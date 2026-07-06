@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { ClipboardList, Syringe, Utensils } from 'lucide-react-native';
+import { ClipboardList, Footprints, Syringe, Utensils } from 'lucide-react-native';
 import type { LucideIcon } from 'lucide-react-native';
 import { Pressable, ScrollView, View } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
@@ -133,6 +133,14 @@ export function TodayScreen() {
             }
             route="/log/dose"
           />
+          {summary.steps !== null ? (
+            <StatCard
+              Icon={Footprints}
+              label={strings.today.cards.steps}
+              value={summary.steps.toLocaleString('pt-BR')}
+              route="/perfil"
+            />
+          ) : null}
           <StatCard
             Icon={ClipboardList}
             label={strings.today.cards.symptoms}

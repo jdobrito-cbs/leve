@@ -26,6 +26,7 @@ export const strings = {
       nextDose: 'Próxima dose',
       lastWeight: 'Último peso',
       symptoms: 'Sintomas hoje',
+      steps: 'Passos hoje',
     },
     weightSection: 'Progresso de peso',
     goalLabel: 'Meta',
@@ -163,6 +164,20 @@ export const strings = {
     exportData: 'Exportar meus dados',
     deleteData: 'Excluir meus dados',
     comingSoon: 'Disponível em breve',
+  },
+  health: {
+    section: 'Saúde conectada',
+    androidName: 'Health Connect',
+    iosName: 'Apple Saúde',
+    connect: 'Conectar',
+    connected: 'Conectado',
+    disconnect: 'Desconectar',
+    importNow: 'Importar pesos agora',
+    importedSuffix: 'pesos importados',
+    unavailable:
+      'Indisponível neste aparelho — requer o app de desenvolvimento (dev build) e o Health Connect/Apple Saúde.',
+    privacyNote:
+      'A importação só acontece quando você toca em importar; os dados ficam apenas neste aparelho e nunca são usados para publicidade.',
   },
   reminders: {
     doseTitle: 'Lembrete de dose',

@@ -1,4 +1,4 @@
-import { Switch, View } from 'react-native';
+import { Platform, Switch, View } from 'react-native';
 import {
   AppText,
   Button,
@@ -10,8 +10,54 @@ import {
 } from '@/design/components';
 import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
+import { useHealthConnection } from '@/features/health/useHealthConnection';
 import { useProfileForm } from '@/features/profile/useProfileForm';
 import { strings } from '@/i18n/pt-BR';
+
+function HealthSection() {
+  const { colors } = useTheme();
+  const health = useHealthConnection();
+  const platformName = Platform.OS === 'ios' ? strings.health.iosName : strings.health.androidName;
+
+  return (
+    <Card style={{ gap: spacing.md }}>
+      <AppText variant="title">
+        {strings.health.section} — {platformName}
+      </AppText>
+      {!health.available ? (
+        <AppText variant="caption" muted>
+          {strings.health.unavailable}
+        </AppText>
+      ) : health.connected ? (
+        <>
+          <AppText variant="caption" style={{ color: colors.success }}>
+            {strings.health.connected}
+          </AppText>
+          <Button
+            label={strings.health.importNow}
+            onPress={health.importNow}
+            disabled={health.importing}
+          />
+          {health.lastImported !== null ? (
+            <AppText variant="caption" muted>
+              {health.lastImported} {strings.health.importedSuffix}
+            </AppText>
+          ) : null}
+          <Button
+            label={strings.health.disconnect}
+            variant="secondary"
+            onPress={health.disconnect}
+          />
+        </>
+      ) : (
+        <Button label={strings.health.connect} onPress={health.connect} />
+      )}
+      <AppText variant="caption" muted>
+        {strings.health.privacyNote}
+      </AppText>
+    </Card>
+  );
+}
 
 export function ProfileScreen() {
   const { colors } = useTheme();
@@ -111,6 +157,8 @@ export function ProfileScreen() {
           {strings.profile.saved}
         </AppText>
       ) : null}
+
+      <HealthSection />
 
       <Card style={{ gap: spacing.sm }}>
         <AppText variant="title">{strings.profile.privacySection}</AppText>

@@ -53,7 +53,20 @@ jest.mock('@/features/today/useTodaySummary', () => ({
     nextDoseAt: null,
     lastDoseLabel: 'semaglutida · 0.5 mg',
     symptomsCount: 2,
+    steps: 4200,
     refresh: jest.fn(),
+  }),
+}));
+jest.mock('@/features/health/useHealthConnection', () => ({
+  useHealthConnection: () => ({
+    loading: false,
+    available: true,
+    connected: false,
+    connect: jest.fn(),
+    disconnect: jest.fn(),
+    importNow: jest.fn(),
+    importing: false,
+    lastImported: null,
   }),
 }));
 import { strings } from '@/i18n/pt-BR';
@@ -81,6 +94,8 @@ test('Hoje mostra anel de água e cards do dia', async () => {
   getByText(strings.today.cards.symptoms);
   getByText(/93,2/);
   getByText(/Meta.*85/);
+  getByText(strings.today.cards.steps);
+  getByText('4.200');
 });
 
 test('Registrar lista as 5 categorias e navega nas ativas', async () => {
@@ -109,6 +124,8 @@ test('Perfil mostra metas, lembretes e privacidade; salvar chama save', async ()
   const { getByText } = await render(<ProfileScreen />);
   getByText(strings.profile.editSection);
   getByText(strings.profile.remindersSection);
+  getByText(new RegExp(strings.health.section));
+  getByText(strings.health.connect);
   getByText(strings.profile.privacySection);
   getByText(strings.profile.exportData);
   getByText(strings.profile.deleteData);

@@ -6,8 +6,11 @@ import { latestDose } from '@/db/doseRepo';
 import { kcalForDay } from '@/db/foodLogRepo';
 import { getProfile } from '@/db/profileRepo';
 import { symptomsForDay } from '@/db/symptomRepo';
+import { getSetting } from '@/db/settingsRepo';
 import { waterTotalForDay } from '@/db/waterRepo';
 import { latestWeight, weightsSince } from '@/db/weightRepo';
+import { getHealthProvider } from '@/services/health/HealthProvider';
+import { readTodaySteps } from '@/services/health/healthSync';
 
 export interface TodaySummary {
   loading: boolean;
@@ -21,6 +24,7 @@ export interface TodaySummary {
   nextDoseAt: string | null;
   lastDoseLabel: string | null;
   symptomsCount: number;
+  steps: number | null;
   refresh: () => Promise<void>;
 }
 
@@ -36,6 +40,7 @@ export function useTodaySummary(): TodaySummary {
   const [nextDoseAt, setNextDoseAt] = useState<string | null>(null);
   const [lastDoseLabel, setLastDoseLabel] = useState<string | null>(null);
   const [symptomsCount, setSymptomsCount] = useState(0);
+  const [steps, setSteps] = useState<number | null>(null);
 
   const refresh = useCallback(async () => {
     const now = new Date();
@@ -62,6 +67,12 @@ export function useTodaySummary(): TodaySummary {
       setCalorieGoalKcal(profile.calorieGoalKcal ?? null);
       setGoalWeightKg(profile.goalWeightKg ?? null);
     }
+    try {
+      const health = await getSetting<{ connected?: boolean }>(db, 'health');
+      setSteps(health?.connected ? await readTodaySteps(getHealthProvider()) : null);
+    } catch {
+      setSteps(null);
+    }
     setLoading(false);
   }, []);
 
@@ -83,6 +94,7 @@ export function useTodaySummary(): TodaySummary {
     nextDoseAt,
     lastDoseLabel,
     symptomsCount,
+    steps,
     refresh,
   };
 }
