@@ -16,6 +16,9 @@ export const strings = {
   },
   tabs: { today: 'Hoje', log: 'Registrar', progress: 'Progresso', profile: 'Perfil' },
   today: {
+    greeting: 'Olá!',
+    summaryLabel: 'Seu resumo do dia',
+    ringLabel: 'registros hoje',
     emptyTitle: 'Nada registrado hoje',
     emptyHint: 'Use a aba Registrar para adicionar água, refeições, peso ou doses.',
   },

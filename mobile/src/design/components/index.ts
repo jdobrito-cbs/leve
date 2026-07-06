@@ -5,4 +5,6 @@ export { Screen } from './Screen';
 export { Input } from './Input';
 export { EmptyState } from './EmptyState';
 export { IconChip } from './IconChip';
+export { ProgressRing } from './ProgressRing';
+export { HeroHeader } from './HeroHeader';
 export { DisclaimerBanner } from './DisclaimerBanner';

@@ -8,7 +8,7 @@ import { strings } from '@/i18n/pt-BR';
 
 export default function TabsLayout() {
   const { loading, accepted } = useOnboarding();
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
 
   if (loading) return <View />;
   if (!accepted) return <Redirect href="/onboarding" />;
@@ -20,7 +20,17 @@ export default function TabsLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: { fontFamily: fonts.semibold, fontSize: 11 },
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
+        tabBarStyle: {
+          backgroundColor: colors.surface,
+          borderTopWidth: 0,
+          elevation: 12,
+          shadowColor: '#1E3A8A',
+          shadowOpacity: mode === 'light' ? 0.08 : 0,
+          shadowRadius: 16,
+          shadowOffset: { width: 0, height: -4 },
+          height: 62,
+          paddingTop: 6,
+        },
       }}
     >
       <Tabs.Screen
@@ -34,7 +44,26 @@ export default function TabsLayout() {
         name="registrar"
         options={{
           title: strings.tabs.log,
-          tabBarIcon: ({ color }) => <Plus color={color} size={22} strokeWidth={1.9} />,
+          tabBarIcon: () => (
+            <View
+              style={{
+                width: 44,
+                height: 44,
+                borderRadius: 22,
+                backgroundColor: colors.primary,
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: -14,
+                shadowColor: colors.primary,
+                shadowOpacity: 0.35,
+                shadowRadius: 10,
+                shadowOffset: { width: 0, height: 4 },
+                elevation: 6,
+              }}
+            >
+              <Plus color={colors.onPrimary} size={24} strokeWidth={2.2} />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen

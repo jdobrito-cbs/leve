@@ -4,20 +4,21 @@ import { useTheme } from '../useTheme';
 
 export function Card({ style, ...rest }: ViewProps) {
   const { colors, mode } = useTheme();
+  const isLight = mode === 'light';
   return (
     <View
       style={[
         {
           backgroundColor: colors.surface,
-          borderColor: colors.border,
-          borderWidth: 1,
           borderRadius: radius.lg,
           padding: spacing.md,
-          shadowColor: '#000000',
-          shadowOpacity: mode === 'light' ? 0.04 : 0,
-          shadowRadius: 12,
-          shadowOffset: { width: 0, height: 4 },
-          elevation: mode === 'light' ? 1 : 0,
+          borderWidth: isLight ? 0 : 1,
+          borderColor: colors.border,
+          shadowColor: '#1E3A8A',
+          shadowOpacity: isLight ? 0.07 : 0,
+          shadowRadius: 16,
+          shadowOffset: { width: 0, height: 6 },
+          elevation: isLight ? 2 : 0,
         },
         style,
       ]}

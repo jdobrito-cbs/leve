@@ -1,27 +1,27 @@
 export const palette = {
-  teal50: '#F0FDFA',
-  teal100: '#CCFBF1',
-  teal300: '#5EEAD4',
-  teal500: '#14B8A6',
-  teal600: '#0F766E',
-  teal700: '#115E59',
+  blue600: '#2563EB',
+  blue500: '#3B82F6',
+  blue400: '#60A5FA',
+  blue700: '#1D4ED8',
+  blue100: '#DBEAFE',
+  blue50: '#EFF6FF',
   white: '#FFFFFF',
-  stone50: '#FAFAF9',
-  stone100: '#F5F5F4',
-  stone200: '#E7E5E4',
-  stone400: '#A8A29E',
-  stone600: '#57534E',
-  stone900: '#1C1917',
-  green700: '#15803D',
+  slate50: '#F4F6FB',
+  slate100: '#F1F5F9',
+  slate200: '#E6EAF2',
+  slate400: '#94A3B8',
+  slate500: '#64748B',
+  slate900: '#0F172A',
+  green600: '#16A34A',
   green400: '#4ADE80',
-  amber700: '#B45309',
+  amber600: '#D97706',
   amber400: '#FBBF24',
-  red700: '#B91C1C',
+  red600: '#DC2626',
   red400: '#F87171',
-  darkBg: '#101514',
-  darkSurface: '#1B2220',
-  darkBorder: '#2C3532',
-  tealSoftDark: '#1E3A34',
+  navyBg: '#0B1220',
+  navySurface: '#141D31',
+  navyBorder: '#24304A',
+  navySoft: '#1D2E52',
 } as const;
 
 export const fonts = {
@@ -31,5 +31,5 @@ export const fonts = {
 } as const;
 
 export const spacing = { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 } as const;
-export const radius = { sm: 8, md: 12, lg: 20 } as const;
+export const radius = { sm: 10, md: 14, lg: 24 } as const;
 export const typeScale = { display: 28, title: 22, body: 16, caption: 13 } as const;

@@ -9,6 +9,9 @@ export interface ThemeColors {
   primary: string;
   primarySoft: string;
   onPrimary: string;
+  heroStart: string;
+  heroEnd: string;
+  onHero: string;
   success: string;
   warning: string;
   danger: string;
@@ -22,31 +25,37 @@ export interface Theme {
 export const lightTheme: Theme = {
   mode: 'light',
   colors: {
-    background: palette.stone50,
+    background: palette.slate50,
     surface: palette.white,
-    border: palette.stone200,
-    text: palette.stone900,
-    textMuted: palette.stone600,
-    primary: palette.teal600,
-    primarySoft: palette.teal100,
+    border: palette.slate200,
+    text: palette.slate900,
+    textMuted: palette.slate500,
+    primary: palette.blue600,
+    primarySoft: palette.blue100,
     onPrimary: palette.white,
-    success: palette.green700,
-    warning: palette.amber700,
-    danger: palette.red700,
+    heroStart: palette.blue600,
+    heroEnd: palette.blue400,
+    onHero: palette.white,
+    success: palette.green600,
+    warning: palette.amber600,
+    danger: palette.red600,
   },
 };
 
 export const darkTheme: Theme = {
   mode: 'dark',
   colors: {
-    background: palette.darkBg,
-    surface: palette.darkSurface,
-    border: palette.darkBorder,
-    text: palette.stone100,
-    textMuted: palette.stone400,
-    primary: palette.teal300,
-    primarySoft: palette.tealSoftDark,
-    onPrimary: palette.darkBg,
+    background: palette.navyBg,
+    surface: palette.navySurface,
+    border: palette.navyBorder,
+    text: palette.slate100,
+    textMuted: palette.slate400,
+    primary: palette.blue400,
+    primarySoft: palette.navySoft,
+    onPrimary: palette.navyBg,
+    heroStart: palette.blue700,
+    heroEnd: palette.blue500,
+    onHero: palette.white,
     success: palette.green400,
     warning: palette.amber400,
     danger: palette.red400,
