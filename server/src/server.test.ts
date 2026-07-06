@@ -48,6 +48,9 @@ describe('POST /scan-food', () => {
 
   test('health', async () => {
     const app = buildServer({ callHub: async () => '{"foods":[]}' });
-    expect((await app.inject({ method: 'GET', url: '/health' })).json()).toEqual({ ok: true });
+    expect((await app.inject({ method: 'GET', url: '/health' })).json()).toEqual({
+      ok: true,
+      accounts: false,
+    });
   });
 });

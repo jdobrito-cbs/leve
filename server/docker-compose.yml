@@ -6,3 +6,27 @@ services:
       - "3333:3333"
     env_file:
       - .env
+    environment:
+      DATABASE_URL: postgresql://leve:${POSTGRES_PASSWORD:-leve}@postgres:5432/leve
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "npx prisma migrate deploy && node dist/index.js"
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: leve
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-leve}
+      POSTGRES_DB: leve
+    volumes:
+      - leve-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U leve"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  leve-pgdata:
