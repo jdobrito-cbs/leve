@@ -33,12 +33,15 @@ import { strings } from '@/i18n/pt-BR';
 import { ProgressScreen } from '@/features/screens/ProgressScreen';
 
 test('mostra seções e histórico de doses', async () => {
-  const { getByText } = await render(<ProgressScreen />);
+  const { getByText, getAllByText } = await render(<ProgressScreen />);
+  getByText(strings.progress.pkSection);
+  getByText(strings.progress.pkDisclaimer);
+  getByText(/nível relativo/);
   getByText(strings.progress.weightSection);
   getByText(strings.progress.waterSection);
   getByText(strings.progress.kcalSection);
   getByText(strings.progress.dosesSection);
-  getByText(/semaglutida/);
+  expect(getAllByText(/semaglutida/).length).toBeGreaterThanOrEqual(2); // curva PK + histórico
 });
 
 test('sem dados mostra estados vazios', async () => {

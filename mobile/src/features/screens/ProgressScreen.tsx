@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
 import { BarChart, LineChart } from 'react-native-gifted-charts';
-import { AppText, Card, ListRow, Screen, SegmentedChips } from '@/design/components';
+import { AppText, Card, DisclaimerBanner, ListRow, Screen, SegmentedChips } from '@/design/components';
 import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import type { InjectionSite } from '@/features/dose/rotation';
+import { estimateRelativeCurve } from '@/features/pk/pharmacokinetics';
 import { useProgressData } from '@/features/progress/useProgressData';
 import { strings } from '@/i18n/pt-BR';
 
@@ -37,9 +38,45 @@ export function ProgressScreen() {
   const hasWater = water7.some((d) => d.totalMl > 0);
   const hasKcal = kcal7.some((d) => d.kcal > 0);
 
+  const pk = useMemo(() => estimateRelativeCurve(doses), [doses]);
+
   return (
     <Screen>
       <AppText variant="display">{strings.tabs.progress}</AppText>
+
+      <Card style={{ gap: spacing.md }}>
+        <AppText variant="title">{strings.progress.pkSection}</AppText>
+        {pk ? (
+          <>
+            <LineChart
+              data={pk.points.map((p) => ({ value: Math.round(p.level * 100) }))}
+              color={colors.primary}
+              thickness={3}
+              height={110}
+              maxValue={100}
+              hideDataPoints
+              hideAxesAndRules
+              hideYAxisText
+              adjustToWidth
+              curved
+              disableScroll
+            />
+            <AppText variant="caption" muted>
+              {pk.medKey} · {strings.progress.pkRelative} · {strings.progress.pkProjection}
+            </AppText>
+          </>
+        ) : doses.length > 0 ? (
+          <AppText variant="caption" muted>
+            {strings.progress.pkUnknownMed}
+          </AppText>
+        ) : (
+          <AppText muted>{strings.progress.empty}</AppText>
+        )}
+        <DisclaimerBanner />
+        <AppText variant="caption" muted>
+          {strings.progress.pkDisclaimer}
+        </AppText>
+      </Card>
 
       <Card style={{ gap: spacing.md }}>
         <AppText variant="title">{strings.progress.weightSection}</AppText>

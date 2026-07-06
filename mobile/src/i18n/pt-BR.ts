@@ -131,6 +131,13 @@ export const strings = {
     add: 'Adicionar refeição',
   },
   progress: {
+    pkSection: 'Nível estimado de medicação',
+    pkRelative: 'nível relativo (%)',
+    pkProjection: 'inclui projeção de 7 dias',
+    pkDisclaimer:
+      'Estimativa matemática com dados públicos de farmacocinética populacional. ' +
+      'Não reflete seu nível real e não orienta decisões — fale com seu médico.',
+    pkUnknownMed: 'Sem dados públicos para esta medicação — curva indisponível.',
     weightSection: 'Peso',
     range30: '30 dias',
     range90: '90 dias',
