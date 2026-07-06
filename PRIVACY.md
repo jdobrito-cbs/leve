@@ -1,4 +1,12 @@
-# Privacidade — Leve (rascunho, FASES 0–2)
+# Privacidade — Leve (rascunho, FASES 0–5)
+
+## Conta e backup (FASE 5)
+
+- Criar conta é **opcional**: sem conta, o app é 100% local, como sempre.
+- Consentimento **granular** no cadastro: termos (obrigatório) e backup (opcional, revogável), registrados com data no servidor.
+- O backup é **criptografado de ponta a ponta no aparelho** (chave derivada da sua senha) — o servidor armazena um blob ilegível e **não tem como decifrá-lo**. Senha esquecida = backup irrecuperável (os dados locais permanecem).
+- **Direito de acesso**: "Exportar meus dados" gera um arquivo JSON com todos os registros, mesmo sem conta.
+- **Direito de exclusão**: "Excluir meus dados" apaga tudo do aparelho; "Excluir conta e backup" apaga permanentemente a conta e o blob no servidor (confirmação com senha).
 
 ## Scan de comida por IA (FASE 3)
 
