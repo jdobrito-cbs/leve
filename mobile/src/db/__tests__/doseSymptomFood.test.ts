@@ -19,7 +19,7 @@ test('dose: latest, lista desc e último local de injeção', async () => {
     medication: 'semaglutida',
     doseMg: 0.5,
     route: 'injecao',
-    injectionSite: 'abdomen_e',
+    injectionSite: 'abdomen_sup_e',
     at: new Date(2026, 6, 1),
   });
   await addDose(db, {
@@ -29,7 +29,7 @@ test('dose: latest, lista desc e último local de injeção', async () => {
     at: new Date(2026, 6, 5),
   });
   expect((await latestDose(db))?.route).toBe('pilula');
-  expect(await lastInjectionSite(db)).toBe('abdomen_e');
+  expect(await lastInjectionSite(db)).toBe('abdomen_sup_e');
   expect((await listDoses(db)).map((d) => d.route)).toEqual(['pilula', 'injecao']);
 });
 

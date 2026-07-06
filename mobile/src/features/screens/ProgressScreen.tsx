@@ -110,7 +110,7 @@ export function ProgressScreen() {
               title={`${d.medication} · ${d.doseMg.toLocaleString('pt-BR')} mg`}
               subtitle={
                 d.route === 'injecao' && d.injectionSite
-                  ? `${strings.dose.routes.injecao} · ${strings.dose.sites[d.injectionSite as InjectionSite]}`
+                  ? `${strings.dose.routes.injecao} · ${strings.dose.sites[d.injectionSite as InjectionSite] ?? d.injectionSite}`
                   : strings.dose.routes[d.route as 'injecao' | 'pilula']
               }
               right={new Date(d.loggedAt).toLocaleDateString('pt-BR')}

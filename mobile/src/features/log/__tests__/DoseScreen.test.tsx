@@ -15,7 +15,7 @@ import { strings } from '@/i18n/pt-BR';
 import { DoseScreen } from '../DoseScreen';
 
 test('sugere próximo local do rodízio e salva dose de injeção', async () => {
-  mockLastSite.mockResolvedValue('abdomen_e');
+  mockLastSite.mockResolvedValue('abdomen_sup_e');
   mockAddDose.mockResolvedValue(undefined);
   const { getByText, getAllByText, getByPlaceholderText } = await render(<DoseScreen />);
   await waitFor(() => expect(getAllByText(strings.dose.suggestedLabel).length).toBe(1));
@@ -29,7 +29,7 @@ test('sugere próximo local do rodízio e salva dose de injeção', async () => 
         medication: 'semaglutida',
         doseMg: 0.5,
         route: 'injecao',
-        injectionSite: 'abdomen_d',
+        injectionSite: 'abdomen_sup_d',
         nextDoseAt: null,
       }),
     ),

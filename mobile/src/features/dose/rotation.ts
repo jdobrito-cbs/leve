@@ -1,6 +1,10 @@
 export const INJECTION_SITES = [
-  'abdomen_e',
-  'abdomen_d',
+  'abdomen_sup_e',
+  'abdomen_sup_d',
+  'abdomen_meio_e',
+  'abdomen_meio_d',
+  'abdomen_inf_e',
+  'abdomen_inf_d',
   'coxa_e',
   'coxa_d',
   'braco_e',
