@@ -4,4 +4,5 @@ export { Card } from './Card';
 export { Screen } from './Screen';
 export { Input } from './Input';
 export { EmptyState } from './EmptyState';
+export { IconChip } from './IconChip';
 export { DisclaimerBanner } from './DisclaimerBanner';

@@ -21,6 +21,13 @@ export const palette = {
   darkBg: '#101514',
   darkSurface: '#1B2220',
   darkBorder: '#2C3532',
+  tealSoftDark: '#1E3A34',
+} as const;
+
+export const fonts = {
+  regular: 'Manrope_400Regular',
+  semibold: 'Manrope_600SemiBold',
+  bold: 'Manrope_700Bold',
 } as const;
 
 export const spacing = { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 } as const;

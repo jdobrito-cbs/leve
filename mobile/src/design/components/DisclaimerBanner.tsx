@@ -1,3 +1,4 @@
+import { Info } from 'lucide-react-native';
 import { View } from 'react-native';
 import { strings } from '@/i18n/pt-BR';
 import { radius, spacing } from '../tokens';
@@ -18,11 +19,11 @@ export function DisclaimerBanner() {
         borderWidth: 1,
         borderLeftWidth: 3,
         borderLeftColor: colors.primary,
-        borderRadius: radius.sm,
+        borderRadius: radius.md,
         padding: spacing.sm + 4,
       }}
     >
-      <AppText variant="caption">ℹ️</AppText>
+      <Info color={colors.primary} size={16} strokeWidth={2} style={{ marginTop: 1 }} />
       <AppText variant="caption" muted style={{ flex: 1 }}>
         {strings.disclaimer.medical}
       </AppText>

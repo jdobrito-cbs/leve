@@ -1,13 +1,10 @@
 import { Redirect, Tabs } from 'expo-router';
+import { ChartLine, CircleUser, Plus, Sprout } from 'lucide-react-native';
 import { View } from 'react-native';
-import { AppText } from '@/design/components';
+import { fonts } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { strings } from '@/i18n/pt-BR';
-
-function TabIcon({ glyph, focused }: { glyph: string; focused: boolean }) {
-  return <AppText style={{ opacity: focused ? 1 : 0.45 }}>{glyph}</AppText>;
-}
 
 export default function TabsLayout() {
   const { loading, accepted } = useOnboarding();
@@ -22,6 +19,7 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
+        tabBarLabelStyle: { fontFamily: fonts.semibold, fontSize: 11 },
         tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
       }}
     >
@@ -29,28 +27,28 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: strings.tabs.today,
-          tabBarIcon: ({ focused }) => <TabIcon glyph="🌱" focused={focused} />,
+          tabBarIcon: ({ color }) => <Sprout color={color} size={22} strokeWidth={1.9} />,
         }}
       />
       <Tabs.Screen
         name="registrar"
         options={{
           title: strings.tabs.log,
-          tabBarIcon: ({ focused }) => <TabIcon glyph="➕" focused={focused} />,
+          tabBarIcon: ({ color }) => <Plus color={color} size={22} strokeWidth={1.9} />,
         }}
       />
       <Tabs.Screen
         name="progresso"
         options={{
           title: strings.tabs.progress,
-          tabBarIcon: ({ focused }) => <TabIcon glyph="📈" focused={focused} />,
+          tabBarIcon: ({ color }) => <ChartLine color={color} size={22} strokeWidth={1.9} />,
         }}
       />
       <Tabs.Screen
         name="perfil"
         options={{
           title: strings.tabs.profile,
-          tabBarIcon: ({ focused }) => <TabIcon glyph="👤" focused={focused} />,
+          tabBarIcon: ({ color }) => <CircleUser color={color} size={22} strokeWidth={1.9} />,
         }}
       />
     </Tabs>

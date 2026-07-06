@@ -1,4 +1,5 @@
 import { fireEvent, render } from '@testing-library/react-native';
+import { Sprout } from 'lucide-react-native';
 import { strings } from '@/i18n/pt-BR';
 import { Button, DisclaimerBanner, EmptyState } from '../index';
 
@@ -18,7 +19,7 @@ test('Button dispara onPress e respeita disabled', async () => {
 });
 
 test('EmptyState renderiza título e dica', async () => {
-  const { getByText } = await render(<EmptyState title="Vazio" hint="Dica" />);
+  const { getByText } = await render(<EmptyState title="Vazio" hint="Dica" Icon={Sprout} />);
   getByText('Vazio');
   getByText('Dica');
 });

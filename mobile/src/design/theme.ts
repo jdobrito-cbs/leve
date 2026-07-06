@@ -7,6 +7,7 @@ export interface ThemeColors {
   text: string;
   textMuted: string;
   primary: string;
+  primarySoft: string;
   onPrimary: string;
   success: string;
   warning: string;
@@ -27,6 +28,7 @@ export const lightTheme: Theme = {
     text: palette.stone900,
     textMuted: palette.stone600,
     primary: palette.teal600,
+    primarySoft: palette.teal100,
     onPrimary: palette.white,
     success: palette.green700,
     warning: palette.amber700,
@@ -43,6 +45,7 @@ export const darkTheme: Theme = {
     text: palette.stone100,
     textMuted: palette.stone400,
     primary: palette.teal300,
+    primarySoft: palette.tealSoftDark,
     onPrimary: palette.darkBg,
     success: palette.green400,
     warning: palette.amber400,

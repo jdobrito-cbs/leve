@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { Check } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { AppText, Button, Card, DisclaimerBanner, Screen } from '@/design/components';
@@ -50,11 +51,7 @@ export default function Onboarding() {
               justifyContent: 'center',
             }}
           >
-            {checked ? (
-              <AppText variant="caption" style={{ color: colors.onPrimary }}>
-                ✓
-              </AppText>
-            ) : null}
+            {checked ? <Check color={colors.onPrimary} size={14} strokeWidth={3} /> : null}
           </View>
           <AppText>{strings.onboarding.acceptLabel}</AppText>
         </Pressable>

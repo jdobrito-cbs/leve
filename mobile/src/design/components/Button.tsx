@@ -1,5 +1,5 @@
 import { Pressable } from 'react-native';
-import { radius, spacing } from '../tokens';
+import { fonts, spacing } from '../tokens';
 import { useTheme } from '../useTheme';
 import { AppText } from './AppText';
 
@@ -22,14 +22,20 @@ export function Button({ label, onPress, variant = 'primary', disabled }: Props)
         backgroundColor: isPrimary ? colors.primary : 'transparent',
         borderWidth: isPrimary ? 0 : 1,
         borderColor: colors.primary,
-        borderRadius: radius.md,
-        paddingVertical: spacing.sm + 4,
+        borderRadius: 999,
+        paddingVertical: spacing.sm + 5,
         paddingHorizontal: spacing.lg,
         alignItems: 'center' as const,
-        opacity: disabled ? 0.4 : pressed ? 0.8 : 1,
+        opacity: disabled ? 0.4 : pressed ? 0.85 : 1,
       })}
     >
-      <AppText style={{ color: isPrimary ? colors.onPrimary : colors.primary, fontWeight: '600' }}>
+      <AppText
+        style={{
+          color: isPrimary ? colors.onPrimary : colors.primary,
+          fontFamily: fonts.semibold,
+          letterSpacing: 0.2,
+        }}
+      >
         {label}
       </AppText>
     </Pressable>
