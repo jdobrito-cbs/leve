@@ -129,6 +129,7 @@ export const strings = {
     todayList: 'Refeições de hoje',
     todayTotal: 'Total do dia',
     add: 'Adicionar refeição',
+    scanTab: 'Escanear',
     scanButton: 'Escanear com a câmera',
     scanGallery: 'Escolher da galeria',
     scanning: 'Analisando a foto…',

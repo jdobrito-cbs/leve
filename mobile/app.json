@@ -47,7 +47,14 @@
           }
         }
       ],
-      "@kingstinct/react-native-healthkit"
+      "@kingstinct/react-native-healthkit",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O Leve usa suas fotos apenas quando você escolhe uma imagem para identificar alimentos.",
+          "cameraPermission": "O Leve usa a câmera apenas quando você fotografa uma refeição para identificar alimentos."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

@@ -15,6 +15,19 @@ jest.mock('@/db/foodLogRepo', () => ({
   kcalForDay: (...a: unknown[]) => mockKcalDay(...a),
 }));
 
+const mockRecognize = jest.fn();
+jest.mock('@/services/vision/VisionProvider', () => ({
+  isScanConfigured: () => true,
+  getVisionProvider: () => ({ recognizeFood: (...a: unknown[]) => mockRecognize(...a) }),
+}));
+jest.mock('expo-image-picker', () => ({
+  launchImageLibraryAsync: jest
+    .fn()
+    .mockResolvedValue({ canceled: false, assets: [{ uri: 'file://foto.jpg' }] }),
+  requestCameraPermissionsAsync: jest.fn().mockResolvedValue({ granted: true }),
+  launchCameraAsync: jest.fn(),
+}));
+
 import { strings } from '@/i18n/pt-BR';
 import { MealScreen } from '../MealScreen';
 
@@ -52,6 +65,32 @@ test('busca TACO, ajusta porção e adiciona com valores proporcionais', async (
         name: 'Feijão, carioca, cozido',
         portionGrams: 200,
         calories: 152,
+      }),
+    ),
+  );
+});
+
+test('scan: foto → candidato → casa com TACO → salva com origin scan', async () => {
+  mockSearch.mockResolvedValue([FEIJAO]);
+  mockRecognize.mockResolvedValue({
+    label: 'feijão carioca',
+    confidence: 0.9,
+    candidates: [{ label: 'feijão carioca', confidence: 0.9, portionGrams: 80 }],
+  });
+  const { getByText, getByDisplayValue } = await render(<MealScreen />);
+  await fireEvent.press(getByText(strings.meal.scanTab));
+  await fireEvent.press(getByText(strings.meal.scanGallery));
+  await waitFor(() => getByText('feijão carioca'));
+  await fireEvent.press(getByText('feijão carioca'));
+  await waitFor(() => getByDisplayValue('80'));
+  await fireEvent.press(getByText(strings.meal.add));
+  await waitFor(() =>
+    expect(mockAddFood).toHaveBeenCalledWith(
+      {},
+      expect.objectContaining({
+        name: 'Feijão, carioca, cozido',
+        portionGrams: 80,
+        origin: 'scan',
       }),
     ),
   );
