@@ -2,6 +2,20 @@ import { fireEvent, render } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 jest.mock('expo-router', () => ({ router: { push: jest.fn(), back: jest.fn() } }));
+jest.mock('react-native-gifted-charts', () => ({
+  BarChart: () => null,
+  LineChart: () => null,
+}));
+jest.mock('@/features/progress/useProgressData', () => ({
+  useProgressData: () => ({
+    loading: false,
+    weights: [],
+    water7: [],
+    kcal7: [],
+    doses: [],
+    refresh: jest.fn(),
+  }),
+}));
 jest.mock('@/features/today/useTodaySummary', () => ({
   useTodaySummary: () => ({
     loading: false,
@@ -58,9 +72,10 @@ test('Registrar lista as 5 categorias e navega nas ativas', async () => {
   expect(router.push).toHaveBeenCalledWith('/log/agua');
 });
 
-test('Progresso mostra empty state', async () => {
+test('Progresso mostra as seções', async () => {
   const { getByText } = await render(<ProgressScreen />);
-  getByText(strings.progress.emptyTitle);
+  getByText(strings.progress.weightSection);
+  getByText(strings.progress.dosesSection);
 });
 
 test('Perfil mostra seção de privacidade com exportar/excluir', async () => {
