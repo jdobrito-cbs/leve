@@ -9,7 +9,7 @@ const items = [
   { Icon: GlassWater, label: strings.log.water, route: '/log/agua' },
   { Icon: Utensils, label: strings.log.meal, route: null },
   { Icon: Syringe, label: strings.log.dose, route: null },
-  { Icon: Weight, label: strings.log.weight, route: null },
+  { Icon: Weight, label: strings.log.weight, route: '/log/peso' },
   { Icon: ClipboardList, label: strings.log.symptom, route: null },
 ] as const;
 
