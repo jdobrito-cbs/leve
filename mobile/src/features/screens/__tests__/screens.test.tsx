@@ -16,6 +16,27 @@ jest.mock('@/features/progress/useProgressData', () => ({
     refresh: jest.fn(),
   }),
 }));
+const mockSave = jest.fn();
+jest.mock('@/features/profile/useProfileForm', () => ({
+  useProfileForm: () => ({
+    loading: false,
+    form: {
+      name: 'Jorge',
+      heightStr: '178',
+      medication: 'semaglutida',
+      goalWeightStr: '85',
+      waterGoalStr: '2000',
+      calorieGoalStr: '',
+      doseEnabled: false,
+      waterEnabled: false,
+      waterTimesStr: '09:00, 13:00, 17:00',
+    },
+    setField: jest.fn(),
+    save: mockSave,
+    saved: false,
+    permissionError: false,
+  }),
+}));
 jest.mock('@/features/today/useTodaySummary', () => ({
   useTodaySummary: () => ({
     loading: false,
@@ -78,9 +99,13 @@ test('Progresso mostra as seções', async () => {
   getByText(strings.progress.dosesSection);
 });
 
-test('Perfil mostra seção de privacidade com exportar/excluir', async () => {
+test('Perfil mostra metas, lembretes e privacidade; salvar chama save', async () => {
   const { getByText } = await render(<ProfileScreen />);
+  getByText(strings.profile.editSection);
+  getByText(strings.profile.remindersSection);
   getByText(strings.profile.privacySection);
   getByText(strings.profile.exportData);
   getByText(strings.profile.deleteData);
+  await fireEvent.press(getByText(strings.profile.save));
+  expect(mockSave).toHaveBeenCalled();
 });

@@ -5,6 +5,7 @@ import {
   useFonts,
 } from '@expo-google-fonts/manrope';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
+import * as Notifications from 'expo-notifications';
 import { Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
@@ -13,6 +14,15 @@ import { db } from '@/db/client';
 import migrations from '@/db/migrations/migrations';
 import { seedFoodItemsIfEmpty } from '@/db/seed/tacoSeed';
 import { strings } from '@/i18n/pt-BR';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 export default function RootLayout() {
   const { success, error } = useMigrations(db, migrations);
