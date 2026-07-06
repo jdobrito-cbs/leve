@@ -7,4 +7,7 @@ export { EmptyState } from './EmptyState';
 export { IconChip } from './IconChip';
 export { ProgressRing } from './ProgressRing';
 export { HeroHeader } from './HeroHeader';
+export { SegmentedChips } from './SegmentedChips';
+export { NumberField } from './NumberField';
+export { ListRow } from './ListRow';
 export { DisclaimerBanner } from './DisclaimerBanner';
