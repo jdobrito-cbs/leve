@@ -45,6 +45,11 @@ jest.mock('@/features/today/useTodaySummary', () => ({
     kcal: 850,
     calorieGoalKcal: null,
     lastWeightKg: 93.2,
+    weights30: [
+      { id: 1, weightKg: 95.5, origin: 'manual', loggedAt: '2026-06-10T10:00:00.000Z' },
+      { id: 2, weightKg: 93.2, origin: 'manual', loggedAt: '2026-07-01T10:00:00.000Z' },
+    ],
+    goalWeightKg: 85,
     nextDoseAt: null,
     lastDoseLabel: 'semaglutida · 0.5 mg',
     symptomsCount: 2,
@@ -70,11 +75,12 @@ test('Hoje mostra anel de água e cards do dia', async () => {
   );
   getByText('1.200');
   getByText(strings.today.waterRing);
+  getByText(strings.today.weightSection);
   getByText(strings.today.cards.kcal);
   getByText(strings.today.cards.nextDose);
-  getByText(strings.today.cards.lastWeight);
   getByText(strings.today.cards.symptoms);
   getByText(/93,2/);
+  getByText(/Meta.*85/);
 });
 
 test('Registrar lista as 5 categorias e navega nas ativas', async () => {

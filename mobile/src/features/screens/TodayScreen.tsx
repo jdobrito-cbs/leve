@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
-import { ClipboardList, Syringe, Utensils, Weight } from 'lucide-react-native';
+import { ClipboardList, Syringe, Utensils } from 'lucide-react-native';
 import type { LucideIcon } from 'lucide-react-native';
 import { Pressable, ScrollView, View } from 'react-native';
+import { LineChart } from 'react-native-gifted-charts';
 import { AppText, Card, HeroHeader, IconChip, ProgressRing } from '@/design/components';
 import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
@@ -75,6 +76,42 @@ export function TodayScreen() {
             </AppText>
           </Card>
         </Pressable>
+        <Pressable accessibilityRole="button" onPress={() => router.push('/log/peso' as never)}>
+          <Card style={{ gap: spacing.sm }}>
+            <AppText variant="title">{strings.today.weightSection}</AppText>
+            {summary.weights30.length >= 2 ? (
+              <LineChart
+                data={summary.weights30.map((w) => ({ value: w.weightKg }))}
+                color={colors.primary}
+                thickness={3}
+                height={90}
+                hideDataPoints
+                hideAxesAndRules
+                hideYAxisText
+                adjustToWidth
+                curved
+                disableScroll
+              />
+            ) : (
+              <AppText variant="caption" muted>
+                {strings.progress.empty}
+              </AppText>
+            )}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <AppText style={{ fontFamily: fonts.semibold }}>
+                {summary.lastWeightKg !== null
+                  ? `${summary.lastWeightKg.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} kg`
+                  : strings.today.noWeight}
+              </AppText>
+              {summary.goalWeightKg !== null ? (
+                <AppText variant="caption" muted>
+                  {strings.today.goalLabel}:{' '}
+                  {summary.goalWeightKg.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} kg
+                </AppText>
+              ) : null}
+            </View>
+          </Card>
+        </Pressable>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md }}>
           <StatCard
             Icon={Utensils}
@@ -95,16 +132,6 @@ export function TodayScreen() {
                 : (summary.lastDoseLabel ?? strings.today.noDose)
             }
             route="/log/dose"
-          />
-          <StatCard
-            Icon={Weight}
-            label={strings.today.cards.lastWeight}
-            value={
-              summary.lastWeightKg !== null
-                ? `${summary.lastWeightKg.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} kg`
-                : strings.today.noWeight
-            }
-            route="/log/peso"
           />
           <StatCard
             Icon={ClipboardList}

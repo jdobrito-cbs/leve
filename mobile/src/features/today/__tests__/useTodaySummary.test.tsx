@@ -13,6 +13,7 @@ jest.mock('@/db/waterRepo', () => ({ waterTotalForDay: jest.fn().mockResolvedVal
 jest.mock('@/db/foodLogRepo', () => ({ kcalForDay: jest.fn().mockResolvedValue(250) }));
 jest.mock('@/db/weightRepo', () => ({
   latestWeight: jest.fn().mockResolvedValue({ weightKg: 93.2 }),
+  weightsSince: jest.fn().mockResolvedValue([{ weightKg: 95.5 }, { weightKg: 93.2 }]),
 }));
 jest.mock('@/db/doseRepo', () => ({
   latestDose: jest.fn().mockResolvedValue({
@@ -25,7 +26,9 @@ jest.mock('@/db/symptomRepo', () => ({
   symptomsForDay: jest.fn().mockResolvedValue([{ kind: 'nausea' }]),
 }));
 jest.mock('@/db/profileRepo', () => ({
-  getProfile: jest.fn().mockResolvedValue({ waterGoalMl: 2000, calorieGoalKcal: null }),
+  getProfile: jest
+    .fn()
+    .mockResolvedValue({ waterGoalMl: 2000, calorieGoalKcal: null, goalWeightKg: 85 }),
 }));
 
 import { useTodaySummary } from '../useTodaySummary';
@@ -37,6 +40,8 @@ test('agrega os dados do dia', async () => {
   expect(result.current.waterGoalMl).toBe(2000);
   expect(result.current.kcal).toBe(250);
   expect(result.current.lastWeightKg).toBe(93.2);
+  expect(result.current.weights30).toHaveLength(2);
+  expect(result.current.goalWeightKg).toBe(85);
   expect(result.current.nextDoseAt).toBe('2026-07-14T12:00:00.000Z');
   expect(result.current.symptomsCount).toBe(1);
 });

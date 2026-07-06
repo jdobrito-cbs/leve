@@ -27,6 +27,8 @@ export const strings = {
       lastWeight: 'Último peso',
       symptoms: 'Sintomas hoje',
     },
+    weightSection: 'Progresso de peso',
+    goalLabel: 'Meta',
     noDose: 'Nenhuma registrada',
     noWeight: 'Sem registro',
     none: 'Nenhum',
