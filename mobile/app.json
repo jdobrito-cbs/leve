@@ -8,7 +8,10 @@
     "scheme": "leve",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "infoPlist": {
+        "NSHealthShareUsageDescription": "O Leve importa peso e passos do Apple Saúde apenas quando você autoriza, para exibir seu progresso no app. Os dados ficam somente no seu aparelho."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -34,7 +37,17 @@
         }
       ],
       "expo-sqlite",
-      "expo-font"
+      "expo-font",
+      "react-native-health-connect",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          }
+        }
+      ],
+      "@kingstinct/react-native-healthkit"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -33,5 +33,20 @@ export class UnavailableHealthProvider implements HealthProvider {
 }
 
 export function getHealthProvider(): HealthProvider {
+  try {
+    const { Platform } = require('react-native') as typeof import('react-native');
+    if (Platform.OS === 'android') {
+      const { HealthConnectProvider } =
+        require('./HealthConnectProvider') as typeof import('./HealthConnectProvider');
+      return new HealthConnectProvider();
+    }
+    if (Platform.OS === 'ios') {
+      const { HealthKitProvider } =
+        require('./HealthKitProvider') as typeof import('./HealthKitProvider');
+      return new HealthKitProvider();
+    }
+  } catch {
+    // módulo nativo ausente (ex.: Expo Go) — cai no provider indisponível
+  }
   return new UnavailableHealthProvider();
 }
