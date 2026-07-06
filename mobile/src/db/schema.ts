@@ -7,6 +7,8 @@ export const profile = sqliteTable('profile', {
   goalWeightKg: real('goal_weight_kg'),
   medication: text('medication'),
   disclaimerAcceptedAt: text('disclaimer_accepted_at'),
+  waterGoalMl: real('water_goal_ml').notNull().default(2000),
+  calorieGoalKcal: real('calorie_goal_kcal'),
 });
 
 export const waterLogs = sqliteTable('water_logs', {
@@ -55,10 +57,17 @@ export const weightLogs = sqliteTable('weight_logs', {
 export const foodItems = sqliteTable('food_items', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
+  nameNormalized: text('name_normalized'),
+  category: text('category'),
   referencePortion: text('reference_portion'),
   calories: real('calories'),
   proteinG: real('protein_g'),
   carbsG: real('carbs_g'),
   fatG: real('fat_g'),
   source: text('source').notNull(),
+});
+
+export const settings = sqliteTable('settings', {
+  key: text('key').primaryKey(),
+  value: text('value').notNull(),
 });

@@ -8,6 +8,18 @@ export async function getProfile(db: AppDb): Promise<Profile | null> {
   return rows[0] ?? null;
 }
 
+export async function updateProfile(
+  db: AppDb,
+  patch: Partial<Omit<Profile, 'id'>>,
+): Promise<void> {
+  const existing = await getProfile(db);
+  if (existing) {
+    await db.update(profile).set(patch).where(eq(profile.id, existing.id));
+  } else {
+    await db.insert(profile).values(patch);
+  }
+}
+
 export async function acceptDisclaimer(db: AppDb, now: Date): Promise<void> {
   const existing = await getProfile(db);
   const acceptedAt = now.toISOString();

@@ -8,6 +8,8 @@ export interface Profile {
   goalWeightKg: number | null;
   medication: string | null;
   disclaimerAcceptedAt: string | null; // ISO 8601
+  waterGoalMl: number;
+  calorieGoalKcal: number | null;
 }
 
 export interface WaterLog {
@@ -56,6 +58,7 @@ export interface WeightLog {
 export interface FoodItem {
   id: number;
   name: string;
+  category: string | null;
   referencePortion: string | null;
   calories: number | null;
   proteinG: number | null;
