@@ -7,7 +7,7 @@ import { strings } from '@/i18n/pt-BR';
 
 const items = [
   { Icon: GlassWater, label: strings.log.water, route: '/log/agua' },
-  { Icon: Utensils, label: strings.log.meal, route: null },
+  { Icon: Utensils, label: strings.log.meal, route: '/log/refeicao' },
   { Icon: Syringe, label: strings.log.dose, route: '/log/dose' },
   { Icon: Weight, label: strings.log.weight, route: '/log/peso' },
   { Icon: ClipboardList, label: strings.log.symptom, route: '/log/sintoma' },
