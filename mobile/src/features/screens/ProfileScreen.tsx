@@ -61,7 +61,7 @@ function HealthSection() {
 
 export function ProfileScreen() {
   const { colors } = useTheme();
-  const { loading, form, setField, save, saved, permissionError } = useProfileForm();
+  const { loading, form, setField, save, saved, permissionError, autoGoalMl } = useProfileForm();
 
   if (loading) return <Screen />;
 
@@ -94,12 +94,32 @@ export function ProfileScreen() {
           onChangeText={(v) => setField('goalWeightStr', v)}
           suffix="kg"
         />
-        <NumberField
-          label={strings.profile.waterGoalLabel}
-          value={form.waterGoalStr}
-          onChangeText={(v) => setField('waterGoalStr', v)}
-          suffix="ml"
-        />
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <View style={{ flex: 1 }}>
+            <AppText>{strings.profile.waterGoalAuto}</AppText>
+            {form.waterGoalAuto && autoGoalMl !== null ? (
+              <AppText variant="caption" muted>
+                ≈ {autoGoalMl.toLocaleString('pt-BR')} ml
+              </AppText>
+            ) : null}
+          </View>
+          <Switch
+            value={form.waterGoalAuto}
+            onValueChange={(v) => setField('waterGoalAuto', v)}
+            trackColor={{ true: colors.primary, false: colors.border }}
+          />
+        </View>
+        <AppText variant="caption" muted>
+          {strings.profile.waterGoalAutoHint}
+        </AppText>
+        {!form.waterGoalAuto ? (
+          <NumberField
+            label={strings.profile.waterGoalLabel}
+            value={form.waterGoalStr}
+            onChangeText={(v) => setField('waterGoalStr', v)}
+            suffix="ml"
+          />
+        ) : null}
         <NumberField
           label={strings.profile.calorieGoalLabel}
           value={form.calorieGoalStr}

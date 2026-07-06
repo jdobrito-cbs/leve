@@ -6,8 +6,8 @@ import { AppText, Button, Card, NumberField, Screen } from '@/design/components'
 import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
-import { getProfile } from '@/db/profileRepo';
 import { addWater, waterTotalForDay } from '@/db/waterRepo';
+import { getEffectiveWaterGoal } from '@/features/water/waterGoal';
 import { strings } from '@/i18n/pt-BR';
 
 const QUICK = [
@@ -24,8 +24,8 @@ export function WaterScreen() {
 
   const load = useCallback(async () => {
     setTotalMl(await waterTotalForDay(db, new Date()));
-    const p = await getProfile(db);
-    if (p?.waterGoalMl) setGoalMl(p.waterGoalMl);
+    const { goalMl } = await getEffectiveWaterGoal(db);
+    setGoalMl(goalMl);
   }, []);
 
   useEffect(() => {

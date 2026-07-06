@@ -29,6 +29,9 @@ jest.mock('@/db/settingsRepo', () => ({
   getSetting: jest.fn().mockResolvedValue({ connected: true }),
 }));
 jest.mock('@/services/health/HealthProvider', () => ({ getHealthProvider: () => ({}) }));
+jest.mock('@/features/water/waterGoal', () => ({
+  getEffectiveWaterGoal: jest.fn().mockResolvedValue({ goalMl: 2000, auto: false }),
+}));
 jest.mock('@/services/health/healthSync', () => ({
   readTodaySteps: jest.fn().mockResolvedValue(4200),
 }));

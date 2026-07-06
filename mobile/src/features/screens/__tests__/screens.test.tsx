@@ -26,6 +26,7 @@ jest.mock('@/features/profile/useProfileForm', () => ({
       medication: 'semaglutida',
       goalWeightStr: '85',
       waterGoalStr: '2000',
+      waterGoalAuto: true,
       calorieGoalStr: '',
       doseEnabled: false,
       waterEnabled: false,
@@ -35,6 +36,7 @@ jest.mock('@/features/profile/useProfileForm', () => ({
     save: mockSave,
     saved: false,
     permissionError: false,
+    autoGoalMl: 3250,
   }),
 }));
 jest.mock('@/features/today/useTodaySummary', () => ({

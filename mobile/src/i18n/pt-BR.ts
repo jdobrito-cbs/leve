@@ -149,6 +149,9 @@ export const strings = {
     medicationLabel: 'Medicação atual',
     goalWeightLabel: 'Meta de peso (kg)',
     waterGoalLabel: 'Meta de água (ml)',
+    waterGoalAuto: 'Meta de água automática (35 ml/kg)',
+    waterGoalAutoHint:
+      'Estimativa geral de hidratação com base no seu peso mais recente. Ajuste manualmente se houver orientação profissional diferente.',
     calorieGoalLabel: 'Meta de calorias (kcal)',
     calorieGoalHint:
       'Opcional. Defina com seu médico ou nutricionista — o Leve não calcula nem recomenda metas.',

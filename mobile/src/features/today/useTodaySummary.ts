@@ -9,6 +9,7 @@ import { symptomsForDay } from '@/db/symptomRepo';
 import { getSetting } from '@/db/settingsRepo';
 import { waterTotalForDay } from '@/db/waterRepo';
 import { latestWeight, weightsSince } from '@/db/weightRepo';
+import { getEffectiveWaterGoal } from '@/features/water/waterGoal';
 import { getHealthProvider } from '@/services/health/HealthProvider';
 import { readTodaySteps } from '@/services/health/healthSync';
 
@@ -46,15 +47,17 @@ export function useTodaySummary(): TodaySummary {
     const now = new Date();
     const since30 = new Date(now);
     since30.setDate(since30.getDate() - 30);
-    const [water, kcalToday, weight, weightSeries, dose, symptoms, profile] = await Promise.all([
-      waterTotalForDay(db, now),
-      kcalForDay(db, now),
-      latestWeight(db),
-      weightsSince(db, since30),
-      latestDose(db),
-      symptomsForDay(db, now),
-      getProfile(db),
-    ]);
+    const [water, kcalToday, weight, weightSeries, dose, symptoms, profile, waterGoal] =
+      await Promise.all([
+        waterTotalForDay(db, now),
+        kcalForDay(db, now),
+        latestWeight(db),
+        weightsSince(db, since30),
+        latestDose(db),
+        symptomsForDay(db, now),
+        getProfile(db),
+        getEffectiveWaterGoal(db),
+      ]);
     setWaterMl(water);
     setKcal(kcalToday);
     setLastWeightKg(weight?.weightKg ?? null);
@@ -62,8 +65,8 @@ export function useTodaySummary(): TodaySummary {
     setNextDoseAt(dose?.nextDoseAt ?? null);
     setLastDoseLabel(dose ? `${dose.medication} · ${dose.doseMg} mg` : null);
     setSymptomsCount(symptoms.length);
+    setWaterGoalMl(waterGoal.goalMl);
     if (profile) {
-      setWaterGoalMl(profile.waterGoalMl ?? 2000);
       setCalorieGoalKcal(profile.calorieGoalKcal ?? null);
       setGoalWeightKg(profile.goalWeightKg ?? null);
     }

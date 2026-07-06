@@ -8,8 +8,8 @@ jest.mock('@/db/waterRepo', () => ({
   addWater: (...a: unknown[]) => mockAddWater(...a),
   waterTotalForDay: (...a: unknown[]) => mockTotal(...a),
 }));
-jest.mock('@/db/profileRepo', () => ({
-  getProfile: jest.fn().mockResolvedValue({ waterGoalMl: 2000 }),
+jest.mock('@/features/water/waterGoal', () => ({
+  getEffectiveWaterGoal: jest.fn().mockResolvedValue({ goalMl: 2000, auto: true }),
 }));
 
 import { strings } from '@/i18n/pt-BR';

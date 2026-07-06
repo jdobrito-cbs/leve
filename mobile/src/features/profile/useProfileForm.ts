@@ -4,6 +4,8 @@ import { parseDecimalBR } from '@/core/text';
 import { db } from '@/db/client';
 import { getProfile, updateProfile } from '@/db/profileRepo';
 import { getSetting, setSetting } from '@/db/settingsRepo';
+import { latestWeight } from '@/db/weightRepo';
+import { waterGoalFromWeightKg } from '@/features/water/waterGoal';
 import {
   DEFAULT_REMINDERS,
   ReminderSettings,
@@ -17,6 +19,7 @@ export interface ProfileForm {
   medication: string;
   goalWeightStr: string;
   waterGoalStr: string;
+  waterGoalAuto: boolean;
   calorieGoalStr: string;
   doseEnabled: boolean;
   waterEnabled: boolean;
@@ -29,6 +32,7 @@ const EMPTY_FORM: ProfileForm = {
   medication: '',
   goalWeightStr: '',
   waterGoalStr: '2000',
+  waterGoalAuto: true,
   calorieGoalStr: '',
   doseEnabled: false,
   waterEnabled: false,
@@ -40,19 +44,24 @@ export function useProfileForm() {
   const [form, setForm] = useState<ProfileForm>(EMPTY_FORM);
   const [saved, setSaved] = useState(false);
   const [permissionError, setPermissionError] = useState(false);
+  const [autoGoalMl, setAutoGoalMl] = useState<number | null>(null);
 
   const load = useCallback(async () => {
-    const [profile, reminders] = await Promise.all([
+    const [profile, reminders, waterAuto, weight] = await Promise.all([
       getProfile(db),
       getSetting<ReminderSettings>(db, 'reminders'),
+      getSetting<boolean>(db, 'waterGoalAuto'),
+      latestWeight(db),
     ]);
     const r = reminders ?? DEFAULT_REMINDERS;
+    setAutoGoalMl(weight ? waterGoalFromWeightKg(weight.weightKg) : null);
     setForm({
       name: profile?.name ?? '',
       heightStr: profile?.heightCm ? String(profile.heightCm) : '',
       medication: profile?.medication ?? '',
       goalWeightStr: profile?.goalWeightKg ? String(profile.goalWeightKg) : '',
       waterGoalStr: profile?.waterGoalMl ? String(profile.waterGoalMl) : '2000',
+      waterGoalAuto: waterAuto ?? true,
       calorieGoalStr: profile?.calorieGoalKcal ? String(profile.calorieGoalKcal) : '',
       doseEnabled: r.doseEnabled,
       waterEnabled: r.waterEnabled,
@@ -105,9 +114,10 @@ export function useProfileForm() {
       waterTimes: waterTimes.length ? waterTimes : DEFAULT_REMINDERS.waterTimes,
     };
     await setSetting(db, 'reminders', reminders);
+    await setSetting(db, 'waterGoalAuto', form.waterGoalAuto);
     await applyWaterReminders(reminders.waterEnabled, reminders.waterTimes);
     setSaved(true);
   }, [form]);
 
-  return { loading, form, setField, save, saved, permissionError };
+  return { loading, form, setField, save, saved, permissionError, autoGoalMl };
 }
