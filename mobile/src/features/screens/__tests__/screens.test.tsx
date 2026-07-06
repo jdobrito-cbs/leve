@@ -1,5 +1,7 @@
-import { render } from '@testing-library/react-native';
+import { fireEvent, render } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+jest.mock('expo-router', () => ({ router: { push: jest.fn(), back: jest.fn() } }));
 import { strings } from '@/i18n/pt-BR';
 import { LogHubScreen } from '../LogHubScreen';
 import { ProfileScreen } from '../ProfileScreen';
@@ -20,8 +22,9 @@ test('Hoje mostra empty state', async () => {
   getByText(strings.today.emptyTitle);
 });
 
-test('Registrar lista as 5 categorias como "em breve"', async () => {
-  const { getByText, getAllByText } = await render(<LogHubScreen />);
+test('Registrar lista as 5 categorias e navega nas ativas', async () => {
+  const { router } = jest.requireMock('expo-router') as { router: { push: jest.Mock } };
+  const { getByText } = await render(<LogHubScreen />);
   for (const label of [
     strings.log.water,
     strings.log.meal,
@@ -31,7 +34,8 @@ test('Registrar lista as 5 categorias como "em breve"', async () => {
   ]) {
     getByText(label);
   }
-  expect(getAllByText(strings.log.comingSoon)).toHaveLength(5);
+  await fireEvent.press(getByText(strings.log.water));
+  expect(router.push).toHaveBeenCalledWith('/log/agua');
 });
 
 test('Progresso mostra empty state', async () => {
