@@ -1,5 +1,11 @@
 # Privacidade — Leve (rascunho, FASES 0–2)
 
+## Scan de comida por IA (FASE 3)
+
+- É a única função do app que usa internet, e é **opt-in por foto**: nada é enviado sem você tocar em Escanear.
+- A foto vai com criptografia (TLS) para o servidor do Leve, que a repassa ao serviço de IA apenas para identificar os alimentos; o servidor é **stateless** — a foto **não é armazenada nem registrada em logs**.
+- Nenhuma chave ou configuração técnica fica no aparelho; o resultado (nomes de alimentos, porção estimada, confiança) só é gravado localmente se você confirmar o registro.
+
 ## Integrações de saúde (FASE 2)
 
 - A conexão com Apple Saúde (HealthKit) e Health Connect é **opt-in**: nada é lido sem você tocar em "Conectar" e autorizar na tela do sistema.
