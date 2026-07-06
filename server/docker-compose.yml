@@ -1,0 +1,8 @@
+services:
+  leve-server:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3333:3333"
+    env_file:
+      - .env
