@@ -1,9 +1,9 @@
-import { Text, View } from 'react-native';
+import { Redirect } from 'expo-router';
+import { View } from 'react-native';
+import { useOnboarding } from '@/features/onboarding/useOnboarding';
 
 export default function Index() {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Leve</Text>
-    </View>
-  );
+  const { loading, accepted } = useOnboarding();
+  if (loading) return <View />;
+  return accepted ? <View /> : <Redirect href="/onboarding" />;
 }
