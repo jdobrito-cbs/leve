@@ -10,7 +10,7 @@ const items = [
   { Icon: Utensils, label: strings.log.meal, route: null },
   { Icon: Syringe, label: strings.log.dose, route: '/log/dose' },
   { Icon: Weight, label: strings.log.weight, route: '/log/peso' },
-  { Icon: ClipboardList, label: strings.log.symptom, route: null },
+  { Icon: ClipboardList, label: strings.log.symptom, route: '/log/sintoma' },
 ] as const;
 
 export function LogHubScreen() {
