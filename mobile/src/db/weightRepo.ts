@@ -1,10 +1,15 @@
 import { asc, desc, gte } from 'drizzle-orm';
-import type { WeightLog } from '@/core/types';
+import type { LogOrigin, WeightLog } from '@/core/types';
 import type { AppDb } from './client';
 import { weightLogs } from './schema';
 
-export async function addWeight(db: AppDb, weightKg: number, at: Date): Promise<void> {
-  await db.insert(weightLogs).values({ weightKg, origin: 'manual', loggedAt: at.toISOString() });
+export async function addWeight(
+  db: AppDb,
+  weightKg: number,
+  at: Date,
+  origin: LogOrigin = 'manual',
+): Promise<void> {
+  await db.insert(weightLogs).values({ weightKg, origin, loggedAt: at.toISOString() });
 }
 
 export async function latestWeight(db: AppDb): Promise<WeightLog | null> {
