@@ -55,7 +55,8 @@
           "cameraPermission": "O Leve usa a câmera apenas quando você fotografa uma refeição para identificar alimentos."
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

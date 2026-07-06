@@ -1,7 +1,22 @@
 import { fireEvent, render } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-jest.mock('expo-router', () => ({ router: { push: jest.fn(), back: jest.fn() } }));
+jest.mock('expo-router', () => ({ router: { push: jest.fn(), back: jest.fn(), replace: jest.fn() } }));
+jest.mock('@/db/client', () => ({ db: {} }));
+jest.mock('expo-sharing', () => ({
+  isAvailableAsync: jest.fn().mockResolvedValue(false),
+  shareAsync: jest.fn(),
+}));
+jest.mock('expo-file-system/legacy', () => ({
+  cacheDirectory: 'file://cache/',
+  writeAsStringAsync: jest.fn(),
+}));
+const mockExportAll = jest.fn().mockResolvedValue({ version: 1 });
+const mockWipeAll = jest.fn();
+jest.mock('@/features/backup/exportData', () => ({
+  exportAllData: (...a: unknown[]) => mockExportAll(...a),
+  wipeAllData: (...a: unknown[]) => mockWipeAll(...a),
+}));
 jest.mock('react-native-gifted-charts', () => ({
   BarChart: () => null,
   LineChart: () => null,
@@ -122,15 +137,22 @@ test('Progresso mostra as seções', async () => {
   getByText(strings.progress.dosesSection);
 });
 
-test('Perfil mostra metas, lembretes e privacidade; salvar chama save', async () => {
+test('Perfil mostra metas, lembretes, conta e privacidade; exportar e excluir funcionam', async () => {
   const { getByText } = await render(<ProfileScreen />);
   getByText(strings.profile.editSection);
   getByText(strings.profile.remindersSection);
   getByText(new RegExp(strings.health.section));
   getByText(strings.health.connect);
+  getByText(strings.account.section);
   getByText(strings.profile.privacySection);
-  getByText(strings.profile.exportData);
-  getByText(strings.profile.deleteData);
   await fireEvent.press(getByText(strings.profile.save));
   expect(mockSave).toHaveBeenCalled();
+
+  await fireEvent.press(getByText(strings.profile.exportData));
+  expect(mockExportAll).toHaveBeenCalled();
+
+  await fireEvent.press(getByText(strings.profile.deleteData));
+  expect(mockWipeAll).not.toHaveBeenCalled(); // primeiro toque só pede confirmação
+  await fireEvent.press(getByText(strings.profile.deleteData));
+  expect(mockWipeAll).toHaveBeenCalled();
 });
