@@ -2,6 +2,20 @@ import { fireEvent, render } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 jest.mock('expo-router', () => ({ router: { push: jest.fn(), back: jest.fn() } }));
+jest.mock('@/features/today/useTodaySummary', () => ({
+  useTodaySummary: () => ({
+    loading: false,
+    waterMl: 1200,
+    waterGoalMl: 2000,
+    kcal: 850,
+    calorieGoalKcal: null,
+    lastWeightKg: 93.2,
+    nextDoseAt: null,
+    lastDoseLabel: 'semaglutida · 0.5 mg',
+    symptomsCount: 2,
+    refresh: jest.fn(),
+  }),
+}));
 import { strings } from '@/i18n/pt-BR';
 import { LogHubScreen } from '../LogHubScreen';
 import { ProfileScreen } from '../ProfileScreen';
@@ -13,13 +27,19 @@ const initialMetrics = {
   insets: { top: 47, left: 0, right: 0, bottom: 34 },
 };
 
-test('Hoje mostra empty state', async () => {
+test('Hoje mostra anel de água e cards do dia', async () => {
   const { getByText } = await render(
     <SafeAreaProvider initialMetrics={initialMetrics}>
       <TodayScreen />
     </SafeAreaProvider>,
   );
-  getByText(strings.today.emptyTitle);
+  getByText('1.200');
+  getByText(strings.today.waterRing);
+  getByText(strings.today.cards.kcal);
+  getByText(strings.today.cards.nextDose);
+  getByText(strings.today.cards.lastWeight);
+  getByText(strings.today.cards.symptoms);
+  getByText(/93,2/);
 });
 
 test('Registrar lista as 5 categorias e navega nas ativas', async () => {

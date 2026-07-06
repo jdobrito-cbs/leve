@@ -1,11 +1,48 @@
-import { ScrollView, View } from 'react-native';
-import { AppText, Card, HeroHeader, ProgressRing } from '@/design/components';
+import { router } from 'expo-router';
+import { ClipboardList, Syringe, Utensils, Weight } from 'lucide-react-native';
+import type { LucideIcon } from 'lucide-react-native';
+import { Pressable, ScrollView, View } from 'react-native';
+import { AppText, Card, HeroHeader, IconChip, ProgressRing } from '@/design/components';
 import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
+import { useTodaySummary } from '@/features/today/useTodaySummary';
 import { strings } from '@/i18n/pt-BR';
+
+function StatCard({
+  Icon,
+  label,
+  value,
+  route,
+}: {
+  Icon: LucideIcon;
+  label: string;
+  value: string;
+  route: string;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => router.push(route as never)}
+      style={{ flexBasis: '47%', flexGrow: 1 }}
+    >
+      <Card style={{ gap: spacing.sm }}>
+        <IconChip Icon={Icon} size={36} />
+        <AppText variant="caption" muted>
+          {label}
+        </AppText>
+        <AppText style={{ fontFamily: fonts.semibold }} numberOfLines={1}>
+          {value}
+        </AppText>
+      </Card>
+    </Pressable>
+  );
+}
 
 export function TodayScreen() {
   const { colors } = useTheme();
+  const summary = useTodaySummary();
+  const progress = summary.waterGoalMl > 0 ? summary.waterMl / summary.waterGoalMl : 0;
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <HeroHeader>
@@ -23,20 +60,61 @@ export function TodayScreen() {
         style={{ marginTop: -spacing.lg }}
         contentContainerStyle={{ padding: spacing.md, gap: spacing.md, paddingBottom: spacing.xl }}
       >
-        <Card style={{ alignItems: 'center', gap: spacing.md, paddingVertical: spacing.lg }}>
-          <ProgressRing progress={0} size={148}>
-            <AppText style={{ fontFamily: fonts.bold, fontSize: 40, color: colors.text }}>0</AppText>
+        <Pressable accessibilityRole="button" onPress={() => router.push('/log/agua' as never)}>
+          <Card style={{ alignItems: 'center', gap: spacing.md, paddingVertical: spacing.lg }}>
+            <ProgressRing progress={progress} size={148}>
+              <AppText style={{ fontFamily: fonts.bold, fontSize: 34, color: colors.text }}>
+                {summary.waterMl.toLocaleString('pt-BR')}
+              </AppText>
+              <AppText variant="caption" muted>
+                {strings.today.waterRing}
+              </AppText>
+            </ProgressRing>
             <AppText variant="caption" muted>
-              {strings.today.ringLabel}
+              {summary.waterGoalMl.toLocaleString('pt-BR')} ml {strings.today.ofGoal}
             </AppText>
-          </ProgressRing>
-          <View style={{ alignItems: 'center', gap: spacing.xs }}>
-            <AppText variant="title">{strings.today.emptyTitle}</AppText>
-            <AppText muted style={{ textAlign: 'center' }}>
-              {strings.today.emptyHint}
-            </AppText>
-          </View>
-        </Card>
+          </Card>
+        </Pressable>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md }}>
+          <StatCard
+            Icon={Utensils}
+            label={strings.today.cards.kcal}
+            value={
+              summary.calorieGoalKcal
+                ? `${summary.kcal.toLocaleString('pt-BR')} / ${summary.calorieGoalKcal.toLocaleString('pt-BR')}`
+                : `${summary.kcal.toLocaleString('pt-BR')} kcal`
+            }
+            route="/log/refeicao"
+          />
+          <StatCard
+            Icon={Syringe}
+            label={strings.today.cards.nextDose}
+            value={
+              summary.nextDoseAt
+                ? new Date(summary.nextDoseAt).toLocaleDateString('pt-BR')
+                : (summary.lastDoseLabel ?? strings.today.noDose)
+            }
+            route="/log/dose"
+          />
+          <StatCard
+            Icon={Weight}
+            label={strings.today.cards.lastWeight}
+            value={
+              summary.lastWeightKg !== null
+                ? `${summary.lastWeightKg.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} kg`
+                : strings.today.noWeight
+            }
+            route="/log/peso"
+          />
+          <StatCard
+            Icon={ClipboardList}
+            label={strings.today.cards.symptoms}
+            value={
+              summary.symptomsCount > 0 ? String(summary.symptomsCount) : strings.today.none
+            }
+            route="/log/sintoma"
+          />
+        </View>
       </ScrollView>
     </View>
   );
