@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { formatDateBR, formatTimeHM, parseDateTimeBR } from '@/core/datetime';
 import { MANUAL_BODY_METRICS, METRIC_DEFS, MetricType } from '@/core/metrics';
 import { parseDecimalBR } from '@/core/text';
-import { AppText, Button, Card, NumberField, Screen } from '@/design/components';
+import { AppText, Button, Card, DateTimeField, NumberField, Screen } from '@/design/components';
 import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
@@ -14,6 +15,9 @@ export function BodyCompScreen() {
   const [values, setValues] = useState<Partial<Record<MetricType, string>>>({});
   const [placeholders, setPlaceholders] = useState<Partial<Record<MetricType, string>>>({});
   const [saved, setSaved] = useState(false);
+  const [dateStr, setDateStr] = useState(formatDateBR(new Date()));
+  const [timeStr, setTimeStr] = useState(formatTimeHM(new Date()));
+  const at = parseDateTimeBR(dateStr, timeStr);
 
   useEffect(() => {
     latestMetrics(db).then((map) => {
@@ -32,9 +36,9 @@ export function BodyCompScreen() {
   });
 
   async function save() {
-    const now = new Date();
+    if (!at) return;
     for (const type of filled) {
-      await addMetric(db, type, parseDecimalBR(values[type] ?? '')!, now);
+      await addMetric(db, type, parseDecimalBR(values[type] ?? '')!, at);
     }
     setValues({});
     setSaved(true);
@@ -60,7 +64,17 @@ export function BodyCompScreen() {
             placeholder={placeholders[type] ?? '0,0'}
           />
         ))}
-        <Button label={strings.bodyComp.save} onPress={save} disabled={filled.length === 0} />
+        <DateTimeField
+          dateValue={dateStr}
+          timeValue={timeStr}
+          onChangeDate={setDateStr}
+          onChangeTime={setTimeStr}
+        />
+        <Button
+          label={strings.bodyComp.save}
+          onPress={save}
+          disabled={filled.length === 0 || !at}
+        />
         {saved ? (
           <AppText variant="caption" style={{ color: colors.success }}>
             {strings.bodyComp.saved}

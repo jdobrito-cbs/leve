@@ -1,7 +1,8 @@
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
+import { formatDateBR, formatTimeHM, parseDateTimeBR } from '@/core/datetime';
 import type { SymptomLog } from '@/core/types';
-import { AppText, Button, Card, ListRow, Screen, SegmentedChips } from '@/design/components';
+import { AppText, Button, Card, DateTimeField, ListRow, Screen, SegmentedChips } from '@/design/components';
 import { spacing } from '@/design/tokens';
 import { db } from '@/db/client';
 import { addSymptom, symptomsForDay } from '@/db/symptomRepo';
@@ -20,6 +21,9 @@ export function SymptomScreen() {
   const [kind, setKind] = useState<KindKey | null>(null);
   const [intensity, setIntensity] = useState<string | null>(null);
   const [today, setToday] = useState<SymptomLog[]>([]);
+  const [dateStr, setDateStr] = useState(formatDateBR(new Date()));
+  const [timeStr, setTimeStr] = useState(formatTimeHM(new Date()));
+  const at = parseDateTimeBR(dateStr, timeStr);
 
   const load = useCallback(async () => {
     setToday(await symptomsForDay(db, new Date()));
@@ -30,8 +34,8 @@ export function SymptomScreen() {
   }, [load]);
 
   async function save() {
-    if (!kind || !intensity) return;
-    await addSymptom(db, kind, Number(intensity), new Date());
+    if (!kind || !intensity || !at) return;
+    await addSymptom(db, kind, Number(intensity), at);
     setKind(null);
     setIntensity(null);
     await load();
@@ -49,7 +53,13 @@ export function SymptomScreen() {
           {strings.symptom.intensityLabel}
         </AppText>
         <SegmentedChips options={INTENSITY_OPTIONS} value={intensity} onChange={setIntensity} />
-        <Button label={strings.symptom.save} onPress={save} disabled={!kind || !intensity} />
+        <DateTimeField
+          dateValue={dateStr}
+          timeValue={timeStr}
+          onChangeDate={setDateStr}
+          onChangeTime={setTimeStr}
+        />
+        <Button label={strings.symptom.save} onPress={save} disabled={!kind || !intensity || !at} />
       </Card>
       {today.length > 0 ? (
         <Card>

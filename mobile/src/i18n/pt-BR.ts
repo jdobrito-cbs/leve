@@ -349,5 +349,7 @@ export const strings = {
     close: 'Fechar',
     add: 'Adicionar',
     today: 'hoje',
+    dateLabel: 'Data do registro',
+    timeLabel: 'Hora',
   },
 } as const;

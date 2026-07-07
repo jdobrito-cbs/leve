@@ -111,6 +111,15 @@ export function ProfileScreen() {
           onChangeText={(v) => setField('goalWeightStr', v)}
           suffix="kg"
         />
+        <NumberField
+          label={strings.dose.intervalLabel}
+          value={form.doseIntervalStr}
+          onChangeText={(v) => setField('doseIntervalStr', v)}
+          suffix={strings.dose.days}
+        />
+        <AppText variant="caption" muted>
+          {strings.dose.intervalHint}
+        </AppText>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
           <View style={{ flex: 1 }}>
             <AppText>{strings.profile.waterGoalAuto}</AppText>

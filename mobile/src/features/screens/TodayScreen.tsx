@@ -102,6 +102,9 @@ export function TodayScreen() {
   const summary = useTodaySummary();
   const progress = summary.waterGoalMl > 0 ? summary.waterMl / summary.waterGoalMl : 0;
   const pk = useMemo(() => estimateRelativeCurve(summary.doses), [summary.doses]);
+  const daysToNextDose = summary.nextDoseAt
+    ? Math.max(0, Math.ceil((new Date(summary.nextDoseAt).getTime() - Date.now()) / 86400000))
+    : null;
 
   return (
     <ScrollView
@@ -209,7 +212,7 @@ export function TodayScreen() {
             label={strings.today.cards.nextDose}
             value={
               summary.nextDoseAt
-                ? new Date(summary.nextDoseAt).toLocaleDateString('pt-BR')
+                ? `${new Date(summary.nextDoseAt).toLocaleDateString('pt-BR')} · ${daysToNextDose}d`
                 : (summary.lastDoseLabel ?? strings.today.noDose)
             }
             route="/log/dose"

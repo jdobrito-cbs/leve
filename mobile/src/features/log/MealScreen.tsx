@@ -2,6 +2,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
+import { formatDateBR, formatTimeHM, parseDateTimeBR } from '@/core/datetime';
 import { parseDecimalBR } from '@/core/text';
 import type { FoodItem, FoodLog } from '@/core/types';
 import type { FoodCandidate } from '@/services/vision/VisionProvider';
@@ -10,6 +11,7 @@ import {
   AppText,
   Button,
   Card,
+  DateTimeField,
   EmptyState,
   Input,
   ListRow,
@@ -50,6 +52,9 @@ export function MealScreen() {
   const [fromScan, setFromScan] = useState(false);
   const [todayList, setTodayList] = useState<FoodLog[]>([]);
   const [todayKcal, setTodayKcal] = useState(0);
+  const [dateStr, setDateStr] = useState(formatDateBR(new Date()));
+  const [timeStr, setTimeStr] = useState(formatTimeHM(new Date()));
+  const at = parseDateTimeBR(dateStr, timeStr);
 
   const load = useCallback(async () => {
     setTodayList(await foodForDay(db, new Date()));
@@ -78,7 +83,7 @@ export function MealScreen() {
   const kcalManual = parseDecimalBR(manualKcal);
 
   async function addFromTaco() {
-    if (!selected || portion === null || portion <= 0) return;
+    if (!selected || portion === null || portion <= 0 || !at) return;
     await addFoodLog(db, {
       name: selected.name,
       portionGrams: portion,
@@ -88,7 +93,7 @@ export function MealScreen() {
       fatG: scaled(selected.fatG, portion),
       fiberG: scaled(selected.fiberG, portion),
       origin: fromScan ? 'scan' : 'manual',
-      at: new Date(),
+      at,
     });
     setSelected(null);
     setQuery('');
@@ -98,12 +103,12 @@ export function MealScreen() {
   }
 
   async function addManual() {
-    if (!manualName.trim() || kcalManual === null || kcalManual < 0) return;
+    if (!manualName.trim() || kcalManual === null || kcalManual < 0 || !at) return;
     await addFoodLog(db, {
       name: manualName.trim(),
       calories: kcalManual,
       origin: fromScan ? 'scan' : 'manual',
-      at: new Date(),
+      at,
     });
     setManualName('');
     setManualKcal('');
@@ -150,6 +155,12 @@ export function MealScreen() {
     <Screen>
       <AppText variant="display">{strings.meal.title}</AppText>
       <SegmentedChips options={MODE_OPTIONS} value={mode} onChange={setMode} />
+      <DateTimeField
+        dateValue={dateStr}
+        timeValue={timeStr}
+        onChangeDate={setDateStr}
+        onChangeTime={setTimeStr}
+      />
 
       {mode === 'search' ? (
         <Card style={{ gap: spacing.md }}>

@@ -45,6 +45,7 @@ jest.mock('@/features/profile/useProfileForm', () => ({
       heightStr: '178',
       medication: 'semaglutida',
       goalWeightStr: '85',
+      doseIntervalStr: '7',
       waterGoalStr: '2000',
       waterGoalAuto: true,
       calorieGoalStr: '',
@@ -145,7 +146,7 @@ test('Hoje mostra todos os boxes na nova ordem', async () => {
   getByText(/Meta.*85/);
   getByText(strings.today.cards.kcal);
   getByText(strings.today.cards.nextDose);
-  getByText('14/07/2026');
+  getByText(/14\/07\/2026 · \d+d/); // data + dias restantes
   getByText(strings.today.cards.symptoms);
   getByText(strings.today.medicationSection);
   getByText(strings.today.mealsSection);

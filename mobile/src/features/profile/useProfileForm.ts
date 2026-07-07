@@ -22,6 +22,7 @@ export interface ProfileForm {
   heightStr: string;
   medication: string;
   goalWeightStr: string;
+  doseIntervalStr: string;
   waterGoalStr: string;
   waterGoalAuto: boolean;
   calorieGoalStr: string;
@@ -37,6 +38,7 @@ const EMPTY_FORM: ProfileForm = {
   heightStr: '',
   medication: '',
   goalWeightStr: '',
+  doseIntervalStr: '7',
   waterGoalStr: '2000',
   waterGoalAuto: true,
   calorieGoalStr: '',
@@ -54,11 +56,12 @@ export function useProfileForm() {
   const [autoGoalMl, setAutoGoalMl] = useState<number | null>(null);
 
   const load = useCallback(async () => {
-    const [profile, reminders, waterAuto, weight] = await Promise.all([
+    const [profile, reminders, waterAuto, weight, doseInterval] = await Promise.all([
       getProfile(db),
       getSetting<ReminderSettings>(db, 'reminders'),
       getSetting<boolean>(db, 'waterGoalAuto'),
       latestWeight(db),
+      getSetting<number>(db, 'doseIntervalDays'),
     ]);
     const r = reminders ?? DEFAULT_REMINDERS;
     setAutoGoalMl(weight ? waterGoalFromWeightKg(weight.weightKg) : null);
@@ -68,6 +71,7 @@ export function useProfileForm() {
       heightStr: profile?.heightCm ? String(profile.heightCm) : '',
       medication: profile?.medication ?? '',
       goalWeightStr: profile?.goalWeightKg ? String(profile.goalWeightKg) : '',
+      doseIntervalStr: doseInterval !== null ? String(doseInterval) : '7',
       waterGoalStr: profile?.waterGoalMl ? String(profile.waterGoalMl) : '2000',
       waterGoalAuto: waterAuto ?? true,
       calorieGoalStr: profile?.calorieGoalKcal ? String(profile.calorieGoalKcal) : '',
@@ -127,6 +131,11 @@ export function useProfileForm() {
     };
     await setSetting(db, 'reminders', reminders);
     await setSetting(db, 'waterGoalAuto', form.waterGoalAuto);
+    await setSetting(
+      db,
+      'doseIntervalDays',
+      Math.max(0, Math.round(parseDecimalBR(form.doseIntervalStr) ?? 7)),
+    );
     await applyWaterReminders(reminders.waterEnabled, reminders.waterTimes);
     await applyInsightsReminder(insightsEnabled);
     setSaved(true);

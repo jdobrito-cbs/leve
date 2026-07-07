@@ -16,6 +16,35 @@ export function lastNDays(n: number, today: Date): Date[] {
   return days;
 }
 
+export function formatDateBR(date: Date): string {
+  const d = String(date.getDate()).padStart(2, '0');
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  return `${d}/${m}/${date.getFullYear()}`;
+}
+
+export function formatTimeHM(date: Date): string {
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+}
+
+/** 'DD/MM/AAAA' + 'HH:MM' → Date local; null se inválido (inclusive 31/02 etc.). */
+export function parseDateTimeBR(dateStr: string, timeStr: string): Date | null {
+  const dm = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(dateStr.trim());
+  const tm = /^(\d{2}):(\d{2})$/.exec(timeStr.trim());
+  if (!dm || !tm) return null;
+  const [, dd, mm, yyyy] = dm.map(Number);
+  const [, hh, min] = tm.map(Number);
+  const date = new Date(yyyy, mm - 1, dd, hh, min);
+  if (
+    date.getDate() !== dd ||
+    date.getMonth() !== mm - 1 ||
+    date.getHours() !== hh ||
+    date.getMinutes() !== min
+  ) {
+    return null;
+  }
+  return date;
+}
+
 export function localDayKey(date: Date): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');

@@ -1,4 +1,22 @@
-import { dayRangeUtc, lastNDays, localDayKey } from '../datetime';
+import {
+  dayRangeUtc,
+  formatDateBR,
+  formatTimeHM,
+  lastNDays,
+  localDayKey,
+  parseDateTimeBR,
+} from '../datetime';
+
+test('parseDateTimeBR aceita data/hora válidas e rejeita inválidas', () => {
+  const d = parseDateTimeBR('07/07/2026', '14:30');
+  expect(d?.getDate()).toBe(7);
+  expect(d?.getHours()).toBe(14);
+  expect(formatDateBR(d!)).toBe('07/07/2026');
+  expect(formatTimeHM(d!)).toBe('14:30');
+  expect(parseDateTimeBR('31/02/2026', '10:00')).toBeNull();
+  expect(parseDateTimeBR('07-07-2026', '10:00')).toBeNull();
+  expect(parseDateTimeBR('07/07/2026', '25:00')).toBeNull();
+});
 import { normalizeText, parseDecimalBR } from '../text';
 
 test('dayRangeUtc cobre o dia local inteiro', () => {
