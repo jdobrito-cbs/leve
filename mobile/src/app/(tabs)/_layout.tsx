@@ -139,8 +139,6 @@ export default function TabsLayout() {
         listeners={bump('registrar')}
         options={{
           title: strings.tabs.log,
-          tabBarLabel: () => null,
-          tabBarAccessibilityLabel: strings.tabs.log,
           tabBarIcon: ({ focused }) => <Fab focused={focused} signal={signals.registrar} />,
         }}
       />
