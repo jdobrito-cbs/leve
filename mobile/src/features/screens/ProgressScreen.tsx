@@ -201,12 +201,14 @@ disableScroll
         <AppText variant="title">{strings.progress.weightSection}</AppText>
         <SegmentedChips options={RANGE_OPTIONS} value={range} onChange={setRange} />
         {weightData.length > 1 && weightBounds ? (
-          <FitChart>{(fitWidth) => (<LineChart width={fitWidth}
+          <FitChart>{(fitWidth) => (<LineChart width={fitWidth - 72}
             data={weightData}
             color={colors.primary}
             thickness={3}
             yAxisOffset={weightBounds.offset}
             maxValue={weightBounds.max}
+            initialSpacing={8}
+            endSpacing={24}
             hideDataPoints={weightData.length > 20}
             dataPointsColor={colors.primary}
             xAxisLabelTextStyle={{ color: colors.textMuted, fontSize: 10 }}
