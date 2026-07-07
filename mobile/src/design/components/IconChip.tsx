@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react-native';
-import { useEffect, useRef } from 'react';
+import { PropsWithChildren, useEffect, useRef } from 'react';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -9,8 +9,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useTheme } from '../useTheme';
 
-interface Props {
-  Icon: LucideIcon;
+interface Props extends PropsWithChildren {
+  /** Ícone padrão; ignorado quando `children` traz um ícone animado customizado. */
+  Icon?: LucideIcon;
   size?: number;
   /** Quando este valor muda, o chip dá uma sacudidinha (dado atualizado). */
   wiggleKey?: string | number;
@@ -20,7 +21,7 @@ interface Props {
  * Ícone flat dentro de um chip arredondado — motivo visual do Leve.
  * Nasce com um pop de mola e sacode quando o dado que representa muda.
  */
-export function IconChip({ Icon, size = 40, wiggleKey }: Props) {
+export function IconChip({ Icon, size = 40, wiggleKey, children }: Props) {
   const { colors } = useTheme();
   const scale = useSharedValue(0.4);
   const tilt = useSharedValue(0);
@@ -63,7 +64,7 @@ export function IconChip({ Icon, size = 40, wiggleKey }: Props) {
         style,
       ]}
     >
-      <Icon color={colors.primary} size={size * 0.5} strokeWidth={1.9} />
+      {children ?? (Icon ? <Icon color={colors.primary} size={size * 0.5} strokeWidth={1.9} /> : null)}
     </Animated.View>
   );
 }
