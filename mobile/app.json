@@ -8,14 +8,16 @@
     "scheme": "leve",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "app.leve.mobile",
+      "supportsTablet": false,
       "infoPlist": {
-        "NSHealthShareUsageDescription": "O Leve importa peso e passos do Apple Saúde apenas quando você autoriza, para exibir seu progresso no app. Os dados ficam somente no seu aparelho."
+        "NSHealthShareUsageDescription": "O Leve importa peso, passos, sono, frequência cardíaca e composição corporal do Apple Saúde apenas quando você autoriza, para exibir seu progresso no app. Os dados ficam somente no seu aparelho."
       }
     },
     "android": {
+      "package": "app.leve.mobile",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#2563EB",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
