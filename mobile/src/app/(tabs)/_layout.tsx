@@ -105,6 +105,9 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
+        // Em telas largas (tablet/web) o padrão vira ícone ao lado do texto,
+        // o que desmonta o botão central — mantém o layout vertical sempre.
+        tabBarLabelPosition: 'below-icon',
         tabBarLabelStyle: { fontFamily: fonts.semibold, fontSize: 11 },
         tabBarStyle: {
           backgroundColor: colors.surface,
@@ -136,6 +139,8 @@ export default function TabsLayout() {
         listeners={bump('registrar')}
         options={{
           title: strings.tabs.log,
+          tabBarLabel: () => null,
+          tabBarAccessibilityLabel: strings.tabs.log,
           tabBarIcon: ({ focused }) => <Fab focused={focused} signal={signals.registrar} />,
         }}
       />
