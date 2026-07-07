@@ -9,6 +9,7 @@ export const profile = sqliteTable('profile', {
   disclaimerAcceptedAt: text('disclaimer_accepted_at'),
   waterGoalMl: real('water_goal_ml').notNull().default(2000),
   calorieGoalKcal: real('calorie_goal_kcal'),
+  sex: text('sex'), // 'feminino' | 'masculino' | 'nao_informar'
 });
 
 export const waterLogs = sqliteTable('water_logs', {
@@ -70,4 +71,35 @@ export const foodItems = sqliteTable('food_items', {
 export const settings = sqliteTable('settings', {
   key: text('key').primaryKey(),
   value: text('value').notNull(),
+});
+
+export const healthMetrics = sqliteTable('health_metrics', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  type: text('type').notNull(),
+  value: real('value').notNull(),
+  unit: text('unit').notNull(),
+  origin: text('origin').notNull().default('manual'),
+  loggedAt: text('logged_at').notNull(),
+});
+
+export const periodLogs = sqliteTable('period_logs', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  startedAt: text('started_at').notNull(),
+  endedAt: text('ended_at'),
+  flow: text('flow'),
+});
+
+export const medications = sqliteTable('medications', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  doseText: text('dose_text'),
+  times: text('times').notNull(), // 'HH:MM,HH:MM'
+  active: integer('active').notNull().default(1),
+});
+
+export const medIntakes = sqliteTable('med_intakes', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  medicationId: integer('medication_id').notNull(),
+  scheduledFor: text('scheduled_for').notNull(), // 'YYYY-MM-DD HH:MM'
+  takenAt: text('taken_at'),
 });
