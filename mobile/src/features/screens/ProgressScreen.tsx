@@ -207,11 +207,17 @@ disableScroll
             thickness={3}
             yAxisOffset={weightBounds.offset}
             maxValue={weightBounds.max}
-            initialSpacing={8}
-            endSpacing={24}
+            initialSpacing={10}
+            endSpacing={40}
             hideDataPoints={weightData.length > 20}
             dataPointsColor={colors.primary}
-            xAxisLabelTextStyle={{ color: colors.textMuted, fontSize: 10 }}
+            xAxisLabelTextStyle={{
+              color: colors.textMuted,
+              fontSize: 10,
+              width: 40,
+              marginLeft: -16,
+              textAlign: 'center',
+            }}
             yAxisTextStyle={{ color: colors.textMuted, fontSize: 11 }}
             xAxisColor={colors.border}
             yAxisColor={colors.border}
