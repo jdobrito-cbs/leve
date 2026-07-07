@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import { localDayKey } from '@/core/datetime';
+import type { MetricSample, MetricType } from '@/core/metrics';
 import type { HealthProvider, StepsSample, WeightSample } from './HealthProvider';
 
 interface WeightRecord {
@@ -15,15 +16,29 @@ interface StepsRecord {
 interface HealthConnectModule {
   initialize(): Promise<boolean>;
   requestPermission(
-    permissions: Array<{ accessType: 'read'; recordType: 'Weight' | 'Steps' }>,
+    permissions: Array<{ accessType: 'read'; recordType: string }>,
   ): Promise<unknown[]>;
   readRecords(
-    recordType: 'Weight' | 'Steps',
+    recordType: string,
     options: {
       timeRangeFilter: { operator: 'between'; startTime: string; endTime: string };
     },
   ): Promise<{ records: unknown[] }>;
 }
+
+const METRIC_RECORD_TYPES = [
+  'SleepSession',
+  'RestingHeartRate',
+  'HeartRate',
+  'OxygenSaturation',
+  'RespiratoryRate',
+  'BodyFat',
+  'BodyWaterMass',
+  'BoneMass',
+  'LeanBodyMass',
+  'ActiveCaloriesBurned',
+  'ExerciseSession',
+];
 
 function getModule(): HealthConnectModule | null {
   try {
@@ -53,6 +68,7 @@ export class HealthConnectProvider implements HealthProvider {
       const granted = await this.mod.requestPermission([
         { accessType: 'read', recordType: 'Weight' },
         { accessType: 'read', recordType: 'Steps' },
+        ...METRIC_RECORD_TYPES.map((recordType) => ({ accessType: 'read' as const, recordType })),
       ]);
       return granted.length > 0;
     } catch {
@@ -102,5 +118,80 @@ export class HealthConnectProvider implements HealthProvider {
     } catch {
       return [];
     }
+  }
+
+  async readMetrics(since: Date): Promise<MetricSample[]> {
+    if (!this.mod) return [];
+    const range = {
+      timeRangeFilter: {
+        operator: 'between' as const,
+        startTime: since.toISOString(),
+        endTime: new Date().toISOString(),
+      },
+    };
+    const read = async (recordType: string): Promise<Record<string, unknown>[]> => {
+      try {
+        const { records } = await this.mod!.readRecords(recordType, range);
+        return records as Record<string, unknown>[];
+      } catch {
+        return [];
+      }
+    };
+    const num = (v: unknown): number | null =>
+      typeof v === 'number' && Number.isFinite(v) ? v : null;
+    const kg = (v: unknown): number | null =>
+      num((v as { inKilograms?: unknown } | undefined)?.inKilograms);
+    const when = (r: Record<string, unknown>): Date | null => {
+      const t = (r.time ?? r.endTime ?? r.startTime) as string | undefined;
+      return t ? new Date(t) : null;
+    };
+
+    const samples: MetricSample[] = [];
+    const push = (type: MetricType, value: number | null, takenAt: Date | null) => {
+      if (value !== null && takenAt) samples.push({ type, value, takenAt });
+    };
+
+    for (const r of await read('SleepSession')) {
+      const start = r.startTime ? new Date(r.startTime as string) : null;
+      const end = r.endTime ? new Date(r.endTime as string) : null;
+      if (start && end && end > start) {
+        push('sleep_hours', Math.round(((end.getTime() - start.getTime()) / 36e5) * 10) / 10, end);
+      }
+    }
+    for (const r of await read('RestingHeartRate')) {
+      push('heart_rate_resting', num(r.beatsPerMinute), when(r));
+    }
+    for (const r of await read('HeartRate')) {
+      const s = (r.samples as Array<{ beatsPerMinute?: unknown }> | undefined) ?? [];
+      const values = s.map((x) => num(x.beatsPerMinute)).filter((v): v is number => v !== null);
+      if (values.length) {
+        push(
+          'heart_rate_avg',
+          Math.round(values.reduce((a, b) => a + b, 0) / values.length),
+          when(r),
+        );
+      }
+    }
+    for (const r of await read('OxygenSaturation')) push('spo2', num(r.percentage), when(r));
+    for (const r of await read('RespiratoryRate')) push('respiratory_rate', num(r.rate), when(r));
+    for (const r of await read('BodyFat')) push('body_fat_pct', num(r.percentage), when(r));
+    for (const r of await read('BodyWaterMass')) push('body_water_kg', kg(r.mass), when(r));
+    for (const r of await read('BoneMass')) push('bone_mass_kg', kg(r.mass), when(r));
+    for (const r of await read('LeanBodyMass')) push('lean_mass_kg', kg(r.mass), when(r));
+    for (const r of await read('ActiveCaloriesBurned')) {
+      push(
+        'active_calories',
+        num((r.energy as { inKilocalories?: unknown } | undefined)?.inKilocalories),
+        when(r),
+      );
+    }
+    for (const r of await read('ExerciseSession')) {
+      const start = r.startTime ? new Date(r.startTime as string) : null;
+      const end = r.endTime ? new Date(r.endTime as string) : null;
+      if (start && end && end > start) {
+        push('exercise_minutes', Math.round((end.getTime() - start.getTime()) / 60000), end);
+      }
+    }
+    return samples;
   }
 }

@@ -28,6 +28,7 @@ jest.mock('@/features/progress/useProgressData', () => ({
     water7: [],
     kcal7: [],
     doses: [],
+    metrics: [],
     refresh: jest.fn(),
   }),
 }));

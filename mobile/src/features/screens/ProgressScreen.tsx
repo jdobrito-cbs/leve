@@ -1,8 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { View } from 'react-native';
 import { BarChart, LineChart } from 'react-native-gifted-charts';
+import { METRIC_DEFS, MetricType } from '@/core/metrics';
 import { AppText, Card, DisclaimerBanner, ListRow, Screen, SegmentedChips } from '@/design/components';
-import { spacing } from '@/design/tokens';
+import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
+import { db } from '@/db/client';
+import { metricSeries, type MetricRow } from '@/db/metricsRepo';
 import type { InjectionSite } from '@/features/dose/rotation';
 import { estimateRelativeCurve } from '@/features/pk/pharmacokinetics';
 import { useProgressData } from '@/features/progress/useProgressData';
@@ -20,9 +24,73 @@ function weekdayLabel(dayKey: string): string {
   return new Date(y, m - 1, d).toLocaleDateString('pt-BR', { weekday: 'short' }).slice(0, 3);
 }
 
+function BodyHealthSection({ metrics }: { metrics: MetricRow[] }) {
+  const { colors } = useTheme();
+  const [selected, setSelected] = useState<MetricType | null>(null);
+  const [series, setSeries] = useState<MetricRow[]>([]);
+
+  useEffect(() => {
+    if (!selected) return;
+    const since = new Date();
+    since.setDate(since.getDate() - 90);
+    metricSeries(db, selected, since).then(setSeries);
+  }, [selected]);
+
+  if (metrics.length === 0) {
+    return (
+      <Card style={{ gap: spacing.md }}>
+        <AppText variant="title">{strings.progress.bodySection}</AppText>
+        <AppText muted>{strings.progress.empty}</AppText>
+      </Card>
+    );
+  }
+
+  return (
+    <Card style={{ gap: spacing.md }}>
+      <AppText variant="title">{strings.progress.bodySection}</AppText>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md }}>
+        {metrics.map((m) => (
+          <View key={m.type} style={{ flexBasis: '45%', flexGrow: 1 }}>
+            <AppText variant="caption" muted>
+              {strings.metrics[m.type]}
+            </AppText>
+            <AppText style={{ fontFamily: fonts.semibold }}>
+              {m.value.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}{' '}
+              {METRIC_DEFS[m.type].unit}
+            </AppText>
+          </View>
+        ))}
+      </View>
+      <SegmentedChips
+        options={metrics.map((m) => ({ value: m.type, label: strings.metrics[m.type] }))}
+        value={selected}
+        onChange={setSelected}
+      />
+      {selected && series.length > 1 ? (
+        <LineChart
+          data={series.map((s) => ({ value: s.value }))}
+          color={colors.primary}
+          thickness={3}
+          height={100}
+          hideDataPoints
+          hideAxesAndRules
+          hideYAxisText
+          adjustToWidth
+          curved
+          disableScroll
+        />
+      ) : selected ? (
+        <AppText variant="caption" muted>
+          {strings.progress.empty}
+        </AppText>
+      ) : null}
+    </Card>
+  );
+}
+
 export function ProgressScreen() {
   const { colors } = useTheme();
-  const { weights, water7, kcal7, doses } = useProgressData();
+  const { weights, water7, kcal7, doses, metrics } = useProgressData();
   const [range, setRange] = useState<RangeKey>('30');
 
   const weightData = useMemo(() => {
@@ -77,6 +145,8 @@ export function ProgressScreen() {
           {strings.progress.pkDisclaimer}
         </AppText>
       </Card>
+
+      <BodyHealthSection metrics={metrics} />
 
       <Card style={{ gap: spacing.md }}>
         <AppText variant="title">{strings.progress.weightSection}</AppText>

@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { ClipboardList, GlassWater, Syringe, Utensils, Weight } from 'lucide-react-native';
+import { ClipboardList, GlassWater, PersonStanding, Syringe, Utensils, Weight } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
 import { AppText, Card, IconChip, Screen } from '@/design/components';
 import { spacing } from '@/design/tokens';
@@ -11,6 +11,7 @@ const items = [
   { Icon: Syringe, label: strings.log.dose, route: '/log/dose' },
   { Icon: Weight, label: strings.log.weight, route: '/log/peso' },
   { Icon: ClipboardList, label: strings.log.symptom, route: '/log/sintoma' },
+  { Icon: PersonStanding, label: strings.log.bodyComp, route: '/log/corpo' },
 ] as const;
 
 export function LogHubScreen() {

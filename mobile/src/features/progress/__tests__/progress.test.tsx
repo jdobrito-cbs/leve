@@ -25,18 +25,26 @@ const mockData = {
       nextDoseAt: null,
     },
   ],
+  metrics: [
+    { id: 1, type: 'body_fat_pct', value: 31.4, unit: '%', origin: 'healthconnect', loggedAt: '2026-07-01T08:00:00.000Z' },
+  ],
   refresh: jest.fn(),
 };
+jest.mock('@/db/client', () => ({ db: {} }));
+jest.mock('@/db/metricsRepo', () => ({ metricSeries: jest.fn().mockResolvedValue([]) }));
 jest.mock('../useProgressData', () => ({ useProgressData: () => mockData }));
 
 import { strings } from '@/i18n/pt-BR';
 import { ProgressScreen } from '@/features/screens/ProgressScreen';
 
 test('mostra seções e histórico de doses', async () => {
-  const { getByText, getAllByText } = await render(<ProgressScreen />);
+  const rendered = await render(<ProgressScreen />);
+  const { getByText, getAllByText } = rendered;
   getByText(strings.progress.pkSection);
   getByText(strings.progress.pkDisclaimer);
   getByText(/nível relativo/);
+  getByText(strings.progress.bodySection);
+  expect(getAllByText(/Gordura corporal/).length).toBeGreaterThanOrEqual(1);
   getByText(strings.progress.weightSection);
   getByText(strings.progress.waterSection);
   getByText(strings.progress.kcalSection);
@@ -49,6 +57,7 @@ test('sem dados mostra estados vazios', async () => {
   mockData.water7 = [];
   mockData.kcal7 = [];
   mockData.doses = [];
+  mockData.metrics = [];
   const { getAllByText } = await render(<ProgressScreen />);
   expect(getAllByText(strings.progress.empty).length).toBeGreaterThanOrEqual(3);
 });

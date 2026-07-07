@@ -34,6 +34,7 @@ jest.mock('@/features/water/waterGoal', () => ({
 }));
 jest.mock('@/services/health/healthSync', () => ({
   readTodaySteps: jest.fn().mockResolvedValue(4200),
+  autoSyncIfDue: jest.fn().mockResolvedValue(false),
 }));
 jest.mock('@/db/profileRepo', () => ({
   getProfile: jest

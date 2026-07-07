@@ -11,7 +11,7 @@ import { waterTotalForDay } from '@/db/waterRepo';
 import { latestWeight, weightsSince } from '@/db/weightRepo';
 import { getEffectiveWaterGoal } from '@/features/water/waterGoal';
 import { getHealthProvider } from '@/services/health/HealthProvider';
-import { readTodaySteps } from '@/services/health/healthSync';
+import { autoSyncIfDue, readTodaySteps } from '@/services/health/healthSync';
 
 export interface TodaySummary {
   loading: boolean;
@@ -44,6 +44,8 @@ export function useTodaySummary(): TodaySummary {
   const [steps, setSteps] = useState<number | null>(null);
 
   const refresh = useCallback(async () => {
+    // Balança/wearable → app de saúde → Leve, sem toque (throttle de 1 h).
+    await autoSyncIfDue(db).catch(() => undefined);
     const now = new Date();
     const since30 = new Date(now);
     since30.setDate(since30.getDate() - 30);

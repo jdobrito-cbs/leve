@@ -9,11 +9,14 @@ export interface StepsSample {
   date: string;
 }
 
+import type { MetricSample } from '@/core/metrics';
+
 export interface HealthProvider {
   isAvailable(): Promise<boolean>;
   requestPermissions(): Promise<boolean>;
   readWeight(since: Date): Promise<WeightSample[]>;
   readSteps(since: Date): Promise<StepsSample[]>;
+  readMetrics(since: Date): Promise<MetricSample[]>;
 }
 
 /** Padrão até a Fase 2 (HealthKit no iOS, Health Connect no Android). */
@@ -28,6 +31,9 @@ export class UnavailableHealthProvider implements HealthProvider {
     return [];
   }
   async readSteps(): Promise<StepsSample[]> {
+    return [];
+  }
+  async readMetrics(): Promise<MetricSample[]> {
     return [];
   }
 }

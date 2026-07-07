@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { db } from '@/db/client';
 import { getSetting, setSetting } from '@/db/settingsRepo';
 import { getHealthProvider } from '@/services/health/HealthProvider';
-import { importWeights } from '@/services/health/healthSync';
+import { importMetrics, importWeights } from '@/services/health/healthSync';
 
 interface HealthSettings {
   connected: boolean;
@@ -48,7 +48,7 @@ export function useHealthConnection() {
   const importNow = useCallback(async () => {
     setImporting(true);
     try {
-      const count = await importWeights(db, provider);
+      const count = (await importWeights(db, provider)) + (await importMetrics(db, provider));
       setLastImported(count);
       return count;
     } finally {

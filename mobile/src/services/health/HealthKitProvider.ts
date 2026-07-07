@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import { localDayKey } from '@/core/datetime';
+import type { MetricSample, MetricType } from '@/core/metrics';
 import type { HealthProvider, StepsSample, WeightSample } from './HealthProvider';
 
 interface QuantitySample {
@@ -27,6 +28,18 @@ interface HealthKitModule {
 const BODY_MASS = 'HKQuantityTypeIdentifierBodyMass';
 const STEP_COUNT = 'HKQuantityTypeIdentifierStepCount';
 
+/** Identificadores HealthKit → métrica do Leve (iOS não testável neste ambiente; adapter defensivo). */
+const HK_METRICS: Array<{ id: string; type: MetricType }> = [
+  { id: 'HKQuantityTypeIdentifierBodyFatPercentage', type: 'body_fat_pct' },
+  { id: 'HKQuantityTypeIdentifierLeanBodyMass', type: 'lean_mass_kg' },
+  { id: 'HKQuantityTypeIdentifierRestingHeartRate', type: 'heart_rate_resting' },
+  { id: 'HKQuantityTypeIdentifierHeartRate', type: 'heart_rate_avg' },
+  { id: 'HKQuantityTypeIdentifierOxygenSaturation', type: 'spo2' },
+  { id: 'HKQuantityTypeIdentifierRespiratoryRate', type: 'respiratory_rate' },
+  { id: 'HKQuantityTypeIdentifierActiveEnergyBurned', type: 'active_calories' },
+  { id: 'HKQuantityTypeIdentifierAppleExerciseTime', type: 'exercise_minutes' },
+];
+
 function getModule(): HealthKitModule | null {
   try {
     return require('@kingstinct/react-native-healthkit') as HealthKitModule;
@@ -51,7 +64,10 @@ export class HealthKitProvider implements HealthProvider {
   async requestPermissions(): Promise<boolean> {
     if (!this.mod) return false;
     try {
-      return await this.mod.requestAuthorization([], [BODY_MASS, STEP_COUNT]);
+      return await this.mod.requestAuthorization(
+        [],
+        [BODY_MASS, STEP_COUNT, ...HK_METRICS.map((m) => m.id)],
+      );
     } catch {
       return false;
     }
@@ -91,5 +107,25 @@ export class HealthKitProvider implements HealthProvider {
     } catch {
       return [];
     }
+  }
+
+  async readMetrics(since: Date): Promise<MetricSample[]> {
+    if (!this.mod) return [];
+    const samples: MetricSample[] = [];
+    for (const { id, type } of HK_METRICS) {
+      try {
+        const rows = await this.mod.queryQuantitySamples(id, {
+          filter: { startDate: since, endDate: new Date() },
+        });
+        for (const s of rows) {
+          if (typeof s.quantity === 'number' && Number.isFinite(s.quantity) && s.startDate) {
+            samples.push({ type, value: s.quantity, takenAt: new Date(s.startDate) });
+          }
+        }
+      } catch {
+        // tipo indisponível neste aparelho — segue para o próximo
+      }
+    }
+    return samples;
   }
 }
