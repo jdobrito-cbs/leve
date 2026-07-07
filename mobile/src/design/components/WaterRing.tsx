@@ -121,7 +121,7 @@ export function WaterRing({ progress, size = 148, strokeWidth = 12, children }: 
           animatedProps={ringProps}
         />
       </Svg>
-      <View style={{ alignItems: 'center' }}>{children}</View>
+      <View style={{ alignItems: 'center', zIndex: 2, elevation: 2 }}>{children}</View>
     </View>
   );
 }
