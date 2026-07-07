@@ -20,6 +20,32 @@ export const DEFAULT_REMINDERS: ReminderSettings = {
 };
 
 const INSIGHTS_ID = 'insights-daily';
+const MED_PREFIX = 'med-';
+const MAX_MED_SLOTS = 40;
+
+/** Reagenda os lembretes DAILY de todos os remédios ativos (apoio de memória). */
+export async function applyMedicationReminders(
+  meds: Array<{ id: number; name: string; doseText: string | null; times: string[] }>,
+): Promise<void> {
+  for (let i = 0; i < MAX_MED_SLOTS; i++) {
+    await Notifications.cancelScheduledNotificationAsync(`${MED_PREFIX}${i}`);
+  }
+  let slot = 0;
+  for (const med of meds) {
+    for (const time of med.times) {
+      if (slot >= MAX_MED_SLOTS || !/^\d{2}:\d{2}$/.test(time)) continue;
+      const [hour, minute] = time.split(':').map(Number);
+      await Notifications.scheduleNotificationAsync({
+        identifier: `${MED_PREFIX}${slot++}`,
+        content: {
+          title: strings.reminders.medTitle,
+          body: `${med.name}${med.doseText ? ` — ${med.doseText}` : ''}`,
+        },
+        trigger: { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour, minute },
+      });
+    }
+  }
+}
 
 /** Resumo diário neutro (a análise roda ao abrir o app; sem processamento em background). */
 export async function applyInsightsReminder(enabled: boolean): Promise<void> {

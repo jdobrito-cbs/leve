@@ -77,6 +77,7 @@ jest.mock('@/features/today/useTodaySummary', () => ({
     lastDoseLabel: 'semaglutida · 0.5 mg',
     symptomsCount: 2,
     steps: 4200,
+    medsToday: { taken: 1, total: 3 },
     insights: [
       { id: 'recomp-positiva', kind: 'positivo', text: 'Seu peso subiu, mas a gordura caiu — contexto positivo.' },
     ],
@@ -124,6 +125,8 @@ test('Hoje mostra anel de água e cards do dia', async () => {
   getByText('4.200');
   getByText(strings.insights.section);
   getByText(/contexto positivo/);
+  getByText(strings.meds.cardLabel);
+  getByText('1/3');
 });
 
 test('Registrar lista as 5 categorias e navega nas ativas', async () => {

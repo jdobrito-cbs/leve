@@ -209,6 +209,11 @@ export function ProfileScreen() {
 
       <Card style={{ gap: spacing.sm }}>
         <Button
+          label={strings.meds.title}
+          variant="secondary"
+          onPress={() => router.push('/remedios' as never)}
+        />
+        <Button
           label={strings.account.section}
           variant="secondary"
           onPress={() => router.push('/conta' as never)}

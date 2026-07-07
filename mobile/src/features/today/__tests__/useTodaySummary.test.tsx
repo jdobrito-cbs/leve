@@ -32,6 +32,9 @@ jest.mock('@/services/health/HealthProvider', () => ({ getHealthProvider: () => 
 jest.mock('@/features/water/waterGoal', () => ({
   getEffectiveWaterGoal: jest.fn().mockResolvedValue({ goalMl: 2000, auto: false }),
 }));
+jest.mock('@/features/meds/medsRepo', () => ({
+  todayIntakes: jest.fn().mockResolvedValue([]),
+}));
 jest.mock('@/features/insights/data', () => ({
   buildInsightInput: jest.fn().mockResolvedValue({
     weights28: [],

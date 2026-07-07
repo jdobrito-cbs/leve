@@ -9,6 +9,7 @@ import { symptomsForDay } from '@/db/symptomRepo';
 import { getSetting } from '@/db/settingsRepo';
 import { waterTotalForDay } from '@/db/waterRepo';
 import { latestWeight, weightsSince } from '@/db/weightRepo';
+import { todayIntakes } from '@/features/meds/medsRepo';
 import { buildInsightInput } from '@/features/insights/data';
 import { buildInsights, type Insight } from '@/features/insights/insights';
 import { getEffectiveWaterGoal } from '@/features/water/waterGoal';
@@ -29,6 +30,7 @@ export interface TodaySummary {
   symptomsCount: number;
   steps: number | null;
   insights: Insight[];
+  medsToday: { taken: number; total: number } | null;
   refresh: () => Promise<void>;
 }
 
@@ -46,6 +48,7 @@ export function useTodaySummary(): TodaySummary {
   const [symptomsCount, setSymptomsCount] = useState(0);
   const [steps, setSteps] = useState<number | null>(null);
   const [insights, setInsights] = useState<Insight[]>([]);
+  const [medsToday, setMedsToday] = useState<{ taken: number; total: number } | null>(null);
 
   const refresh = useCallback(async () => {
     // Balança/wearable → app de saúde → Leve, sem toque (throttle de 1 h).
@@ -87,6 +90,16 @@ export function useTodaySummary(): TodaySummary {
     } catch {
       setInsights([]);
     }
+    try {
+      const intakes = await todayIntakes(db, now);
+      setMedsToday(
+        intakes.length > 0
+          ? { taken: intakes.filter((i) => i.takenAt).length, total: intakes.length }
+          : null,
+      );
+    } catch {
+      setMedsToday(null);
+    }
     setLoading(false);
   }, []);
 
@@ -110,6 +123,7 @@ export function useTodaySummary(): TodaySummary {
     symptomsCount,
     steps,
     insights,
+    medsToday,
     refresh,
   };
 }
