@@ -32,7 +32,7 @@ export interface TodaySummary {
   kcal: number;
   calorieGoalKcal: number | null;
   lastWeightKg: number | null;
-  /** Primeiro peso registrado + os 10 últimos, em ordem cronológica. */
+  /** Primeiro peso registrado + os 6 últimos, em ordem cronológica. */
   weightSeries: WeightLog[];
   goalWeightKg: number | null;
   nextDoseAt: string | null;
@@ -88,7 +88,7 @@ export function useTodaySummary(): TodaySummary {
         waterTotalForDay(db, now),
         macrosForDay(db, now),
         firstWeight(db),
-        listWeights(db, 10),
+        listWeights(db, 6),
         latestDose(db),
         listDoses(db, 30),
         symptomsForDay(db, now),
@@ -98,7 +98,7 @@ export function useTodaySummary(): TodaySummary {
     setWaterMl(water);
     setMacros(dayMacros);
     setLastWeightKg(recentWeights[0]?.weightKg ?? null);
-    // Gráfico: do primeiro peso registrado aos 10 últimos.
+    // Gráfico: do primeiro peso registrado aos 6 últimos.
     const recentAsc = [...recentWeights].reverse();
     setWeightSeries(
       first && !recentAsc.some((w) => w.id === first.id) ? [first, ...recentAsc] : recentAsc,
