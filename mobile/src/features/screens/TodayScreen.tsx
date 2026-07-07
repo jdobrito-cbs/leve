@@ -1,22 +1,28 @@
-import { router } from 'expo-router';
-import { ClipboardList, Footprints, Pill, Syringe, Utensils } from 'lucide-react-native';
-import type { LucideIcon } from 'lucide-react-native';
+﻿import { router } from 'expo-router';
+import { type ComponentType } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LineChart } from 'react-native-gifted-charts';
 import { AppText, Card, HeroHeader, IconChip, WaterRing } from '@/design/components';
+import {
+  FootprintsWalkIcon,
+  NotesWritingIcon,
+  PillRollIcon,
+  SyringeInjectIcon,
+  UtensilsCrossIcon,
+} from '@/design/logIcons';
 import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { useTodaySummary } from '@/features/today/useTodaySummary';
 import { strings } from '@/i18n/pt-BR';
 
 function StatCard({
-  Icon,
+  Anim,
   label,
   value,
   route,
 }: {
-  Icon: LucideIcon;
+  Anim: ComponentType<{ size?: number }>;
   label: string;
   value: string;
   route: string;
@@ -28,7 +34,9 @@ function StatCard({
       style={{ flexBasis: '47%', flexGrow: 1 }}
     >
       <Card style={{ gap: spacing.sm }}>
-        <IconChip Icon={Icon} size={36} wiggleKey={value} />
+        <IconChip size={36} wiggleKey={value}>
+          <Anim size={18} />
+        </IconChip>
         <AppText variant="caption" muted>
           {label}
         </AppText>
@@ -151,7 +159,7 @@ export function TodayScreen() {
           style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md }}
         >
           <StatCard
-            Icon={Utensils}
+            Anim={UtensilsCrossIcon}
             label={strings.today.cards.kcal}
             value={
               summary.calorieGoalKcal
@@ -161,7 +169,7 @@ export function TodayScreen() {
             route="/log/refeicao"
           />
           <StatCard
-            Icon={Syringe}
+            Anim={SyringeInjectIcon}
             label={strings.today.cards.nextDose}
             value={
               summary.nextDoseAt
@@ -172,7 +180,7 @@ export function TodayScreen() {
           />
           {summary.medsToday !== null ? (
             <StatCard
-              Icon={Pill}
+              Anim={PillRollIcon}
               label={strings.meds.cardLabel}
               value={`${summary.medsToday.taken}/${summary.medsToday.total}`}
               route="/remedios"
@@ -180,14 +188,14 @@ export function TodayScreen() {
           ) : null}
           {summary.steps !== null ? (
             <StatCard
-              Icon={Footprints}
+              Anim={FootprintsWalkIcon}
               label={strings.today.cards.steps}
               value={summary.steps.toLocaleString('pt-BR')}
               route="/perfil"
             />
           ) : null}
           <StatCard
-            Icon={ClipboardList}
+            Anim={NotesWritingIcon}
             label={strings.today.cards.symptoms}
             value={
               summary.symptomsCount > 0 ? String(summary.symptomsCount) : strings.today.none

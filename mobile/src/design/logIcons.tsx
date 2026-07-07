@@ -1,4 +1,12 @@
-import { CalendarHeart, ClipboardList, PersonStanding, Syringe, Weight } from 'lucide-react-native';
+import {
+  CalendarHeart,
+  ClipboardList,
+  Footprints,
+  PersonStanding,
+  Pill,
+  Syringe,
+  Weight,
+} from 'lucide-react-native';
 import { useEffect } from 'react';
 import Animated, {
   Easing,
@@ -223,6 +231,62 @@ export function BodyDanceIcon({ size = SIZE }: IconProps) {
   return (
     <Animated.View style={[{ transformOrigin: '50% 85%' }, dance]}>
       <PersonStanding color={colors.primary} size={size} strokeWidth={1.9} />
+    </Animated.View>
+  );
+}
+
+/** Remédios: a pílula rola de um lado para o outro, como na palma da mão. */
+export function PillRollIcon({ size = SIZE }: IconProps) {
+  const { colors } = useTheme();
+  const roll = useSharedValue(0);
+
+  useEffect(() => {
+    roll.value = withRepeat(
+      withSequence(
+        withDelay(1000, withTiming(24, { duration: 320, easing: Easing.inOut(Easing.quad) })),
+        withSpring(-16, { damping: 7, stiffness: 160 }),
+        withSpring(0, { damping: 8, stiffness: 160 }),
+        withTiming(0, { duration: 900 }),
+      ),
+      -1,
+    );
+  }, [roll]);
+
+  const rolling = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${roll.value}deg` }],
+  }));
+
+  return (
+    <Animated.View style={rolling}>
+      <Pill color={colors.primary} size={size} strokeWidth={1.9} />
+    </Animated.View>
+  );
+}
+
+/** Passos: ritmo de caminhada — um passinho para cada lado, sem parar. */
+export function FootprintsWalkIcon({ size = SIZE }: IconProps) {
+  const { colors } = useTheme();
+  const step = useSharedValue(0);
+
+  useEffect(() => {
+    const beat = (to: number) =>
+      withTiming(to, { duration: 200, easing: Easing.inOut(Easing.quad) });
+    step.value = withRepeat(
+      withSequence(beat(1), beat(0), beat(-1), beat(0), withTiming(0, { duration: 500 })),
+      -1,
+    );
+  }, [step]);
+
+  const walking = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: -Math.abs(step.value) * 1.6 },
+      { rotate: `${step.value * 7}deg` },
+    ],
+  }));
+
+  return (
+    <Animated.View style={walking}>
+      <Footprints color={colors.primary} size={size} strokeWidth={1.9} />
     </Animated.View>
   );
 }

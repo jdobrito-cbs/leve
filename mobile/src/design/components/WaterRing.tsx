@@ -43,6 +43,9 @@ export function WaterRing({ progress, size = 148, strokeWidth = 12, children }: 
   const cx = size / 2;
   const cupSize = inner * 2;
   const clamped = Math.min(Math.max(progress, 0), 1);
+  // Cor por status: meta batida = verde; abaixo da metade = vermelho; no caminho = azul.
+  const statusColor =
+    clamped >= 1 ? colors.success : clamped < 0.5 ? colors.danger : colors.primary;
 
   const phase = useSharedValue(0);
   const level = useSharedValue(0);
@@ -99,12 +102,12 @@ export function WaterRing({ progress, size = 148, strokeWidth = 12, children }: 
       >
         <Animated.View style={[waveLayer, backWave]}>
           <Svg width={size * 2} height={size * 2}>
-            <Path d={wave} fill={colors.primarySoft} />
+            <Path d={wave} fill={statusColor} opacity={0.22} />
           </Svg>
         </Animated.View>
         <Animated.View style={[waveLayer, frontWave]}>
           <Svg width={size * 2} height={size * 2}>
-            <Path d={wave} fill={colors.primary} opacity={0.28} />
+            <Path d={wave} fill={statusColor} opacity={0.3} />
           </Svg>
         </Animated.View>
       </View>
@@ -126,7 +129,7 @@ export function WaterRing({ progress, size = 148, strokeWidth = 12, children }: 
             cx={cx}
             cy={cx}
             r={r}
-            stroke={colors.primary}
+            stroke={statusColor}
             strokeWidth={strokeWidth}
             fill="none"
             strokeDasharray={`${circumference}`}
@@ -138,7 +141,7 @@ export function WaterRing({ progress, size = 148, strokeWidth = 12, children }: 
             cx={cx}
             cy={cx}
             r={r}
-            stroke={colors.primary}
+            stroke={statusColor}
             strokeWidth={strokeWidth}
             fill="none"
             strokeDasharray={`${circumference}`}
