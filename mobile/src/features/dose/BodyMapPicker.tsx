@@ -1,5 +1,5 @@
 import { Pressable, View } from 'react-native';
-import Svg, { Circle, Rect } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
 import { AppText } from '@/design/components';
 import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
@@ -18,17 +18,23 @@ const H = 290;
 
 // Vista em espelho (como você se vê): lado esquerdo do corpo à esquerda da tela.
 const POS: Record<InjectionSite, { x: number; y: number }> = {
-  abdomen_sup_e: { x: 86, y: 102 },
-  abdomen_sup_d: { x: 114, y: 102 },
-  abdomen_meio_e: { x: 86, y: 124 },
-  abdomen_meio_d: { x: 114, y: 124 },
-  abdomen_inf_e: { x: 86, y: 146 },
-  abdomen_inf_d: { x: 114, y: 146 },
-  braco_e: { x: 53, y: 96 },
-  braco_d: { x: 147, y: 96 },
-  coxa_e: { x: 86, y: 200 },
-  coxa_d: { x: 114, y: 200 },
+  abdomen_sup_e: { x: 88, y: 100 },
+  abdomen_sup_d: { x: 112, y: 100 },
+  abdomen_meio_e: { x: 88, y: 122 },
+  abdomen_meio_d: { x: 112, y: 122 },
+  abdomen_inf_e: { x: 88, y: 144 },
+  abdomen_inf_d: { x: 112, y: 144 },
+  braco_e: { x: 52, y: 70 },
+  braco_d: { x: 148, y: 70 },
+  coxa_e: { x: 84, y: 198 },
+  coxa_d: { x: 116, y: 198 },
 };
+
+// Contorno único do corpo (braços abertos, pernas com vão), estilo linha fina.
+const BODY_OUTLINE =
+  'M 80 52 L 32 72 A 7 7 0 0 1 38 86 L 76 70 L 76 150 L 68 256 A 8 8 0 0 1 84 258 ' +
+  'L 96 168 L 104 168 L 116 258 A 8 8 0 0 1 132 256 L 124 150 L 124 70 L 162 86 ' +
+  'A 7 7 0 0 1 168 72 L 120 52 Q 100 44 80 52 Z';
 
 function LegendDot({ color, dashed, label }: { color: string; dashed?: boolean; label: string }) {
   return (
@@ -53,19 +59,20 @@ function LegendDot({ color, dashed, label }: { color: string; dashed?: boolean; 
 /** Bonequinho com os pontos de aplicação: toque em uma bolinha para escolher. */
 export function BodyMapPicker({ value, onChange, lastSite, suggested }: Props) {
   const { colors } = useTheme();
-  const silhouette = { fill: colors.border, opacity: 0.45 };
+  const outline = {
+    stroke: colors.textMuted,
+    strokeWidth: 3,
+    fill: 'none' as const,
+    strokeLinejoin: 'round' as const,
+    strokeLinecap: 'round' as const,
+  };
 
   return (
     <View style={{ alignItems: 'center', gap: spacing.sm }}>
       <View style={{ width: W, height: H }}>
         <Svg width={W} height={H}>
-          <Circle cx={100} cy={28} r={18} {...silhouette} />
-          <Rect x={90} y={44} width={20} height={12} {...silhouette} />
-          <Rect x={68} y={54} width={64} height={112} rx={24} {...silhouette} />
-          <Rect x={44} y={60} width={18} height={86} rx={9} {...silhouette} />
-          <Rect x={138} y={60} width={18} height={86} rx={9} {...silhouette} />
-          <Rect x={75} y={162} width={22} height={112} rx={11} {...silhouette} />
-          <Rect x={103} y={162} width={22} height={112} rx={11} {...silhouette} />
+          <Circle cx={100} cy={26} r={16} {...outline} />
+          <Path d={BODY_OUTLINE} {...outline} />
         </Svg>
         {INJECTION_SITES.map((site) => {
           const p = POS[site];
@@ -81,11 +88,11 @@ export function BodyMapPicker({ value, onChange, lastSite, suggested }: Props) {
               hitSlop={8}
               style={{
                 position: 'absolute',
-                left: p.x - 11,
-                top: p.y - 11,
-                width: 22,
-                height: 22,
-                borderRadius: 11,
+                left: p.x - 9,
+                top: p.y - 9,
+                width: 18,
+                height: 18,
+                borderRadius: 9,
                 backgroundColor: isSelected ? colors.primary : colors.surface,
                 borderWidth: 2,
                 borderColor: isSelected
