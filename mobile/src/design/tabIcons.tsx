@@ -1,136 +1,144 @@
 import { useEffect } from 'react';
-import { Platform, type ColorValue } from 'react-native';
+import { View, type ColorValue } from 'react-native';
 import Animated, {
   Easing,
-  useAnimatedProps,
+  useAnimatedStyle,
   useSharedValue,
   withSequence,
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import Svg, { Circle, G, Path } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
 
-const AnimatedG = Animated.createAnimatedComponent(G);
-const AnimatedPath = Animated.createAnimatedComponent(Path);
+/**
+ * Ícones da tab bar com movimento interno real, em todas as plataformas:
+ * as camadas móveis são Views animadas (transformações de layout), não SVG
+ * interno — por isso funcionam igual no nativo e na web.
+ * `signal` muda a cada toque na aba e redispara a animação, mesmo com a aba já ativa.
+ */
 
 interface TabIconProps {
   color: ColorValue;
   focused: boolean;
+  signal: number;
   size?: number;
 }
 
 const stroke = { strokeWidth: 1.9, strokeLinecap: 'round', strokeLinejoin: 'round' } as const;
 
-// `animatedProps` em elementos SVG é recurso nativo; na web os ícones ficam estáticos.
-const isWeb = Platform.OS === 'web';
-
-/** Hoje: as folhas do broto balançam como ao vento quando a aba é escolhida. */
-export function SproutTabIcon({ color, focused, size = 22 }: TabIconProps) {
+/** Hoje: as folhas balançam como ao vento (o chão fica firme). */
+export function SproutTabIcon({ color, focused, signal, size = 22 }: TabIconProps) {
   const sway = useSharedValue(0);
 
   useEffect(() => {
-    if (focused) {
-      sway.value = withSequence(
-        withTiming(-11, { duration: 110, easing: Easing.out(Easing.quad) }),
-        withSpring(0, { damping: 5, stiffness: 150 }), // oscila até assentar
-      );
-    } else {
-      sway.value = withTiming(0, { duration: 150 });
-    }
-  }, [focused, sway]);
+    if (!focused) return;
+    sway.value = withSequence(
+      withTiming(-14, { duration: 110, easing: Easing.out(Easing.quad) }),
+      withSpring(0, { damping: 4, stiffness: 140 }), // oscila várias vezes até assentar
+    );
+  }, [focused, signal, sway]);
 
-  const leaves = useAnimatedProps(() => ({ rotation: sway.value }));
-
-  const leafPaths = (
-    <>
-      <Path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3" />
-      <Path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4" />
-    </>
-  );
+  const leaves = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${sway.value}deg` }],
+  }));
 
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      {isWeb ? (
-        <G stroke={color} {...stroke}>{leafPaths}</G>
-      ) : (
-        <AnimatedG animatedProps={leaves} origin="12, 21" stroke={color} {...stroke}>
-          {leafPaths}
-        </AnimatedG>
-      )}
-      <Path d="M5 21h14" stroke={color} {...stroke} />
-    </Svg>
+    <View style={{ width: size, height: size }}>
+      <Animated.View
+        style={[
+          { position: 'absolute', inset: 0, transformOrigin: '50% 100%' },
+          leaves,
+        ]}
+      >
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} {...stroke}>
+          <Path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3" />
+          <Path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4" />
+        </Svg>
+      </Animated.View>
+      <Svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={color}
+        style={{ position: 'absolute' }}
+        {...stroke}
+      >
+        <Path d="M5 21h14" />
+      </Svg>
+    </View>
   );
 }
 
-const TREND_LENGTH = 17.2; // comprimento aproximado da linha de tendência
-
-/** Progresso: a linha do gráfico se desenha da esquerda para a direita ao focar. */
-export function ChartTabIcon({ color, focused, size = 22 }: TabIconProps) {
-  const offset = useSharedValue(0);
+/** Progresso: a linha de tendência se desenha da esquerda para a direita. */
+export function ChartTabIcon({ color, focused, signal, size = 22 }: TabIconProps) {
+  const reveal = useSharedValue(size);
 
   useEffect(() => {
-    if (focused) {
-      offset.value = TREND_LENGTH;
-      offset.value = withTiming(0, { duration: 700, easing: Easing.out(Easing.cubic) });
-    } else {
-      offset.value = withTiming(0, { duration: 120 });
-    }
-  }, [focused, offset]);
+    if (!focused) return;
+    reveal.value = 0;
+    reveal.value = withTiming(size, { duration: 700, easing: Easing.out(Easing.cubic) });
+  }, [focused, signal, reveal, size]);
 
-  const trend = useAnimatedProps(() => ({ strokeDashoffset: offset.value }));
+  const mask = useAnimatedStyle(() => ({ width: reveal.value }));
 
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Path d="M3 3v16a2 2 0 0 0 2 2h16" stroke={color} {...stroke} />
-      {isWeb ? (
-        <Path d="m19 9-5 5-4-4-3 3" stroke={color} {...stroke} />
-      ) : (
-        <AnimatedPath
-          d="m19 9-5 5-4-4-3 3"
-          stroke={color}
-          strokeDasharray={`${TREND_LENGTH}`}
-          animatedProps={trend}
-          {...stroke}
-        />
-      )}
-    </Svg>
+    <View style={{ width: size, height: size }}>
+      <Svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={color}
+        style={{ position: 'absolute' }}
+        {...stroke}
+      >
+        <Path d="M3 3v16a2 2 0 0 0 2 2h16" />
+      </Svg>
+      <Animated.View style={[{ position: 'absolute', height: size, overflow: 'hidden' }, mask]}>
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} {...stroke}>
+          <Path d="m19 9-5 5-4-4-3 3" />
+        </Svg>
+      </Animated.View>
+    </View>
   );
 }
 
-/** Perfil: o boneco dá um mergulho rápido e volta, dentro do círculo. */
-export function UserTabIcon({ color, focused, size = 22 }: TabIconProps) {
+/** Perfil: o boneco dá um mergulho rápido e volta, dentro do círculo parado. */
+export function UserTabIcon({ color, focused, signal, size = 22 }: TabIconProps) {
   const dip = useSharedValue(0);
 
   useEffect(() => {
-    if (focused) {
-      dip.value = withSequence(
-        withTiming(2, { duration: 110, easing: Easing.out(Easing.quad) }),
-        withSpring(0, { damping: 6, stiffness: 200 }),
-      );
-    } else {
-      dip.value = withTiming(0, { duration: 150 });
-    }
-  }, [focused, dip]);
+    if (!focused) return;
+    dip.value = withSequence(
+      withTiming(2.4, { duration: 110, easing: Easing.out(Easing.quad) }),
+      withSpring(0, { damping: 5, stiffness: 190 }),
+    );
+  }, [focused, signal, dip]);
 
-  const person = useAnimatedProps(() => ({ y: dip.value }));
-
-  const personShapes = (
-    <>
-      <Circle cx="12" cy="10" r="3" />
-      <Path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662" />
-    </>
-  );
+  const person = useAnimatedStyle(() => ({
+    transform: [{ translateY: dip.value }],
+  }));
 
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Circle cx="12" cy="12" r="10" stroke={color} {...stroke} />
-      {isWeb ? (
-        <G stroke={color} {...stroke}>{personShapes}</G>
-      ) : (
-        <AnimatedG animatedProps={person} stroke={color} {...stroke}>
-          {personShapes}
-        </AnimatedG>
-      )}
-    </Svg>
+    <View style={{ width: size, height: size }}>
+      <Svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={color}
+        style={{ position: 'absolute' }}
+        {...stroke}
+      >
+        <Circle cx="12" cy="12" r="10" />
+      </Svg>
+      <Animated.View style={[{ position: 'absolute', inset: 0 }, person]}>
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} {...stroke}>
+          <Circle cx="12" cy="10" r="3" />
+          <Path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662" />
+        </Svg>
+      </Animated.View>
+    </View>
   );
 }
