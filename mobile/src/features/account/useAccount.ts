@@ -51,6 +51,7 @@ export function useAccount() {
   useEffect(() => {
     SecureStore.getItemAsync(KEYS.email)
       .then(setEmail)
+      .catch(() => setEmail(null)) // web: cofre indisponível — segue deslogado
       .finally(() => setLoading(false));
   }, []);
 
