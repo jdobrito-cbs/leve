@@ -173,12 +173,14 @@ export function TodayScreen() {
                       dataPointText: w.weightKg.toLocaleString('pt-BR', {
                         maximumFractionDigits: 1,
                       }),
-                      // Último ponto: puxa o rótulo para dentro para não cortar.
-                      textShiftX: i === arr.length - 1 ? -28 : -8,
+                      // Rótulos alternam acima/abaixo da linha para não se sobrepor;
+                      // o último é puxado para dentro para não cortar na borda.
+                      textShiftY: i % 2 === 0 ? -8 : 20,
+                      textShiftX: i === arr.length - 1 ? -24 : -8,
                     }))}
                     color={colors.primary}
                     thickness={3}
-                    height={110}
+                    height={120}
                     width={width - 64}
                     yAxisOffset={minV - pad}
                     maxValue={maxV - minV + 2 * pad}
