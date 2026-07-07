@@ -16,7 +16,7 @@ import { useTheme } from '../useTheme';
  * com ondas na superfície. A cada +50% além da meta, o box enche por completo.
  */
 
-const WAVE_W = 900;
+const WAVE_W = 1600;
 const WAVE_H = 16;
 const wave =
   `M0 8 Q ${WAVE_W / 16} 0 ${WAVE_W / 8} 8 T ${WAVE_W / 4} 8 T ${(WAVE_W * 3) / 8} 8 T ${WAVE_W / 2} 8` +
@@ -90,26 +90,22 @@ function Drip({ side, delay }: { side: 'left' | 'right'; delay: number }) {
 
   const style = useAnimatedStyle(() => ({
     transform: [{ translateY: fall.value * 46 }],
-    opacity: fall.value < 0.05 ? 0 : 1 - fall.value * 0.9,
+    // some por completo no fim da queda (sem rastro)
+    opacity: fall.value < 0.05 || fall.value > 0.92 ? 0 : 1 - fall.value * 0.85,
   }));
 
   return (
     <Animated.View
       pointerEvents="none"
-      style={[
-        {
-          position: 'absolute',
-          top: '55%',
-          [side]: -4,
-          width: 7,
-          height: 10,
-          borderRadius: 5,
-          borderTopLeftRadius: 1,
-          backgroundColor: colors.success,
-        },
-        style,
-      ]}
-    />
+      style={[{ position: 'absolute', top: '55%', [side]: -5, width: 8, height: 12 }, style]}
+    >
+      <Svg width={8} height={12} viewBox="0 0 8 12">
+        <Path
+          d="M4 0 C 5.2 3 8 5.2 8 7.8 A 4 4 0 1 1 0 7.8 C 0 5.2 2.8 3 4 0 Z"
+          fill={colors.success}
+        />
+      </Svg>
+    </Animated.View>
   );
 }
 
