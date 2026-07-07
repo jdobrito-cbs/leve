@@ -110,17 +110,17 @@ export function ProgressScreen() {
       since.setDate(since.getDate() - Number(range));
       filtered = weights.filter((w) => new Date(w.loggedAt) >= since);
     }
-    // Data presa a cada ponto (abaixo da linha); com muitos registros,
-    // rotula ~6 espaçados para não sobrepor.
-    const step = Math.max(1, Math.ceil(filtered.length / 6));
+    // Apenas 3 datas, presas aos pontos: a inicial, uma no meio e a final.
+    const last = filtered.length - 1;
+    const mid = Math.floor(last / 2);
     return filtered.map((w, i) => {
-      const labeled = i % step === 0 || i === filtered.length - 1;
+      const labeled = i === 0 || i === mid || i === last;
       return {
         value: w.weightKg,
         dataPointText: labeled ? shortDate(w.loggedAt) : undefined,
         hideDataPoint: filtered.length > 20 && !labeled,
         textShiftY: 16,
-        textShiftX: i === filtered.length - 1 ? -34 : i === 0 ? 2 : -14,
+        textShiftX: i === last ? -34 : i === 0 ? 2 : -14,
       };
     });
   }, [weights, range]);
