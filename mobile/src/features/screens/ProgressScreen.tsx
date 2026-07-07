@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { BarChart, LineChart } from 'react-native-gifted-charts';
 import { METRIC_DEFS, MetricType } from '@/core/metrics';
-import { AppText, Card, DisclaimerBanner, ListRow, Screen, SegmentedChips } from '@/design/components';
+import { AppText, Card, DisclaimerBanner, FitChart, ListRow, Screen, SegmentedChips } from '@/design/components';
 import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
@@ -67,7 +67,7 @@ function BodyHealthSection({ metrics }: { metrics: MetricRow[] }) {
         onChange={setSelected}
       />
       {selected && series.length > 1 ? (
-        <LineChart
+        <FitChart>{(fitWidth) => (<LineChart width={fitWidth}
           data={series.map((s) => ({ value: s.value }))}
           color={colors.primary}
           thickness={3}
@@ -76,9 +76,9 @@ function BodyHealthSection({ metrics }: { metrics: MetricRow[] }) {
           hideAxesAndRules
           hideYAxisText
           adjustToWidth
-          curved
-          disableScroll
-        />
+curved
+disableScroll
+/>)}</FitChart>
       ) : selected ? (
         <AppText variant="caption" muted>
           {strings.progress.empty}
@@ -116,7 +116,7 @@ export function ProgressScreen() {
         <AppText variant="title">{strings.progress.pkSection}</AppText>
         {pk ? (
           <>
-            <LineChart
+            <FitChart>{(fitWidth) => (<LineChart width={fitWidth}
               data={pk.points.map((p) => ({ value: Math.round(p.level * 100) }))}
               color={colors.primary}
               thickness={3}
@@ -126,9 +126,9 @@ export function ProgressScreen() {
               hideAxesAndRules
               hideYAxisText
               adjustToWidth
-              curved
-              disableScroll
-            />
+curved
+disableScroll
+/>)}</FitChart>
             <AppText variant="caption" muted>
               {pk.medKey} · {strings.progress.pkRelative} · {strings.progress.pkProjection}
             </AppText>
@@ -152,7 +152,7 @@ export function ProgressScreen() {
         <AppText variant="title">{strings.progress.weightSection}</AppText>
         <SegmentedChips options={RANGE_OPTIONS} value={range} onChange={setRange} />
         {weightData.length > 1 ? (
-          <LineChart
+          <FitChart>{(fitWidth) => (<LineChart width={fitWidth}
             data={weightData}
             color={colors.primary}
             thickness={3}
@@ -164,7 +164,7 @@ export function ProgressScreen() {
             rulesColor={colors.border}
             adjustToWidth
             curved
-          />
+          />)}</FitChart>
         ) : (
           <AppText muted>{strings.progress.empty}</AppText>
         )}
@@ -173,7 +173,7 @@ export function ProgressScreen() {
       <Card style={{ gap: spacing.md }}>
         <AppText variant="title">{strings.progress.waterSection}</AppText>
         {hasWater ? (
-          <BarChart
+          <FitChart>{(fitWidth) => (<BarChart width={fitWidth}
             data={waterData}
             frontColor={colors.primary}
             barBorderRadius={6}
@@ -182,8 +182,8 @@ export function ProgressScreen() {
             xAxisColor={colors.border}
             yAxisColor={colors.border}
             rulesColor={colors.border}
-            adjustToWidth
-          />
+adjustToWidth
+/>)}</FitChart>
         ) : (
           <AppText muted>{strings.progress.empty}</AppText>
         )}
@@ -192,7 +192,7 @@ export function ProgressScreen() {
       <Card style={{ gap: spacing.md }}>
         <AppText variant="title">{strings.progress.kcalSection}</AppText>
         {hasKcal ? (
-          <BarChart
+          <FitChart>{(fitWidth) => (<BarChart width={fitWidth}
             data={kcalData}
             frontColor={colors.primary}
             barBorderRadius={6}
@@ -201,8 +201,8 @@ export function ProgressScreen() {
             xAxisColor={colors.border}
             yAxisColor={colors.border}
             rulesColor={colors.border}
-            adjustToWidth
-          />
+adjustToWidth
+/>)}</FitChart>
         ) : (
           <AppText muted>{strings.progress.empty}</AppText>
         )}

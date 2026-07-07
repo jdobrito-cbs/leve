@@ -3,7 +3,7 @@ import { useMemo, type ComponentType, type PropsWithChildren } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LineChart } from 'react-native-gifted-charts';
-import { AppText, Card, HeroHeader, IconChip, WaterRing } from '@/design/components';
+import { AppText, Card, FitChart, HeroHeader, IconChip, WaterRing } from '@/design/components';
 import { OverflowDrips, OverflowFill } from '@/design/components/OverflowWater';
 import {
   FootprintsWalkIcon,
@@ -156,18 +156,25 @@ export function TodayScreen() {
         <Box index={1} route="/log/peso">
           <AppText variant="title">{strings.today.weightSection}</AppText>
           {summary.weights30.length >= 2 ? (
-            <LineChart
-              data={summary.weights30.map((w) => ({ value: w.weightKg }))}
-              color={colors.primary}
-              thickness={3}
-              height={90}
-              hideDataPoints
-              hideAxesAndRules
-              hideYAxisText
-              adjustToWidth
-              curved
-              disableScroll
-            />
+            <FitChart>
+              {(width) => (
+                <LineChart
+                  data={summary.weights30.map((w) => ({ value: w.weightKg }))}
+                  color={colors.primary}
+                  thickness={3}
+                  height={90}
+                  width={width}
+                  initialSpacing={4}
+                  endSpacing={4}
+                  hideDataPoints
+                  hideAxesAndRules
+                  hideYAxisText
+                  adjustToWidth
+                  curved
+                  disableScroll
+                />
+              )}
+            </FitChart>
           ) : (
             <AppText variant="caption" muted>
               {strings.progress.empty}
@@ -221,19 +228,26 @@ export function TodayScreen() {
           <TitleRow Anim={SyringeInjectIcon} title={strings.today.medicationSection} />
           {pk ? (
             <>
-              <LineChart
-                data={pk.points.map((p) => ({ value: Math.round(p.level * 100) }))}
-                color={colors.primary}
-                thickness={3}
-                height={80}
-                maxValue={100}
-                hideDataPoints
-                hideAxesAndRules
-                hideYAxisText
-                adjustToWidth
-                curved
-                disableScroll
-              />
+              <FitChart>
+                {(width) => (
+                  <LineChart
+                    data={pk.points.map((p) => ({ value: Math.round(p.level * 100) }))}
+                    color={colors.primary}
+                    thickness={3}
+                    height={80}
+                    width={width}
+                    initialSpacing={4}
+                    endSpacing={4}
+                    maxValue={100}
+                    hideDataPoints
+                    hideAxesAndRules
+                    hideYAxisText
+                    adjustToWidth
+                    curved
+                    disableScroll
+                  />
+                )}
+              </FitChart>
               <AppText variant="caption" muted>
                 {pk.medKey} · {strings.progress.pkRelative} · {strings.progress.pkProjection}
               </AppText>
