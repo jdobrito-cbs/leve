@@ -45,6 +45,8 @@ export function OverflowFill({ progress }: { progress: number }) {
   }));
 
   if (fillPct <= 0) return null;
+  // Box completamente cheio: a água passou da borda — sem superfície visível.
+  const brimful = fillPct >= 100;
 
   return (
     <Animated.View
@@ -54,17 +56,22 @@ export function OverflowFill({ progress }: { progress: number }) {
         fill,
       ]}
     >
-      <Animated.View
-        style={[{ position: 'absolute', top: 0, left: 0, width: WAVE_W, height: WAVE_H }, surface]}
-      >
-        <Svg width={WAVE_W} height={WAVE_H}>
-          <Path d={wave} fill={colors.success} opacity={0.22} />
-        </Svg>
-      </Animated.View>
+      {!brimful ? (
+        <Animated.View
+          style={[
+            { position: 'absolute', top: 0, left: 0, width: WAVE_W, height: WAVE_H },
+            surface,
+          ]}
+        >
+          <Svg width={WAVE_W} height={WAVE_H}>
+            <Path d={wave} fill={colors.success} opacity={0.22} />
+          </Svg>
+        </Animated.View>
+      ) : null}
       <View
         style={{
           position: 'absolute',
-          top: WAVE_H - 2,
+          top: brimful ? 0 : WAVE_H - 2,
           left: 0,
           right: 0,
           bottom: 0,
