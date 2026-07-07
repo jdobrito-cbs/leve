@@ -10,6 +10,7 @@ interface TacoFood {
   proteinG: number | null;
   carbsG: number | null;
   fatG: number | null;
+  fiberG: number | null;
 }
 
 export async function seedFoodItemsIfEmpty(db: AppDb): Promise<void> {
@@ -24,6 +25,7 @@ export async function seedFoodItemsIfEmpty(db: AppDb): Promise<void> {
     proteinG: f.proteinG,
     carbsG: f.carbsG,
     fatG: f.fatG,
+    fiberG: f.fiberG,
     source: 'taco',
   }));
   for (let i = 0; i < rows.length; i += 100) {

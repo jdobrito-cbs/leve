@@ -15,13 +15,12 @@ import {
 import { spacing } from '@/design/tokens';
 import { db } from '@/db/client';
 import { addDose, lastInjectionSite } from '@/db/doseRepo';
-import { getSetting } from '@/db/settingsRepo';
+import { getSetting, setSetting } from '@/db/settingsRepo';
 import { INJECTION_SITES, InjectionSite, suggestNextSite } from '@/features/dose/rotation';
 import { strings } from '@/i18n/pt-BR';
 import { scheduleDoseReminder } from '@/services/reminders/reminders';
 
 type MedKey = keyof typeof strings.dose.medications;
-type NextDoseKey = keyof typeof strings.dose.nextDose;
 
 const MED_OPTIONS = (Object.keys(strings.dose.medications) as MedKey[]).map((value) => ({
   value,
@@ -33,18 +32,6 @@ const ROUTE_OPTIONS = (Object.keys(strings.dose.routes) as DoseRoute[]).map((val
   label: strings.dose.routes[value],
 }));
 
-const NEXT_OPTIONS = (Object.keys(strings.dose.nextDose) as NextDoseKey[]).map((value) => ({
-  value,
-  label: strings.dose.nextDose[value],
-}));
-
-function nextDoseDate(choice: NextDoseKey): Date | null {
-  if (choice === 'none') return null;
-  const d = new Date();
-  d.setDate(d.getDate() + (choice === 'in7days' ? 7 : 1));
-  return d;
-}
-
 export function DoseScreen() {
   const [medication, setMedication] = useState<MedKey | null>(null);
   const [customMed, setCustomMed] = useState('');
@@ -52,12 +39,15 @@ export function DoseScreen() {
   const [route, setRoute] = useState<DoseRoute>('injecao');
   const [lastSite, setLastSite] = useState<InjectionSite | null>(null);
   const [site, setSite] = useState<InjectionSite | null>(null);
-  const [nextChoice, setNextChoice] = useState<NextDoseKey>('none');
+  const [intervalStr, setIntervalStr] = useState('7');
 
   useEffect(() => {
     lastInjectionSite(db).then((last) => {
       setLastSite(last);
       setSite(suggestNextSite(last));
+    });
+    getSetting<number>(db, 'doseIntervalDays').then((days) => {
+      if (days !== null) setIntervalStr(String(days));
     });
   }, []);
 
@@ -80,7 +70,10 @@ export function DoseScreen() {
 
   async function save() {
     if (!valid || !medName || doseMg === null) return;
-    const nextDoseAt = nextDoseDate(nextChoice);
+    const intervalDays = Math.max(0, Math.round(parseDecimalBR(intervalStr) ?? 0));
+    await setSetting(db, 'doseIntervalDays', intervalDays);
+    const nextDoseAt =
+      intervalDays > 0 ? new Date(Date.now() + intervalDays * 24 * 3600 * 1000) : null;
     await addDose(db, {
       medication: medName,
       doseMg,
@@ -136,10 +129,16 @@ export function DoseScreen() {
         </Card>
       ) : null}
       <Card style={{ gap: spacing.md }}>
+        <NumberField
+          label={strings.dose.intervalLabel}
+          value={intervalStr}
+          onChangeText={setIntervalStr}
+          suffix={strings.dose.days}
+          placeholder="7"
+        />
         <AppText variant="caption" muted>
-          {strings.dose.nextDoseLabel}
+          {strings.dose.intervalHint}
         </AppText>
-        <SegmentedChips options={NEXT_OPTIONS} value={nextChoice} onChange={setNextChoice} />
       </Card>
       <Button label={strings.dose.save} onPress={save} disabled={!valid} />
       <Button label={strings.common.close} variant="secondary" onPress={() => router.back()} />

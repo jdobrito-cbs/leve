@@ -8,7 +8,10 @@ jest.mock('@/db/doseRepo', () => ({
   addDose: (...a: unknown[]) => mockAddDose(...a),
   lastInjectionSite: (...a: unknown[]) => mockLastSite(...a),
 }));
-jest.mock('@/db/settingsRepo', () => ({ getSetting: jest.fn().mockResolvedValue(null) }));
+jest.mock('@/db/settingsRepo', () => ({
+  getSetting: jest.fn().mockResolvedValue(null),
+  setSetting: jest.fn(),
+}));
 jest.mock('@/services/reminders/reminders', () => ({ scheduleDoseReminder: jest.fn() }));
 
 import { strings } from '@/i18n/pt-BR';
@@ -30,7 +33,7 @@ test('sugere próximo local do rodízio e salva dose de injeção', async () => 
         doseMg: 0.5,
         route: 'injecao',
         injectionSite: 'abdomen_sup_d',
-        nextDoseAt: null,
+        nextDoseAt: expect.any(Date), // intervalo padrão de 7 dias
       }),
     ),
   );

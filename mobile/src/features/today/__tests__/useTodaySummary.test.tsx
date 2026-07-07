@@ -10,10 +10,21 @@ jest.mock('expo-router', () => ({
   },
 }));
 jest.mock('@/db/waterRepo', () => ({ waterTotalForDay: jest.fn().mockResolvedValue(500) }));
-jest.mock('@/db/foodLogRepo', () => ({ kcalForDay: jest.fn().mockResolvedValue(250) }));
+jest.mock('@/db/foodLogRepo', () => ({
+  macrosForDay: jest
+    .fn()
+    .mockResolvedValue({ kcal: 250, proteinG: 20, carbsG: 30, fatG: 8, fiberG: 5 }),
+}));
 jest.mock('@/db/weightRepo', () => ({
   latestWeight: jest.fn().mockResolvedValue({ weightKg: 93.2 }),
   weightsSince: jest.fn().mockResolvedValue([{ weightKg: 95.5 }, { weightKg: 93.2 }]),
+}));
+jest.mock('@/db/metricsRepo', () => ({
+  metricSeries: jest.fn().mockResolvedValue([{ value: 120 }, { value: 200 }]),
+  latestMetric: jest.fn().mockResolvedValue({ value: 7.5 }),
+}));
+jest.mock('@/features/meds/medsRepo', () => ({
+  todayIntakes: jest.fn().mockResolvedValue([]),
 }));
 jest.mock('@/db/doseRepo', () => ({
   latestDose: jest.fn().mockResolvedValue({
@@ -21,6 +32,7 @@ jest.mock('@/db/doseRepo', () => ({
     doseMg: 0.5,
     nextDoseAt: '2026-07-14T12:00:00.000Z',
   }),
+  listDoses: jest.fn().mockResolvedValue([]),
 }));
 jest.mock('@/db/symptomRepo', () => ({
   symptomsForDay: jest.fn().mockResolvedValue([{ kind: 'nausea' }]),
@@ -31,9 +43,6 @@ jest.mock('@/db/settingsRepo', () => ({
 jest.mock('@/services/health/HealthProvider', () => ({ getHealthProvider: () => ({}) }));
 jest.mock('@/features/water/waterGoal', () => ({
   getEffectiveWaterGoal: jest.fn().mockResolvedValue({ goalMl: 2000, auto: false }),
-}));
-jest.mock('@/features/meds/medsRepo', () => ({
-  todayIntakes: jest.fn().mockResolvedValue([]),
 }));
 jest.mock('@/features/insights/data', () => ({
   buildInsightInput: jest.fn().mockResolvedValue({

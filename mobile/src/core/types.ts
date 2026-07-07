@@ -27,6 +27,7 @@ export interface FoodLog {
   proteinG: number | null;
   carbsG: number | null;
   fatG: number | null;
+  fiberG: number | null;
   origin: LogOrigin;
   photoUri: string | null;
   loggedAt: string;
@@ -65,5 +66,6 @@ export interface FoodItem {
   proteinG: number | null;
   carbsG: number | null;
   fatG: number | null;
+  fiberG: number | null;
   source: 'taco' | 'internacional';
 }

@@ -60,6 +60,7 @@ const out = foods.map((f) => {
     proteinG: num(n.protein),
     carbsG: num(n.carbohydrates),
     fatG: num(n.lipids),
+    fiberG: num(n.dietaryFiber),
   };
 });
 

@@ -26,6 +26,7 @@ export const foodLogs = sqliteTable('food_logs', {
   proteinG: real('protein_g'),
   carbsG: real('carbs_g'),
   fatG: real('fat_g'),
+  fiberG: real('fiber_g'),
   origin: text('origin').notNull().default('manual'),
   photoUri: text('photo_uri'),
   loggedAt: text('logged_at').notNull(),
@@ -65,6 +66,7 @@ export const foodItems = sqliteTable('food_items', {
   proteinG: real('protein_g'),
   carbsG: real('carbs_g'),
   fatG: real('fat_g'),
+  fiberG: real('fiber_g'),
   source: text('source').notNull(),
 });
 

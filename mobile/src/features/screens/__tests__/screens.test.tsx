@@ -65,6 +65,7 @@ jest.mock('@/features/today/useTodaySummary', () => ({
     loading: false,
     waterMl: 1200,
     waterGoalMl: 2000,
+    macros: { kcal: 850, proteinG: 62.5, carbsG: 90, fatG: 30, fiberG: 14 },
     kcal: 850,
     calorieGoalKcal: null,
     lastWeightKg: 93.2,
@@ -73,10 +74,34 @@ jest.mock('@/features/today/useTodaySummary', () => ({
       { id: 2, weightKg: 93.2, origin: 'manual', loggedAt: '2026-07-01T10:00:00.000Z' },
     ],
     goalWeightKg: 85,
-    nextDoseAt: null,
+    nextDoseAt: '2026-07-14T12:00:00.000Z',
     lastDoseLabel: 'semaglutida · 0.5 mg',
+    doseIntervalDays: 7,
+    doses: [
+      {
+        id: 1,
+        medication: 'semaglutida',
+        doseMg: 0.5,
+        route: 'injecao',
+        injectionSite: null,
+        loggedAt: '2026-07-01T10:00:00.000Z',
+        nextDoseAt: null,
+      },
+    ],
     symptomsCount: 2,
     steps: 4200,
+    activeCalories: 320,
+    healthLatest: { sleepHours: 7.2, restingHr: 64, spo2: 98, respiratoryRate: 15 },
+    intakes: [
+      {
+        intakeId: 1,
+        medicationId: 1,
+        name: 'Metformina',
+        doseText: '850 mg',
+        time: '08:00',
+        takenAt: '2026-07-07T08:05:00.000Z',
+      },
+    ],
     medsToday: { taken: 1, total: 3 },
     insights: [
       { id: 'recomp-positiva', kind: 'positivo', text: 'Seu peso subiu, mas a gordura caiu — contexto positivo.' },
@@ -107,8 +132,8 @@ const initialMetrics = {
   insets: { top: 47, left: 0, right: 0, bottom: 34 },
 };
 
-test('Hoje mostra anel de água e cards do dia', async () => {
-  const { getByText } = await render(
+test('Hoje mostra todos os boxes na nova ordem', async () => {
+  const { getByText, getAllByText } = await render(
     <SafeAreaProvider initialMetrics={initialMetrics}>
       <TodayScreen />
     </SafeAreaProvider>,
@@ -116,17 +141,27 @@ test('Hoje mostra anel de água e cards do dia', async () => {
   getByText('1.200');
   getByText(strings.today.waterRing);
   getByText(strings.today.weightSection);
-  getByText(strings.today.cards.kcal);
-  getByText(strings.today.cards.nextDose);
-  getByText(strings.today.cards.symptoms);
   getByText(/93,2/);
   getByText(/Meta.*85/);
-  getByText(strings.today.cards.steps);
+  getByText(strings.today.cards.kcal);
+  getByText(strings.today.cards.nextDose);
+  getByText('14/07/2026');
+  getByText(strings.today.cards.symptoms);
+  getByText(strings.today.medicationSection);
+  getByText(strings.today.mealsSection);
+  expect(getAllByText(/850/).length).toBeGreaterThanOrEqual(2); // card rápido + box de refeição
+  getByText(/62,5 g/);
+  getByText(strings.today.nutrition.fiber);
+  getByText(strings.today.activitySection);
+  getByText(/320 kcal/);
   getByText('4.200');
+  getByText(strings.today.medRemindersSection);
+  getByText(/Metformina/);
+  getByText(strings.today.healthSection);
+  getByText(/7,2 h/);
+  getByText(/64 bpm/);
   getByText(strings.insights.section);
   getByText(/contexto positivo/);
-  getByText(strings.meds.cardLabel);
-  getByText('1/3');
 });
 
 test('Registrar lista as 5 categorias e navega nas ativas', async () => {

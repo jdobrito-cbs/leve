@@ -86,6 +86,7 @@ export function MealScreen() {
       proteinG: scaled(selected.proteinG, portion),
       carbsG: scaled(selected.carbsG, portion),
       fatG: scaled(selected.fatG, portion),
+      fiberG: scaled(selected.fiberG, portion),
       origin: fromScan ? 'scan' : 'manual',
       at: new Date(),
     });
