@@ -19,7 +19,7 @@ export interface HealthProvider {
   readMetrics(since: Date): Promise<MetricSample[]>;
 }
 
-/** Padrão até a Fase 2 (HealthKit no iOS, Health Connect no Android). */
+/** Usado quando não há integração de saúde disponível no aparelho. */
 export class UnavailableHealthProvider implements HealthProvider {
   async isAvailable() {
     return false;

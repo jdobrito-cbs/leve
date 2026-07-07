@@ -45,7 +45,7 @@ export const strings = {
     symptom: 'Sintoma',
     bodyComp: 'Composição corporal',
     cycle: 'Ciclo menstrual',
-    comingSoon: 'Disponível na próxima fase',
+    comingSoon: 'Em breve',
   },
   water: {
     title: 'Registrar água',

@@ -1,8 +1,7 @@
-# PROMPT PARA CLAUDE CODE — App de Saúde / GLP-1 (multiplataforma)
+# Leve — Especificação do produto
 
-> Cole como `PROJECT_SPEC.md` na raiz do projeto. Peça ao Claude Code para
-> trabalhar em FASES e nunca tudo de uma vez.
->
+App de saúde e acompanhamento de tratamento GLP-1 (multiplataforma).
+
 > AVISO DE ESCOPO: este é um app de SAÚDE que lida com dados sensíveis e
 > medicação de prescrição. Conformidade (LGPD/GDPR), privacidade e design
 > responsável NÃO são opcionais — são estruturais. O app REGISTRA e ORGANIZA;
@@ -146,17 +145,15 @@ pré-requisitos do dono.
 
 ---
 
-## Como quero que você trabalhe
+## Diretrizes de desenvolvimento
 
-1. Comece pela FASE 0. Só avance com meu OK.
-2. Antes de cada fase, plano curto + espere confirmação.
-3. Abstraia integrações de plataforma (saúde, IA de visão) atrás de interfaces,
-   para trocar implementações sem reescrever o núcleo.
-4. Trate o app como **local-first**: ele deve ser plenamente útil offline e
-   pessoal antes de existir qualquer backend.
-5. Aplique os princípios de design responsável e privacidade em TODA tela
-   relevante — não deixe para o fim.
-6. Nunca copie nome, marca ou identidade visual de apps existentes.
-7. Se algo for ambíguo ou tiver risco legal/clínico, PERGUNTE em vez de assumir.
-8. Sinalize claramente onde é necessária ação do dono fora do código (contas de
-   loja, política de privacidade revisada por advogado, etc.).
+1. Trabalhar em fases, na ordem definida acima.
+2. Abstrair integrações de plataforma (saúde, visão computacional) atrás de
+   interfaces, para trocar implementações sem reescrever o núcleo.
+3. Tratar o app como **local-first**: plenamente útil offline e pessoal antes
+   de existir qualquer backend.
+4. Aplicar os princípios de design responsável e privacidade em toda tela
+   relevante desde o início.
+5. Não copiar nome, marca ou identidade visual de apps existentes.
+6. Registrar claramente o que exige ação fora do código (contas de loja,
+   política de privacidade revisada por advogado, etc.).
