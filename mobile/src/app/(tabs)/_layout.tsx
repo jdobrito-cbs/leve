@@ -1,5 +1,5 @@
 import { Redirect, Tabs } from 'expo-router';
-import { ChartLine, CircleUser, Plus, Sprout } from 'lucide-react-native';
+import { Plus } from 'lucide-react-native';
 import { PropsWithChildren, useEffect } from 'react';
 import { View } from 'react-native';
 import Animated, {
@@ -8,6 +8,7 @@ import Animated, {
   withSequence,
   withSpring,
 } from 'react-native-reanimated';
+import { ChartTabIcon, SproutTabIcon, UserTabIcon } from '@/design/tabIcons';
 import { fonts } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
@@ -104,7 +105,7 @@ export default function TabsLayout() {
           title: strings.tabs.today,
           tabBarIcon: ({ color, focused }) => (
             <BouncyIcon focused={focused}>
-              <Sprout color={color} size={22} strokeWidth={1.9} />
+              <SproutTabIcon color={color} focused={focused} />
             </BouncyIcon>
           ),
         }}
@@ -122,7 +123,7 @@ export default function TabsLayout() {
           title: strings.tabs.progress,
           tabBarIcon: ({ color, focused }) => (
             <BouncyIcon focused={focused}>
-              <ChartLine color={color} size={22} strokeWidth={1.9} />
+              <ChartTabIcon color={color} focused={focused} />
             </BouncyIcon>
           ),
         }}
@@ -133,7 +134,7 @@ export default function TabsLayout() {
           title: strings.tabs.profile,
           tabBarIcon: ({ color, focused }) => (
             <BouncyIcon focused={focused}>
-              <CircleUser color={color} size={22} strokeWidth={1.9} />
+              <UserTabIcon color={color} focused={focused} />
             </BouncyIcon>
           ),
         }}
