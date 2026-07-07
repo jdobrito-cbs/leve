@@ -28,7 +28,7 @@ function StatCard({
       style={{ flexBasis: '47%', flexGrow: 1 }}
     >
       <Card style={{ gap: spacing.sm }}>
-        <IconChip Icon={Icon} size={36} />
+        <IconChip Icon={Icon} size={36} wiggleKey={value} />
         <AppText variant="caption" muted>
           {label}
         </AppText>
