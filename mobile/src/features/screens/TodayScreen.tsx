@@ -76,6 +76,31 @@ export function TodayScreen() {
             </AppText>
           </Card>
         </Pressable>
+        {summary.insights.length > 0 ? (
+          <Card style={{ gap: spacing.sm }}>
+            <AppText variant="title">{strings.insights.section}</AppText>
+            {summary.insights.map((insight) => (
+              <View key={insight.id} style={{ flexDirection: 'row', gap: spacing.sm }}>
+                <View
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 4,
+                    marginTop: 6,
+                    backgroundColor:
+                      insight.kind === 'positivo' ? colors.success : colors.warning,
+                  }}
+                />
+                <AppText variant="caption" style={{ flex: 1 }}>
+                  {insight.text}
+                </AppText>
+              </View>
+            ))}
+            <AppText variant="caption" muted>
+              {strings.insights.disclaimer}
+            </AppText>
+          </Card>
+        ) : null}
         <Pressable accessibilityRole="button" onPress={() => router.push('/log/peso' as never)}>
           <Card style={{ gap: spacing.sm }}>
             <AppText variant="title">{strings.today.weightSection}</AppText>

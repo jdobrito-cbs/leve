@@ -170,6 +170,16 @@ export function ProfileScreen() {
             placeholder="09:00, 13:00, 17:00"
           />
         ) : null}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <View style={{ flex: 1 }}>
+            <AppText>{strings.profile.insightsReminder}</AppText>
+          </View>
+          <Switch
+            value={form.insightsEnabled}
+            onValueChange={(v) => setField('insightsEnabled', v)}
+            trackColor={{ true: colors.primary, false: colors.border }}
+          />
+        </View>
         {permissionError ? (
           <AppText variant="caption" style={{ color: colors.danger }}>
             {strings.profile.permissionDenied}

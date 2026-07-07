@@ -9,6 +9,7 @@ import { waterGoalFromWeightKg } from '@/features/water/waterGoal';
 import {
   DEFAULT_REMINDERS,
   ReminderSettings,
+  applyInsightsReminder,
   applyWaterReminders,
   requestNotificationPermission,
 } from '@/services/reminders/reminders';
@@ -24,6 +25,7 @@ export interface ProfileForm {
   doseEnabled: boolean;
   waterEnabled: boolean;
   waterTimesStr: string; // 'HH:MM, HH:MM'
+  insightsEnabled: boolean;
 }
 
 const EMPTY_FORM: ProfileForm = {
@@ -37,6 +39,7 @@ const EMPTY_FORM: ProfileForm = {
   doseEnabled: false,
   waterEnabled: false,
   waterTimesStr: DEFAULT_REMINDERS.waterTimes.join(', '),
+  insightsEnabled: false,
 };
 
 export function useProfileForm() {
@@ -66,6 +69,7 @@ export function useProfileForm() {
       doseEnabled: r.doseEnabled,
       waterEnabled: r.waterEnabled,
       waterTimesStr: r.waterTimes.join(', '),
+      insightsEnabled: r.insightsEnabled ?? false,
     });
     setLoading(false);
   }, []);
@@ -83,15 +87,16 @@ export function useProfileForm() {
 
   const save = useCallback(async () => {
     setPermissionError(false);
-    let { doseEnabled, waterEnabled } = form;
+    let { doseEnabled, waterEnabled, insightsEnabled } = form;
 
-    if (doseEnabled || waterEnabled) {
+    if (doseEnabled || waterEnabled || insightsEnabled) {
       const granted = await requestNotificationPermission();
       if (!granted) {
         doseEnabled = false;
         waterEnabled = false;
+        insightsEnabled = false;
         setPermissionError(true);
-        setForm((f) => ({ ...f, doseEnabled: false, waterEnabled: false }));
+        setForm((f) => ({ ...f, doseEnabled: false, waterEnabled: false, insightsEnabled: false }));
       }
     }
 
@@ -112,10 +117,12 @@ export function useProfileForm() {
       doseEnabled,
       waterEnabled,
       waterTimes: waterTimes.length ? waterTimes : DEFAULT_REMINDERS.waterTimes,
+      insightsEnabled,
     };
     await setSetting(db, 'reminders', reminders);
     await setSetting(db, 'waterGoalAuto', form.waterGoalAuto);
     await applyWaterReminders(reminders.waterEnabled, reminders.waterTimes);
+    await applyInsightsReminder(insightsEnabled);
     setSaved(true);
   }, [form]);
 

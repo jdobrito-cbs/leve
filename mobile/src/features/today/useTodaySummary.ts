@@ -9,6 +9,8 @@ import { symptomsForDay } from '@/db/symptomRepo';
 import { getSetting } from '@/db/settingsRepo';
 import { waterTotalForDay } from '@/db/waterRepo';
 import { latestWeight, weightsSince } from '@/db/weightRepo';
+import { buildInsightInput } from '@/features/insights/data';
+import { buildInsights, type Insight } from '@/features/insights/insights';
 import { getEffectiveWaterGoal } from '@/features/water/waterGoal';
 import { getHealthProvider } from '@/services/health/HealthProvider';
 import { autoSyncIfDue, readTodaySteps } from '@/services/health/healthSync';
@@ -26,6 +28,7 @@ export interface TodaySummary {
   lastDoseLabel: string | null;
   symptomsCount: number;
   steps: number | null;
+  insights: Insight[];
   refresh: () => Promise<void>;
 }
 
@@ -42,6 +45,7 @@ export function useTodaySummary(): TodaySummary {
   const [lastDoseLabel, setLastDoseLabel] = useState<string | null>(null);
   const [symptomsCount, setSymptomsCount] = useState(0);
   const [steps, setSteps] = useState<number | null>(null);
+  const [insights, setInsights] = useState<Insight[]>([]);
 
   const refresh = useCallback(async () => {
     // Balança/wearable → app de saúde → Leve, sem toque (throttle de 1 h).
@@ -78,6 +82,11 @@ export function useTodaySummary(): TodaySummary {
     } catch {
       setSteps(null);
     }
+    try {
+      setInsights(buildInsights(await buildInsightInput(db)));
+    } catch {
+      setInsights([]);
+    }
     setLoading(false);
   }, []);
 
@@ -100,6 +109,7 @@ export function useTodaySummary(): TodaySummary {
     lastDoseLabel,
     symptomsCount,
     steps,
+    insights,
     refresh,
   };
 }

@@ -47,6 +47,7 @@ jest.mock('@/features/profile/useProfileForm', () => ({
       doseEnabled: false,
       waterEnabled: false,
       waterTimesStr: '09:00, 13:00, 17:00',
+      insightsEnabled: false,
     },
     setField: jest.fn(),
     save: mockSave,
@@ -72,6 +73,9 @@ jest.mock('@/features/today/useTodaySummary', () => ({
     lastDoseLabel: 'semaglutida · 0.5 mg',
     symptomsCount: 2,
     steps: 4200,
+    insights: [
+      { id: 'recomp-positiva', kind: 'positivo', text: 'Seu peso subiu, mas a gordura caiu — contexto positivo.' },
+    ],
     refresh: jest.fn(),
   }),
 }));
@@ -114,6 +118,8 @@ test('Hoje mostra anel de água e cards do dia', async () => {
   getByText(/Meta.*85/);
   getByText(strings.today.cards.steps);
   getByText('4.200');
+  getByText(strings.insights.section);
+  getByText(/contexto positivo/);
 });
 
 test('Registrar lista as 5 categorias e navega nas ativas', async () => {

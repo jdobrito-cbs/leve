@@ -179,6 +179,7 @@ export const strings = {
     doseReminder: 'Lembrete de dose',
     doseReminderHint: 'Notifica na data que você registrar como próxima dose.',
     waterReminder: 'Lembretes de água',
+    insightsReminder: 'Resumo diário de observações',
     waterTimesLabel: 'Horários (HH:MM)',
     permissionDenied: 'Permissão de notificação negada — ative nas configurações do aparelho.',
     privacySection: 'Privacidade',
@@ -189,6 +190,19 @@ export const strings = {
     deleteDataConfirm:
       'Apaga TODOS os registros deste aparelho permanentemente. Toque de novo para confirmar.',
     comingSoon: 'Disponível em breve',
+  },
+  insights: {
+    section: 'Observações',
+    disclaimer:
+      'Observações informativas com base nos seus registros — não são diagnóstico nem orientação médica.',
+    informative: 'Informativo.',
+    talkToDoctor: 'Vale conversar com seu médico.',
+    recompGood: 'Seu peso subiu, mas a gordura caiu e a massa muscular aumentou — contexto positivo',
+    recompBad: 'Seu peso subiu com aumento de gordura e queda de massa magra',
+    muscleLoss: 'Na perda de peso recente houve queda de massa muscular',
+    sleepLow: 'Seu sono tem ficado abaixo do usual',
+    hrUp: 'Sua frequência cardíaca de repouso está acima da sua média do mês',
+    hydrationLow: 'Sua ingestão de água tem ficado bem abaixo da meta',
   },
   metrics: {
     sleep_hours: 'Sono',
@@ -258,6 +272,8 @@ export const strings = {
     doseBody: 'Você anotou uma dose para hoje. Confirme detalhes com a orientação do seu médico.',
     waterTitle: 'Hidratação',
     waterBody: 'Que tal um copo de água? Registre no Leve.',
+    insightsTitle: 'Observações do dia',
+    insightsBody: 'Abra o Leve para ver suas observações de saúde de hoje.',
   },
   common: {
     loading: 'Carregando…',

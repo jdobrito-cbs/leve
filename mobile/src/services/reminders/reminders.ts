@@ -9,13 +9,28 @@ export interface ReminderSettings {
   doseEnabled: boolean;
   waterEnabled: boolean;
   waterTimes: string[]; // 'HH:MM'
+  insightsEnabled?: boolean;
 }
 
 export const DEFAULT_REMINDERS: ReminderSettings = {
   doseEnabled: false,
   waterEnabled: false,
   waterTimes: ['09:00', '13:00', '17:00'],
+  insightsEnabled: false,
 };
+
+const INSIGHTS_ID = 'insights-daily';
+
+/** Resumo diário neutro (a análise roda ao abrir o app; sem processamento em background). */
+export async function applyInsightsReminder(enabled: boolean): Promise<void> {
+  await Notifications.cancelScheduledNotificationAsync(INSIGHTS_ID);
+  if (!enabled) return;
+  await Notifications.scheduleNotificationAsync({
+    identifier: INSIGHTS_ID,
+    content: { title: strings.reminders.insightsTitle, body: strings.reminders.insightsBody },
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour: 20, minute: 0 },
+  });
+}
 
 export async function requestNotificationPermission(): Promise<boolean> {
   const result = await Notifications.requestPermissionsAsync();
