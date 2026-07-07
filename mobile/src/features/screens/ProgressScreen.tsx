@@ -119,8 +119,9 @@ export function ProgressScreen() {
         value: w.weightKg,
         dataPointText: labeled ? shortDate(w.loggedAt) : undefined,
         hideDataPoint: filtered.length > 20 && !labeled,
-        textShiftY: 16,
-        textShiftX: i === last ? -34 : i === 0 ? 2 : -14,
+        // Data centralizada sob o próprio ponto, afastada da linha para leitura.
+        textShiftY: 22,
+        textShiftX: i === last ? -16 : i === 0 ? 6 : -14,
       };
     });
   }, [weights, range]);
@@ -218,8 +219,8 @@ disableScroll
             endSpacing={40}
             dataPointsColor={colors.primary}
             dataPointsRadius={3.5}
-            textColor={colors.textMuted}
-            textFontSize={10}
+            textColor={colors.text}
+            textFontSize={11}
             yAxisTextStyle={{ color: colors.textMuted, fontSize: 11 }}
             xAxisColor={colors.border}
             yAxisColor={colors.border}
