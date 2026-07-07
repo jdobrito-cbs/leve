@@ -110,12 +110,19 @@ export function ProgressScreen() {
       since.setDate(since.getDate() - Number(range));
       filtered = weights.filter((w) => new Date(w.loggedAt) >= since);
     }
-    // Data em cada ponto; com muitos registros, rotula ~6 espaçados para não sobrepor.
+    // Data presa a cada ponto (abaixo da linha); com muitos registros,
+    // rotula ~6 espaçados para não sobrepor.
     const step = Math.max(1, Math.ceil(filtered.length / 6));
-    return filtered.map((w, i) => ({
-      value: w.weightKg,
-      label: i % step === 0 || i === filtered.length - 1 ? shortDate(w.loggedAt) : '',
-    }));
+    return filtered.map((w, i) => {
+      const labeled = i % step === 0 || i === filtered.length - 1;
+      return {
+        value: w.weightKg,
+        dataPointText: labeled ? shortDate(w.loggedAt) : undefined,
+        hideDataPoint: filtered.length > 20 && !labeled,
+        textShiftY: 16,
+        textShiftX: i === filtered.length - 1 ? -34 : i === 0 ? 2 : -14,
+      };
+    });
   }, [weights, range]);
 
   // Escala na faixa real dos pesos (eixo a partir de 0 achata a linha).
@@ -207,17 +214,12 @@ disableScroll
             thickness={3}
             yAxisOffset={weightBounds.offset}
             maxValue={weightBounds.max}
-            initialSpacing={24}
+            initialSpacing={10}
             endSpacing={40}
-            hideDataPoints={weightData.length > 20}
             dataPointsColor={colors.primary}
-            xAxisLabelTextStyle={{
-              color: colors.textMuted,
-              fontSize: 10,
-              width: 40,
-              marginLeft: -20,
-              textAlign: 'center',
-            }}
+            dataPointsRadius={3.5}
+            textColor={colors.textMuted}
+            textFontSize={10}
             yAxisTextStyle={{ color: colors.textMuted, fontSize: 11 }}
             xAxisColor={colors.border}
             yAxisColor={colors.border}
