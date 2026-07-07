@@ -28,12 +28,6 @@ function weekdayLabel(dayKey: string): string {
 
 const fmtMg = (n: number) => n.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
 
-/** ISO → 'DD/MM' para os rótulos do eixo do gráfico de peso. */
-function shortDate(iso: string): string {
-  const d = new Date(iso);
-  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
-}
-
 function BodyHealthSection({ metrics }: { metrics: MetricRow[] }) {
   const { colors } = useTheme();
   const [selected, setSelected] = useState<MetricType | null>(null);
@@ -110,20 +104,7 @@ export function ProgressScreen() {
       since.setDate(since.getDate() - Number(range));
       filtered = weights.filter((w) => new Date(w.loggedAt) >= since);
     }
-    // Apenas 3 datas, presas aos pontos: a inicial, uma no meio e a final.
-    const last = filtered.length - 1;
-    const mid = Math.floor(last / 2);
-    return filtered.map((w, i) => {
-      const labeled = i === 0 || i === mid || i === last;
-      return {
-        value: w.weightKg,
-        dataPointText: labeled ? shortDate(w.loggedAt) : undefined,
-        hideDataPoint: filtered.length > 20 && !labeled,
-        // Data centralizada sob o próprio ponto, afastada da linha para leitura.
-        textShiftY: 22,
-        textShiftX: i === last ? -16 : i === 0 ? 6 : -14,
-      };
-    });
+    return filtered.map((w) => ({ value: w.weightKg }));
   }, [weights, range]);
 
   // Escala na faixa real dos pesos (eixo a partir de 0 achata a linha).
@@ -216,11 +197,10 @@ disableScroll
             yAxisOffset={weightBounds.offset}
             maxValue={weightBounds.max}
             initialSpacing={10}
-            endSpacing={40}
+            endSpacing={16}
+            hideDataPoints={weightData.length > 20}
             dataPointsColor={colors.primary}
             dataPointsRadius={3.5}
-            textColor={colors.text}
-            textFontSize={11}
             yAxisTextStyle={{ color: colors.textMuted, fontSize: 11 }}
             xAxisColor={colors.border}
             yAxisColor={colors.border}
