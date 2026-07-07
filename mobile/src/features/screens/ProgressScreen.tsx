@@ -202,17 +202,24 @@ disableScroll
       <Card style={{ gap: spacing.md }}>
         <AppText variant="title">{strings.progress.waterSection}</AppText>
         {hasWater ? (
-          <FitChart>{(fitWidth) => (<BarChart width={fitWidth}
+          <FitChart>{(fitWidth) => {
+            // Largura das barras calculada à mão: adjustToWidth não desconta o eixo y
+            // e empurrava a última barra para fora do box.
+            const slot = (fitWidth - 64) / waterData.length;
+            return (<BarChart width={fitWidth - 64}
             data={waterData}
             frontColor={colors.primary}
             barBorderRadius={6}
+            barWidth={Math.max(10, slot * 0.5)}
+            spacing={slot * 0.5}
+            initialSpacing={slot * 0.25}
             xAxisLabelTextStyle={{ color: colors.textMuted, fontSize: 10 }}
             yAxisTextStyle={{ color: colors.textMuted, fontSize: 11 }}
             xAxisColor={colors.border}
             yAxisColor={colors.border}
             rulesColor={colors.border}
-adjustToWidth
-/>)}</FitChart>
+/>);
+          }}</FitChart>
         ) : (
           <AppText muted>{strings.progress.empty}</AppText>
         )}
@@ -221,17 +228,22 @@ adjustToWidth
       <Card style={{ gap: spacing.md }}>
         <AppText variant="title">{strings.progress.kcalSection}</AppText>
         {hasKcal ? (
-          <FitChart>{(fitWidth) => (<BarChart width={fitWidth}
+          <FitChart>{(fitWidth) => {
+            const slot = (fitWidth - 64) / kcalData.length;
+            return (<BarChart width={fitWidth - 64}
             data={kcalData}
             frontColor={colors.primary}
             barBorderRadius={6}
+            barWidth={Math.max(10, slot * 0.5)}
+            spacing={slot * 0.5}
+            initialSpacing={slot * 0.25}
             xAxisLabelTextStyle={{ color: colors.textMuted, fontSize: 10 }}
             yAxisTextStyle={{ color: colors.textMuted, fontSize: 11 }}
             xAxisColor={colors.border}
             yAxisColor={colors.border}
             rulesColor={colors.border}
-adjustToWidth
-/>)}</FitChart>
+/>);
+          }}</FitChart>
         ) : (
           <AppText muted>{strings.progress.empty}</AppText>
         )}
