@@ -160,23 +160,42 @@ export function TodayScreen() {
           <AppText variant="title">{strings.today.weightSection}</AppText>
           {summary.weightSeries.length >= 2 ? (
             <FitChart>
-              {(width) => (
-                <LineChart
-                  data={summary.weightSeries.map((w) => ({ value: w.weightKg }))}
-                  color={colors.primary}
-                  thickness={3}
-                  height={90}
-                  width={width}
-                  initialSpacing={4}
-                  endSpacing={4}
-                  hideDataPoints
-                  hideAxesAndRules
-                  hideYAxisText
-                  adjustToWidth
-                  curved
-                  disableScroll
-                />
-              )}
+              {(width) => {
+                // Escala na faixa real dos pesos (senão a linha fica achatada).
+                const values = summary.weightSeries.map((w) => w.weightKg);
+                const minV = Math.min(...values);
+                const maxV = Math.max(...values);
+                const pad = Math.max(1, (maxV - minV) * 0.35);
+                return (
+                  <LineChart
+                    data={summary.weightSeries.map((w) => ({
+                      value: w.weightKg,
+                      dataPointText: w.weightKg.toLocaleString('pt-BR', {
+                        maximumFractionDigits: 1,
+                      }),
+                    }))}
+                    color={colors.primary}
+                    thickness={3}
+                    height={110}
+                    width={width}
+                    yAxisOffset={minV - pad}
+                    maxValue={maxV - minV + 2 * pad}
+                    initialSpacing={16}
+                    endSpacing={16}
+                    dataPointsColor={colors.primary}
+                    dataPointsRadius={3.5}
+                    textColor={colors.text}
+                    textFontSize={11}
+                    textShiftY={-8}
+                    textShiftX={-8}
+                    hideAxesAndRules
+                    hideYAxisText
+                    adjustToWidth
+                    curved
+                    disableScroll
+                  />
+                );
+              }}
             </FitChart>
           ) : (
             <AppText variant="caption" muted>
