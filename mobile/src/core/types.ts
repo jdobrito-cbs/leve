@@ -69,5 +69,5 @@ export interface FoodItem {
   carbsG: number | null;
   fatG: number | null;
   fiberG: number | null;
-  source: 'taco' | 'internacional';
+  source: 'taco' | 'regional' | 'internacional';
 }

@@ -22,3 +22,17 @@ test('seed popula uma vez e busca ignora acentos', async () => {
   expect(results[0].calories).not.toBeNull();
   expect(await searchFoods(db, 'f')).toEqual([]); // query curta
 });
+
+test('pratos regionais entram no seed e são encontrados por termos do dia a dia', async () => {
+  const db = makeDb() as never;
+  await seedFoodItemsIfEmpty(db);
+  await seedFoodItemsIfEmpty(db); // idempotente também para os regionais
+  const picadinho = await searchFoods(db, 'picadinho');
+  expect(picadinho.map((f) => f.name)).toContain('Picadinho de carne bovina');
+  const bife = await searchFoods(db, 'bife');
+  expect(bife.length).toBeGreaterThanOrEqual(2); // alcatra e contra-filé
+  const calabresa = await searchFoods(db, 'feijao preto com calabresa');
+  expect(calabresa[0]?.calories).toBe(118);
+  const carneSol = await searchFoods(db, 'carne de sol');
+  expect(carneSol.length).toBeGreaterThan(0);
+});

@@ -1,9 +1,11 @@
+import { eq } from 'drizzle-orm';
 import { normalizeText } from '@/core/text';
 import type { AppDb } from '../client';
 import { foodItems } from '../schema';
+import regionais from './regionais.json';
 import taco from './taco.json';
 
-interface TacoFood {
+interface SeedFood {
   name: string;
   category: string | null;
   kcal: number | null;
@@ -13,10 +15,8 @@ interface TacoFood {
   fiberG: number | null;
 }
 
-export async function seedFoodItemsIfEmpty(db: AppDb): Promise<void> {
-  const existing = await db.select({ id: foodItems.id }).from(foodItems).limit(1);
-  if (existing.length > 0) return;
-  const rows = (taco as TacoFood[]).map((f) => ({
+function toRows(foods: SeedFood[], source: string) {
+  return foods.map((f) => ({
     name: f.name,
     nameNormalized: normalizeText(f.name),
     category: f.category,
@@ -26,9 +26,28 @@ export async function seedFoodItemsIfEmpty(db: AppDb): Promise<void> {
     carbsG: f.carbsG,
     fatG: f.fatG,
     fiberG: f.fiberG,
-    source: 'taco',
+    source,
   }));
+}
+
+async function insertChunked(db: AppDb, rows: ReturnType<typeof toRows>): Promise<void> {
   for (let i = 0; i < rows.length; i += 100) {
     await db.insert(foodItems).values(rows.slice(i, i + 100));
+  }
+}
+
+export async function seedFoodItemsIfEmpty(db: AppDb): Promise<void> {
+  const existing = await db.select({ id: foodItems.id }).from(foodItems).limit(1);
+  if (existing.length === 0) {
+    await insertChunked(db, toRows(taco as SeedFood[], 'taco'));
+  }
+  // Pratos regionais: semeados à parte para chegarem também a instalações antigas.
+  const hasRegional = await db
+    .select({ id: foodItems.id })
+    .from(foodItems)
+    .where(eq(foodItems.source, 'regional'))
+    .limit(1);
+  if (hasRegional.length === 0) {
+    await insertChunked(db, toRows(regionais as SeedFood[], 'regional'));
   }
 }
