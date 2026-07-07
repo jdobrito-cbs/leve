@@ -174,16 +174,16 @@ export function TodayScreen() {
                         maximumFractionDigits: 1,
                       }),
                       // Último ponto: puxa o rótulo para dentro para não cortar.
-                      textShiftX: i === arr.length - 1 ? -30 : -8,
+                      textShiftX: i === arr.length - 1 ? -18 : -8,
                     }))}
                     color={colors.primary}
                     thickness={3}
                     height={110}
-                    width={width}
+                    width={width - 52}
                     yAxisOffset={minV - pad}
                     maxValue={maxV - minV + 2 * pad}
                     initialSpacing={16}
-                    endSpacing={34}
+                    endSpacing={36}
                     dataPointsColor={colors.primary}
                     dataPointsRadius={3.5}
                     textColor={colors.text}
