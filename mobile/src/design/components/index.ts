@@ -6,6 +6,7 @@ export { Input } from './Input';
 export { EmptyState } from './EmptyState';
 export { IconChip } from './IconChip';
 export { ProgressRing } from './ProgressRing';
+export { WaterRing } from './WaterRing';
 export { HeroHeader } from './HeroHeader';
 export { SegmentedChips } from './SegmentedChips';
 export { NumberField } from './NumberField';
