@@ -9,7 +9,7 @@ import { getProfile } from '@/db/profileRepo';
 import { getSetting } from '@/db/settingsRepo';
 import { symptomsForDay } from '@/db/symptomRepo';
 import { waterTotalForDay } from '@/db/waterRepo';
-import { latestWeight, weightsSince } from '@/db/weightRepo';
+import { firstWeight, listWeights } from '@/db/weightRepo';
 import { todayIntakes, type TodayIntake } from '@/features/meds/medsRepo';
 import { buildInsightInput } from '@/features/insights/data';
 import { buildInsights, type Insight } from '@/features/insights/insights';
@@ -32,7 +32,8 @@ export interface TodaySummary {
   kcal: number;
   calorieGoalKcal: number | null;
   lastWeightKg: number | null;
-  weights30: WeightLog[];
+  /** Primeiro peso registrado + os 10 últimos, em ordem cronológica. */
+  weightSeries: WeightLog[];
   goalWeightKg: number | null;
   nextDoseAt: string | null;
   lastDoseLabel: string | null;
@@ -63,7 +64,7 @@ export function useTodaySummary(): TodaySummary {
   const [macros, setMacros] = useState<DayMacros>(EMPTY_MACROS);
   const [calorieGoalKcal, setCalorieGoalKcal] = useState<number | null>(null);
   const [lastWeightKg, setLastWeightKg] = useState<number | null>(null);
-  const [weights30, setWeights30] = useState<WeightLog[]>([]);
+  const [weightSeries, setWeightSeries] = useState<WeightLog[]>([]);
   const [goalWeightKg, setGoalWeightKg] = useState<number | null>(null);
   const [nextDoseAt, setNextDoseAt] = useState<string | null>(null);
   const [lastDoseLabel, setLastDoseLabel] = useState<string | null>(null);
@@ -82,15 +83,12 @@ export function useTodaySummary(): TodaySummary {
     const now = new Date();
     const startOfDay = new Date(now);
     startOfDay.setHours(0, 0, 0, 0);
-    const since30 = new Date(now);
-    since30.setDate(since30.getDate() - 30);
-
-    const [water, dayMacros, weight, weightSeries, dose, doseList, symptoms, profile, waterGoal] =
+    const [water, dayMacros, first, recentWeights, dose, doseList, symptoms, profile, waterGoal] =
       await Promise.all([
         waterTotalForDay(db, now),
         macrosForDay(db, now),
-        latestWeight(db),
-        weightsSince(db, since30),
+        firstWeight(db),
+        listWeights(db, 10),
         latestDose(db),
         listDoses(db, 30),
         symptomsForDay(db, now),
@@ -99,8 +97,12 @@ export function useTodaySummary(): TodaySummary {
       ]);
     setWaterMl(water);
     setMacros(dayMacros);
-    setLastWeightKg(weight?.weightKg ?? null);
-    setWeights30(weightSeries);
+    setLastWeightKg(recentWeights[0]?.weightKg ?? null);
+    // Gráfico: do primeiro peso registrado aos 10 últimos.
+    const recentAsc = [...recentWeights].reverse();
+    setWeightSeries(
+      first && !recentAsc.some((w) => w.id === first.id) ? [first, ...recentAsc] : recentAsc,
+    );
     setNextDoseAt(dose?.nextDoseAt ?? null);
     setLastDoseLabel(dose ? `${dose.medication} · ${dose.doseMg} mg` : null);
     setDoses(doseList);
@@ -167,7 +169,7 @@ export function useTodaySummary(): TodaySummary {
     kcal: macros.kcal,
     calorieGoalKcal,
     lastWeightKg,
-    weights30,
+    weightSeries,
     goalWeightKg,
     nextDoseAt,
     lastDoseLabel,

@@ -158,11 +158,11 @@ export function TodayScreen() {
         {/* 2 — Peso */}
         <Box index={1} route="/log/peso">
           <AppText variant="title">{strings.today.weightSection}</AppText>
-          {summary.weights30.length >= 2 ? (
+          {summary.weightSeries.length >= 2 ? (
             <FitChart>
               {(width) => (
                 <LineChart
-                  data={summary.weights30.map((w) => ({ value: w.weightKg }))}
+                  data={summary.weightSeries.map((w) => ({ value: w.weightKg }))}
                   color={colors.primary}
                   thickness={3}
                   height={90}

@@ -70,7 +70,7 @@ jest.mock('@/features/today/useTodaySummary', () => ({
     kcal: 850,
     calorieGoalKcal: null,
     lastWeightKg: 93.2,
-    weights30: [
+    weightSeries: [
       { id: 1, weightKg: 95.5, origin: 'manual', loggedAt: '2026-06-10T10:00:00.000Z' },
       { id: 2, weightKg: 93.2, origin: 'manual', loggedAt: '2026-07-01T10:00:00.000Z' },
     ],

@@ -17,6 +17,12 @@ export async function latestWeight(db: AppDb): Promise<WeightLog | null> {
   return (rows[0] as WeightLog | undefined) ?? null;
 }
 
+/** Primeiro peso já registrado (ponto de partida do tratamento). */
+export async function firstWeight(db: AppDb): Promise<WeightLog | null> {
+  const rows = await db.select().from(weightLogs).orderBy(asc(weightLogs.loggedAt)).limit(1);
+  return (rows[0] as WeightLog | undefined) ?? null;
+}
+
 export async function listWeights(db: AppDb, limit = 100): Promise<WeightLog[]> {
   return (await db
     .select()

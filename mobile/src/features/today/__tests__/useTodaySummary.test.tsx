@@ -16,8 +16,13 @@ jest.mock('@/db/foodLogRepo', () => ({
     .mockResolvedValue({ kcal: 250, proteinG: 20, carbsG: 30, fatG: 8, fiberG: 5 }),
 }));
 jest.mock('@/db/weightRepo', () => ({
-  latestWeight: jest.fn().mockResolvedValue({ weightKg: 93.2 }),
-  weightsSince: jest.fn().mockResolvedValue([{ weightKg: 95.5 }, { weightKg: 93.2 }]),
+  firstWeight: jest.fn().mockResolvedValue({ id: 1, weightKg: 100 }),
+  listWeights: jest
+    .fn()
+    .mockResolvedValue([
+      { id: 3, weightKg: 93.2 },
+      { id: 2, weightKg: 95.5 },
+    ]),
 }));
 jest.mock('@/db/metricsRepo', () => ({
   metricSeries: jest.fn().mockResolvedValue([{ value: 120 }, { value: 200 }]),
@@ -75,7 +80,8 @@ test('agrega os dados do dia', async () => {
   expect(result.current.waterGoalMl).toBe(2000);
   expect(result.current.kcal).toBe(250);
   expect(result.current.lastWeightKg).toBe(93.2);
-  expect(result.current.weights30).toHaveLength(2);
+  // primeiro peso (100) + últimos em ordem cronológica
+  expect(result.current.weightSeries.map((w) => w.weightKg)).toEqual([100, 95.5, 93.2]);
   expect(result.current.goalWeightKg).toBe(85);
   expect(result.current.nextDoseAt).toBe('2026-07-14T12:00:00.000Z');
   expect(result.current.symptomsCount).toBe(1);
