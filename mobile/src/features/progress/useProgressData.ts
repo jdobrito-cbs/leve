@@ -10,7 +10,7 @@ import { weightsSince } from '@/db/weightRepo';
 
 export interface ProgressData {
   loading: boolean;
-  weights: WeightLog[]; // últimos 90 dias, asc
+  weights: WeightLog[]; // todos os registros, asc (a tela filtra por período)
   water7: { dayKey: string; totalMl: number }[];
   kcal7: { dayKey: string; kcal: number }[];
   doses: DoseLog[];
@@ -28,10 +28,8 @@ export function useProgressData(): ProgressData {
 
   const refresh = useCallback(async () => {
     const now = new Date();
-    const since90 = new Date(now);
-    since90.setDate(since90.getDate() - 90);
     const [w, wa, kc, ds, met] = await Promise.all([
-      weightsSince(db, since90),
+      weightsSince(db, new Date(0)),
       waterDailyTotals(db, 7, now),
       kcalDailyTotals(db, 7, now),
       listDoses(db, 20),

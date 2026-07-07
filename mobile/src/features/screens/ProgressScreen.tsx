@@ -12,16 +12,24 @@ import { estimateRelativeCurve } from '@/features/pk/pharmacokinetics';
 import { useProgressData } from '@/features/progress/useProgressData';
 import { strings } from '@/i18n/pt-BR';
 
-type RangeKey = '30' | '90';
+type RangeKey = '30' | '90' | '120' | 'all';
 
 const RANGE_OPTIONS = [
   { value: '30' as RangeKey, label: strings.progress.range30 },
   { value: '90' as RangeKey, label: strings.progress.range90 },
+  { value: '120' as RangeKey, label: strings.progress.range120 },
+  { value: 'all' as RangeKey, label: strings.progress.rangeAll },
 ];
 
 function weekdayLabel(dayKey: string): string {
   const [y, m, d] = dayKey.split('-').map(Number);
   return new Date(y, m - 1, d).toLocaleDateString('pt-BR', { weekday: 'short' }).slice(0, 3);
+}
+
+/** ISO → 'DD/MM' para os rótulos do eixo do gráfico de peso. */
+function shortDate(iso: string): string {
+  const d = new Date(iso);
+  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
 function BodyHealthSection({ metrics }: { metrics: MetricRow[] }) {
@@ -94,12 +102,30 @@ export function ProgressScreen() {
   const [range, setRange] = useState<RangeKey>('30');
 
   const weightData = useMemo(() => {
-    const since = new Date();
-    since.setDate(since.getDate() - Number(range));
-    return weights
-      .filter((w) => new Date(w.loggedAt) >= since)
-      .map((w) => ({ value: w.weightKg }));
+    let filtered = weights;
+    if (range !== 'all') {
+      const since = new Date();
+      since.setDate(since.getDate() - Number(range));
+      filtered = weights.filter((w) => new Date(w.loggedAt) >= since);
+    }
+    // Data em cada ponto; com muitos registros, rotula ~6 espaçados para não sobrepor.
+    const step = Math.max(1, Math.ceil(filtered.length / 6));
+    return filtered.map((w, i) => ({
+      value: w.weightKg,
+      label: i % step === 0 || i === filtered.length - 1 ? shortDate(w.loggedAt) : '',
+    }));
   }, [weights, range]);
+
+  // Escala na faixa real dos pesos (eixo a partir de 0 achata a linha).
+  const weightBounds = useMemo(() => {
+    if (weightData.length === 0) return null;
+    const values = weightData.map((d) => d.value);
+    const minV = Math.min(...values);
+    const maxV = Math.max(...values);
+    const pad = Math.max(2, Math.round((maxV - minV) * 0.3));
+    const offset = Math.max(0, Math.floor(minV) - pad);
+    return { offset, max: Math.ceil(maxV) + pad - offset };
+  }, [weightData]);
 
   const waterData = water7.map((d) => ({ value: d.totalMl, label: weekdayLabel(d.dayKey) }));
   const kcalData = kcal7.map((d) => ({ value: d.kcal, label: weekdayLabel(d.dayKey) }));
@@ -151,13 +177,16 @@ disableScroll
       <Card style={{ gap: spacing.md }}>
         <AppText variant="title">{strings.progress.weightSection}</AppText>
         <SegmentedChips options={RANGE_OPTIONS} value={range} onChange={setRange} />
-        {weightData.length > 1 ? (
+        {weightData.length > 1 && weightBounds ? (
           <FitChart>{(fitWidth) => (<LineChart width={fitWidth}
             data={weightData}
             color={colors.primary}
             thickness={3}
+            yAxisOffset={weightBounds.offset}
+            maxValue={weightBounds.max}
             hideDataPoints={weightData.length > 20}
             dataPointsColor={colors.primary}
+            xAxisLabelTextStyle={{ color: colors.textMuted, fontSize: 10 }}
             yAxisTextStyle={{ color: colors.textMuted, fontSize: 11 }}
             xAxisColor={colors.border}
             yAxisColor={colors.border}

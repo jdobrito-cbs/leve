@@ -206,6 +206,8 @@ export const strings = {
     weightSection: 'Peso',
     range30: '30 dias',
     range90: '90 dias',
+    range120: '120 dias',
+    rangeAll: 'Geral',
     waterSection: 'Água (7 dias)',
     kcalSection: 'Calorias (7 dias)',
     bodySection: 'Corpo e saúde',
