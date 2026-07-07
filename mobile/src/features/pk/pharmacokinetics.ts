@@ -48,6 +48,12 @@ export interface PkCurve {
   medKey: string;
   points: PkPoint[];
   rawPeak: number;
+  /** Dose (mg) da última aplicação registrada. */
+  latestDoseMg: number;
+  /** Estimativa (mg-equivalente do modelo) no fim da janela, +7 dias. */
+  endMgEstimate: number;
+  /** Índice do pico após a última dose (para rotular a dosagem no gráfico). */
+  peakIndex: number;
 }
 
 const STEP_HOURS = 6;
@@ -89,9 +95,23 @@ export function estimateRelativeCurve(doses: DoseLog[], now: Date = new Date()):
 
   const rawPeak = Math.max(...points.map((p) => p.level));
   if (rawPeak <= 0) return null;
+
+  const latestTime = new Date(latest.loggedAt).getTime();
+  let peakIndex = 0;
+  let peakLevel = -1;
+  points.forEach((p, i) => {
+    if (p.timeMs >= latestTime && p.level > peakLevel) {
+      peakLevel = p.level;
+      peakIndex = i;
+    }
+  });
+
   return {
     medKey,
     rawPeak,
+    latestDoseMg: latest.doseMg,
+    endMgEstimate: points[points.length - 1].level,
+    peakIndex,
     points: points.map((p) => ({ timeMs: p.timeMs, level: p.level / rawPeak })),
   };
 }

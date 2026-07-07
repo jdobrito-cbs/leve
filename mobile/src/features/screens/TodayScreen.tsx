@@ -302,15 +302,30 @@ export function TodayScreen() {
               <FitChart>
                 {(width) => (
                   <LineChart
-                    data={pk.points.map((p) => ({ value: Math.round(p.level * 100) }))}
+                    data={pk.points.map((p, i, arr) => ({
+                      value: Math.round(p.level * 100),
+                      // Só o pico da última dose e o fim da projeção têm ponto e rótulo.
+                      hideDataPoint: i !== pk.peakIndex && i !== arr.length - 1,
+                      dataPointText:
+                        i === pk.peakIndex
+                          ? `${fmt(pk.latestDoseMg, 1)} mg`
+                          : i === arr.length - 1
+                            ? `≈ ${fmt(pk.endMgEstimate, 1)} mg`
+                            : undefined,
+                      textShiftY: -6,
+                      textShiftX: i === arr.length - 1 ? -30 : -16,
+                    }))}
                     color={colors.primary}
                     thickness={3}
-                    height={80}
-                    width={width}
+                    height={96}
+                    width={width - 64}
                     initialSpacing={4}
-                    endSpacing={4}
-                    maxValue={100}
-                    hideDataPoints
+                    endSpacing={48}
+                    maxValue={118}
+                    dataPointsColor={colors.primary}
+                    dataPointsRadius={3.5}
+                    textColor={colors.text}
+                    textFontSize={11}
                     hideAxesAndRules
                     hideYAxisText
                     adjustToWidth
@@ -319,6 +334,10 @@ export function TodayScreen() {
                   />
                 )}
               </FitChart>
+              <AppText variant="caption" muted>
+                {strings.progress.pkLastDose}: {fmt(pk.latestDoseMg, 1)} mg ·{' '}
+                {strings.progress.pkIn7Days}: ≈ {fmt(pk.endMgEstimate, 1)} mg
+              </AppText>
               <AppText variant="caption" muted>
                 {pk.medKey} · {strings.progress.pkRelative} · {strings.progress.pkProjection}
               </AppText>

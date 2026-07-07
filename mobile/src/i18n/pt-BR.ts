@@ -196,6 +196,8 @@ export const strings = {
   progress: {
     pkSection: 'Nível estimado de medicação',
     pkRelative: 'nível relativo (%)',
+    pkLastDose: 'Última dose',
+    pkIn7Days: 'estimativa em 7 dias',
     pkProjection: 'inclui projeção de 7 dias',
     pkDisclaimer:
       'Estimativa matemática com dados públicos de farmacocinética populacional. ' +
