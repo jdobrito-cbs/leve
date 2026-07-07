@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import type { ColorValue } from 'react-native';
+import { Platform, type ColorValue } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedProps,
@@ -21,6 +21,9 @@ interface TabIconProps {
 
 const stroke = { strokeWidth: 1.9, strokeLinecap: 'round', strokeLinejoin: 'round' } as const;
 
+// `animatedProps` em elementos SVG é recurso nativo; na web os ícones ficam estáticos.
+const isWeb = Platform.OS === 'web';
+
 /** Hoje: as folhas do broto balançam como ao vento quando a aba é escolhida. */
 export function SproutTabIcon({ color, focused, size = 22 }: TabIconProps) {
   const sway = useSharedValue(0);
@@ -38,12 +41,22 @@ export function SproutTabIcon({ color, focused, size = 22 }: TabIconProps) {
 
   const leaves = useAnimatedProps(() => ({ rotation: sway.value }));
 
+  const leafPaths = (
+    <>
+      <Path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3" />
+      <Path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4" />
+    </>
+  );
+
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <AnimatedG animatedProps={leaves} origin="12, 21" stroke={color} {...stroke}>
-        <Path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3" />
-        <Path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4" />
-      </AnimatedG>
+      {isWeb ? (
+        <G stroke={color} {...stroke}>{leafPaths}</G>
+      ) : (
+        <AnimatedG animatedProps={leaves} origin="12, 21" stroke={color} {...stroke}>
+          {leafPaths}
+        </AnimatedG>
+      )}
       <Path d="M5 21h14" stroke={color} {...stroke} />
     </Svg>
   );
@@ -69,13 +82,17 @@ export function ChartTabIcon({ color, focused, size = 22 }: TabIconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path d="M3 3v16a2 2 0 0 0 2 2h16" stroke={color} {...stroke} />
-      <AnimatedPath
-        d="m19 9-5 5-4-4-3 3"
-        stroke={color}
-        strokeDasharray={`${TREND_LENGTH}`}
-        animatedProps={trend}
-        {...stroke}
-      />
+      {isWeb ? (
+        <Path d="m19 9-5 5-4-4-3 3" stroke={color} {...stroke} />
+      ) : (
+        <AnimatedPath
+          d="m19 9-5 5-4-4-3 3"
+          stroke={color}
+          strokeDasharray={`${TREND_LENGTH}`}
+          animatedProps={trend}
+          {...stroke}
+        />
+      )}
     </Svg>
   );
 }
@@ -97,13 +114,23 @@ export function UserTabIcon({ color, focused, size = 22 }: TabIconProps) {
 
   const person = useAnimatedProps(() => ({ y: dip.value }));
 
+  const personShapes = (
+    <>
+      <Circle cx="12" cy="10" r="3" />
+      <Path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662" />
+    </>
+  );
+
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Circle cx="12" cy="12" r="10" stroke={color} {...stroke} />
-      <AnimatedG animatedProps={person} stroke={color} {...stroke}>
-        <Circle cx="12" cy="10" r="3" />
-        <Path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662" />
-      </AnimatedG>
+      {isWeb ? (
+        <G stroke={color} {...stroke}>{personShapes}</G>
+      ) : (
+        <AnimatedG animatedProps={person} stroke={color} {...stroke}>
+          {personShapes}
+        </AnimatedG>
+      )}
     </Svg>
   );
 }

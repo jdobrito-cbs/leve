@@ -1,5 +1,5 @@
 import { PropsWithChildren, useEffect } from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedProps,
@@ -73,6 +73,9 @@ export function WaterRing({ progress, size = 148, strokeWidth = 12, children }: 
   }));
 
   const wave = wavePath(size * 2, size * 2, 5);
+  // `animatedProps` em SVG é recurso nativo; na web o anel e a água ficam estáticos.
+  const isWeb = Platform.OS === 'web';
+  const staticTop = cx + inner - 2 * inner * clamped;
 
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
@@ -82,19 +85,35 @@ export function WaterRing({ progress, size = 148, strokeWidth = 12, children }: 
             <Circle cx={cx} cy={cx} r={inner} />
           </ClipPath>
         </Defs>
-        <AnimatedPath
-          d={wave}
-          fill={colors.primarySoft}
-          animatedProps={backWave}
-          clipPath="url(#cup)"
-        />
-        <AnimatedPath
-          d={wave}
-          fill={colors.primary}
-          opacity={0.28}
-          animatedProps={frontWave}
-          clipPath="url(#cup)"
-        />
+        {isWeb ? (
+          <>
+            <Path d={wave} fill={colors.primarySoft} y={staticTop + 3} clipPath="url(#cup)" />
+            <Path
+              d={wave}
+              fill={colors.primary}
+              opacity={0.28}
+              x={-size * 0.35}
+              y={staticTop}
+              clipPath="url(#cup)"
+            />
+          </>
+        ) : (
+          <>
+            <AnimatedPath
+              d={wave}
+              fill={colors.primarySoft}
+              animatedProps={backWave}
+              clipPath="url(#cup)"
+            />
+            <AnimatedPath
+              d={wave}
+              fill={colors.primary}
+              opacity={0.28}
+              animatedProps={frontWave}
+              clipPath="url(#cup)"
+            />
+          </>
+        )}
       </Svg>
       <Svg
         width={size}
@@ -109,17 +128,31 @@ export function WaterRing({ progress, size = 148, strokeWidth = 12, children }: 
           strokeWidth={strokeWidth}
           fill="none"
         />
-        <AnimatedCircle
-          cx={cx}
-          cy={cx}
-          r={r}
-          stroke={colors.primary}
-          strokeWidth={strokeWidth}
-          fill="none"
-          strokeDasharray={`${circumference}`}
-          strokeLinecap="round"
-          animatedProps={ringProps}
-        />
+        {isWeb ? (
+          <Circle
+            cx={cx}
+            cy={cx}
+            r={r}
+            stroke={colors.primary}
+            strokeWidth={strokeWidth}
+            fill="none"
+            strokeDasharray={`${circumference}`}
+            strokeDashoffset={circumference * (1 - clamped)}
+            strokeLinecap="round"
+          />
+        ) : (
+          <AnimatedCircle
+            cx={cx}
+            cy={cx}
+            r={r}
+            stroke={colors.primary}
+            strokeWidth={strokeWidth}
+            fill="none"
+            strokeDasharray={`${circumference}`}
+            strokeLinecap="round"
+            animatedProps={ringProps}
+          />
+        )}
       </Svg>
       <View style={{ alignItems: 'center', zIndex: 2, elevation: 2 }}>{children}</View>
     </View>
