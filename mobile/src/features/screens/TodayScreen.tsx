@@ -59,7 +59,7 @@ export function TodayScreen() {
         </AppText>
       </HeroHeader>
       <ScrollView
-        style={{ marginTop: -spacing.lg }}
+        style={{ marginTop: -spacing.lg, zIndex: 1 }}
         contentContainerStyle={{ padding: spacing.md, gap: spacing.md, paddingBottom: spacing.xl }}
       >
         <Animated.View entering={FadeInDown.duration(420)}>

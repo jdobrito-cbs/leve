@@ -38,7 +38,7 @@ export default function Onboarding() {
         </AppText>
       </HeroHeader>
       <ScrollView
-        style={{ marginTop: -spacing.lg }}
+        style={{ marginTop: -spacing.lg, zIndex: 1 }}
         contentContainerStyle={{ padding: spacing.md, gap: spacing.md, paddingBottom: spacing.xl }}
       >
         <Card style={{ gap: spacing.md }}>
