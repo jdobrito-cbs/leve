@@ -207,7 +207,7 @@ disableScroll
             thickness={3}
             yAxisOffset={weightBounds.offset}
             maxValue={weightBounds.max}
-            initialSpacing={10}
+            initialSpacing={24}
             endSpacing={40}
             hideDataPoints={weightData.length > 20}
             dataPointsColor={colors.primary}
@@ -215,7 +215,7 @@ disableScroll
               color: colors.textMuted,
               fontSize: 10,
               width: 40,
-              marginLeft: -16,
+              marginLeft: -20,
               textAlign: 'center',
             }}
             yAxisTextStyle={{ color: colors.textMuted, fontSize: 11 }}
