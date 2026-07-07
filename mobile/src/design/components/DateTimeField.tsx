@@ -1,6 +1,12 @@
-import { View } from 'react-native';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { Calendar, Clock } from 'lucide-react-native';
+import { useState } from 'react';
+import { Platform, Pressable, View } from 'react-native';
+import { formatDateBR, formatTimeHM, parseDateTimeBR } from '@/core/datetime';
 import { strings } from '@/i18n/pt-BR';
-import { spacing } from '../tokens';
+import { radius, spacing } from '../tokens';
+import { useTheme } from '../useTheme';
+import { AppText } from './AppText';
 import { Input } from './Input';
 
 interface Props {
@@ -10,28 +16,116 @@ interface Props {
   onChangeTime: (v: string) => void;
 }
 
+/** Máscara progressiva DD/MM/AAAA a partir só dos dígitos digitados. */
+export function maskDateBR(text: string): string {
+  const d = text.replace(/\D/g, '').slice(0, 8);
+  if (d.length <= 2) return d;
+  if (d.length <= 4) return `${d.slice(0, 2)}/${d.slice(2)}`;
+  return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4)}`;
+}
+
+/** Máscara progressiva HH:MM a partir só dos dígitos digitados. */
+export function maskTimeHM(text: string): string {
+  const d = text.replace(/\D/g, '').slice(0, 4);
+  if (d.length <= 2) return d;
+  return `${d.slice(0, 2)}:${d.slice(2)}`;
+}
+
 /** Data e hora do registro (pré-preenchidas com agora; edite para lançar registros antigos). */
 export function DateTimeField({ dateValue, timeValue, onChangeDate, onChangeTime }: Props) {
+  const { colors } = useTheme();
+  const [picker, setPicker] = useState<'date' | 'time' | null>(null);
+
+  // Valor inicial do seletor: o que está digitado, senão agora.
+  const pickerValue =
+    parseDateTimeBR(
+      /^\d{2}\/\d{2}\/\d{4}$/.test(dateValue) ? dateValue : formatDateBR(new Date()),
+      /^\d{2}:\d{2}$/.test(timeValue) ? timeValue : formatTimeHM(new Date()),
+    ) ?? new Date();
+
+  function onPicked(event: DateTimePickerEvent, selected?: Date) {
+    // Android abre como diálogo: qualquer evento (ok/cancelar) encerra.
+    if (Platform.OS === 'android') setPicker(null);
+    if (event.type === 'dismissed' || !selected) return;
+    if (picker === 'date') onChangeDate(formatDateBR(selected));
+    else onChangeTime(formatTimeHM(selected));
+  }
+
+  const pickerButton = (mode: 'date' | 'time') => (
+    <Pressable
+      onPress={() => setPicker((p) => (p === mode ? null : mode))}
+      hitSlop={8}
+      accessibilityLabel={mode === 'date' ? strings.common.dateLabel : strings.common.timeLabel}
+      style={{
+        borderWidth: 1,
+        borderColor: picker === mode ? colors.primary : colors.border,
+        borderRadius: radius.sm,
+        backgroundColor: colors.surface,
+        paddingHorizontal: spacing.sm + 2,
+        paddingVertical: spacing.sm + 2,
+        justifyContent: 'center',
+      }}
+    >
+      {mode === 'date' ? (
+        <Calendar size={18} color={colors.primary} />
+      ) : (
+        <Clock size={18} color={colors.primary} />
+      )}
+    </Pressable>
+  );
+
   return (
-    <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-      <View style={{ flex: 1.4 }}>
-        <Input
-          label={strings.common.dateLabel}
-          value={dateValue}
-          onChangeText={onChangeDate}
-          placeholder="DD/MM/AAAA"
-          keyboardType="numbers-and-punctuation"
-        />
+    <View style={{ gap: spacing.sm }}>
+      <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+        <View style={{ flex: 1.4, flexDirection: 'row', gap: spacing.xs }}>
+          <View style={{ flex: 1 }}>
+            <Input
+              label={strings.common.dateLabel}
+              value={dateValue}
+              onChangeText={(v) => onChangeDate(maskDateBR(v))}
+              placeholder="DD/MM/AAAA"
+              keyboardType="number-pad"
+              maxLength={10}
+            />
+          </View>
+          {Platform.OS !== 'web' ? (
+            <View style={{ justifyContent: 'flex-end' }}>{pickerButton('date')}</View>
+          ) : null}
+        </View>
+        <View style={{ flex: 1, flexDirection: 'row', gap: spacing.xs }}>
+          <View style={{ flex: 1 }}>
+            <Input
+              label={strings.common.timeLabel}
+              value={timeValue}
+              onChangeText={(v) => onChangeTime(maskTimeHM(v))}
+              placeholder="HH:MM"
+              keyboardType="number-pad"
+              maxLength={5}
+            />
+          </View>
+          {Platform.OS !== 'web' ? (
+            <View style={{ justifyContent: 'flex-end' }}>{pickerButton('time')}</View>
+          ) : null}
+        </View>
       </View>
-      <View style={{ flex: 1 }}>
-        <Input
-          label={strings.common.timeLabel}
-          value={timeValue}
-          onChangeText={onChangeTime}
-          placeholder="HH:MM"
-          keyboardType="numbers-and-punctuation"
-        />
-      </View>
+      {picker !== null ? (
+        <View style={{ gap: spacing.xs }}>
+          <DateTimePicker
+            value={pickerValue}
+            mode={picker}
+            display={picker === 'date' ? (Platform.OS === 'ios' ? 'inline' : 'default') : 'spinner'}
+            is24Hour
+            onChange={onPicked}
+          />
+          {Platform.OS === 'ios' ? (
+            <Pressable onPress={() => setPicker(null)} hitSlop={8} style={{ alignSelf: 'flex-end' }}>
+              <AppText variant="caption" style={{ color: colors.primary }}>
+                {strings.common.close}
+              </AppText>
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
     </View>
   );
 }
