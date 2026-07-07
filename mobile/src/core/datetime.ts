@@ -45,6 +45,12 @@ export function parseDateTimeBR(dateStr: string, timeStr: string): Date | null {
   return date;
 }
 
+/** ISO → 'DD/MM/AAAA · HH:MM' (hora local), para listas de registros. */
+export function formatDateTimeLabel(iso: string): string {
+  const d = new Date(iso);
+  return `${formatDateBR(d)} · ${formatTimeHM(d)}`;
+}
+
 export function localDayKey(date: Date): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');

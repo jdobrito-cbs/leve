@@ -1,13 +1,32 @@
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { formatDateBR, formatTimeHM, parseDateTimeBR } from '@/core/datetime';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  formatDateBR,
+  formatDateTimeLabel,
+  formatTimeHM,
+  parseDateTimeBR,
+} from '@/core/datetime';
 import { MANUAL_BODY_METRICS, METRIC_DEFS, MetricType } from '@/core/metrics';
 import { parseDecimalBR } from '@/core/text';
-import { AppText, Button, Card, DateTimeField, NumberField, Screen } from '@/design/components';
+import {
+  AppText,
+  Button,
+  Card,
+  DateTimeField,
+  ListRow,
+  NumberField,
+  Screen,
+} from '@/design/components';
 import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
-import { addMetric, latestMetrics } from '@/db/metricsRepo';
+import {
+  MetricRow,
+  addMetric,
+  deleteMetric,
+  latestMetrics,
+  listManualMetrics,
+} from '@/db/metricsRepo';
 import { strings } from '@/i18n/pt-BR';
 
 export function BodyCompScreen() {
@@ -17,18 +36,26 @@ export function BodyCompScreen() {
   const [saved, setSaved] = useState(false);
   const [dateStr, setDateStr] = useState(formatDateBR(new Date()));
   const [timeStr, setTimeStr] = useState(formatTimeHM(new Date()));
+  const [list, setList] = useState<MetricRow[]>([]);
   const at = parseDateTimeBR(dateStr, timeStr);
 
-  useEffect(() => {
-    latestMetrics(db).then((map) => {
-      const p: Partial<Record<MetricType, string>> = {};
-      for (const type of MANUAL_BODY_METRICS) {
-        const last = map.get(type);
-        if (last) p[type] = String(last.value);
-      }
-      setPlaceholders(p);
-    });
+  const load = useCallback(async () => {
+    const [map, rows] = await Promise.all([
+      latestMetrics(db),
+      listManualMetrics(db, MANUAL_BODY_METRICS),
+    ]);
+    const p: Partial<Record<MetricType, string>> = {};
+    for (const type of MANUAL_BODY_METRICS) {
+      const last = map.get(type);
+      if (last) p[type] = String(last.value);
+    }
+    setPlaceholders(p);
+    setList(rows);
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const filled = MANUAL_BODY_METRICS.filter((t) => {
     const v = parseDecimalBR(values[t] ?? '');
@@ -42,6 +69,7 @@ export function BodyCompScreen() {
     }
     setValues({});
     setSaved(true);
+    await load();
   }
 
   return (
@@ -81,6 +109,23 @@ export function BodyCompScreen() {
           </AppText>
         ) : null}
       </Card>
+      {list.length > 0 ? (
+        <Card>
+          <AppText variant="title">{strings.common.historyTitle}</AppText>
+          {list.map((m) => (
+            <ListRow
+              key={m.id}
+              title={strings.metrics[m.type]}
+              subtitle={formatDateTimeLabel(m.loggedAt)}
+              right={`${m.value.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} ${m.unit}`}
+              onDelete={async () => {
+                await deleteMetric(db, m.id);
+                await load();
+              }}
+            />
+          ))}
+        </Card>
+      ) : null}
       <Button label={strings.common.close} variant="secondary" onPress={() => router.back()} />
     </Screen>
   );

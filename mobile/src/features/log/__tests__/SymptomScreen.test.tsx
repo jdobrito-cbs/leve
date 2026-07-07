@@ -3,17 +3,19 @@ import { fireEvent, render, waitFor } from '@testing-library/react-native';
 jest.mock('@/db/client', () => ({ db: {} }));
 jest.mock('expo-router', () => ({ router: { back: jest.fn(), push: jest.fn() } }));
 const mockAddSymptom = jest.fn();
-const mockForDay = jest.fn();
+const mockList = jest.fn();
+const mockDelete = jest.fn();
 jest.mock('@/db/symptomRepo', () => ({
   addSymptom: (...a: unknown[]) => mockAddSymptom(...a),
-  symptomsForDay: (...a: unknown[]) => mockForDay(...a),
+  listSymptoms: (...a: unknown[]) => mockList(...a),
+  deleteSymptom: (...a: unknown[]) => mockDelete(...a),
 }));
 
 import { strings } from '@/i18n/pt-BR';
 import { SymptomScreen } from '../SymptomScreen';
 
 test('seleciona sintoma + intensidade e salva', async () => {
-  mockForDay.mockResolvedValue([]);
+  mockList.mockResolvedValue([]);
   mockAddSymptom.mockResolvedValue(undefined);
   const { getByText } = await render(<SymptomScreen />);
   await waitFor(() => getByText(strings.symptom.kinds.nausea));

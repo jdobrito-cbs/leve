@@ -1,4 +1,4 @@
-import { asc, desc, gte } from 'drizzle-orm';
+import { asc, desc, eq, gte } from 'drizzle-orm';
 import type { LogOrigin, WeightLog } from '@/core/types';
 import type { AppDb } from './client';
 import { weightLogs } from './schema';
@@ -15,6 +15,18 @@ export async function addWeight(
 export async function latestWeight(db: AppDb): Promise<WeightLog | null> {
   const rows = await db.select().from(weightLogs).orderBy(desc(weightLogs.loggedAt)).limit(1);
   return (rows[0] as WeightLog | undefined) ?? null;
+}
+
+export async function listWeights(db: AppDb, limit = 100): Promise<WeightLog[]> {
+  return (await db
+    .select()
+    .from(weightLogs)
+    .orderBy(desc(weightLogs.loggedAt))
+    .limit(limit)) as WeightLog[];
+}
+
+export async function deleteWeight(db: AppDb, id: number): Promise<void> {
+  await db.delete(weightLogs).where(eq(weightLogs.id, id));
 }
 
 export async function weightsSince(db: AppDb, since: Date): Promise<WeightLog[]> {

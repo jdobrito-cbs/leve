@@ -1,4 +1,4 @@
-import { and, asc, gte, lt } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, lt } from 'drizzle-orm';
 import { dayRangeUtc } from '@/core/datetime';
 import type { SymptomLog } from '@/core/types';
 import type { AppDb } from './client';
@@ -11,6 +11,18 @@ export async function addSymptom(
   at: Date,
 ): Promise<void> {
   await db.insert(symptomLogs).values({ kind, intensity, loggedAt: at.toISOString() });
+}
+
+export async function listSymptoms(db: AppDb, limit = 100): Promise<SymptomLog[]> {
+  return (await db
+    .select()
+    .from(symptomLogs)
+    .orderBy(desc(symptomLogs.loggedAt))
+    .limit(limit)) as SymptomLog[];
+}
+
+export async function deleteSymptom(db: AppDb, id: number): Promise<void> {
+  await db.delete(symptomLogs).where(eq(symptomLogs.id, id));
 }
 
 export async function symptomsForDay(db: AppDb, day: Date): Promise<SymptomLog[]> {

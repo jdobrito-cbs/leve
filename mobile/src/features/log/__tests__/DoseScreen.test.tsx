@@ -4,9 +4,13 @@ jest.mock('@/db/client', () => ({ db: {} }));
 jest.mock('expo-router', () => ({ router: { back: jest.fn(), push: jest.fn() } }));
 const mockAddDose = jest.fn();
 const mockLastSite = jest.fn();
+const mockListDoses = jest.fn().mockResolvedValue([]);
+const mockDeleteDose = jest.fn();
 jest.mock('@/db/doseRepo', () => ({
   addDose: (...a: unknown[]) => mockAddDose(...a),
   lastInjectionSite: (...a: unknown[]) => mockLastSite(...a),
+  listDoses: (...a: unknown[]) => mockListDoses(...a),
+  deleteDose: (...a: unknown[]) => mockDeleteDose(...a),
 }));
 jest.mock('@/db/settingsRepo', () => ({
   getSetting: jest.fn().mockResolvedValue(null),

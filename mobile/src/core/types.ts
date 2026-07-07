@@ -1,5 +1,6 @@
 export type LogOrigin = 'manual' | 'scan' | 'healthkit' | 'healthconnect';
 export type DoseRoute = 'injecao' | 'pilula';
+export type MealPeriod = 'cafe' | 'almoco' | 'lanche' | 'jantar' | 'ceia';
 
 export interface Profile {
   id: number;
@@ -30,6 +31,7 @@ export interface FoodLog {
   fiberG: number | null;
   origin: LogOrigin;
   photoUri: string | null;
+  period: MealPeriod | null;
   loggedAt: string;
 }
 

@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, ne } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, inArray, ne } from 'drizzle-orm';
 import { METRIC_DEFS, MetricType } from '@/core/metrics';
 import type { LogOrigin } from '@/core/types';
 import type { AppDb } from './client';
@@ -38,6 +38,24 @@ export async function latestMetrics(db: AppDb): Promise<Map<MetricType, MetricRo
   const map = new Map<MetricType, MetricRow>();
   for (const row of rows) map.set(row.type, row);
   return map;
+}
+
+/** Registros manuais dos tipos indicados, do mais recente ao mais antigo. */
+export async function listManualMetrics(
+  db: AppDb,
+  types: readonly MetricType[],
+  limit = 100,
+): Promise<MetricRow[]> {
+  return (await db
+    .select()
+    .from(healthMetrics)
+    .where(and(inArray(healthMetrics.type, [...types]), eq(healthMetrics.origin, 'manual')))
+    .orderBy(desc(healthMetrics.loggedAt))
+    .limit(limit)) as MetricRow[];
+}
+
+export async function deleteMetric(db: AppDb, id: number): Promise<void> {
+  await db.delete(healthMetrics).where(eq(healthMetrics.id, id));
 }
 
 export async function metricSeries(

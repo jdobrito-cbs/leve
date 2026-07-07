@@ -1,8 +1,13 @@
 import { router } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
-import { formatDateBR, formatTimeHM, parseDateTimeBR } from '@/core/datetime';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  formatDateBR,
+  formatDateTimeLabel,
+  formatTimeHM,
+  parseDateTimeBR,
+} from '@/core/datetime';
 import { parseDecimalBR } from '@/core/text';
-import type { DoseRoute } from '@/core/types';
+import type { DoseLog, DoseRoute } from '@/core/types';
 import {
   AppText,
   Button,
@@ -10,13 +15,15 @@ import {
   DateTimeField,
   DisclaimerBanner,
   Input,
+  ListRow,
   NumberField,
   Screen,
   SegmentedChips,
 } from '@/design/components';
 import { spacing } from '@/design/tokens';
+import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
-import { addDose, lastInjectionSite } from '@/db/doseRepo';
+import { addDose, deleteDose, lastInjectionSite, listDoses } from '@/db/doseRepo';
 import { getSetting } from '@/db/settingsRepo';
 import { INJECTION_SITES, InjectionSite, suggestNextSite } from '@/features/dose/rotation';
 import { strings } from '@/i18n/pt-BR';
@@ -35,21 +42,28 @@ const ROUTE_OPTIONS = (Object.keys(strings.dose.routes) as DoseRoute[]).map((val
 }));
 
 export function DoseScreen() {
+  const { colors } = useTheme();
   const [medication, setMedication] = useState<MedKey | null>(null);
   const [customMed, setCustomMed] = useState('');
   const [doseStr, setDoseStr] = useState('');
   const [route, setRoute] = useState<DoseRoute>('injecao');
   const [lastSite, setLastSite] = useState<InjectionSite | null>(null);
   const [site, setSite] = useState<InjectionSite | null>(null);
+  const [list, setList] = useState<DoseLog[]>([]);
+  const [saved, setSaved] = useState(false);
   const [dateStr, setDateStr] = useState(formatDateBR(new Date()));
   const [timeStr, setTimeStr] = useState(formatTimeHM(new Date()));
 
-  useEffect(() => {
-    lastInjectionSite(db).then((last) => {
-      setLastSite(last);
-      setSite(suggestNextSite(last));
-    });
+  const load = useCallback(async () => {
+    const [last, doses] = await Promise.all([lastInjectionSite(db), listDoses(db)]);
+    setLastSite(last);
+    setSite(suggestNextSite(last));
+    setList(doses);
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const suggested = useMemo(() => suggestNextSite(lastSite), [lastSite]);
 
@@ -87,7 +101,19 @@ export function DoseScreen() {
       const reminders = await getSetting<{ doseEnabled?: boolean }>(db, 'reminders');
       if (reminders?.doseEnabled) await scheduleDoseReminder(nextDoseAt);
     }
-    router.back();
+    setDoseStr('');
+    setSaved(true);
+    await load();
+  }
+
+  async function remove(id: number) {
+    await deleteDose(db, id);
+    await load();
+  }
+
+  function doseRowTitle(d: DoseLog): string {
+    const label = strings.dose.medications[d.medication as MedKey] ?? d.medication;
+    return `${label} · ${d.doseMg.toLocaleString('pt-BR')} mg`;
   }
 
   return (
@@ -138,6 +164,28 @@ export function DoseScreen() {
         />
       </Card>
       <Button label={strings.dose.save} onPress={save} disabled={!valid} />
+      {saved ? (
+        <AppText variant="caption" style={{ color: colors.success, textAlign: 'center' }}>
+          {strings.dose.savedLabel}
+        </AppText>
+      ) : null}
+      {list.length > 0 ? (
+        <Card>
+          <AppText variant="title">{strings.common.historyTitle}</AppText>
+          {list.map((d) => (
+            <ListRow
+              key={d.id}
+              title={doseRowTitle(d)}
+              subtitle={
+                d.injectionSite
+                  ? `${formatDateTimeLabel(d.loggedAt)} · ${strings.dose.sites[d.injectionSite as InjectionSite]}`
+                  : formatDateTimeLabel(d.loggedAt)
+              }
+              onDelete={() => remove(d.id)}
+            />
+          ))}
+        </Card>
+      ) : null}
       <Button label={strings.common.close} variant="secondary" onPress={() => router.back()} />
     </Screen>
   );

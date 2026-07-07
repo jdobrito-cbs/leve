@@ -1,6 +1,6 @@
-import { and, asc, gte, lt, sum } from 'drizzle-orm';
+import { and, asc, eq, gte, lt, sum } from 'drizzle-orm';
 import { dayRangeUtc, lastNDays, localDayKey } from '@/core/datetime';
-import type { FoodLog, LogOrigin } from '@/core/types';
+import type { FoodLog, LogOrigin, MealPeriod } from '@/core/types';
 import type { AppDb } from './client';
 import { foodLogs } from './schema';
 
@@ -13,6 +13,7 @@ export interface AddFoodLogInput {
   fatG?: number | null;
   fiberG?: number | null;
   origin?: LogOrigin;
+  period?: MealPeriod | null;
   at: Date;
 }
 
@@ -27,8 +28,13 @@ export async function addFoodLog(db: AppDb, input: AddFoodLogInput): Promise<voi
     fiberG: input.fiberG ?? null,
     origin: input.origin ?? 'manual',
     photoUri: null,
+    period: input.period ?? null,
     loggedAt: input.at.toISOString(),
   });
+}
+
+export async function deleteFoodLog(db: AppDb, id: number): Promise<void> {
+  await db.delete(foodLogs).where(eq(foodLogs.id, id));
 }
 
 export async function foodForDay(db: AppDb, day: Date): Promise<FoodLog[]> {

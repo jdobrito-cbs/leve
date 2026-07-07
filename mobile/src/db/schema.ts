@@ -29,7 +29,27 @@ export const foodLogs = sqliteTable('food_logs', {
   fiberG: real('fiber_g'),
   origin: text('origin').notNull().default('manual'),
   photoUri: text('photo_uri'),
+  period: text('period'), // 'cafe' | 'almoco' | 'lanche' | 'jantar' | 'ceia'
   loggedAt: text('logged_at').notNull(),
+});
+
+// Pratos salvos para reutilizar (modelos de refeição).
+export const dishes = sqliteTable('dishes', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  createdAt: text('created_at').notNull(),
+});
+
+export const dishItems = sqliteTable('dish_items', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  dishId: integer('dish_id').notNull(),
+  name: text('name').notNull(),
+  grams: real('grams'),
+  calories: real('calories'),
+  proteinG: real('protein_g'),
+  carbsG: real('carbs_g'),
+  fatG: real('fat_g'),
+  fiberG: real('fiber_g'),
 });
 
 export const doseLogs = sqliteTable('dose_logs', {

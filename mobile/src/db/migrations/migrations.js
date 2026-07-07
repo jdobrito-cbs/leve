@@ -5,6 +5,7 @@ import m0000 from './0000_sticky_scream.sql';
 import m0001 from './0001_polite_pete_wisdom.sql';
 import m0002 from './0002_lumpy_manta.sql';
 import m0003 from './0003_pretty_taskmaster.sql';
+import m0004 from './0004_bright_tusk.sql';
 
   export default {
     journal,
@@ -12,7 +13,8 @@ import m0003 from './0003_pretty_taskmaster.sql';
       m0000,
 m0001,
 m0002,
-m0003
+m0003,
+m0004
     }
   }
   

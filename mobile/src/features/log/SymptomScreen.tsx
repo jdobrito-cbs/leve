@@ -1,11 +1,16 @@
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { formatDateBR, formatTimeHM, parseDateTimeBR } from '@/core/datetime';
+import {
+  formatDateBR,
+  formatDateTimeLabel,
+  formatTimeHM,
+  parseDateTimeBR,
+} from '@/core/datetime';
 import type { SymptomLog } from '@/core/types';
 import { AppText, Button, Card, DateTimeField, ListRow, Screen, SegmentedChips } from '@/design/components';
 import { spacing } from '@/design/tokens';
 import { db } from '@/db/client';
-import { addSymptom, symptomsForDay } from '@/db/symptomRepo';
+import { addSymptom, deleteSymptom, listSymptoms } from '@/db/symptomRepo';
 import { strings } from '@/i18n/pt-BR';
 
 type KindKey = keyof typeof strings.symptom.kinds;
@@ -20,13 +25,13 @@ const INTENSITY_OPTIONS = ['1', '2', '3', '4', '5'].map((value) => ({ value, lab
 export function SymptomScreen() {
   const [kind, setKind] = useState<KindKey | null>(null);
   const [intensity, setIntensity] = useState<string | null>(null);
-  const [today, setToday] = useState<SymptomLog[]>([]);
+  const [list, setList] = useState<SymptomLog[]>([]);
   const [dateStr, setDateStr] = useState(formatDateBR(new Date()));
   const [timeStr, setTimeStr] = useState(formatTimeHM(new Date()));
   const at = parseDateTimeBR(dateStr, timeStr);
 
   const load = useCallback(async () => {
-    setToday(await symptomsForDay(db, new Date()));
+    setList(await listSymptoms(db));
   }, []);
 
   useEffect(() => {
@@ -61,14 +66,19 @@ export function SymptomScreen() {
         />
         <Button label={strings.symptom.save} onPress={save} disabled={!kind || !intensity || !at} />
       </Card>
-      {today.length > 0 ? (
+      {list.length > 0 ? (
         <Card>
-          <AppText variant="title">{strings.symptom.todayList}</AppText>
-          {today.map((s) => (
+          <AppText variant="title">{strings.common.historyTitle}</AppText>
+          {list.map((s) => (
             <ListRow
               key={s.id}
               title={strings.symptom.kinds[s.kind as KindKey] ?? s.kind}
+              subtitle={formatDateTimeLabel(s.loggedAt)}
               right={`${s.intensity}/5`}
+              onDelete={async () => {
+                await deleteSymptom(db, s.id);
+                await load();
+              }}
             />
           ))}
         </Card>

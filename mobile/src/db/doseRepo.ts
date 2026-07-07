@@ -37,6 +37,10 @@ export async function listDoses(db: AppDb, limit = 50): Promise<DoseLog[]> {
     .limit(limit)) as DoseLog[];
 }
 
+export async function deleteDose(db: AppDb, id: number): Promise<void> {
+  await db.delete(doseLogs).where(eq(doseLogs.id, id));
+}
+
 export async function lastInjectionSite(db: AppDb): Promise<InjectionSite | null> {
   const rows = await db
     .select({ site: doseLogs.injectionSite })

@@ -1,4 +1,6 @@
+import { Trash2 } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
+import { strings } from '@/i18n/pt-BR';
 import { spacing } from '../tokens';
 import { useTheme } from '../useTheme';
 import { AppText } from './AppText';
@@ -8,9 +10,10 @@ interface Props {
   subtitle?: string;
   right?: string;
   onPress?: () => void;
+  onDelete?: () => void;
 }
 
-export function ListRow({ title, subtitle, right, onPress }: Props) {
+export function ListRow({ title, subtitle, right, onPress, onDelete }: Props) {
   const { colors } = useTheme();
   const content = (
     <View
@@ -32,6 +35,17 @@ export function ListRow({ title, subtitle, right, onPress }: Props) {
         ) : null}
       </View>
       {right ? <AppText muted>{right}</AppText> : null}
+      {onDelete ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={strings.common.deleteEntry}
+          onPress={onDelete}
+          hitSlop={10}
+          style={{ padding: spacing.xs }}
+        >
+          <Trash2 size={17} color={colors.danger} />
+        </Pressable>
+      ) : null}
     </View>
   );
   return onPress ? (
