@@ -6,10 +6,10 @@ import {
 } from '@expo-google-fonts/manrope';
 import * as Notifications from 'expo-notifications';
 import { Stack } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
-import { AppText, Screen } from '@/design/components';
-import { db, initDb } from '@/db/client';
+import { AppText, Button, Screen } from '@/design/components';
+import { db, initDb, isDbLockedError } from '@/db/client';
 import { seedFoodItemsIfEmpty } from '@/db/seed/tacoSeed';
 import { strings } from '@/i18n/pt-BR';
 
@@ -31,7 +31,8 @@ export default function RootLayout() {
     Manrope_700Bold,
   });
 
-  useEffect(() => {
+  const load = useCallback(() => {
+    setError(null);
     initDb()
       .then(() =>
         seedFoodItemsIfEmpty(db).catch((e) =>
@@ -42,11 +43,19 @@ export default function RootLayout() {
       .catch((e) => setError(e instanceof Error ? e : new Error(String(e))));
   }, []);
 
+  useEffect(() => {
+    load();
+  }, [load]);
+
   if (error) {
+    const locked = isDbLockedError(error);
     return (
       <Screen>
-        <AppText variant="title">{strings.common.error}</AppText>
-        <AppText muted>{error.message}</AppText>
+        <AppText variant="title">
+          {locked ? strings.common.dbLockedTitle : strings.common.error}
+        </AppText>
+        <AppText muted>{locked ? strings.common.dbLockedBody : error.message}</AppText>
+        <Button label={strings.common.retry} onPress={load} />
       </Screen>
     );
   }

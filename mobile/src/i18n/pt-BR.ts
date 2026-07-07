@@ -377,5 +377,9 @@ export const strings = {
     timeLabel: 'Hora',
     historyTitle: 'Registros',
     deleteEntry: 'Apagar registro',
+    dbLockedTitle: 'O Leve já está aberto em outra aba',
+    dbLockedBody:
+      'No navegador, seus dados só podem ser usados por uma aba de cada vez. ' +
+      'Feche as outras abas do Leve e toque em tentar novamente.',
   },
 } as const;

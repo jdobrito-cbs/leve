@@ -9,6 +9,16 @@ export type AppDb = BaseSQLiteDatabase<'sync' | 'async', unknown, typeof schema>
 let instance: AppDb | null = null;
 let initPromise: Promise<AppDb> | null = null;
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** No web o arquivo do banco (OPFS) é exclusivo: outra aba do app o mantém aberto. */
+export function isDbLockedError(e: unknown): boolean {
+  const msg = e instanceof Error ? `${e.name} ${e.message}` : String(e);
+  return msg.includes('Access Handle') || msg.includes('NoModificationAllowedError');
+}
+
 /** Aplica as migrations pendentes usando a API assíncrona (funciona em nativo e web). */
 async function runMigrations(sqlite: SQLiteDatabase): Promise<void> {
   await sqlite.execAsync('CREATE TABLE IF NOT EXISTS __leve_migrations (idx INTEGER PRIMARY KEY)');
@@ -29,13 +39,33 @@ async function runMigrations(sqlite: SQLiteDatabase): Promise<void> {
   }
 }
 
+/**
+ * Abre o banco no web com retentativas: após recarregar a página, a aba
+ * anterior pode segurar o arquivo (OPFS é exclusivo) por alguns instantes.
+ */
+async function openWebDatabase(
+  expoSqlite: typeof import('expo-sqlite'),
+): Promise<SQLiteDatabase> {
+  for (let attempt = 0; ; attempt++) {
+    let opened: SQLiteDatabase | null = null;
+    try {
+      opened = await expoSqlite.openDatabaseAsync('leve.db');
+      await runMigrations(opened);
+      return opened;
+    } catch (e) {
+      if (opened) await opened.closeAsync().catch(() => undefined);
+      if (!isDbLockedError(e) || attempt >= 4) throw e;
+      await sleep(700);
+    }
+  }
+}
+
 async function create(): Promise<AppDb> {
   const expoSqlite = await import('expo-sqlite');
 
   if (Platform.OS === 'web') {
     // Web: driver assíncrono (não depende de SharedArrayBuffer/COOP/COEP).
-    const sqlite = await expoSqlite.openDatabaseAsync('leve.db');
-    await runMigrations(sqlite);
+    const sqlite = await openWebDatabase(expoSqlite);
     const { drizzle } = await import('drizzle-orm/sqlite-proxy');
     const db = drizzle(
       async (sql, params, method) => {
@@ -65,10 +95,17 @@ async function create(): Promise<AppDb> {
 /** Abre o banco e aplica migrations; chamado uma vez pelo layout raiz antes de renderizar o app. */
 export async function initDb(): Promise<AppDb> {
   if (!initPromise) {
-    initPromise = create().then((db) => {
-      instance = db;
-      return db;
-    });
+    initPromise = create().then(
+      (db) => {
+        instance = db;
+        return db;
+      },
+      (e) => {
+        // Falhou (ex.: banco preso em outra aba): libera para tentar de novo.
+        initPromise = null;
+        throw e;
+      },
+    );
   }
   return initPromise;
 }
