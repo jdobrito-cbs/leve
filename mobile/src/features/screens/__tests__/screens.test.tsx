@@ -1,8 +1,11 @@
-import { fireEvent, render } from '@testing-library/react-native';
+import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 jest.mock('expo-router', () => ({ router: { push: jest.fn(), back: jest.fn(), replace: jest.fn() } }));
 jest.mock('@/db/client', () => ({ db: {} }));
+jest.mock('@/db/profileRepo', () => ({
+  getProfile: jest.fn().mockResolvedValue({ sex: 'feminino' }),
+}));
 jest.mock('expo-sharing', () => ({
   isAvailableAsync: jest.fn().mockResolvedValue(false),
   shareAsync: jest.fn(),
@@ -38,6 +41,7 @@ jest.mock('@/features/profile/useProfileForm', () => ({
     loading: false,
     form: {
       name: 'Jorge',
+      sex: 'masculino',
       heightStr: '178',
       medication: 'semaglutida',
       goalWeightStr: '85',
@@ -134,6 +138,7 @@ test('Registrar lista as 5 categorias e navega nas ativas', async () => {
   ]) {
     getByText(label);
   }
+  await waitFor(() => getByText(strings.log.cycle)); // sexo feminino → item de ciclo aparece
   await fireEvent.press(getByText(strings.log.water));
   expect(router.push).toHaveBeenCalledWith('/log/agua');
 });

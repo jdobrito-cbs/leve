@@ -14,8 +14,11 @@ import {
   requestNotificationPermission,
 } from '@/services/reminders/reminders';
 
+export type SexOption = 'feminino' | 'masculino' | 'nao_informar';
+
 export interface ProfileForm {
   name: string;
+  sex: SexOption | null;
   heightStr: string;
   medication: string;
   goalWeightStr: string;
@@ -30,6 +33,7 @@ export interface ProfileForm {
 
 const EMPTY_FORM: ProfileForm = {
   name: '',
+  sex: null,
   heightStr: '',
   medication: '',
   goalWeightStr: '',
@@ -60,6 +64,7 @@ export function useProfileForm() {
     setAutoGoalMl(weight ? waterGoalFromWeightKg(weight.weightKg) : null);
     setForm({
       name: profile?.name ?? '',
+      sex: (profile?.sex as SexOption | null) ?? null,
       heightStr: profile?.heightCm ? String(profile.heightCm) : '',
       medication: profile?.medication ?? '',
       goalWeightStr: profile?.goalWeightKg ? String(profile.goalWeightKg) : '',
@@ -107,6 +112,7 @@ export function useProfileForm() {
 
     await updateProfile(db, {
       name: form.name.trim() || null,
+      sex: form.sex,
       heightCm: parseDecimalBR(form.heightStr),
       medication: form.medication.trim() || null,
       goalWeightKg: parseDecimalBR(form.goalWeightStr),

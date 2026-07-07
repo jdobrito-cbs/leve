@@ -5,7 +5,7 @@ import { profile } from './schema';
 
 export async function getProfile(db: AppDb): Promise<Profile | null> {
   const rows = await db.select().from(profile).limit(1);
-  return rows[0] ?? null;
+  return (rows[0] as Profile | undefined) ?? null;
 }
 
 export async function updateProfile(

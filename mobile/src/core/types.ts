@@ -10,6 +10,7 @@ export interface Profile {
   disclaimerAcceptedAt: string | null; // ISO 8601
   waterGoalMl: number;
   calorieGoalKcal: number | null;
+  sex: 'feminino' | 'masculino' | 'nao_informar' | null;
 }
 
 export interface WaterLog {

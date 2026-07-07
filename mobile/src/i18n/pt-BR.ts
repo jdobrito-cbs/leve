@@ -44,6 +44,7 @@ export const strings = {
     weight: 'Peso',
     symptom: 'Sintoma',
     bodyComp: 'Composição corporal',
+    cycle: 'Ciclo menstrual',
     comingSoon: 'Disponível na próxima fase',
   },
   water: {
@@ -165,6 +166,8 @@ export const strings = {
     nameLabel: 'Nome',
     heightLabel: 'Altura (cm)',
     medicationLabel: 'Medicação atual',
+    sexLabel: 'Sexo',
+    sexes: { feminino: 'Feminino', masculino: 'Masculino', nao_informar: 'Prefiro não informar' },
     goalWeightLabel: 'Meta de peso (kg)',
     waterGoalLabel: 'Meta de água (ml)',
     waterGoalAuto: 'Meta de água automática (35 ml/kg)',
@@ -190,6 +193,23 @@ export const strings = {
     deleteDataConfirm:
       'Apaga TODOS os registros deste aparelho permanentemente. Toque de novo para confirmar.',
     comingSoon: 'Disponível em breve',
+  },
+  cycle: {
+    title: 'Ciclo menstrual',
+    startToday: 'Menstruação começou hoje',
+    endToday: 'Terminou hoje',
+    activeSince: 'Em andamento desde',
+    dayOfCycle: 'dia do ciclo',
+    flowLabel: 'Fluxo',
+    flows: { leve: 'Leve', moderado: 'Moderado', intenso: 'Intenso' },
+    predicted: 'Próxima estimada para',
+    avgCycle: 'ciclo médio de',
+    predictionHint:
+      'Estimativa pela média dos seus últimos ciclos — informativa, não é método contraceptivo nem diagnóstico.',
+    history: 'Ciclos anteriores',
+    empty: 'Registre o início da menstruação para acompanhar o ciclo.',
+    cardActive: 'Menstruação — dia',
+    cardPredicted: 'Próxima menstruação',
   },
   insights: {
     section: 'Observações',

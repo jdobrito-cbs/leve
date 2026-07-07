@@ -13,6 +13,7 @@ import {
   Input,
   NumberField,
   Screen,
+  SegmentedChips,
 } from '@/design/components';
 import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
@@ -82,6 +83,16 @@ export function ProfileScreen() {
           label={strings.profile.nameLabel}
           value={form.name}
           onChangeText={(v) => setField('name', v)}
+        />
+        <AppText variant="caption" muted>
+          {strings.profile.sexLabel}
+        </AppText>
+        <SegmentedChips
+          options={(Object.keys(strings.profile.sexes) as Array<keyof typeof strings.profile.sexes>).map(
+            (value) => ({ value, label: strings.profile.sexes[value] }),
+          )}
+          value={form.sex}
+          onChange={(v) => setField('sex', v)}
         />
         <NumberField
           label={strings.profile.heightLabel}
