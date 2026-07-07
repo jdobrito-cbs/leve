@@ -43,9 +43,15 @@ export function WaterRing({ progress, size = 148, strokeWidth = 12, children }: 
   const cx = size / 2;
   const cupSize = inner * 2;
   const clamped = Math.min(Math.max(progress, 0), 1);
-  // Cor por status: meta batida = verde; abaixo da metade = vermelho; no caminho = azul.
+  // Cor por status: 0–40% vermelho · 41–60% amarelo · 61–99% azul · 100%+ verde.
   const statusColor =
-    clamped >= 1 ? colors.success : clamped < 0.5 ? colors.danger : colors.primary;
+    clamped >= 1
+      ? colors.success
+      : clamped > 0.6
+        ? colors.primary
+        : clamped > 0.4
+          ? colors.warning
+          : colors.danger;
 
   const phase = useSharedValue(0);
   const level = useSharedValue(0);
