@@ -1,13 +1,13 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import type { DoseLog, WeightLog } from '@/core/types';
+import type { DoseLog, SymptomLog, WeightLog } from '@/core/types';
 import { db } from '@/db/client';
 import { latestDose, listDoses } from '@/db/doseRepo';
 import { DayMacros, macrosForDay } from '@/db/foodLogRepo';
 import { latestMetric, metricSeries } from '@/db/metricsRepo';
 import { getProfile } from '@/db/profileRepo';
 import { getSetting } from '@/db/settingsRepo';
-import { symptomsForDay } from '@/db/symptomRepo';
+import { listSymptoms, symptomsForDay } from '@/db/symptomRepo';
 import { waterTotalForDay } from '@/db/waterRepo';
 import { firstWeight, listWeights } from '@/db/weightRepo';
 import { todayIntakes, type TodayIntake } from '@/features/meds/medsRepo';
@@ -40,6 +40,8 @@ export interface TodaySummary {
   doseIntervalDays: number | null;
   doses: DoseLog[];
   symptomsCount: number;
+  /** Os 7 últimos sintomas registrados (mais recentes primeiro). */
+  recentSymptoms: SymptomLog[];
   steps: number | null;
   activeCalories: number;
   healthLatest: HealthLatest;
@@ -71,6 +73,7 @@ export function useTodaySummary(): TodaySummary {
   const [doseIntervalDays, setDoseIntervalDays] = useState<number | null>(null);
   const [doses, setDoses] = useState<DoseLog[]>([]);
   const [symptomsCount, setSymptomsCount] = useState(0);
+  const [recentSymptoms, setRecentSymptoms] = useState<SymptomLog[]>([]);
   const [steps, setSteps] = useState<number | null>(null);
   const [activeCalories, setActiveCalories] = useState(0);
   const [healthLatest, setHealthLatest] = useState<HealthLatest>(EMPTY_HEALTH);
@@ -95,6 +98,7 @@ export function useTodaySummary(): TodaySummary {
         getProfile(db),
         getEffectiveWaterGoal(db),
       ]);
+    setRecentSymptoms(await listSymptoms(db, 7));
     setWaterMl(water);
     setMacros(dayMacros);
     setLastWeightKg(recentWeights[0]?.weightKg ?? null);
@@ -176,6 +180,7 @@ export function useTodaySummary(): TodaySummary {
     doseIntervalDays,
     doses,
     symptomsCount,
+    recentSymptoms,
     steps,
     activeCalories,
     healthLatest,

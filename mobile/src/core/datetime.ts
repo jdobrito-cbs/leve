@@ -45,6 +45,14 @@ export function parseDateTimeBR(dateStr: string, timeStr: string): Date | null {
   return date;
 }
 
+/** ISO → 'DD/MM HH:MM' (hora local), para listas compactas. */
+export function formatDateTimeShort(iso: string): string {
+  const d = new Date(iso);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  return `${day}/${month} ${formatTimeHM(d)}`;
+}
+
 /** ISO → 'DD/MM/AAAA · HH:MM' (hora local), para listas de registros. */
 export function formatDateTimeLabel(iso: string): string {
   const d = new Date(iso);

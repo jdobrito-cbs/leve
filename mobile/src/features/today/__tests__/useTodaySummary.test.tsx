@@ -41,6 +41,9 @@ jest.mock('@/db/doseRepo', () => ({
 }));
 jest.mock('@/db/symptomRepo', () => ({
   symptomsForDay: jest.fn().mockResolvedValue([{ kind: 'nausea' }]),
+  listSymptoms: jest
+    .fn()
+    .mockResolvedValue([{ id: 1, kind: 'nausea', intensity: 3, loggedAt: '2026-07-07T09:00:00.000Z' }]),
 }));
 jest.mock('@/db/settingsRepo', () => ({
   getSetting: jest.fn().mockResolvedValue({ connected: true }),
@@ -85,5 +88,6 @@ test('agrega os dados do dia', async () => {
   expect(result.current.goalWeightKg).toBe(85);
   expect(result.current.nextDoseAt).toBe('2026-07-14T12:00:00.000Z');
   expect(result.current.symptomsCount).toBe(1);
+  expect(result.current.recentSymptoms).toHaveLength(1);
   expect(result.current.steps).toBe(4200);
 });

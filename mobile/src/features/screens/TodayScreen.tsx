@@ -3,6 +3,7 @@ import { useMemo, type ComponentType, type PropsWithChildren } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LineChart } from 'react-native-gifted-charts';
+import { formatDateTimeShort } from '@/core/datetime';
 import { AppText, Card, FitChart, HeroHeader, IconChip, WaterRing } from '@/design/components';
 import { OverflowDrips, OverflowFill } from '@/design/components/OverflowWater';
 import {
@@ -242,13 +243,55 @@ export function TodayScreen() {
             }
             route="/log/dose"
           />
-          <StatCard
-            index={3}
-            Anim={NotesWritingIcon}
-            label={strings.today.cards.symptoms}
-            value={summary.symptomsCount > 0 ? String(summary.symptomsCount) : strings.today.none}
-            route="/log/sintoma"
-          />
+          {/* Sintomas: contador à esquerda, últimos 7 com data e hora na lateral */}
+          <Animated.View
+            entering={FadeInDown.duration(420).delay(3 * 70)}
+            style={{ flexBasis: '47%', flexGrow: 1 }}
+          >
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push('/log/sintoma' as never)}
+            >
+              <Card style={{ flexDirection: 'row', gap: spacing.md }}>
+                <View style={{ gap: spacing.sm }}>
+                  <IconChip size={36} wiggleKey={String(summary.symptomsCount)}>
+                    <NotesWritingIcon size={18} />
+                  </IconChip>
+                  <AppText variant="caption" muted>
+                    {strings.today.cards.symptoms}
+                  </AppText>
+                  <AppText style={{ fontFamily: fonts.semibold }}>
+                    {summary.symptomsCount > 0
+                      ? String(summary.symptomsCount)
+                      : strings.today.none}
+                  </AppText>
+                </View>
+                {summary.recentSymptoms.length > 0 ? (
+                  <View style={{ flex: 1, justifyContent: 'center', gap: 2 }}>
+                    {summary.recentSymptoms.map((s) => (
+                      <View
+                        key={s.id}
+                        style={{
+                          flexDirection: 'row',
+                          justifyContent: 'space-between',
+                          gap: spacing.sm,
+                        }}
+                      >
+                        <AppText variant="caption" numberOfLines={1} style={{ flexShrink: 1 }}>
+                          {strings.symptom.kinds[s.kind as keyof typeof strings.symptom.kinds] ??
+                            s.kind}{' '}
+                          {s.intensity}/5
+                        </AppText>
+                        <AppText variant="caption" muted>
+                          {formatDateTimeShort(s.loggedAt)}
+                        </AppText>
+                      </View>
+                    ))}
+                  </View>
+                ) : null}
+              </Card>
+            </Pressable>
+          </Animated.View>
         </View>
 
         {/* 4 — Nível estimado da medicação */}

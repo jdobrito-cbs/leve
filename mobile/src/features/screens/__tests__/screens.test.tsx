@@ -90,6 +90,10 @@ jest.mock('@/features/today/useTodaySummary', () => ({
       },
     ],
     symptomsCount: 2,
+    recentSymptoms: [
+      { id: 2, kind: 'nausea', intensity: 3, loggedAt: '2026-07-07T09:00:00.000Z' },
+      { id: 1, kind: 'azia', intensity: 2, loggedAt: '2026-07-06T21:30:00.000Z' },
+    ],
     steps: 4200,
     activeCalories: 320,
     healthLatest: { sleepHours: 7.2, restingHr: 64, spo2: 98, respiratoryRate: 15 },
@@ -148,6 +152,8 @@ test('Hoje mostra todos os boxes na nova ordem', async () => {
   getByText(strings.today.cards.nextDose);
   getByText(/14\/07\/2026 · \d+d/); // data + dias restantes
   getByText(strings.today.cards.symptoms);
+  getByText(/Náusea 3\/5/); // últimos sintomas na lateral do card
+  getByText(/06\/07 21:30/);
   getByText(strings.today.medicationSection);
   getByText(strings.today.mealsSection);
   expect(getAllByText(/850/).length).toBeGreaterThanOrEqual(2); // card rápido + box de refeição
