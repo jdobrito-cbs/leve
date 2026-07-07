@@ -207,7 +207,7 @@ export function TodayScreen() {
           <View
             style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
           >
-            <AppText style={{ fontFamily: fonts.bold, fontSize: 20 }}>
+            <AppText style={{ fontFamily: fonts.bold, fontSize: 34, lineHeight: 40 }}>
               {summary.lastWeightKg !== null
                 ? `${fmt(summary.lastWeightKg, 1)} kg`
                 : strings.today.noWeight}
