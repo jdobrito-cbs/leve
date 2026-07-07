@@ -25,7 +25,10 @@ export default function Onboarding() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      contentContainerStyle={{ paddingBottom: spacing.xl }}
+    >
       <HeroHeader>
         <AppText variant="caption" style={{ color: colors.onHero, opacity: 0.85 }}>
           {strings.appName} — {strings.tagline}
@@ -37,10 +40,7 @@ export default function Onboarding() {
           {strings.onboarding.welcomeBody}
         </AppText>
       </HeroHeader>
-      <ScrollView
-        style={{ marginTop: -spacing.lg, zIndex: 1 }}
-        contentContainerStyle={{ padding: spacing.md, gap: spacing.md, paddingBottom: spacing.xl }}
-      >
+      <View style={{ padding: spacing.md, gap: spacing.md, marginTop: -spacing.lg, zIndex: 1 }}>
         <Card style={{ gap: spacing.md }}>
           <DisclaimerBanner />
           <AppText variant="caption" muted>
@@ -74,7 +74,7 @@ export default function Onboarding() {
             disabled={!checked || saving}
           />
         </Card>
-      </ScrollView>
-    </View>
+      </View>
+    </ScrollView>
   );
 }

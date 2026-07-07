@@ -46,7 +46,10 @@ export function TodayScreen() {
   const progress = summary.waterGoalMl > 0 ? summary.waterMl / summary.waterGoalMl : 0;
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      contentContainerStyle={{ paddingBottom: spacing.xl }}
+    >
       <HeroHeader>
         <AppText variant="caption" style={{ color: colors.onHero, opacity: 0.85 }}>
           {strings.today.greeting}
@@ -58,9 +61,8 @@ export function TodayScreen() {
           {strings.today.summaryLabel}
         </AppText>
       </HeroHeader>
-      <ScrollView
-        style={{ marginTop: -spacing.lg, zIndex: 1 }}
-        contentContainerStyle={{ padding: spacing.md, gap: spacing.md, paddingBottom: spacing.xl }}
+      <View
+        style={{ padding: spacing.md, gap: spacing.md, marginTop: -spacing.lg, zIndex: 1 }}
       >
         <Animated.View entering={FadeInDown.duration(420)}>
           <Pressable accessibilityRole="button" onPress={() => router.push('/log/agua' as never)}>
@@ -193,7 +195,7 @@ export function TodayScreen() {
             route="/log/sintoma"
           />
         </Animated.View>
-      </ScrollView>
-    </View>
+      </View>
+    </ScrollView>
   );
 }
