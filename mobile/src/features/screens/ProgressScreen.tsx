@@ -187,7 +187,19 @@ disableScroll
       <BodyHealthSection metrics={metrics} />
 
       <Card style={{ gap: spacing.md }}>
-        <AppText variant="title">{strings.progress.weightSection}</AppText>
+        <View
+          style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+        >
+          <AppText variant="title">{strings.progress.weightSection}</AppText>
+          {weights.length > 0 ? (
+            <AppText style={{ fontFamily: fonts.bold, fontSize: 30, lineHeight: 36 }}>
+              {weights[weights.length - 1].weightKg.toLocaleString('pt-BR', {
+                maximumFractionDigits: 1,
+              })}{' '}
+              kg
+            </AppText>
+          ) : null}
+        </View>
         <SegmentedChips options={RANGE_OPTIONS} value={range} onChange={setRange} />
         {weightData.length > 1 && weightBounds ? (
           <FitChart>{(fitWidth) => (<LineChart width={fitWidth - 72}
