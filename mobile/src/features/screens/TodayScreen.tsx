@@ -168,11 +168,13 @@ export function TodayScreen() {
                 const pad = Math.max(1, (maxV - minV) * 0.35);
                 return (
                   <LineChart
-                    data={summary.weightSeries.map((w) => ({
+                    data={summary.weightSeries.map((w, i, arr) => ({
                       value: w.weightKg,
                       dataPointText: w.weightKg.toLocaleString('pt-BR', {
                         maximumFractionDigits: 1,
                       }),
+                      // Último ponto: puxa o rótulo para dentro para não cortar.
+                      textShiftX: i === arr.length - 1 ? -30 : -8,
                     }))}
                     color={colors.primary}
                     thickness={3}
@@ -181,7 +183,7 @@ export function TodayScreen() {
                     yAxisOffset={minV - pad}
                     maxValue={maxV - minV + 2 * pad}
                     initialSpacing={16}
-                    endSpacing={16}
+                    endSpacing={34}
                     dataPointsColor={colors.primary}
                     dataPointsRadius={3.5}
                     textColor={colors.text}
@@ -202,8 +204,10 @@ export function TodayScreen() {
               {strings.progress.empty}
             </AppText>
           )}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <AppText style={{ fontFamily: fonts.semibold }}>
+          <View
+            style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+          >
+            <AppText style={{ fontFamily: fonts.bold, fontSize: 20 }}>
               {summary.lastWeightKg !== null
                 ? `${fmt(summary.lastWeightKg, 1)} kg`
                 : strings.today.noWeight}
