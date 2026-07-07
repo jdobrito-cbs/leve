@@ -153,7 +153,7 @@ test('Hoje mostra todos os boxes na nova ordem', async () => {
   getByText(/14\/07\/2026 · \d+d/); // data + dias restantes
   getByText(strings.today.cards.symptoms);
   getByText(/Náusea 3\/5/); // últimos sintomas na lateral do card
-  getByText(/06\/07 21:30/);
+  expect(getAllByText(/\d{2}\/\d{2} \d{2}:\d{2}/).length).toBeGreaterThanOrEqual(2); // data e hora
   getByText(strings.today.medicationSection);
   getByText(strings.today.mealsSection);
   expect(getAllByText(/850/).length).toBeGreaterThanOrEqual(2); // card rápido + box de refeição

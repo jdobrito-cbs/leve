@@ -25,7 +25,8 @@ import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
 import { addDose, deleteDose, lastInjectionSite, listDoses } from '@/db/doseRepo';
 import { getSetting } from '@/db/settingsRepo';
-import { INJECTION_SITES, InjectionSite, suggestNextSite } from '@/features/dose/rotation';
+import { BodyMapPicker } from '@/features/dose/BodyMapPicker';
+import { InjectionSite, suggestNextSite } from '@/features/dose/rotation';
 import { strings } from '@/i18n/pt-BR';
 import { scheduleDoseReminder } from '@/services/reminders/reminders';
 
@@ -66,17 +67,6 @@ export function DoseScreen() {
   }, [load]);
 
   const suggested = useMemo(() => suggestNextSite(lastSite), [lastSite]);
-
-  const siteOptions = INJECTION_SITES.map((value) => ({
-    value,
-    label: strings.dose.sites[value],
-    sublabel:
-      value === lastSite
-        ? strings.dose.lastSiteLabel
-        : value === suggested
-          ? strings.dose.suggestedLabel
-          : undefined,
-  }));
 
   const doseMg = parseDecimalBR(doseStr);
   const at = parseDateTimeBR(dateStr, timeStr);
@@ -149,7 +139,7 @@ export function DoseScreen() {
           <AppText variant="caption" muted>
             {strings.dose.siteLabel}
           </AppText>
-          <SegmentedChips options={siteOptions} value={site} onChange={setSite} />
+          <BodyMapPicker value={site} onChange={setSite} lastSite={lastSite} suggested={suggested} />
           <AppText variant="caption" muted>
             {strings.dose.siteHint}
           </AppText>
