@@ -26,6 +26,8 @@ function weekdayLabel(dayKey: string): string {
   return new Date(y, m - 1, d).toLocaleDateString('pt-BR', { weekday: 'short' }).slice(0, 3);
 }
 
+const fmtMg = (n: number) => n.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+
 /** ISO → 'DD/MM' para os rótulos do eixo do gráfico de peso. */
 function shortDate(iso: string): string {
   const d = new Date(iso);
@@ -142,19 +144,40 @@ export function ProgressScreen() {
         <AppText variant="title">{strings.progress.pkSection}</AppText>
         {pk ? (
           <>
-            <FitChart>{(fitWidth) => (<LineChart width={fitWidth}
-              data={pk.points.map((p) => ({ value: Math.round(p.level * 100) }))}
+            <FitChart>{(fitWidth) => (<LineChart width={fitWidth - 64}
+              data={pk.points.map((p, i, arr) => ({
+                value: Math.round(p.level * 100),
+                // Igual ao painel: só o pico da última dose e o fim da projeção têm rótulo.
+                hideDataPoint: i !== pk.peakIndex && i !== arr.length - 1,
+                dataPointText:
+                  i === pk.peakIndex
+                    ? `${fmtMg(pk.latestDoseMg)} mg`
+                    : i === arr.length - 1
+                      ? `≈ ${fmtMg(pk.endMgEstimate)} mg`
+                      : undefined,
+                textShiftY: -6,
+                textShiftX: i === arr.length - 1 ? -30 : -16,
+              }))}
               color={colors.primary}
               thickness={3}
               height={110}
-              maxValue={100}
-              hideDataPoints
+              maxValue={118}
+              initialSpacing={4}
+              endSpacing={48}
+              dataPointsColor={colors.primary}
+              dataPointsRadius={3.5}
+              textColor={colors.text}
+              textFontSize={11}
               hideAxesAndRules
               hideYAxisText
               adjustToWidth
 curved
 disableScroll
 />)}</FitChart>
+            <AppText variant="caption" muted>
+              {strings.progress.pkLastDose}: {fmtMg(pk.latestDoseMg)} mg ·{' '}
+              {strings.progress.pkIn7Days}: ≈ {fmtMg(pk.endMgEstimate)} mg
+            </AppText>
             <AppText variant="caption" muted>
               {pk.medKey} · {strings.progress.pkRelative} · {strings.progress.pkProjection}
             </AppText>
