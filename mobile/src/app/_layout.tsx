@@ -51,7 +51,7 @@ class RootErrorBoundary extends Component<PropsWithChildren, { error: Error | nu
 export default function RootLayout() {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [stage, setStage] = useState(strings.common.bootDb);
+  const [stage, setStage] = useState<string>(strings.common.bootDb);
   const [fontsLoaded, fontError] = useFonts({
     Manrope_400Regular,
     Manrope_600SemiBold,
