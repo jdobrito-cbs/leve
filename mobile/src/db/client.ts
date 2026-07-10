@@ -86,8 +86,11 @@ async function create(): Promise<AppDb> {
   }
 
   // Nativo: driver síncrono (rápido, roda na própria thread de JS).
+  console.log('[leve] abrindo banco nativo…');
   const sqlite = expoSqlite.openDatabaseSync('leve.db');
+  console.log('[leve] banco aberto; aplicando migrations…');
   await runMigrations(sqlite);
+  console.log('[leve] migrations aplicadas');
   const { drizzle } = await import('drizzle-orm/expo-sqlite');
   return drizzle(sqlite, { schema }) as unknown as AppDb;
 }

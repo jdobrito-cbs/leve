@@ -381,6 +381,9 @@ export const strings = {
     timeLabel: 'Hora',
     historyTitle: 'Registros',
     deleteEntry: 'Apagar registro',
+    bootDb: 'Preparando o banco de dados…',
+    bootSeed: 'Carregando a base de alimentos…',
+    bootStuck: 'A inicialização demorou demais na etapa',
     dbLockedTitle: 'O Leve já está aberto em outra aba',
     dbLockedBody:
       'No navegador, seus dados só podem ser usados por uma aba de cada vez. ' +

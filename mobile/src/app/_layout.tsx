@@ -51,6 +51,7 @@ class RootErrorBoundary extends Component<PropsWithChildren, { error: Error | nu
 export default function RootLayout() {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [stage, setStage] = useState(strings.common.bootDb);
   const [fontsLoaded, fontError] = useFonts({
     Manrope_400Regular,
     Manrope_600SemiBold,
@@ -61,19 +62,36 @@ export default function RootLayout() {
 
   const load = useCallback(() => {
     setError(null);
+    setStage(strings.common.bootDb);
+    console.log('[leve] iniciando banco…');
     initDb()
-      .then(() =>
-        seedFoodItemsIfEmpty(db).catch((e) =>
+      .then(() => {
+        console.log('[leve] banco pronto; semeando alimentos…');
+        setStage(strings.common.bootSeed);
+        return seedFoodItemsIfEmpty(db).catch((e) =>
           console.warn('Seed TACO falhou (busca ficará vazia):', e),
-        ),
-      )
-      .then(() => setReady(true))
+        );
+      })
+      .then(() => {
+        console.log('[leve] inicialização concluída');
+        setReady(true);
+      })
       .catch((e) => setError(e instanceof Error ? e : new Error(String(e))));
   }, []);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  // Vigia: travou em alguma etapa → vira erro legível em vez de spinner eterno.
+  useEffect(() => {
+    if (ready || error) return;
+    const timer = setTimeout(
+      () => setError(new Error(`${strings.common.bootStuck}: ${stage}`)),
+      20000,
+    );
+    return () => clearTimeout(timer);
+  }, [ready, error, stage]);
 
   if (error) {
     const locked = isDbLockedError(error);
@@ -89,8 +107,11 @@ export default function RootLayout() {
   }
   if (!ready || !fontsReady) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 }}>
         <ActivityIndicator size="large" />
+        <AppText variant="caption" muted>
+          {stage}
+        </AppText>
       </View>
     );
   }
