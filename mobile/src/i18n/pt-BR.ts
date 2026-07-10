@@ -381,6 +381,9 @@ export const strings = {
     timeLabel: 'Hora',
     historyTitle: 'Registros',
     deleteEntry: 'Apagar registro',
+    dbInsecureContext:
+      'No navegador, os dados só funcionam em endereço seguro (https ou localhost). ' +
+      'Abra pelo computador em localhost ou use o endereço https do túnel do Expo.',
     bootDb: 'Preparando o banco de dados…',
     bootSeed: 'Carregando a base de alimentos…',
     bootStuck: 'A inicialização demorou demais na etapa',

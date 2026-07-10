@@ -1,6 +1,7 @@
 import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { Platform } from 'react-native';
+import { strings } from '@/i18n/pt-BR';
 import migrations from './migrations/migrations';
 import * as schema from './schema';
 
@@ -64,6 +65,11 @@ async function create(): Promise<AppDb> {
   const expoSqlite = await import('expo-sqlite');
 
   if (Platform.OS === 'web') {
+    // O armazenamento do navegador (OPFS) só existe em contexto seguro —
+    // https ou localhost. Via http://IP:porta ele trava sem mensagem.
+    if (typeof globalThis.isSecureContext === 'boolean' && !globalThis.isSecureContext) {
+      throw new Error(strings.common.dbInsecureContext);
+    }
     // Web: driver assíncrono (não depende de SharedArrayBuffer/COOP/COEP).
     const sqlite = await openWebDatabase(expoSqlite);
     const { drizzle } = await import('drizzle-orm/sqlite-proxy');
