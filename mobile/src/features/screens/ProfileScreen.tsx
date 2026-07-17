@@ -18,13 +18,33 @@ import {
 import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { useHealthConnection } from '@/features/health/useHealthConnection';
+import { isLocked } from '@/features/premium/gates';
+import { usePremium } from '@/features/premium/usePremium';
 import { useProfileForm } from '@/features/profile/useProfileForm';
 import { strings } from '@/i18n/pt-BR';
 
 function HealthSection() {
   const { colors } = useTheme();
   const health = useHealthConnection();
+  const { premium } = usePremium();
   const platformName = Platform.OS === 'ios' ? strings.health.iosName : strings.health.androidName;
+
+  if (isLocked('healthSync', premium)) {
+    return (
+      <Card style={{ gap: spacing.md }}>
+        <AppText variant="title">
+          {strings.health.section} — {platformName}
+        </AppText>
+        <AppText variant="caption" muted>
+          {strings.premium.healthLockedBody}
+        </AppText>
+        <Button
+          label={strings.premium.discover}
+          onPress={() => router.push('/assinatura' as never)}
+        />
+      </Card>
+    );
+  }
 
   return (
     <Card style={{ gap: spacing.md }}>
@@ -217,6 +237,11 @@ export function ProfileScreen() {
       <HealthSection />
 
       <Card style={{ gap: spacing.sm }}>
+        <Button
+          label={strings.premium.title}
+          variant="secondary"
+          onPress={() => router.push('/assinatura' as never)}
+        />
         <Button
           label={strings.meds.title}
           variant="secondary"

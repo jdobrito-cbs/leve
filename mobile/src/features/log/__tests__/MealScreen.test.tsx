@@ -28,6 +28,15 @@ jest.mock('@/services/vision/VisionProvider', () => ({
   isScanConfigured: () => true,
   getVisionProvider: () => ({ recognizeFood: (...a: unknown[]) => mockRecognize(...a) }),
 }));
+let mockPremium = true;
+jest.mock('@/features/premium/usePremium', () => ({
+  usePremium: () => ({
+    loading: false,
+    premium: mockPremium,
+    entitlement: { plan: mockPremium ? 'partner' : 'free' },
+    refresh: jest.fn(),
+  }),
+}));
 jest.mock('expo-image-picker', () => ({
   launchImageLibraryAsync: jest
     .fn()
@@ -54,6 +63,7 @@ const FEIJAO = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockPremium = true;
   mockForDay.mockResolvedValue([]);
   mockListDishes.mockResolvedValue([]);
   mockAddFood.mockResolvedValue(undefined);
@@ -136,6 +146,15 @@ test('modo manual: peso digitado + base TACO calculam as calorias', async () => 
       expect.objectContaining({ name: 'Feijão de casa', portionGrams: 200, calories: 152 }),
     ),
   );
+});
+
+test('sem premium, tocar no scan leva à tela de assinatura', async () => {
+  mockPremium = false;
+  const { router } = jest.requireMock('expo-router') as { router: { push: jest.Mock } };
+  const { getByText } = await render(<MealScreen />);
+  await fireEvent.press(getByText(new RegExp(strings.meal.scanTab)));
+  expect(router.push).toHaveBeenCalledWith('/assinatura');
+  expect(mockRecognize).not.toHaveBeenCalled();
 });
 
 test('salvar prato persiste modelo reutilizável', async () => {

@@ -42,3 +42,6 @@ example
 /ios
 /android
 .env
+
+# Chave privada das licencas de parceiro (fica so com o dono)
+scripts/license-key.private.json

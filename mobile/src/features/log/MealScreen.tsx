@@ -22,6 +22,8 @@ import {
 import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
+import { isLocked } from '@/features/premium/gates';
+import { usePremium } from '@/features/premium/usePremium';
 import { Dish, DishItemInput, deleteDish, listDishes, saveDish } from '@/db/dishRepo';
 import { searchFoods } from '@/db/foodItemsRepo';
 import { addFoodLog, deleteFoodLog, foodForDay } from '@/db/foodLogRepo';
@@ -34,11 +36,22 @@ interface PlateItem extends DishItemInput {
   origin: LogOrigin;
 }
 
-const MODE_OPTIONS = [
-  { value: 'search' as Mode, label: strings.meal.searchTab },
-  { value: 'manual' as Mode, label: strings.meal.manualTab },
-  ...(isScanConfigured() ? [{ value: 'scan' as Mode, label: strings.meal.scanTab }] : []),
-];
+function modeOptions(scanLocked: boolean) {
+  return [
+    { value: 'search' as Mode, label: strings.meal.searchTab },
+    { value: 'manual' as Mode, label: strings.meal.manualTab },
+    ...(isScanConfigured()
+      ? [
+          {
+            value: 'scan' as Mode,
+            label: scanLocked
+              ? `${strings.meal.scanTab} · ${strings.premium.lockedTag}`
+              : strings.meal.scanTab,
+          },
+        ]
+      : []),
+  ];
+}
 
 const PERIOD_ORDER: MealPeriod[] = ['cafe', 'almoco', 'lanche', 'jantar', 'ceia'];
 
@@ -68,6 +81,8 @@ function fmtKcal(v: number | null): string {
 
 export function MealScreen() {
   const { colors } = useTheme();
+  const { premium } = usePremium();
+  const scanLocked = isLocked('scanFood', premium);
   const [mode, setMode] = useState<Mode>('search');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<FoodItem[]>([]);
@@ -305,7 +320,17 @@ export function MealScreen() {
           onChangeTime={setTimeStr}
         />
       </Card>
-      <SegmentedChips options={MODE_OPTIONS} value={mode} onChange={setMode} />
+      <SegmentedChips
+        options={modeOptions(scanLocked)}
+        value={mode}
+        onChange={(v) => {
+          if (v === 'scan' && scanLocked) {
+            router.push('/assinatura' as never);
+            return;
+          }
+          setMode(v);
+        }}
+      />
 
       {mode === 'search' ? (
         <Card style={{ gap: spacing.md }}>

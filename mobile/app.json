@@ -10,8 +10,10 @@
     "ios": {
       "bundleIdentifier": "app.leve.mobile",
       "supportsTablet": false,
+      "usesAppleSignIn": true,
       "infoPlist": {
-        "NSHealthShareUsageDescription": "O Leve importa peso, passos, sono, frequência cardíaca e composição corporal do Apple Saúde apenas quando você autoriza, para exibir seu progresso no app. Os dados ficam somente no seu aparelho."
+        "NSHealthShareUsageDescription": "O Leve importa peso, passos, sono, frequência cardíaca e composição corporal do Apple Saúde apenas quando você autoriza, para exibir seu progresso no app. Os dados ficam somente no seu aparelho.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -22,7 +24,10 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "single",
@@ -59,11 +64,18 @@
       ],
       "expo-sharing",
       "expo-secure-store",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-apple-authentication"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e26c1ba7-dafc-4b2f-8af3-b3a71f7aa222"
+      }
     }
   }
 }

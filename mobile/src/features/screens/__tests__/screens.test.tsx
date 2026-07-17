@@ -114,6 +114,14 @@ jest.mock('@/features/today/useTodaySummary', () => ({
     refresh: jest.fn(),
   }),
 }));
+jest.mock('@/features/premium/usePremium', () => ({
+  usePremium: () => ({
+    loading: false,
+    premium: true,
+    entitlement: { plan: 'partner' },
+    refresh: jest.fn(),
+  }),
+}));
 jest.mock('@/features/health/useHealthConnection', () => ({
   useHealthConnection: () => ({
     loading: false,
