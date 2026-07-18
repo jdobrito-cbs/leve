@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Camera, HeartPulse, KeyRound, Sparkles } from 'lucide-react-native';
+import { Camera, Droplet, Dumbbell, HeartPulse, KeyRound, Pill, Sparkles } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { AppText, Button, Card, IconChip, Input, Screen } from '@/design/components';
@@ -126,6 +126,24 @@ export function PremiumScreen() {
             <HeartPulse size={17} color={colors.primary} />
           </IconChip>
           <AppText style={{ flex: 1 }}>{strings.premium.benefits.health}</AppText>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <IconChip size={34}>
+            <Pill size={17} color={colors.primary} />
+          </IconChip>
+          <AppText style={{ flex: 1 }}>{strings.premium.benefits.meds}</AppText>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <IconChip size={34}>
+            <Dumbbell size={17} color={colors.primary} />
+          </IconChip>
+          <AppText style={{ flex: 1 }}>{strings.premium.benefits.gym}</AppText>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <IconChip size={34}>
+            <Droplet size={17} color={colors.primary} />
+          </IconChip>
+          <AppText style={{ flex: 1 }}>{strings.premium.benefits.cycle}</AppText>
         </View>
       </Card>
 

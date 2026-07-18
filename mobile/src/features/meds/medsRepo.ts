@@ -20,6 +20,21 @@ export interface TodayIntake {
   takenAt: string | null;
 }
 
+/** Quantidades de doses diárias oferecidas (dividem 24 h em horas cheias). */
+export const DAILY_DOSE_COUNTS = [1, 2, 3, 4, 6, 8, 12] as const;
+
+/** Horários automáticos: doses igualmente espaçadas nas 24 h, ancoradas às 08:00. */
+export function timesForDailyCount(count: number): string[] {
+  const stepMin = Math.round((24 * 60) / count);
+  const times = Array.from({ length: count }, (_, i) => {
+    const totalMin = (8 * 60 + i * stepMin) % (24 * 60);
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  });
+  return times.sort();
+}
+
 export function parseTimes(times: string): string[] {
   return times
     .split(',')

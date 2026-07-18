@@ -1,13 +1,24 @@
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
-import { AppText, Button, Card, Input, ListRow, Screen } from '@/design/components';
+import {
+  AppText,
+  Button,
+  Card,
+  Input,
+  ListRow,
+  Screen,
+  SegmentedChips,
+} from '@/design/components';
 import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
+import { isLocked } from '@/features/premium/gates';
+import { usePremium } from '@/features/premium/usePremium';
 import { strings } from '@/i18n/pt-BR';
 import { applyMedicationReminders, requestNotificationPermission } from '@/services/reminders/reminders';
 import {
+  DAILY_DOSE_COUNTS,
   Medication,
   TodayIntake,
   addMedication,
@@ -16,17 +27,25 @@ import {
   listMedications,
   markTaken,
   parseTimes,
+  timesForDailyCount,
   todayIntakes,
 } from './medsRepo';
 
+const DOSE_COUNT_OPTIONS = DAILY_DOSE_COUNTS.map((n) => ({
+  value: String(n),
+  label: `${n}x`,
+}));
+
 export function MedsScreen() {
   const { colors } = useTheme();
+  const { premium } = usePremium();
   const [meds, setMeds] = useState<Medication[]>([]);
   const [intakes, setIntakes] = useState<TodayIntake[]>([]);
   const [stats, setStats] = useState({ taken: 0, total: 0 });
   const [name, setName] = useState('');
   const [doseText, setDoseText] = useState('');
-  const [timesStr, setTimesStr] = useState('08:00');
+  const [doseCount, setDoseCount] = useState('1');
+  const autoTimes = timesForDailyCount(Number(doseCount));
 
   const load = useCallback(async () => {
     setMeds(await listMedications(db));
@@ -38,6 +57,26 @@ export function MedsScreen() {
     load();
   }, [load]);
 
+  if (isLocked('meds', premium)) {
+    return (
+      <Screen>
+        <AppText variant="display">{strings.meds.title}</AppText>
+        <Card style={{ gap: spacing.md }}>
+          <AppText variant="caption" muted>
+            {strings.premium.medsLockedBody}
+          </AppText>
+          <Button
+            label={strings.premium.discover}
+            onPress={() => router.push('/assinatura' as never)}
+          />
+        </Card>
+        {router.canGoBack?.() ? (
+          <Button label={strings.common.close} variant="secondary" onPress={() => router.back()} />
+        ) : null}
+      </Screen>
+    );
+  }
+
   async function reschedule() {
     const active = await listMedications(db);
     await applyMedicationReminders(
@@ -46,14 +85,17 @@ export function MedsScreen() {
   }
 
   async function add() {
-    const times = parseTimes(timesStr);
-    if (!name.trim() || times.length === 0) return;
-    await addMedication(db, { name: name.trim(), doseText: doseText.trim() || null, times });
+    if (!name.trim()) return;
+    await addMedication(db, {
+      name: name.trim(),
+      doseText: doseText.trim() || null,
+      times: autoTimes,
+    });
     await requestNotificationPermission();
     await reschedule();
     setName('');
     setDoseText('');
-    setTimesStr('08:00');
+    setDoseCount('1');
     await load();
   }
 
@@ -116,17 +158,14 @@ export function MedsScreen() {
       <Card style={{ gap: spacing.md }}>
         <Input label={strings.meds.nameLabel} value={name} onChangeText={setName} />
         <Input label={strings.meds.doseLabel} value={doseText} onChangeText={setDoseText} />
-        <Input
-          label={strings.meds.timesLabel}
-          value={timesStr}
-          onChangeText={setTimesStr}
-          placeholder="08:00, 20:00"
-        />
-        <Button
-          label={strings.meds.add}
-          onPress={add}
-          disabled={!name.trim() || parseTimes(timesStr).length === 0}
-        />
+        <AppText variant="caption" muted>
+          {strings.meds.dosesPerDayLabel}
+        </AppText>
+        <SegmentedChips options={DOSE_COUNT_OPTIONS} value={doseCount} onChange={setDoseCount} />
+        <AppText variant="caption" muted>
+          {strings.meds.timesPreview}: {autoTimes.join(' · ')}
+        </AppText>
+        <Button label={strings.meds.add} onPress={add} disabled={!name.trim()} />
         <AppText variant="caption" muted>
           {strings.meds.remindersOn}
         </AppText>

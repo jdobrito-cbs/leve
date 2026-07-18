@@ -5,6 +5,9 @@
 export const PREMIUM_LOCKS = {
   scanFood: true, // escanear comida por foto
   healthSync: true, // saúde conectada (relógio/balança)
+  meds: true, // controle de medicamentos (Meus remédios)
+  gym: true, // academia
+  cycle: true, // controle de ciclo menstrual
   insights: false,
   savedDishes: false,
 } as const;

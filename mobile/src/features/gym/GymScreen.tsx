@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {
   formatDateBR,
@@ -23,6 +24,8 @@ import { db } from '@/db/client';
 import { GymLog, addGymLog, deleteGymLog, gymKcalForDay, listGymLogs } from '@/db/gymRepo';
 import { latestWeight } from '@/db/weightRepo';
 import { GYM_EXERCISES, GymExerciseKey, estimateKcal } from '@/features/gym/exercises';
+import { isLocked } from '@/features/premium/gates';
+import { usePremium } from '@/features/premium/usePremium';
 import { strings } from '@/i18n/pt-BR';
 
 const ALL_KEYS = Object.keys(GYM_EXERCISES) as GymExerciseKey[];
@@ -43,6 +46,7 @@ function detailLabel(log: GymLog): string {
 
 export function GymScreen() {
   const { colors } = useTheme();
+  const { premium } = usePremium();
   const [exercise, setExercise] = useState<GymExerciseKey>('supino');
   const [weightStr, setWeightStr] = useState('');
   const [setsStr, setSetsStr] = useState('3');
@@ -98,6 +102,23 @@ export function GymScreen() {
     });
     setSaved(true);
     await load();
+  }
+
+  if (isLocked('gym', premium)) {
+    return (
+      <Screen>
+        <AppText variant="display">{strings.gym.title}</AppText>
+        <Card style={{ gap: spacing.md }}>
+          <AppText variant="caption" muted>
+            {strings.premium.gymLockedBody}
+          </AppText>
+          <Button
+            label={strings.premium.discover}
+            onPress={() => router.push('/assinatura' as never)}
+          />
+        </Card>
+      </Screen>
+    );
   }
 
   return (

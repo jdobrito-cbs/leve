@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { AppText, Button, Card, DisclaimerBanner, ListRow, Screen, SegmentedChips } from '@/design/components';
 import { spacing } from '@/design/tokens';
 import { db } from '@/db/client';
+import { isLocked } from '@/features/premium/gates';
+import { usePremium } from '@/features/premium/usePremium';
 import {
   PeriodLog,
   deletePeriod,
@@ -23,6 +25,7 @@ const FLOW_OPTIONS = (Object.keys(strings.cycle.flows) as FlowKey[]).map((value)
 }));
 
 export function CycleScreen() {
+  const { premium } = usePremium();
   const [open, setOpen] = useState<PeriodLog | null>(null);
   const [history, setHistory] = useState<PeriodLog[]>([]);
 
@@ -39,6 +42,26 @@ export function CycleScreen() {
   const dayOfCycle = open
     ? Math.floor((Date.now() - new Date(open.startedAt).getTime()) / 86400000) + 1
     : null;
+
+  if (isLocked('cycle', premium)) {
+    return (
+      <Screen>
+        <AppText variant="display">{strings.cycle.title}</AppText>
+        <Card style={{ gap: spacing.md }}>
+          <AppText variant="caption" muted>
+            {strings.premium.cycleLockedBody}
+          </AppText>
+          <Button
+            label={strings.premium.discover}
+            onPress={() => router.push('/assinatura' as never)}
+          />
+        </Card>
+        {router.canGoBack?.() ? (
+          <Button label={strings.common.close} variant="secondary" onPress={() => router.back()} />
+        ) : null}
+      </Screen>
+    );
+  }
 
   return (
     <Screen>

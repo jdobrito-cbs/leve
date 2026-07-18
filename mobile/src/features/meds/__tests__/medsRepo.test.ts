@@ -8,8 +8,18 @@ import {
   deactivateMedication,
   listMedications,
   markTaken,
+  timesForDailyCount,
   todayIntakes,
 } from '../medsRepo';
+
+test('horários automáticos dividem as 24h a partir das 08:00', () => {
+  expect(timesForDailyCount(1)).toEqual(['08:00']);
+  expect(timesForDailyCount(2)).toEqual(['08:00', '20:00']);
+  expect(timesForDailyCount(3)).toEqual(['00:00', '08:00', '16:00']);
+  expect(timesForDailyCount(4)).toEqual(['02:00', '08:00', '14:00', '20:00']);
+  expect(timesForDailyCount(12)).toHaveLength(12);
+  expect(timesForDailyCount(8).every((t) => /^\d{2}:\d{2}$/.test(t))).toBe(true);
+});
 
 function makeDb() {
   const sqlite = new Database(':memory:');
