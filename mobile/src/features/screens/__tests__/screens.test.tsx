@@ -98,7 +98,14 @@ jest.mock('@/features/today/useTodaySummary', () => ({
     ],
     steps: 4200,
     activeCalories: 320,
-    healthLatest: { sleepHours: 7.2, restingHr: 64, spo2: 98, respiratoryRate: 15 },
+    healthLatest: {
+      sleepHours: 7.2,
+      sleepEfficiencyPct: 92,
+      breathingDisturbances: null,
+      restingHr: 64,
+      spo2: 98,
+      respiratoryRate: 15,
+    },
     intakes: [
       {
         intakeId: 1,

@@ -5,7 +5,7 @@ import { useSyncExternalStore } from 'react';
  * (aviso de beber água, gole registrado…) trocam o mascote por um período
  * curto e ele volta ao feliz sozinho.
  */
-export type MascotKind = 'happy' | 'thirsty' | 'hydrated';
+export type MascotKind = 'happy' | 'thirsty' | 'hydrated' | 'slimmer' | 'meds';
 
 export const MASCOT_EVENT_MS = 60_000;
 

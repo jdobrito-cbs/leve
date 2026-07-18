@@ -362,6 +362,8 @@ export const strings = {
   },
   metrics: {
     sleep_hours: 'Sono',
+    sleep_efficiency_pct: 'Eficiência do sono',
+    breathing_disturbances: 'Distúrbios respiratórios (sono)',
     heart_rate_resting: 'FC em repouso',
     heart_rate_avg: 'FC média',
     spo2: 'Oxigênio no sangue',

@@ -16,6 +16,7 @@ import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
 import { addWeight, deleteWeight, listWeights } from '@/db/weightRepo';
+import { setMascotEvent } from '@/features/today/mascotSignal';
 import { strings } from '@/i18n/pt-BR';
 
 export function WeightScreen() {
@@ -42,6 +43,8 @@ export function WeightScreen() {
   async function save() {
     if (kg === null || kg <= 0 || !at) return;
     await addWeight(db, kg, at);
+    // Peso caiu → panda comemorando por 1 minuto no Hoje.
+    if (diff !== null && diff < 0) setMascotEvent('slimmer');
     setValue('');
     setSaved(true);
     await load();

@@ -37,22 +37,28 @@ async function safely(run: () => Promise<void>): Promise<void> {
   }
 }
 
-/** Chama `onWater` quando um aviso de água chega (app aberto), é tocado, ou
- *  quando o app foi aberto a partir de um aviso recente (partida fria). */
-export function attachWaterReminderListener(onWater: () => void): void {
+/** Chama o callback do tipo quando um aviso chega (app aberto), é tocado, ou
+ *  quando o app foi aberto a partir de um aviso recente (partida fria).
+ *  Água → onWater; remédio/dose → onMeds. */
+export function attachReminderMascotListeners(handlers: {
+  onWater: () => void;
+  onMeds: () => void;
+}): void {
+  const dispatch = (identifier: string) => {
+    if (identifier.startsWith(WATER_PREFIX)) handlers.onWater();
+    else if (identifier.startsWith(MED_PREFIX) || identifier === DOSE_ID) handlers.onMeds();
+  };
   try {
-    Notifications.addNotificationReceivedListener((n) => {
-      if (n.request.identifier.startsWith(WATER_PREFIX)) onWater();
-    });
-    Notifications.addNotificationResponseReceivedListener((r) => {
-      if (r.notification.request.identifier.startsWith(WATER_PREFIX)) onWater();
-    });
+    Notifications.addNotificationReceivedListener((n) => dispatch(n.request.identifier));
+    Notifications.addNotificationResponseReceivedListener((r) =>
+      dispatch(r.notification.request.identifier),
+    );
     Notifications.getLastNotificationResponseAsync()
       .then((r) => {
-        if (!r || !r.notification.request.identifier.startsWith(WATER_PREFIX)) return;
+        if (!r) return;
         const raw = r.notification.date;
         const ts = raw > 1e12 ? raw : raw * 1000; // iOS reporta em segundos
-        if (Date.now() - ts < 10 * 60 * 1000) onWater();
+        if (Date.now() - ts < 10 * 60 * 1000) dispatch(r.notification.request.identifier);
       })
       .catch(() => undefined);
   } catch (e) {

@@ -161,7 +161,8 @@ export function TodayScreen() {
           </AppText>
         </View>
         {/* Mascote: feliz por padrão; eventos trocam por 1 min e ele volta
-            sozinho (aviso de água → sede; gole registrado → hidratado). */}
+            sozinho (aviso de água → sede; gole → hidratado; peso caiu →
+            comemorando — arte chega com o SVG; feliz até lá). */}
         {mascot === 'thirsty' ? (
           <ThirstyPanda width={128} />
         ) : mascot === 'hydrated' ? (

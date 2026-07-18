@@ -15,7 +15,7 @@ import { seedFoodItemsIfEmpty } from '@/db/seed/tacoSeed';
 import { setThemeSignal, type ThemeMode } from '@/design/themeSignal';
 import { setMascotEvent } from '@/features/today/mascotSignal';
 import { autoSyncIfDue } from '@/services/health/healthSync';
-import { attachWaterReminderListener } from '@/services/reminders/reminders';
+import { attachReminderMascotListeners } from '@/services/reminders/reminders';
 import { strings } from '@/i18n/pt-BR';
 
 // No Expo Go alguns módulos nativos não existem — não pode derrubar o app.
@@ -91,8 +91,11 @@ export default function RootLayout() {
 
   useEffect(() => {
     load();
-    // Aviso da hora de beber água → panda com sede por 1 minuto.
-    attachWaterReminderListener(() => setMascotEvent('thirsty'));
+    // Avisos → mascote por 1 minuto: água → com sede; remédio → hora do remédio.
+    attachReminderMascotListeners({
+      onWater: () => setMascotEvent('thirsty'),
+      onMeds: () => setMascotEvent('meds'),
+    });
   }, [load]);
 
   // Vigia: travou em alguma etapa → vira erro legível em vez de spinner eterno.
