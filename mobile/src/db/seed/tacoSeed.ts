@@ -41,13 +41,14 @@ export async function seedFoodItemsIfEmpty(db: AppDb): Promise<void> {
   if (existing.length === 0) {
     await insertChunked(db, toRows(taco as SeedFood[], 'taco'));
   }
-  // Pratos regionais: semeados à parte para chegarem também a instalações antigas.
-  const hasRegional = await db
+  // Pratos regionais: quando a lista cresce, re-semeia para chegar
+  // também a instalações antigas (compara pela quantidade).
+  const regionalRows = await db
     .select({ id: foodItems.id })
     .from(foodItems)
-    .where(eq(foodItems.source, 'regional'))
-    .limit(1);
-  if (hasRegional.length === 0) {
+    .where(eq(foodItems.source, 'regional'));
+  if (regionalRows.length !== (regionais as SeedFood[]).length) {
+    await db.delete(foodItems).where(eq(foodItems.source, 'regional'));
     await insertChunked(db, toRows(regionais as SeedFood[], 'regional'));
   }
 }

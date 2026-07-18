@@ -35,4 +35,10 @@ test('pratos regionais entram no seed e são encontrados por termos do dia a dia
   expect(calabresa[0]?.calories).toBe(118);
   const carneSol = await searchFoods(db, 'carne de sol');
   expect(carneSol.length).toBeGreaterThan(0);
+  // ampliação nortista
+  const farofa = await searchFoods(db, 'farofa simples');
+  expect(farofa.map((f) => f.name)).toContain('Farofa simples (de mandioca)');
+  expect((await searchFoods(db, 'pirarucu')).length).toBeGreaterThanOrEqual(2);
+  expect((await searchFoods(db, 'farinha')).length).toBeGreaterThan(3);
+  expect((await searchFoods(db, 'tambaqui')).length).toBeGreaterThan(0);
 });
