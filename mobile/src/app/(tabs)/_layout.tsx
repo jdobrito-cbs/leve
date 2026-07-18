@@ -323,7 +323,7 @@ export default function TabsLayout() {
     const slot = barW / visibleNames.length;
     const idx = Math.min(visibleNames.length - 1, Math.max(0, Math.floor(absX / slot)));
     const name = visibleNames[idx];
-    if (name) router.navigate(name === 'index' ? '/' : `/${name}`);
+    if (name) router.navigate((name === 'index' ? '/' : `/${name}`) as never);
   };
 
   if (loading) return <View />;
