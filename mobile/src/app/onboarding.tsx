@@ -89,6 +89,8 @@ export default function Onboarding() {
     <ScrollView
       style={{ flex: 1, backgroundColor: colors.background }}
       contentContainerStyle={{ paddingBottom: spacing.xl }}
+      keyboardDismissMode="on-drag"
+      keyboardShouldPersistTaps="handled"
     >
       <HeroHeader>
         <AppText variant="caption" style={{ color: colors.onHero, opacity: 0.85 }}>

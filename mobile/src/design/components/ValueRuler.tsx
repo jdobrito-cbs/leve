@@ -5,53 +5,78 @@ import {
   NativeSyntheticEvent,
   View,
 } from 'react-native';
-import { AppText } from '@/design/components';
-import { spacing } from '@/design/tokens';
-import { useTheme } from '@/design/useTheme';
+import { spacing } from '../tokens';
+import { useTheme } from '../useTheme';
+import { AppText } from './AppText';
 
 export const RULER_TICK_WIDTH = 8;
-export const RULER_STEP = 0.1;
-export const RULER_MIN_KG = 30;
-export const RULER_MAX_KG = 250;
 
-export function offsetToKg(offset: number, minKg = RULER_MIN_KG): number {
-  const kg = minKg + Math.round(offset / RULER_TICK_WIDTH) * RULER_STEP;
-  return Math.round(Math.min(Math.max(kg, minKg), RULER_MAX_KG) * 10) / 10;
+export function offsetToValue(
+  offset: number,
+  min: number,
+  max: number,
+  step: number,
+): number {
+  const raw = min + Math.round(offset / RULER_TICK_WIDTH) * step;
+  const clamped = Math.min(Math.max(raw, min), max);
+  return Math.round(clamped / step) * step;
 }
 
-export function kgToOffset(kg: number, minKg = RULER_MIN_KG): number {
-  const clamped = Math.min(Math.max(kg, minKg), RULER_MAX_KG);
-  return Math.round((clamped - minKg) / RULER_STEP) * RULER_TICK_WIDTH;
+export function valueToOffset(value: number, min: number, max: number, step: number): number {
+  const clamped = Math.min(Math.max(value, min), max);
+  return Math.round((clamped - min) / step) * RULER_TICK_WIDTH;
 }
 
 interface Props {
-  valueKg: number;
-  onChange: (kg: number) => void;
+  value: number;
+  onChange: (value: number) => void;
+  min: number;
+  max: number;
+  /** Incremento por traço (ex.: 0.1 kg, 1 cm). */
+  step: number;
+  /** Traço maior a cada N traços. */
+  majorEvery?: number;
+  /** Número acima do traço a cada N traços. */
+  labelEvery?: number;
+  decimals?: number;
 }
 
-/** Régua rolante de peso: arraste para escolher de 0,1 em 0,1 kg. */
-export function WeightRuler({ valueKg, onChange }: Props) {
+/** Régua rolante: arraste para escolher o valor de `step` em `step`. */
+export function ValueRuler({
+  value,
+  onChange,
+  min,
+  max,
+  step,
+  majorEvery = 10,
+  labelEvery = 50,
+  decimals = 1,
+}: Props) {
   const { colors } = useTheme();
   const listRef = useRef<FlatList<number>>(null);
-  const lastReported = useRef<number>(valueKg);
+  const lastReported = useRef<number>(value);
   const [width, setWidth] = useState(0);
 
-  const count = Math.round((RULER_MAX_KG - RULER_MIN_KG) / RULER_STEP) + 1;
+  const count = Math.round((max - min) / step) + 1;
   const ticks = useMemo(() => Array.from({ length: count }, (_, i) => i), [count]);
+  const round = (v: number) => Number(v.toFixed(decimals));
 
   // Valor digitado no campo move a régua (sem eco do próprio arrasto).
   useEffect(() => {
     if (width === 0) return;
-    if (Math.abs(valueKg - lastReported.current) < RULER_STEP / 2) return;
-    lastReported.current = valueKg;
-    listRef.current?.scrollToOffset({ offset: kgToOffset(valueKg), animated: false });
-  }, [valueKg, width]);
+    if (Math.abs(value - lastReported.current) < step / 2) return;
+    lastReported.current = value;
+    listRef.current?.scrollToOffset({
+      offset: valueToOffset(value, min, max, step),
+      animated: false,
+    });
+  }, [value, width, min, max, step]);
 
   function report(e: NativeSyntheticEvent<NativeScrollEvent>) {
-    const kg = offsetToKg(e.nativeEvent.contentOffset.x);
-    if (Math.abs(kg - lastReported.current) >= RULER_STEP / 2) {
-      lastReported.current = kg;
-      onChange(kg);
+    const v = round(offsetToValue(e.nativeEvent.contentOffset.x, min, max, step));
+    if (Math.abs(v - lastReported.current) >= step / 2) {
+      lastReported.current = v;
+      onChange(v);
     }
   }
 
@@ -66,7 +91,7 @@ export function WeightRuler({ valueKg, onChange }: Props) {
             showsHorizontalScrollIndicator={false}
             snapToInterval={RULER_TICK_WIDTH}
             decelerationRate="fast"
-            initialScrollIndex={Math.round(kgToOffset(valueKg) / RULER_TICK_WIDTH)}
+            initialScrollIndex={Math.round(valueToOffset(value, min, max, step) / RULER_TICK_WIDTH)}
             getItemLayout={(_, index) => ({
               length: RULER_TICK_WIDTH,
               offset: RULER_TICK_WIDTH * index,
@@ -82,8 +107,8 @@ export function WeightRuler({ valueKg, onChange }: Props) {
             onScrollEndDrag={report}
             keyExtractor={(i) => String(i)}
             renderItem={({ item: i }) => {
-              const isKg = i % 10 === 0;
-              const isFiveKg = i % 50 === 0;
+              const isMajor = i % majorEvery === 0;
+              const isLabeled = i % labelEvery === 0;
               return (
                 <View
                   style={{
@@ -93,21 +118,21 @@ export function WeightRuler({ valueKg, onChange }: Props) {
                     justifyContent: 'flex-end',
                   }}
                 >
-                  {isFiveKg ? (
+                  {isLabeled ? (
                     <AppText
                       variant="caption"
                       muted
-                      style={{ position: 'absolute', top: 0, width: 40, textAlign: 'center' }}
+                      style={{ position: 'absolute', top: 0, width: 48, textAlign: 'center' }}
                     >
-                      {Math.round(RULER_MIN_KG + i * RULER_STEP)}
+                      {round(min + i * step).toLocaleString('pt-BR')}
                     </AppText>
                   ) : null}
                   <View
                     style={{
                       width: 2,
-                      height: isFiveKg ? 30 : isKg ? 22 : 12,
+                      height: isLabeled ? 30 : isMajor ? 22 : 12,
                       borderRadius: 1,
-                      backgroundColor: isKg ? colors.textMuted : colors.border,
+                      backgroundColor: isMajor ? colors.textMuted : colors.border,
                     }}
                   />
                 </View>

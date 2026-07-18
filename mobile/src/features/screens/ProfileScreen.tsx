@@ -4,6 +4,7 @@ import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
 import { Platform, Switch, View } from 'react-native';
 import { ageFromIsoDate, brDateToIso } from '@/core/datetime';
+import { parseDecimalBR } from '@/core/text';
 import { db } from '@/db/client';
 import { exportAllData, wipeAllData } from '@/features/backup/exportData';
 import {
@@ -16,6 +17,7 @@ import {
   NumberField,
   Screen,
   SegmentedChips,
+  ValueRuler,
 } from '@/design/components';
 import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
@@ -134,6 +136,16 @@ export function ProfileScreen() {
           onChangeText={(v) => setField('heightStr', v)}
           suffix="cm"
         />
+        <ValueRuler
+          value={parseDecimalBR(form.heightStr) ?? 170}
+          min={100}
+          max={230}
+          step={1}
+          majorEvery={5}
+          labelEvery={10}
+          decimals={0}
+          onChange={(v) => setField('heightStr', String(Math.round(v)))}
+        />
         <Input
           label={strings.profile.medicationLabel}
           value={form.medication}
@@ -144,6 +156,18 @@ export function ProfileScreen() {
           value={form.goalWeightStr}
           onChangeText={(v) => setField('goalWeightStr', v)}
           suffix="kg"
+        />
+        <ValueRuler
+          value={parseDecimalBR(form.goalWeightStr) ?? 80}
+          min={30}
+          max={250}
+          step={0.1}
+          onChange={(v) =>
+            setField(
+              'goalWeightStr',
+              v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+            )
+          }
         />
         <NumberField
           label={strings.dose.intervalLabel}

@@ -19,6 +19,7 @@ import {
   NumberField,
   Screen,
   SegmentedChips,
+  ValueRuler,
 } from '@/design/components';
 import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
@@ -128,6 +129,20 @@ export function DoseScreen() {
           onChangeText={setDoseStr}
           suffix="mg"
           placeholder="0,0"
+        />
+        <ValueRuler
+          value={doseMg ?? 1}
+          min={0}
+          max={30}
+          step={0.1}
+          majorEvery={10}
+          labelEvery={10}
+          onChange={(v) => {
+            setSaved(false);
+            setDoseStr(
+              v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+            );
+          }}
         />
         <AppText variant="caption" muted>
           {strings.dose.routeLabel}

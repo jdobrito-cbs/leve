@@ -11,12 +11,12 @@ import {
   ListRow,
   NumberField,
   Screen,
+  ValueRuler,
 } from '@/design/components';
 import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
 import { addWeight, deleteWeight, listWeights } from '@/db/weightRepo';
-import { WeightRuler } from '@/features/log/WeightRuler';
 import { strings } from '@/i18n/pt-BR';
 
 export function WeightScreen() {
@@ -80,8 +80,11 @@ export function WeightScreen() {
           suffix="kg"
           placeholder="0,0"
         />
-        <WeightRuler
-          valueKg={kg ?? last?.weightKg ?? 80}
+        <ValueRuler
+          value={kg ?? last?.weightKg ?? 80}
+          min={30}
+          max={250}
+          step={0.1}
           onChange={(v) => {
             setSaved(false);
             setValue(v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
