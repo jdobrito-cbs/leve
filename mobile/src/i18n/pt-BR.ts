@@ -406,8 +406,8 @@ export const strings = {
     connect: 'Conectar',
     connected: 'Conectado',
     disconnect: 'Desconectar',
-    importNow: 'Importar pesos agora',
-    importedSuffix: 'pesos importados',
+    importNow: 'Importar dados agora',
+    importedSuffix: 'dados importados',
     unavailable:
       'Indisponível neste aparelho — requer o app de desenvolvimento (dev build) e o Health Connect/Apple Saúde.',
     connectDenied:
