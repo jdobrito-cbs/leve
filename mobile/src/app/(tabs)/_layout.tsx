@@ -19,6 +19,7 @@ import Animated, {
   runOnJS,
   useAnimatedReaction,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
   withSequence,
   withSpring,
@@ -105,6 +106,10 @@ function Fab({ focused, signal }: { focused: boolean; signal: number }) {
 // Elipse do vidro: mais larga que alta, como o Liquid Glass das abas do iOS.
 const GLASS_W = 62;
 const GLASS_H = 46;
+// No Registrar o vidro cresce para envolver o botão elevado + o rótulo.
+const BIG_W = 58;
+const BIG_H = 66;
+const BIG_TOP = -9;
 
 /** Vidro líquido do iOS 26 quando disponível; senão, círculo translúcido. */
 function getGlassView(): ComponentType<{
@@ -173,61 +178,80 @@ function DragTabButton({
   );
 }
 
-/** Fundo da barra de abas: círculo de vidro que desliza até a aba ativa e,
- *  durante o arrasto, segue o dedo com leve crescimento. */
+/** Fundo da barra de abas: elipse de vidro que desliza até a aba ativa,
+ *  segue o dedo no arrasto e CRESCE ao passar pelo Registrar. */
 function GlassSlider({
   count,
   activeIndex,
+  bigIndex,
   dragX,
   dragging,
   onWidth,
 }: {
   count: number;
   activeIndex: number;
+  bigIndex: number;
   dragX: SharedValue<number>;
   dragging: SharedValue<number>;
   onWidth: (w: number) => void;
 }) {
   const { mode } = useTheme();
   const [barW, setBarW] = useState(0);
-  const x = useSharedValue(-9999);
+  const cx = useSharedValue(-9999); // centro da elipse
   const slot = count > 0 ? barW / count : 0;
   const Glass = useMemo(getGlassView, []);
 
   useEffect(() => {
     if (slot <= 0 || activeIndex < 0) return;
-    const target = activeIndex * slot + slot / 2 - GLASS_W / 2;
+    const target = activeIndex * slot + slot / 2;
     // Primeira medição posiciona sem animar; depois, sempre desliza com mola.
-    if (x.value < -5000) x.value = target;
-    else x.value = withSpring(target, { damping: 17, stiffness: 190 });
-  }, [activeIndex, slot, x]);
+    if (cx.value < -5000) cx.value = target;
+    else cx.value = withSpring(target, { damping: 17, stiffness: 190 });
+  }, [activeIndex, slot, cx]);
 
   // Soltou o dedo → a mola parte da posição onde o vidro estava, sem pulo.
   useAnimatedReaction(
     () => dragging.value,
     (now, prev) => {
       if (prev === 1 && now === 0 && barW > 0) {
-        x.value = Math.min(
-          Math.max(dragX.value - GLASS_W / 2, 4),
-          Math.max(4, barW - GLASS_W - 4),
-        );
+        cx.value = Math.min(Math.max(dragX.value, GLASS_W / 2 + 4), barW - GLASS_W / 2 - 4);
       }
     },
     [barW],
   );
 
+  // 0→1 quando o centro está sobre a aba grande (Registrar), com mola.
+  const bigTarget = useDerivedValue(() => {
+    if (barW <= 0 || count <= 0 || bigIndex < 0) return 0;
+    const center =
+      dragging.value === 1
+        ? Math.min(Math.max(dragX.value, GLASS_W / 2 + 4), barW - GLASS_W / 2 - 4)
+        : cx.value;
+    const idx = Math.min(count - 1, Math.max(0, Math.floor(center / (barW / count))));
+    return idx === bigIndex ? 1 : 0;
+  }, [barW, count, bigIndex]);
+  const grow = useDerivedValue(() =>
+    withSpring(bigTarget.value, { damping: 15, stiffness: 220 }),
+  );
+
   const slide = useAnimatedStyle(() => {
-    const tx =
-      dragging.value === 1 && barW > 0
-        ? Math.min(
-            Math.max(dragX.value - GLASS_W / 2, 4),
-            Math.max(4, barW - GLASS_W - 4),
-          )
-        : x.value;
+    if (barW <= 0) return { opacity: 0 };
+    const center =
+      dragging.value === 1
+        ? Math.min(Math.max(dragX.value, GLASS_W / 2 + 4), barW - GLASS_W / 2 - 4)
+        : cx.value;
+    const w = GLASS_W + (BIG_W - GLASS_W) * grow.value;
+    const h = GLASS_H + (BIG_H - GLASS_H) * grow.value;
+    const top = 9 + (BIG_TOP - 9) * grow.value;
     return {
+      opacity: 1,
+      width: w,
+      height: h,
+      top,
+      borderRadius: Math.min(w, h) / 2,
       transform: [
-        { translateX: tx },
-        { scale: withSpring(dragging.value === 1 ? 1.15 : 1, { damping: 16, stiffness: 240 }) },
+        { translateX: center - w / 2 },
+        { scale: withSpring(dragging.value === 1 ? 1.12 : 1, { damping: 16, stiffness: 240 }) },
       ],
     };
   });
@@ -246,11 +270,7 @@ function GlassSlider({
           style={[
             {
               position: 'absolute',
-              top: 9,
               left: 0,
-              width: GLASS_W,
-              height: GLASS_H,
-              borderRadius: GLASS_H / 2,
               overflow: 'hidden',
             },
             slide,
@@ -258,14 +278,14 @@ function GlassSlider({
         >
           {Glass ? (
             <Glass
-              style={{ flex: 1, borderRadius: GLASS_H / 2 }}
+              style={{ flex: 1, borderRadius: 999 }}
               glassEffectStyle="clear"
             />
           ) : (
             <View
               style={{
                 flex: 1,
-                borderRadius: GLASS_H / 2,
+                borderRadius: 999,
                 backgroundColor:
                   mode === 'light' ? 'rgba(37,99,235,0.10)' : 'rgba(148,197,255,0.14)',
                 borderWidth: 1,
@@ -343,6 +363,7 @@ export default function TabsLayout() {
           <GlassSlider
             count={visibleNames.length}
             activeIndex={activeIndex}
+            bigIndex={visibleNames.indexOf('registrar')}
             dragX={dragX}
             dragging={dragging}
             onWidth={setBarW}
