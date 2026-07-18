@@ -1,4 +1,4 @@
-import { BottomTabBar, type BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { BottomTabBar } from '@react-navigation/bottom-tabs';
 import { Redirect, Tabs } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import {
@@ -7,6 +7,7 @@ import {
   useMemo,
   useState,
   useSyncExternalStore,
+  type ComponentProps,
   type ComponentType,
 } from 'react';
 import { View } from 'react-native';
@@ -116,12 +117,15 @@ function getGlassView(): ComponentType<{
   }
 }
 
+/** Tipo do tabBar exatamente como o Tabs do expo-router espera. */
+type ExpoTabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>['tabBar']>>[0];
+
 /** Barra padrão + círculo de vidro que desliza até a aba selecionada. */
 function GlassTabBar({
   visibleCount,
   activeIndex,
   ...props
-}: BottomTabBarProps & { visibleCount: number; activeIndex: number }) {
+}: ExpoTabBarProps & { visibleCount: number; activeIndex: number }) {
   const { mode } = useTheme();
   const [barW, setBarW] = useState(0);
   const x = useSharedValue(-9999);
@@ -140,7 +144,8 @@ function GlassTabBar({
 
   return (
     <View onLayout={(e) => setBarW(e.nativeEvent.layout.width)}>
-      <BottomTabBar {...props} />
+      {/* fork interno do expo-router e pacote npm têm o mesmo formato em runtime */}
+      <BottomTabBar {...(props as never)} />
       {slot > 0 && activeIndex >= 0 ? (
         <Animated.View
           pointerEvents="none"
