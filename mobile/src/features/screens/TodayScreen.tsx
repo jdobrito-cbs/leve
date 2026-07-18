@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useMemo, type ComponentType, type PropsWithChildren } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LineChart } from 'react-native-gifted-charts';
 import { Scale, TrendingUp, Trophy } from 'lucide-react-native';
@@ -103,7 +104,12 @@ function Metric({ label, value }: { label: string; value: string }) {
 export function TodayScreen() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+  const { height: winH } = useWindowDimensions();
   const summary = useTodaySummary();
+  // Azul sólido até a altura do cabeçalho (início do primeiro box); o degradê
+  // acontece logo abaixo e termina na cor do tema.
+  const blueEnd = Math.min(0.85, (insets.top + 128) / winH);
+  const fadeEnd = Math.min(1, blueEnd + 0.4);
   const progress = summary.waterGoalMl > 0 ? summary.waterMl / summary.waterGoalMl : 0;
   const pk = useMemo(() => estimateRelativeCurve(summary.doses), [summary.doses]);
   const daysToNextDose = summary.nextDoseAt
@@ -112,8 +118,16 @@ export function TodayScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
+      {/* Fundo FIXO: azul até o início do primeiro box, depois degradê até a
+          cor do tema (preto no escuro, claro no claro). Não rola com a lista. */}
+      <LinearGradient
+        pointerEvents="none"
+        colors={[colors.heroStart, colors.heroStart, colors.background, colors.background]}
+        locations={[0, blueEnd, fadeEnd, 1]}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: spacing.xl }}>
-      {/* Topo sem box: só os textos sobre o fundo da tela. */}
+      {/* Topo sem box: só os textos sobre o azul do fundo. */}
       <View
         style={{
           paddingTop: insets.top + spacing.md,
@@ -121,13 +135,17 @@ export function TodayScreen() {
           gap: spacing.xs,
         }}
       >
-        <AppText style={{ fontFamily: fonts.semibold, fontSize: 22, lineHeight: 28 }}>
+        <AppText
+          style={{ color: colors.onHero, fontFamily: fonts.semibold, fontSize: 22, lineHeight: 28 }}
+        >
           {summary.userName
             ? strings.today.greetingWithName.replace('{name}', summary.userName)
             : strings.today.greeting}
         </AppText>
-        <AppText variant="display">{strings.tabs.today}</AppText>
-        <AppText variant="caption" muted>
+        <AppText variant="display" style={{ color: colors.onHero }}>
+          {strings.tabs.today}
+        </AppText>
+        <AppText variant="caption" style={{ color: colors.onHero, opacity: 0.85 }}>
           {strings.today.summaryLabel} {formatDateBR(new Date())}
         </AppText>
       </View>
