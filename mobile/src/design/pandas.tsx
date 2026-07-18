@@ -1,4 +1,16 @@
-import Svg, { Path } from 'react-native-svg';
+import { useEffect } from 'react';
+import { View } from 'react-native';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
+import Svg, { Ellipse, Path } from 'react-native-svg';
+import { ThirstyPandaArt } from './thirstyPandaArt';
 
 /**
  * Mascotes panda do Leve.
@@ -46,5 +58,92 @@ export function HappyPanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
         fill="rgba(253,253,253,1)"
       />
     </Svg>
+  );
+}
+
+/** Gota de suor animada: cai e some, em loop. */
+function SweatDrop({
+  x,
+  y,
+  scale,
+  delayMs,
+}: {
+  x: number;
+  y: number;
+  scale: number;
+  delayMs: number;
+}) {
+  const fall = useSharedValue(0);
+
+  useEffect(() => {
+    fall.value = withDelay(
+      delayMs,
+      withRepeat(
+        withSequence(
+          withTiming(1, { duration: 1300, easing: Easing.in(Easing.quad) }),
+          withTiming(0, { duration: 0 }),
+          withTiming(0, { duration: 600 }),
+        ),
+        -1,
+      ),
+    );
+  }, [fall, delayMs]);
+
+  const style = useAnimatedStyle(() => ({
+    transform: [{ translateY: fall.value * 16 * scale }],
+    opacity: fall.value > 0.85 ? (1 - fall.value) / 0.15 : 1,
+  }));
+
+  const w = 10 * scale;
+  return (
+    <Animated.View style={[{ position: 'absolute', left: x - w / 2, top: y }, style]}>
+      <Svg width={w} height={w * 1.35} viewBox="0 0 8 11">
+        <Path
+          d="M4 0 C 5.2 3 8 5.2 8 7.4 A 4 4 0 1 1 0 7.4 C 0 5.2 2.8 3 4 0 Z"
+          fill="#4BB9E5"
+        />
+      </Svg>
+    </Animated.View>
+  );
+}
+
+/** Panda com sede — aparece no Hoje enquanto a meta de água não foi batida.
+ *  viewBox original: 561×444. Água do pote balança e o suor pinga. */
+export function ThirstyPanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
+  const height = (444 / 561) * width;
+  const s = width / 561;
+  const slosh = useSharedValue(0);
+
+  useEffect(() => {
+    slosh.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 850, easing: Easing.inOut(Easing.quad) }),
+        withTiming(-1, { duration: 850, easing: Easing.inOut(Easing.quad) }),
+      ),
+      -1,
+      true,
+    );
+  }, [slosh]);
+
+  const water = useAnimatedStyle(() => ({
+    transform: [{ translateX: slosh.value * 2.5 * s }, { rotate: `${slosh.value * 6}deg` }],
+  }));
+
+  return (
+    <View style={{ width, height }}>
+      <ThirstyPandaArt width={width} height={height} />
+      {/* Superfície da água do pote, balançando */}
+      <Animated.View
+        style={[{ position: 'absolute', left: 243 * s, top: 325 * s }, water]}
+      >
+        <Svg width={46 * s} height={12 * s} viewBox="0 0 46 12">
+          <Ellipse cx={23} cy={6} rx={22} ry={5} fill="#4BB9E5" opacity={0.9} />
+          <Ellipse cx={14} cy={5} rx={6} ry={2} fill="#BFE6F5" opacity={0.8} />
+        </Svg>
+      </Animated.View>
+      {/* Gotas de suor caindo das têmporas */}
+      <SweatDrop x={360 * s} y={110 * s} scale={s * 2.2} delayMs={0} />
+      <SweatDrop x={210 * s} y={104 * s} scale={s * 2.2} delayMs={700} />
+    </View>
   );
 }

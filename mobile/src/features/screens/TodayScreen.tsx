@@ -16,7 +16,7 @@ import {
   SyringeInjectIcon,
   UtensilsCrossIcon,
 } from '@/design/logIcons';
-import { HappyPanda } from '@/design/pandas';
+import { ThirstyPanda } from '@/design/pandas';
 import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { estimateRelativeCurve } from '@/features/pk/pharmacokinetics';
@@ -158,7 +158,9 @@ export function TodayScreen() {
             {strings.today.summaryLabel} {formatDateBR(new Date())}
           </AppText>
         </View>
-        <HappyPanda />
+        {/* Temporário para avaliação visual: panda com sede sempre visível.
+            Depois vira condição da hora de beber água, a pedido do dono. */}
+        <ThirstyPanda width={128} />
       </View>
       <View style={{ padding: spacing.md, gap: spacing.md }}>
         {/* 1 — Água (transborda quando passa de 100%) */}
