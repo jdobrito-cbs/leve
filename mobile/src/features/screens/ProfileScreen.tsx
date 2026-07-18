@@ -6,6 +6,8 @@ import { Platform, Switch, View } from 'react-native';
 
 import { ageFromIsoDate, brDateToIso } from '@/core/datetime';
 import { db } from '@/db/client';
+import { setSetting } from '@/db/settingsRepo';
+import { setThemeSignal } from '@/design/themeSignal';
 import { exportAllData, wipeAllData } from '@/features/backup/exportData';
 import { buildBodyReport } from '@/features/report/bodyReport';
 import { reportHtml } from '@/features/report/reportHtml';
@@ -93,7 +95,7 @@ function HealthSection() {
 }
 
 export function ProfileScreen() {
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
   const { premium } = usePremium();
   const { loading, form, setField, save, saved, permissionError, autoGoalMl } = useProfileForm();
   const birthIso = brDateToIso(form.birthDateStr);
@@ -291,6 +293,24 @@ export function ProfileScreen() {
             {strings.profile.permissionDenied}
           </AppText>
         ) : null}
+      </Card>
+
+      <Card style={{ gap: spacing.md }}>
+        <AppText variant="title">{strings.profile.appearanceSection}</AppText>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <View style={{ flex: 1 }}>
+            <AppText>{strings.profile.darkTheme}</AppText>
+          </View>
+          <Switch
+            value={mode === 'dark'}
+            onValueChange={async (v) => {
+              const m = v ? 'dark' : 'light';
+              setThemeSignal(m);
+              await setSetting(db, 'themeMode', m).catch(() => undefined);
+            }}
+            trackColor={{ true: colors.primary, false: colors.border }}
+          />
+        </View>
       </Card>
 
       <Button label={strings.profile.save} onPress={save} />

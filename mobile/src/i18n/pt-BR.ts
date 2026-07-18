@@ -273,6 +273,8 @@ export const strings = {
     heightLabel: 'Altura (cm)',
     medicationLabel: 'Medicação atual',
     medicationHint: 'Pré-seleciona a medicação ao registrar uma dose.',
+    appearanceSection: 'Aparência',
+    darkTheme: 'Tema escuro',
     sexLabel: 'Sexo',
     birthDateLabel: 'Data de nascimento',
     ageSuffix: 'anos',

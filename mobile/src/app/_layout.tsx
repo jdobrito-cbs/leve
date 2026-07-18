@@ -10,7 +10,9 @@ import { Component, PropsWithChildren, useCallback, useEffect, useState } from '
 import { ActivityIndicator, View } from 'react-native';
 import { AppText, Button, Screen } from '@/design/components';
 import { db, initDb, isDbLockedError } from '@/db/client';
+import { getSetting } from '@/db/settingsRepo';
 import { seedFoodItemsIfEmpty } from '@/db/seed/tacoSeed';
+import { setThemeSignal, type ThemeMode } from '@/design/themeSignal';
 import { autoSyncIfDue } from '@/services/health/healthSync';
 import { strings } from '@/i18n/pt-BR';
 
@@ -73,7 +75,10 @@ export default function RootLayout() {
           console.warn('Seed TACO falhou (busca ficará vazia):', e),
         );
       })
-      .then(() => {
+      .then(async () => {
+        // Preferência de tema salva no Perfil vale desde a abertura.
+        const themeMode = await getSetting<ThemeMode>(db, 'themeMode').catch(() => null);
+        if (themeMode) setThemeSignal(themeMode);
         console.log('[leve] inicialização concluída');
         setReady(true);
         // Busca automática da saúde na abertura (Premium; throttle de 1 h).

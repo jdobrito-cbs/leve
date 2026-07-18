@@ -4,8 +4,9 @@ import { Pressable, ScrollView, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LineChart } from 'react-native-gifted-charts';
 import { Scale, TrendingUp, Trophy } from 'lucide-react-native';
-import { formatDateTimeShort } from '@/core/datetime';
-import { AppText, Card, FitChart, HeroHeader, IconChip, WaterRing } from '@/design/components';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { formatDateBR, formatDateTimeShort } from '@/core/datetime';
+import { AppText, Card, FitChart, IconChip, WaterRing } from '@/design/components';
 import { OverflowDrips, OverflowFill } from '@/design/components/OverflowWater';
 import {
   FootprintsWalkIcon,
@@ -101,6 +102,7 @@ function Metric({ label, value }: { label: string; value: string }) {
 
 export function TodayScreen() {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const summary = useTodaySummary();
   const progress = summary.waterGoalMl > 0 ? summary.waterMl / summary.waterGoalMl : 0;
   const pk = useMemo(() => estimateRelativeCurve(summary.doses), [summary.doses]);
@@ -109,25 +111,27 @@ export function TodayScreen() {
     : null;
 
   return (
-    // Fundo do Hoje inteiro no azul do hero: o elástico revela azul, nunca corte.
-    <View style={{ flex: 1, backgroundColor: colors.heroStart }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: spacing.xl }}>
-      <HeroHeader>
-        <AppText
-          style={{ color: colors.onHero, fontFamily: fonts.semibold, fontSize: 22, lineHeight: 28 }}
-        >
+      {/* Topo sem box: só os textos sobre o fundo da tela. */}
+      <View
+        style={{
+          paddingTop: insets.top + spacing.md,
+          paddingHorizontal: spacing.md + spacing.xs,
+          gap: spacing.xs,
+        }}
+      >
+        <AppText style={{ fontFamily: fonts.semibold, fontSize: 22, lineHeight: 28 }}>
           {summary.userName
             ? strings.today.greetingWithName.replace('{name}', summary.userName)
             : strings.today.greeting}
         </AppText>
-        <AppText variant="display" style={{ color: colors.onHero }}>
-          {strings.tabs.today}
+        <AppText variant="display">{strings.tabs.today}</AppText>
+        <AppText variant="caption" muted>
+          {strings.today.summaryLabel} {formatDateBR(new Date())}
         </AppText>
-        <AppText variant="caption" style={{ color: colors.onHero, opacity: 0.85 }}>
-          {strings.today.summaryLabel}
-        </AppText>
-      </HeroHeader>
-      <View style={{ padding: spacing.md, gap: spacing.md, marginTop: -spacing.lg, zIndex: 1 }}>
+      </View>
+      <View style={{ padding: spacing.md, gap: spacing.md }}>
         {/* 1 — Água (transborda quando passa de 100%) */}
         <Animated.View entering={FadeInDown.duration(420)}>
           <Pressable accessibilityRole="button" onPress={() => router.push('/log/agua' as never)}>
