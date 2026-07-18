@@ -7,6 +7,7 @@ import {
   useMemo,
   useState,
   useSyncExternalStore,
+  type ComponentProps,
   type ComponentType,
 } from 'react';
 import { View } from 'react-native';
@@ -144,7 +145,7 @@ function GlassTabBar({ visibleCount, activeIndex, ...props }: GlassTabBarProps) 
   return (
     <View onLayout={(e) => setBarW(e.nativeEvent.layout.width)}>
       {/* fork interno do expo-router e pacote npm têm o mesmo formato em runtime */}
-      <BottomTabBar {...(props as never)} />
+      <BottomTabBar {...(props as unknown as ComponentProps<typeof BottomTabBar>)} />
       {slot > 0 && activeIndex >= 0 ? (
         <Animated.View
           pointerEvents="none"
