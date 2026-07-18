@@ -16,7 +16,15 @@ import {
   SyringeInjectIcon,
   UtensilsCrossIcon,
 } from '@/design/logIcons';
-import { HappyPanda, HydratedPanda, SlimmerPanda, ThirstyPanda } from '@/design/pandas';
+import {
+  BalancePanda,
+  DosePanda,
+  HappyPanda,
+  HydratedPanda,
+  MedsPanda,
+  SlimmerPanda,
+  ThirstyPanda,
+} from '@/design/pandas';
 import { reportCaloricBalance, useMascot } from '@/features/today/mascotSignal';
 import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
@@ -167,14 +175,20 @@ export function TodayScreen() {
           </AppText>
         </View>
         {/* Mascote: feliz por padrão; eventos trocam por 1 min e ele volta
-            sozinho (aviso de água → sede; gole → hidratado; peso caiu →
-            comemorando — arte chega com o SVG; feliz até lá). */}
+            sozinho (água → sede/hidratado; peso caiu; remédio; dose GLP-1;
+            balanço calórico favorável). */}
         {mascot === 'thirsty' ? (
           <ThirstyPanda width={128} />
         ) : mascot === 'hydrated' ? (
           <HydratedPanda width={128} />
         ) : mascot === 'slimmer' ? (
           <SlimmerPanda width={128} />
+        ) : mascot === 'meds' ? (
+          <MedsPanda width={128} />
+        ) : mascot === 'dose' ? (
+          <DosePanda width={128} />
+        ) : mascot === 'balance' ? (
+          <BalancePanda width={128} />
         ) : (
           <HappyPanda />
         )}

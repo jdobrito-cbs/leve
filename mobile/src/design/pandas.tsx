@@ -10,7 +10,10 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import Svg, { Ellipse, Path } from 'react-native-svg';
+import { BalancePandaArt } from './balancePandaArt';
+import { DosePandaArt } from './dosePandaArt';
 import { HydratedPandaArt } from './hydratedPandaArt';
+import { MedsPandaArt } from './medsPandaArt';
 import { SlimmerBodyArt, SlimmerScaleArt } from './slimmerPandaArt';
 import { ThirstyPandaArt } from './thirstyPandaArt';
 
@@ -177,6 +180,97 @@ export function SlimmerPanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
       <SlimmerScaleArt width={width} height={height} />
       <Animated.View style={[{ position: 'absolute', left: 0, top: 0, width, height }, hop]}>
         <SlimmerBodyArt width={width} height={height} />
+      </Animated.View>
+    </View>
+  );
+}
+
+/** Panda da hora do remédio de apoio — balança de leve chamando atenção.
+ *  viewBox original: 549×455. */
+export function MedsPanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
+  const height = (455 / 549) * width;
+  const sway = useSharedValue(0);
+
+  useEffect(() => {
+    sway.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 700, easing: Easing.inOut(Easing.quad) }),
+        withTiming(-1, { duration: 700, easing: Easing.inOut(Easing.quad) }),
+      ),
+      -1,
+      true,
+    );
+  }, [sway]);
+
+  const rock = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${sway.value * 2.2}deg` }],
+  }));
+
+  return (
+    <View style={{ width, height }}>
+      <Animated.View style={[{ position: 'absolute', left: 0, top: 0, width, height }, rock]}>
+        <MedsPandaArt width={width} height={height} />
+      </Animated.View>
+    </View>
+  );
+}
+
+/** Panda da aplicação GLP-1 — pulso suave de "chegou a hora".
+ *  viewBox original: 555×449. */
+export function DosePanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
+  const height = (449 / 555) * width;
+  const pulse = useSharedValue(0);
+
+  useEffect(() => {
+    pulse.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 550, easing: Easing.inOut(Easing.quad) }),
+        withTiming(0, { duration: 550, easing: Easing.inOut(Easing.quad) }),
+      ),
+      -1,
+      true,
+    );
+  }, [pulse]);
+
+  const beat = useAnimatedStyle(() => ({
+    transform: [{ scale: 1 + pulse.value * 0.04 }],
+  }));
+
+  return (
+    <View style={{ width, height }}>
+      <Animated.View style={[{ position: 'absolute', left: 0, top: 0, width, height }, beat]}>
+        <DosePandaArt width={width} height={height} />
+      </Animated.View>
+    </View>
+  );
+}
+
+/** Panda do balanço calórico favorável — pulinho comemorativo.
+ *  viewBox original: 575×434. */
+export function BalancePanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
+  const height = (434 / 575) * width;
+  const jumpPx = width * 0.06;
+  const jump = useSharedValue(0);
+
+  useEffect(() => {
+    jump.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 340, easing: Easing.out(Easing.quad) }),
+        withTiming(0, { duration: 300, easing: Easing.in(Easing.quad) }),
+        withTiming(0, { duration: 520 }),
+      ),
+      -1,
+    );
+  }, [jump]);
+
+  const hop = useAnimatedStyle(() => ({
+    transform: [{ translateY: -jump.value * jumpPx }],
+  }));
+
+  return (
+    <View style={{ width, height }}>
+      <Animated.View style={[{ position: 'absolute', left: 0, top: 0, width, height }, hop]}>
+        <BalancePandaArt width={width} height={height} />
       </Animated.View>
     </View>
   );
