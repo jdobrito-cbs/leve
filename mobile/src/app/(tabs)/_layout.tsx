@@ -1,4 +1,4 @@
-import { Redirect, Tabs, usePathname } from 'expo-router';
+import { Redirect, router, Tabs, usePathname } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import {
   PropsWithChildren,
@@ -7,17 +7,22 @@ import {
   useState,
   useSyncExternalStore,
   type ComponentType,
+  type ReactNode,
 } from 'react';
-import { View } from 'react-native';
+import { View, type StyleProp, type ViewStyle } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getSexSignal, setSexSignal, subscribeSex } from '@/features/profile/sexSignal';
 import { db } from '@/db/client';
 import { getProfile } from '@/db/profileRepo';
 import Animated, {
+  runOnJS,
+  useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
   withSequence,
   withSpring,
+  type SharedValue,
 } from 'react-native-reanimated';
 import {
   ChartTabIcon,
@@ -115,8 +120,72 @@ function getGlassView(): ComponentType<{
   }
 }
 
-/** Fundo da barra de abas: círculo de vidro que desliza até a aba ativa. */
-function GlassSlider({ count, activeIndex }: { count: number; activeIndex: number }) {
+/** Botão de aba que aceita toque E arrasto: arrastar leva o vidro junto e,
+ *  ao soltar, seleciona a aba sob o dedo — como no Liquid Glass do iOS. */
+function DragTabButton({
+  children,
+  style,
+  onPress,
+  dragX,
+  dragging,
+  onSelectX,
+}: {
+  children?: ReactNode;
+  style?: StyleProp<ViewStyle>;
+  onPress?: () => void;
+  dragX: SharedValue<number>;
+  dragging: SharedValue<number>;
+  onSelectX: (absX: number) => void;
+}) {
+  const gesture = useMemo(() => {
+    const tap = Gesture.Tap()
+      .maxDeltaX(14)
+      .maxDeltaY(14)
+      .onEnd((_e, success) => {
+        if (success && onPress) runOnJS(onPress)();
+      });
+    const pan = Gesture.Pan()
+      .minDistance(6)
+      .onStart((e) => {
+        dragging.value = 1;
+        dragX.value = e.absoluteX;
+      })
+      .onUpdate((e) => {
+        dragX.value = e.absoluteX;
+      })
+      .onFinalize((e) => {
+        if (dragging.value === 1) {
+          dragging.value = 0;
+          runOnJS(onSelectX)(e.absoluteX);
+        }
+      });
+    return Gesture.Race(pan, tap);
+  }, [onPress, onSelectX, dragX, dragging]);
+
+  return (
+    <GestureDetector gesture={gesture}>
+      <View accessibilityRole="button" style={style}>
+        {children}
+      </View>
+    </GestureDetector>
+  );
+}
+
+/** Fundo da barra de abas: círculo de vidro que desliza até a aba ativa e,
+ *  durante o arrasto, segue o dedo com leve crescimento. */
+function GlassSlider({
+  count,
+  activeIndex,
+  dragX,
+  dragging,
+  onWidth,
+}: {
+  count: number;
+  activeIndex: number;
+  dragX: SharedValue<number>;
+  dragging: SharedValue<number>;
+  onWidth: (w: number) => void;
+}) {
   const { mode } = useTheme();
   const [barW, setBarW] = useState(0);
   const x = useSharedValue(-9999);
@@ -131,13 +200,44 @@ function GlassSlider({ count, activeIndex }: { count: number; activeIndex: numbe
     else x.value = withSpring(target, { damping: 17, stiffness: 190 });
   }, [activeIndex, slot, x]);
 
-  const slide = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
+  // Soltou o dedo → a mola parte da posição onde o vidro estava, sem pulo.
+  useAnimatedReaction(
+    () => dragging.value,
+    (now, prev) => {
+      if (prev === 1 && now === 0 && barW > 0) {
+        x.value = Math.min(
+          Math.max(dragX.value - GLASS_CIRCLE / 2, 4),
+          Math.max(4, barW - GLASS_CIRCLE - 4),
+        );
+      }
+    },
+    [barW],
+  );
+
+  const slide = useAnimatedStyle(() => {
+    const tx =
+      dragging.value === 1 && barW > 0
+        ? Math.min(
+            Math.max(dragX.value - GLASS_CIRCLE / 2, 4),
+            Math.max(4, barW - GLASS_CIRCLE - 4),
+          )
+        : x.value;
+    return {
+      transform: [
+        { translateX: tx },
+        { scale: withSpring(dragging.value === 1 ? 1.15 : 1, { damping: 16, stiffness: 240 }) },
+      ],
+    };
+  });
 
   return (
     <View
       style={{ flex: 1 }}
       pointerEvents="none"
-      onLayout={(e) => setBarW(e.nativeEvent.layout.width)}
+      onLayout={(e) => {
+        setBarW(e.nativeEvent.layout.width);
+        onWidth(e.nativeEvent.layout.width);
+      }}
     >
       {slot > 0 && activeIndex >= 0 ? (
         <Animated.View
@@ -214,6 +314,17 @@ export default function TabsLayout() {
   const pathname = usePathname();
   const activeTab = pathname === '/' ? 'index' : (pathname.split('/')[1] ?? '');
   const activeIndex = visibleNames.indexOf(activeTab);
+  // Arrasto do vidro: posição do dedo compartilhada entre botões e círculo.
+  const dragX = useSharedValue(0);
+  const dragging = useSharedValue(0);
+  const [barW, setBarW] = useState(0);
+  const selectByX = (absX: number) => {
+    if (barW <= 0) return;
+    const slot = barW / visibleNames.length;
+    const idx = Math.min(visibleNames.length - 1, Math.max(0, Math.floor(absX / slot)));
+    const name = visibleNames[idx];
+    if (name) router.navigate(name === 'index' ? '/' : `/${name}`);
+  };
 
   if (loading) return <View />;
   if (!accepted) return <Redirect href="/onboarding" />;
@@ -227,7 +338,24 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarBackground: () => (
-          <GlassSlider count={visibleNames.length} activeIndex={activeIndex} />
+          <GlassSlider
+            count={visibleNames.length}
+            activeIndex={activeIndex}
+            dragX={dragX}
+            dragging={dragging}
+            onWidth={setBarW}
+          />
+        ),
+        tabBarButton: (p) => (
+          <DragTabButton
+            style={(p as { style?: StyleProp<ViewStyle> }).style}
+            onPress={(p as { onPress?: () => void }).onPress}
+            dragX={dragX}
+            dragging={dragging}
+            onSelectX={selectByX}
+          >
+            {(p as { children?: ReactNode }).children}
+          </DragTabButton>
         ),
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,

@@ -8,6 +8,7 @@ import * as Notifications from 'expo-notifications';
 import { Stack } from 'expo-router';
 import { Component, PropsWithChildren, useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AppText, Button, Screen } from '@/design/components';
 import { db, initDb, isDbLockedError } from '@/db/client';
 import { getSetting } from '@/db/settingsRepo';
@@ -133,8 +134,10 @@ export default function RootLayout() {
     );
   }
   return (
-    <RootErrorBoundary>
-      <Stack screenOptions={{ headerShown: false }} />
-    </RootErrorBoundary>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <RootErrorBoundary>
+        <Stack screenOptions={{ headerShown: false }} />
+      </RootErrorBoundary>
+    </GestureHandlerRootView>
   );
 }
