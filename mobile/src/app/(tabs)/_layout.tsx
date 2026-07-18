@@ -204,9 +204,10 @@ function GlassSlider({
   useEffect(() => {
     if (slot <= 0 || activeIndex < 0) return;
     const target = activeIndex * slot + slot / 2;
-    // Primeira medição posiciona sem animar; depois, sempre desliza com mola.
+    // Primeira medição posiciona sem animar; depois desliza com mola firme —
+    // sem ultrapassar o alvo (em saltos longos ele chegava a sair da tela).
     if (cx.value < -5000) cx.value = target;
-    else cx.value = withSpring(target, { damping: 17, stiffness: 190 });
+    else cx.value = withSpring(target, { damping: 24, stiffness: 240, overshootClamping: true });
   }, [activeIndex, slot, cx]);
 
   // Soltou o dedo → a mola parte da posição onde o vidro estava, sem pulo.
