@@ -102,7 +102,9 @@ function Fab({ focused, signal }: { focused: boolean; signal: number }) {
   );
 }
 
-const GLASS_CIRCLE = 46;
+// Elipse do vidro: mais larga que alta, como o Liquid Glass das abas do iOS.
+const GLASS_W = 62;
+const GLASS_H = 46;
 
 /** Vidro líquido do iOS 26 quando disponível; senão, círculo translúcido. */
 function getGlassView(): ComponentType<{
@@ -194,7 +196,7 @@ function GlassSlider({
 
   useEffect(() => {
     if (slot <= 0 || activeIndex < 0) return;
-    const target = activeIndex * slot + slot / 2 - GLASS_CIRCLE / 2;
+    const target = activeIndex * slot + slot / 2 - GLASS_W / 2;
     // Primeira medição posiciona sem animar; depois, sempre desliza com mola.
     if (x.value < -5000) x.value = target;
     else x.value = withSpring(target, { damping: 17, stiffness: 190 });
@@ -206,8 +208,8 @@ function GlassSlider({
     (now, prev) => {
       if (prev === 1 && now === 0 && barW > 0) {
         x.value = Math.min(
-          Math.max(dragX.value - GLASS_CIRCLE / 2, 4),
-          Math.max(4, barW - GLASS_CIRCLE - 4),
+          Math.max(dragX.value - GLASS_W / 2, 4),
+          Math.max(4, barW - GLASS_W - 4),
         );
       }
     },
@@ -218,8 +220,8 @@ function GlassSlider({
     const tx =
       dragging.value === 1 && barW > 0
         ? Math.min(
-            Math.max(dragX.value - GLASS_CIRCLE / 2, 4),
-            Math.max(4, barW - GLASS_CIRCLE - 4),
+            Math.max(dragX.value - GLASS_W / 2, 4),
+            Math.max(4, barW - GLASS_W - 4),
           )
         : x.value;
     return {
@@ -246,9 +248,9 @@ function GlassSlider({
               position: 'absolute',
               top: 9,
               left: 0,
-              width: GLASS_CIRCLE,
-              height: GLASS_CIRCLE,
-              borderRadius: GLASS_CIRCLE / 2,
+              width: GLASS_W,
+              height: GLASS_H,
+              borderRadius: GLASS_H / 2,
               overflow: 'hidden',
             },
             slide,
@@ -256,14 +258,14 @@ function GlassSlider({
         >
           {Glass ? (
             <Glass
-              style={{ flex: 1, borderRadius: GLASS_CIRCLE / 2 }}
+              style={{ flex: 1, borderRadius: GLASS_H / 2 }}
               glassEffectStyle="clear"
             />
           ) : (
             <View
               style={{
                 flex: 1,
-                borderRadius: GLASS_CIRCLE / 2,
+                borderRadius: GLASS_H / 2,
                 backgroundColor:
                   mode === 'light' ? 'rgba(37,99,235,0.10)' : 'rgba(148,197,255,0.14)',
                 borderWidth: 1,
