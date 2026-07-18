@@ -2,6 +2,7 @@ import { Redirect, Tabs, useSegments } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import { PropsWithChildren, useEffect, useState } from 'react';
 import { View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { db } from '@/db/client';
 import { getProfile } from '@/db/profileRepo';
 import Animated, {
@@ -93,6 +94,7 @@ type TabName = 'index' | 'registrar' | 'academia' | 'progresso' | 'ciclo' | 'per
 export default function TabsLayout() {
   const { loading, accepted } = useOnboarding();
   const { colors, mode } = useTheme();
+  const insets = useSafeAreaInsets();
   const [signals, setSignals] = useState<Record<TabName, number>>({
     index: 0,
     registrar: 0,
@@ -138,8 +140,11 @@ export default function TabsLayout() {
           shadowOpacity: mode === 'light' ? 0.08 : 0,
           shadowRadius: 16,
           shadowOffset: { width: 0, height: -4 },
-          height: 62,
+          // Altura inclui o recuo do indicador de início (senão fica um vão escuro
+          // abaixo da barra e ela briga com o gesto de home do iPhone).
+          height: 64 + insets.bottom,
           paddingTop: 6,
+          paddingBottom: Math.max(insets.bottom, 8),
         },
       }}
     >
