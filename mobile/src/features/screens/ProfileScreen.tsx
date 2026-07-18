@@ -136,7 +136,12 @@ export function ProfileScreen() {
         return;
       }
       const Print = require('expo-print') as typeof import('expo-print');
-      const { uri } = await Print.printToFileAsync({ html: reportHtml(report) });
+      // Página A4 (595×842 pt) — o padrão do iOS é Carta e sobrava página em branco.
+      const { uri } = await Print.printToFileAsync({
+        html: reportHtml(report),
+        width: 595,
+        height: 842,
+      });
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, { mimeType: 'application/pdf' });
       }

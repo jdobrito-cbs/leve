@@ -155,13 +155,29 @@ export function reportHtml(r: BodyReport): string {
   const when = `${String(dt.getDate()).padStart(2, '0')}/${String(dt.getMonth() + 1).padStart(2, '0')}/${dt.getFullYear()} ${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`;
   const ind = r.indicators;
   const v = r.vitals;
+  // Linhas de saúde/hidratação divididas em duas colunas para caber no A4.
+  const vitalRows = [
+    indicatorRow('Frequência cardíaca em repouso', v.restingHr !== null ? `${fmt(v.restingHr, 0)} bpm` : null),
+    indicatorRow('Frequência cardíaca média', v.avgHr !== null ? `${fmt(v.avgHr, 0)} bpm` : null),
+    indicatorRow('Oxigênio no sangue (SpO₂)', v.spo2 !== null ? `${fmt(v.spo2, 0)}%` : null),
+    indicatorRow('Frequência respiratória', v.respiratoryRate !== null ? `${fmt(v.respiratoryRate, 0)} rpm` : null),
+    indicatorRow('Sono (última noite)', v.sleepHours !== null ? `${fmt(v.sleepHours)} h` : null),
+    indicatorRow('Qualidade do sono (eficiência)', v.sleepEfficiencyPct !== null ? `${fmt(v.sleepEfficiencyPct, 0)}%` : null),
+    indicatorRow('Distúrbios respiratórios no sono', v.breathingDisturbances !== null ? `${fmt(v.breathingDisturbances)}/h` : null),
+    indicatorRow('Água ingerida hoje', `${v.waterTodayMl.toLocaleString('pt-BR')} ml`),
+    indicatorRow('Água por dia (média 7 dias)', v.waterAvg7dMl !== null ? `${v.waterAvg7dMl.toLocaleString('pt-BR')} ml` : null),
+  ].filter((row) => row !== '');
+  const vitalsA = vitalRows.slice(0, Math.ceil(vitalRows.length / 2));
+  const vitalsB = vitalRows.slice(Math.ceil(vitalRows.length / 2));
 
   return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"/>
   <style>
     /* Sem isto o WebKit apaga fundos coloridos ao imprimir — as barras somem. */
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, Roboto, 'Segoe UI', sans-serif;
       -webkit-print-color-adjust: exact !important; print-color-adjust: exact; }
-    body { color: ${INK}; padding: 26px 30px; font-size: 12px; }
+    @page { size: A4 portrait; margin: 0; }
+    /* zoom leve garante o relatório inteiro numa única página A4 */
+    body { color: ${INK}; padding: 22px 28px; font-size: 12px; zoom: 0.93; }
     .h1row { display: flex; align-items: center; gap: 9px; margin-bottom: 4px; }
     h1 { font-size: 21px; } h1 b { color: ${BLUE}; }
     .meta { color: ${MUTED}; display: flex; gap: 16px; padding: 8px 0 12px; border-bottom: 2px solid ${INK}; }
@@ -269,19 +285,13 @@ export function reportHtml(r: BodyReport): string {
         ${indicatorRow('SMI', ind.smi !== null ? `${fmt(ind.smi)} kg/m²` : null)}
         ${indicatorRow('Idade do corpo', ind.bodyAge !== null ? fmt(ind.bodyAge, 0) : null)}
       </table>
-      <h2>Saúde e hidratação</h2>
-      <table class="ind">
-        ${indicatorRow('Frequência cardíaca em repouso', v.restingHr !== null ? `${fmt(v.restingHr, 0)} bpm` : null)}
-        ${indicatorRow('Frequência cardíaca média', v.avgHr !== null ? `${fmt(v.avgHr, 0)} bpm` : null)}
-        ${indicatorRow('Oxigênio no sangue (SpO₂)', v.spo2 !== null ? `${fmt(v.spo2, 0)}%` : null)}
-        ${indicatorRow('Frequência respiratória', v.respiratoryRate !== null ? `${fmt(v.respiratoryRate, 0)} rpm` : null)}
-        ${indicatorRow('Sono (última noite)', v.sleepHours !== null ? `${fmt(v.sleepHours)} h` : null)}
-        ${indicatorRow('Qualidade do sono (eficiência)', v.sleepEfficiencyPct !== null ? `${fmt(v.sleepEfficiencyPct, 0)}%` : null)}
-        ${indicatorRow('Distúrbios respiratórios no sono', v.breathingDisturbances !== null ? `${fmt(v.breathingDisturbances)}/h` : null)}
-        ${indicatorRow('Água ingerida hoje', `${v.waterTodayMl.toLocaleString('pt-BR')} ml`)}
-        ${indicatorRow('Água por dia (média 7 dias)', v.waterAvg7dMl !== null ? `${v.waterAvg7dMl.toLocaleString('pt-BR')} ml` : null)}
-      </table>
     </div>
+  </div>
+
+  <h2>Saúde e hidratação</h2>
+  <div class="grid">
+    <div class="col"><table class="ind">${vitalsA.join('')}</table></div>
+    <div class="col">${vitalsB.length > 0 ? `<table class="ind">${vitalsB.join('')}</table>` : ''}</div>
   </div>
 
   <h2>Pontuação e sugestão</h2>
