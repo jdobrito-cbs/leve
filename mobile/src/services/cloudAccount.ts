@@ -25,6 +25,70 @@ export function isAppleSignInSupported(): boolean {
   return Platform.OS === 'ios';
 }
 
+export function isGoogleSignInSupported(): boolean {
+  return Platform.OS === 'ios' || Platform.OS === 'android';
+}
+
+// IDs de cliente OAuth do Google — são públicos por definição (não são segredos).
+const GOOGLE_WEB_CLIENT_ID =
+  '60542120655-jqvbgai6sbm4k0pbr3rtbsau7ajnvs2v.apps.googleusercontent.com';
+const GOOGLE_IOS_CLIENT_ID =
+  '60542120655-ds77mlrhf3vpbrk2i0bf2efdm9ftpnte.apps.googleusercontent.com';
+
+interface GoogleUser {
+  id: string;
+  name?: string | null;
+  givenName?: string | null;
+  familyName?: string | null;
+  email?: string | null;
+}
+
+/** null quando o usuário cancela; lança 'google-unavailable' quando a build
+ *  instalada não tem o módulo nativo do login Google. */
+export async function signInWithGoogle(db: AppDb): Promise<CloudAccount | null> {
+  let GoogleSignin: {
+    configure(opts: { webClientId: string; iosClientId?: string }): void;
+    hasPlayServices(opts?: { showPlayServicesUpdateDialog?: boolean }): Promise<boolean>;
+    signIn(): Promise<{
+      type?: string;
+      data?: { user?: GoogleUser } | null;
+      user?: GoogleUser;
+    }>;
+  };
+  try {
+    ({ GoogleSignin } = require('@react-native-google-signin/google-signin'));
+  } catch {
+    throw new Error('google-unavailable');
+  }
+  GoogleSignin.configure({
+    webClientId: GOOGLE_WEB_CLIENT_ID,
+    iosClientId: GOOGLE_IOS_CLIENT_ID,
+  });
+  if (Platform.OS === 'android') {
+    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+  }
+  const response = await GoogleSignin.signIn();
+  if (response.type === 'cancelled') return null;
+  const user = response.data?.user ?? response.user;
+  if (!user) return null;
+  const name =
+    user.name ?? [user.givenName, user.familyName].filter(Boolean).join(' ') ?? null;
+  const account: CloudAccount = {
+    provider: 'google',
+    userId: user.id,
+    name: name || null,
+    email: user.email ?? null,
+    connectedAt: new Date().toISOString(),
+  };
+  await setSetting(db, KEY, account);
+  // A conta preenche o nome do perfil quando ele ainda está vazio.
+  if (account.name) {
+    const profile = await getProfile(db);
+    if (!profile?.name) await updateProfile(db, { name: account.name });
+  }
+  return account;
+}
+
 /** null quando o usuário cancela; lança erro quando o login não está disponível. */
 export async function signInWithApple(db: AppDb): Promise<CloudAccount | null> {
   const Apple = require('expo-apple-authentication') as typeof import('expo-apple-authentication');

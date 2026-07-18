@@ -74,7 +74,13 @@
       "expo-apple-authentication",
       "expo-image",
       "expo-status-bar",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.60542120655-ds77mlrhf3vpbrk2i0bf2efdm9ftpnte"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

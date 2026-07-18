@@ -24,7 +24,13 @@ import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { estimateCalorieGoal } from '@/features/profile/calorieGoal';
 import { setSexSignal } from '@/features/profile/sexSignal';
 import type { SexOption } from '@/features/profile/useProfileForm';
-import { getCloudAccount, isAppleSignInSupported, signInWithApple } from '@/services/cloudAccount';
+import {
+  getCloudAccount,
+  isAppleSignInSupported,
+  isGoogleSignInSupported,
+  signInWithApple,
+  signInWithGoogle,
+} from '@/services/cloudAccount';
 import { strings } from '@/i18n/pt-BR';
 
 /** Dados básicos obrigatórios — a conta Apple/Google não fornece sexo nem
@@ -169,6 +175,23 @@ function AccountStep({ onDone }: { onDone: () => void }) {
     }
   }
 
+  async function onGoogle() {
+    setMessage(null);
+    setBusy(true);
+    try {
+      const account = await signInWithGoogle(db);
+      if (account) finish();
+    } catch (e) {
+      setMessage(
+        e instanceof Error && e.message === 'google-unavailable'
+          ? strings.cloudAccount.needsUpdate
+          : strings.cloudAccount.failed,
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <Card style={{ gap: spacing.md }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
@@ -185,12 +208,14 @@ function AccountStep({ onDone }: { onDone: () => void }) {
       {isAppleSignInSupported() ? (
         <Button label={strings.cloudAccount.apple} onPress={onApple} disabled={busy} />
       ) : null}
-      <Button
-        label={strings.cloudAccount.google}
-        variant="secondary"
-        onPress={() => setMessage(strings.cloudAccount.googleSoon)}
-        disabled={busy}
-      />
+      {isGoogleSignInSupported() ? (
+        <Button
+          label={strings.cloudAccount.google}
+          variant="secondary"
+          onPress={onGoogle}
+          disabled={busy}
+        />
+      ) : null}
       {message ? (
         <AppText variant="caption" muted>
           {message}

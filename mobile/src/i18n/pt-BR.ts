@@ -577,6 +577,7 @@ export const strings = {
     apple: 'Continuar com Apple',
     google: 'Continuar com Google',
     googleSoon: 'Login com Google chega na próxima atualização.',
+    needsUpdate: 'Entrar com Google precisa de uma versão mais recente do aplicativo.',
     appleUnavailable: 'Login com Apple indisponível neste aparelho.',
     skip: 'Agora não — continuar sem conta',
     connectedAs: 'Conta conectada',
