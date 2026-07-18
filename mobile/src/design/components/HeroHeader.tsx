@@ -1,5 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { PropsWithChildren } from 'react';
+import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { radius, spacing } from '../tokens';
 import { useTheme } from '../useTheme';
@@ -22,6 +23,19 @@ export function HeroHeader({ children }: PropsWithChildren) {
         gap: spacing.xs,
       }}
     >
+      {/* Transbordo: ao puxar a tela para baixo (elástico do iOS), o azul
+          continua acima do cabeçalho em vez de aparecer um corte. */}
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: -600,
+          left: 0,
+          right: 0,
+          height: 600,
+          backgroundColor: colors.heroStart,
+        }}
+      />
       {children}
     </LinearGradient>
   );
