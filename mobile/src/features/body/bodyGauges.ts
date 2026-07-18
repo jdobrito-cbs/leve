@@ -147,7 +147,7 @@ export function buildBodyGauges(report: BodyReport): GaugeSpec[] {
 
 /** Linhas de texto do box (sem medidor): peso ideal, nível de obesidade, tipo. */
 export function buildBodyFacts(report: BodyReport): Array<{ label: string; value: string }> {
-  const facts = [
+  const facts: Array<{ label: string; value: string }> = [
     {
       label: B.idealWeight,
       value: `${report.idealWeightKg.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} kg`,
