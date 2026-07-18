@@ -11,6 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Ellipse, Path } from 'react-native-svg';
 import { HydratedPandaArt } from './hydratedPandaArt';
+import { SlimmerBodyArt, SlimmerScaleArt } from './slimmerPandaArt';
 import { ThirstyPandaArt } from './thirstyPandaArt';
 
 /**
@@ -145,6 +146,38 @@ export function ThirstyPanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
       {/* Gotas de suor caindo das têmporas */}
       <SweatDrop x={360 * s} y={110 * s} scale={s * 2.2} delayMs={0} />
       <SweatDrop x={210 * s} y={104 * s} scale={s * 2.2} delayMs={700} />
+    </View>
+  );
+}
+
+/** Panda comemorando a queda de peso — só o panda pula; a balança fica parada.
+ *  viewBox original: 547×456. */
+export function SlimmerPanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
+  const height = (456 / 547) * width;
+  const jumpPx = width * 0.09;
+  const jump = useSharedValue(0);
+
+  useEffect(() => {
+    jump.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 360, easing: Easing.out(Easing.quad) }),
+        withTiming(0, { duration: 300, easing: Easing.in(Easing.quad) }),
+        withTiming(0, { duration: 420 }),
+      ),
+      -1,
+    );
+  }, [jump]);
+
+  const hop = useAnimatedStyle(() => ({
+    transform: [{ translateY: -jump.value * jumpPx }],
+  }));
+
+  return (
+    <View style={{ width, height }}>
+      <SlimmerScaleArt width={width} height={height} />
+      <Animated.View style={[{ position: 'absolute', left: 0, top: 0, width, height }, hop]}>
+        <SlimmerBodyArt width={width} height={height} />
+      </Animated.View>
     </View>
   );
 }

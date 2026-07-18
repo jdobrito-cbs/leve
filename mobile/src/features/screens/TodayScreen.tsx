@@ -16,7 +16,7 @@ import {
   SyringeInjectIcon,
   UtensilsCrossIcon,
 } from '@/design/logIcons';
-import { HappyPanda, HydratedPanda, ThirstyPanda } from '@/design/pandas';
+import { HappyPanda, HydratedPanda, SlimmerPanda, ThirstyPanda } from '@/design/pandas';
 import { reportCaloricBalance, useMascot } from '@/features/today/mascotSignal';
 import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
@@ -173,6 +173,8 @@ export function TodayScreen() {
           <ThirstyPanda width={128} />
         ) : mascot === 'hydrated' ? (
           <HydratedPanda width={128} />
+        ) : mascot === 'slimmer' ? (
+          <SlimmerPanda width={128} />
         ) : (
           <HappyPanda />
         )}
