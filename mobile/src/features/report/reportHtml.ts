@@ -162,7 +162,8 @@ export function reportHtml(r: BodyReport): string {
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, Roboto, 'Segoe UI', sans-serif;
       -webkit-print-color-adjust: exact !important; print-color-adjust: exact; }
     body { color: ${INK}; padding: 26px 30px; font-size: 12px; }
-    h1 { font-size: 21px; margin-bottom: 4px; } h1 b { color: ${BLUE}; }
+    .h1row { display: flex; align-items: center; gap: 9px; margin-bottom: 4px; }
+    h1 { font-size: 21px; } h1 b { color: ${BLUE}; }
     .meta { color: ${MUTED}; display: flex; gap: 16px; padding: 8px 0 12px; border-bottom: 2px solid ${INK}; }
     h2 { font-size: 14px; margin: 16px 0 8px; }
     .grid { display: flex; gap: 22px; }
@@ -199,7 +200,21 @@ export function reportHtml(r: BodyReport): string {
     .sug { flex: 1; color: ${INK}; line-height: 1.5; }
     .footer { margin-top: 14px; color: ${MUTED}; font-size: 10px; }
   </style></head><body>
-  <h1><b>Leve</b> · Relatório de análise de composição corporal</h1>
+  <div class="h1row">
+    <svg width="30" height="30" viewBox="0 0 30 30">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#2563EB"/><stop offset="1" stop-color="#60A5FA"/>
+      </linearGradient></defs>
+      <rect width="30" height="30" rx="7" fill="url(#lg)"/>
+      <g transform="translate(4.2 4.2) scale(0.9)" fill="none" stroke="#FFFFFF" stroke-width="1.8"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3"/>
+        <path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4"/>
+        <path d="M5 21h14"/>
+      </g>
+    </svg>
+    <h1><b>Leve</b> · Relatório de análise de composição corporal</h1>
+  </div>
   <div class="meta">
     <span>Nome: <b>${r.name}</b></span><span>Sexo: ${sexLabel}</span>
     <span>Idade: ${r.age ?? '—'}</span><span>Altura: ${Math.round(r.heightCm)} cm</span>
