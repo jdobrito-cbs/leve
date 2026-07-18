@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useMemo, type ComponentType, type PropsWithChildren } from 'react';
+import { useMemo, useState, type ComponentType, type PropsWithChildren } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LineChart } from 'react-native-gifted-charts';
@@ -102,6 +102,8 @@ function Metric({ label, value }: { label: string; value: string }) {
 export function TodayScreen() {
   const { colors } = useTheme();
   const summary = useTodaySummary();
+  const [heroH, setHeroH] = useState(0);
+  const [atTop, setAtTop] = useState(true);
   const progress = summary.waterGoalMl > 0 ? summary.waterMl / summary.waterGoalMl : 0;
   const pk = useMemo(() => estimateRelativeCurve(summary.doses), [summary.doses]);
   const daysToNextDose = summary.nextDoseAt
@@ -109,10 +111,29 @@ export function TodayScreen() {
     : null;
 
   return (
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      {/* Fundo azul revelado só pelo elástico do topo (evita o corte do hero).
+          Some assim que a lista rola, para não vazar entre os cards. */}
+      {atTop && heroH > 0 ? (
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: Math.max(0, heroH - 32),
+            backgroundColor: colors.heroStart,
+          }}
+        />
+      ) : null}
     <ScrollView
-      style={{ flex: 1, backgroundColor: colors.background }}
+      style={{ flex: 1 }}
       contentContainerStyle={{ paddingBottom: spacing.xl }}
+      onScroll={(e) => setAtTop(e.nativeEvent.contentOffset.y <= 1)}
+      scrollEventThrottle={16}
     >
+      <View onLayout={(e) => setHeroH(Math.round(e.nativeEvent.layout.height))}>
       <HeroHeader>
         <AppText
           style={{ color: colors.onHero, fontFamily: fonts.semibold, fontSize: 22, lineHeight: 28 }}
@@ -128,6 +149,7 @@ export function TodayScreen() {
           {strings.today.summaryLabel}
         </AppText>
       </HeroHeader>
+      </View>
       <View style={{ padding: spacing.md, gap: spacing.md, marginTop: -spacing.lg, zIndex: 1 }}>
         {/* 1 — Água (transborda quando passa de 100%) */}
         <Animated.View entering={FadeInDown.duration(420)}>
@@ -520,5 +542,6 @@ export function TodayScreen() {
         ) : null}
       </View>
     </ScrollView>
+    </View>
   );
 }
