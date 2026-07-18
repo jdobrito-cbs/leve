@@ -91,10 +91,12 @@ export default function RootLayout() {
 
   useEffect(() => {
     load();
-    // Avisos → mascote por 1 minuto: água → com sede; remédio → hora do remédio.
+    // Avisos → mascote por 1 minuto: água → com sede; remédio de apoio →
+    // hora do remédio; aplicação GLP-1 → panda da dose.
     attachReminderMascotListeners({
       onWater: () => setMascotEvent('thirsty'),
       onMeds: () => setMascotEvent('meds'),
+      onDose: () => setMascotEvent('dose'),
     });
   }, [load]);
 

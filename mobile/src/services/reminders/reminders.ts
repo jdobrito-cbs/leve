@@ -39,14 +39,16 @@ async function safely(run: () => Promise<void>): Promise<void> {
 
 /** Chama o callback do tipo quando um aviso chega (app aberto), é tocado, ou
  *  quando o app foi aberto a partir de um aviso recente (partida fria).
- *  Água → onWater; remédio/dose → onMeds. */
+ *  Água → onWater; remédios de apoio → onMeds; aplicação GLP-1 → onDose. */
 export function attachReminderMascotListeners(handlers: {
   onWater: () => void;
   onMeds: () => void;
+  onDose: () => void;
 }): void {
   const dispatch = (identifier: string) => {
     if (identifier.startsWith(WATER_PREFIX)) handlers.onWater();
-    else if (identifier.startsWith(MED_PREFIX) || identifier === DOSE_ID) handlers.onMeds();
+    else if (identifier.startsWith(MED_PREFIX)) handlers.onMeds();
+    else if (identifier === DOSE_ID) handlers.onDose();
   };
   try {
     Notifications.addNotificationReceivedListener((n) => dispatch(n.request.identifier));
