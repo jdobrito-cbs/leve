@@ -60,6 +60,14 @@ test('documento traz nome, pontuação, seções e faixas', () => {
     score: 66,
     suggestions: ['Sugestão de teste.'],
     compositionEstimated: false,
+    vitals: {
+      restingHr: 62,
+      avgHr: 78,
+      spo2: 97,
+      respiratoryRate: 15,
+      waterTodayMl: 1800,
+      waterAvg7dMl: 2100,
+    },
   };
   const html = reportHtml(r);
   expect(html).toContain('Jorge');
@@ -67,6 +75,10 @@ test('documento traz nome, pontuação, seções e faixas', () => {
   expect(html).toContain('Água corporal');
   expect(html).toContain('Músculo esquelético');
   expect(html).toContain('Taxa metabólica basal');
+  expect(html).toContain('Frequência cardíaca em repouso');
+  expect(html).toContain('62 bpm');
+  expect(html).toContain('Água ingerida hoje');
+  expect(html).toContain('1.800 ml');
   expect(html).toContain('>66<');
   expect(html).toContain('Sugestão de teste.');
   expect(html).toContain('39,0–48,6');

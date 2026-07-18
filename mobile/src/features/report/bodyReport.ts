@@ -3,6 +3,7 @@ import type { MetricType } from '@/core/metrics';
 import type { AppDb } from '@/db/client';
 import { latestMetric, metricSeries } from '@/db/metricsRepo';
 import { getProfile } from '@/db/profileRepo';
+import { waterDailyTotals, waterTotalForDay } from '@/db/waterRepo';
 import { listWeights, weightsSince } from '@/db/weightRepo';
 
 /**
@@ -61,6 +62,15 @@ export interface BodyReport {
   };
   /** true quando parte da composição foi derivada de peso + gordura corporal. */
   compositionEstimated: boolean;
+  /** Sinais vitais e hidratação registrados no app. */
+  vitals: {
+    restingHr: number | null;
+    avgHr: number | null;
+    spo2: number | null;
+    respiratoryRate: number | null;
+    waterTodayMl: number;
+    waterAvg7dMl: number | null;
+  };
   history: {
     weight: SeriesPoint[];
     muscle: SeriesPoint[];
@@ -208,11 +218,24 @@ export async function buildBodyReport(db: AppDb): Promise<BodyReport | null> {
 
   const since30 = new Date();
   since30.setDate(since30.getDate() - 30);
-  const [muscleSeries, fatSeries, weights30] = await Promise.all([
-    metricSeries(db, 'muscle_mass_kg', since30),
-    metricSeries(db, 'body_fat_pct', since30),
-    weightsSince(db, since30),
-  ]);
+  const now = new Date();
+  const [muscleSeries, fatSeries, weights30, restingHr, avgHr, spo2, respRate, waterToday, water7] =
+    await Promise.all([
+      metricSeries(db, 'muscle_mass_kg', since30),
+      metricSeries(db, 'body_fat_pct', since30),
+      weightsSince(db, since30),
+      last(db, 'heart_rate_resting'),
+      last(db, 'heart_rate_avg'),
+      last(db, 'spo2'),
+      last(db, 'respiratory_rate'),
+      waterTotalForDay(db, now),
+      waterDailyTotals(db, 7, now),
+    ]);
+  const waterDays = water7.filter((d) => d.totalMl > 0);
+  const waterAvg7dMl =
+    waterDays.length > 0
+      ? Math.round(waterDays.reduce((a, d) => a + d.totalMl, 0) / waterDays.length)
+      : null;
 
   const round1 = (n: number) => Math.round(n * 10) / 10;
   const fatKg = fatPctV !== null ? Math.round(weight * fatPctV) / 100 : null;
@@ -314,6 +337,14 @@ export async function buildBodyReport(db: AppDb): Promise<BodyReport | null> {
       bodyAge: metAge ?? null,
     },
     compositionEstimated,
+    vitals: {
+      restingHr,
+      avgHr,
+      spo2,
+      respiratoryRate: respRate,
+      waterTodayMl: waterToday,
+      waterAvg7dMl,
+    },
     history: {
       weight: dailyAverages(
         weights30.map((w) => ({ loggedAt: w.loggedAt, value: w.weightKg })),

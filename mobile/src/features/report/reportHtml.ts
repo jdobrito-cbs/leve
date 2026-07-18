@@ -154,6 +154,7 @@ export function reportHtml(r: BodyReport): string {
   const dt = r.generatedAt;
   const when = `${String(dt.getDate()).padStart(2, '0')}/${String(dt.getMonth() + 1).padStart(2, '0')}/${dt.getFullYear()} ${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`;
   const ind = r.indicators;
+  const v = r.vitals;
 
   return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"/>
   <style>
@@ -252,6 +253,15 @@ export function reportHtml(r: BodyReport): string {
         ${indicatorRow('Gordura subcutânea', ind.subcutaneousPct !== null ? `${fmt(ind.subcutaneousPct)}%` : null)}
         ${indicatorRow('SMI', ind.smi !== null ? `${fmt(ind.smi)} kg/m²` : null)}
         ${indicatorRow('Idade do corpo', ind.bodyAge !== null ? fmt(ind.bodyAge, 0) : null)}
+      </table>
+      <h2>Saúde e hidratação</h2>
+      <table class="ind">
+        ${indicatorRow('Frequência cardíaca em repouso', v.restingHr !== null ? `${fmt(v.restingHr, 0)} bpm` : null)}
+        ${indicatorRow('Frequência cardíaca média', v.avgHr !== null ? `${fmt(v.avgHr, 0)} bpm` : null)}
+        ${indicatorRow('Oxigênio no sangue (SpO₂)', v.spo2 !== null ? `${fmt(v.spo2, 0)}%` : null)}
+        ${indicatorRow('Frequência respiratória', v.respiratoryRate !== null ? `${fmt(v.respiratoryRate, 0)} rpm` : null)}
+        ${indicatorRow('Água ingerida hoje', `${v.waterTodayMl.toLocaleString('pt-BR')} ml`)}
+        ${indicatorRow('Água por dia (média 7 dias)', v.waterAvg7dMl !== null ? `${v.waterAvg7dMl.toLocaleString('pt-BR')} ml` : null)}
       </table>
     </div>
   </div>
