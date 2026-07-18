@@ -24,7 +24,6 @@ import { useTheme } from '@/design/useTheme';
 import { useHealthConnection } from '@/features/health/useHealthConnection';
 import { isLocked } from '@/features/premium/gates';
 import { usePremium } from '@/features/premium/usePremium';
-import { setSexSignal } from '@/features/profile/sexSignal';
 import { useProfileForm } from '@/features/profile/useProfileForm';
 import { strings } from '@/i18n/pt-BR';
 
@@ -118,11 +117,7 @@ export function ProfileScreen() {
             (value) => ({ value, label: strings.profile.sexes[value] }),
           )}
           value={form.sex}
-          onChange={(v) => {
-            setField('sex', v);
-            // A aba Ciclo aparece/some imediatamente ao escolher o sexo.
-            setSexSignal(v);
-          }}
+          onChange={(v) => setField('sex', v)}
         />
         <DateField
           label={strings.profile.birthDateLabel}

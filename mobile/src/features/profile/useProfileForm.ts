@@ -7,6 +7,7 @@ import { getProfile, updateProfile } from '@/db/profileRepo';
 import { getSetting, setSetting } from '@/db/settingsRepo';
 import { latestWeight } from '@/db/weightRepo';
 import { getCloudAccount } from '@/services/cloudAccount';
+import { setSexSignal } from '@/features/profile/sexSignal';
 import { waterGoalFromWeightKg } from '@/features/water/waterGoal';
 import {
   DEFAULT_REMINDERS,
@@ -137,6 +138,8 @@ export function useProfileForm() {
       waterTimes: waterTimes.length ? waterTimes : DEFAULT_REMINDERS.waterTimes,
       insightsEnabled,
     };
+    // A aba Ciclo só muda depois de SALVAR o sexo (não no clique do chip).
+    setSexSignal(form.sex ?? 'nao_informar');
     await setSetting(db, 'reminders', reminders);
     await setSetting(db, 'waterGoalAuto', form.waterGoalAuto);
     await setSetting(
