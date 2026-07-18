@@ -13,7 +13,9 @@ function makeDb() {
 
 test('registra, lista (desc), soma o dia e apaga exercícios', async () => {
   const db = makeDb();
+  // Meio-dia fixo: rodar o teste na virada da meia-noite não muda o dia da soma.
   const today = new Date();
+  today.setHours(12, 0, 0, 0);
   await addGymLog(db, {
     exercise: 'supino',
     kind: 'forca',
