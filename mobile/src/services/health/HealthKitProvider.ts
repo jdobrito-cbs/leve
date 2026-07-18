@@ -50,7 +50,8 @@ const STEP_COUNT = 'HKQuantityTypeIdentifierStepCount';
 const SLEEP = 'HKCategoryTypeIdentifierSleepAnalysis';
 
 /** Identificadores HealthKit → métrica do Leve (iOS não testável neste ambiente; adapter defensivo). */
-const HK_METRICS: Array<{ id: string; type: MetricType }> = [
+const HK_METRICS: Array<{ id: string; type: MetricType; unit?: string }> = [
+  { id: 'HKQuantityTypeIdentifierWaistCircumference', type: 'waist_cm', unit: 'cm' },
   { id: 'HKQuantityTypeIdentifierBodyFatPercentage', type: 'body_fat_pct' },
   { id: 'HKQuantityTypeIdentifierLeanBodyMass', type: 'lean_mass_kg' },
   { id: 'HKQuantityTypeIdentifierRestingHeartRate', type: 'heart_rate_resting' },
@@ -144,12 +145,13 @@ export class HealthKitProvider implements HealthProvider {
   async readMetrics(since: Date): Promise<MetricSample[]> {
     if (!this.mod) return [];
     const samples: MetricSample[] = [];
-    for (const { id, type } of HK_METRICS) {
+    for (const { id, type, unit } of HK_METRICS) {
       try {
         const rows = rowsOf(
           await this.mod.queryQuantitySamples(id, {
             filter: { date: { startDate: since, endDate: new Date() } },
             limit: 0,
+            ...(unit ? { unit } : {}),
           }),
         );
         for (const s of rows) {

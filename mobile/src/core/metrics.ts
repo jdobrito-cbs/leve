@@ -21,6 +21,8 @@ export const METRIC_DEFS = {
   subcutaneous_fat_pct: { unit: '%', platform: false },
   protein_pct: { unit: '%', platform: false },
   metabolic_age: { unit: 'anos', platform: false },
+  waist_cm: { unit: 'cm', platform: true },
+  hip_cm: { unit: 'cm', platform: false },
 } as const;
 
 export type MetricType = keyof typeof METRIC_DEFS;
@@ -36,6 +38,8 @@ export const MANUAL_BODY_METRICS: MetricType[] = [
   'subcutaneous_fat_pct',
   'protein_pct',
   'metabolic_age',
+  'waist_cm',
+  'hip_cm',
 ];
 
 export interface MetricSample {

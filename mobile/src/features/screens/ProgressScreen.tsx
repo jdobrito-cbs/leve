@@ -14,7 +14,7 @@ import {
   SegmentedChips,
 } from '@/design/components';
 import { zoneOf, type GaugeSpec } from '@/features/body/bodyBands';
-import { buildBodyGauges } from '@/features/body/bodyGauges';
+import { buildBodyFacts, buildBodyGauges } from '@/features/body/bodyGauges';
 import { buildBodyReport } from '@/features/report/bodyReport';
 import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
@@ -60,13 +60,16 @@ function dailyAverages(rows: MetricRow[]): { value: number }[] {
 /** Dados corporais no estilo da balança: valor + medidor de faixas por item. */
 function BodyDataSection() {
   const [gauges, setGauges] = useState<GaugeSpec[] | null>(null);
+  const [facts, setFacts] = useState<Array<{ label: string; value: string }>>([]);
 
   useFocusEffect(
     useCallback(() => {
       let alive = true;
       buildBodyReport(db)
         .then((report) => {
-          if (alive) setGauges(report ? buildBodyGauges(report) : []);
+          if (!alive) return;
+          setGauges(report ? buildBodyGauges(report) : []);
+          setFacts(report ? buildBodyFacts(report) : []);
         })
         .catch(() => {
           if (alive) setGauges([]);
@@ -107,6 +110,15 @@ function BodyDataSection() {
           </View>
         );
       })}
+      {facts.map((f) => (
+        <View
+          key={f.label}
+          style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm }}
+        >
+          <AppText style={{ flex: 1 }}>{f.label}</AppText>
+          <AppText style={{ fontFamily: fonts.bold, fontSize: 16 }}>{f.value}</AppText>
+        </View>
+      ))}
       <DisclaimerBanner />
     </Card>
   );

@@ -157,3 +157,52 @@ export function zoneOf(value: number, zones: GaugeZone[]): GaugeZone {
   }
   return zones[zones.length - 1];
 }
+
+/** WHR (cintura ÷ quadril): excelente | padrão | alto | muito alto (OMS). */
+export function whrZones(sex: Sex): GaugeZone[] {
+  const [a, b, c] = sex === 'feminino' ? [0.75, 0.8, 0.85] : [0.85, 0.9, 0.95];
+  return [
+    { to: a, label: L.excellent, color: ZONE.good },
+    { to: b, label: L.standard, color: ZONE.ok },
+    { to: c, label: L.high, color: ZONE.warn },
+    { to: null, label: L.veryHigh, color: ZONE.bad },
+  ];
+}
+
+/** Peso corporal ideal: IMC 22 (centro da faixa saudável) na altura da pessoa. */
+export function idealBodyWeightKg(heightCm: number): number {
+  return r1(22 * (heightCm / 100) ** 2);
+}
+
+/** Nível de obesidade pela escala da OMS (IMC). */
+export function obesityLevelLabel(bmi: number): string {
+  const O = strings.obesityLevels;
+  if (bmi < 18.5) return O.under;
+  if (bmi < 25) return O.normal;
+  if (bmi < 30) return O.over;
+  if (bmi < 35) return O.g1;
+  if (bmi < 40) return O.g2;
+  return O.g3;
+}
+
+/** Tipo de corpo: combinação da zona de gordura, IMC e massa muscular. */
+export function bodyTypeLabel(
+  sex: Sex,
+  heightCm: number,
+  bmi: number,
+  fatPct: number | null,
+  muscleKg: number | null,
+): string | null {
+  if (fatPct === null) return null;
+  const T = strings.bodyTypes;
+  const fatZone = zoneOf(fatPct, fatPctZones(sex)).label;
+  const muscular =
+    muscleKg !== null && muscleKg > componentBandKg(sex, heightCm, 'muscle').max;
+  if (fatZone === L.veryHigh) return bmi >= 30 ? T.obese : T.overFat;
+  if (fatZone === L.high) return bmi >= 25 ? T.overFat : T.hiddenFat;
+  if (fatZone === L.thin) {
+    if (bmi < 18.5) return T.slim;
+    return muscular ? T.athletic : T.standard;
+  }
+  return muscular ? T.muscular : T.standard;
+}

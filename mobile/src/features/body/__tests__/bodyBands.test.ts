@@ -26,6 +26,22 @@ test('faixas masculinas reproduzem os medidores da balança (1,82 m)', () => {
   expect(water.max).toBeCloseTo(48.0, 1); // balança: 48,6
 });
 
+test('novos indicadores: WHR, peso ideal, nível de obesidade e tipo de corpo', () => {
+  const { whrZones, idealBodyWeightKg, obesityLevelLabel, bodyTypeLabel } =
+    require('../bodyBands') as typeof import('../bodyBands');
+  // Balança do dono: 0,89 masculino = Padrão (fronteiras 0,85/0,90/0,95).
+  expect(zoneOf(0.89, whrZones('masculino')).label).toBe('Padrão');
+  expect(zoneOf(0.96, whrZones('masculino')).label).toBe('Muito alto');
+  expect(zoneOf(0.78, whrZones('feminino')).label).toBe('Padrão');
+  // Balança do dono: 72,9 kg para 1,82 m (IMC 22).
+  expect(idealBodyWeightKg(182)).toBeCloseTo(72.9, 1);
+  expect(obesityLevelLabel(32.2)).toBe('Obesidade de grau I');
+  expect(obesityLevelLabel(22)).toBe('Peso normal');
+  // Dono: gordura 32,9% + IMC 32,2 → tipo "Obesidade".
+  expect(bodyTypeLabel('masculino', 182, 32.2, 32.9, 66.7)).toBe('Obesidade');
+  expect(bodyTypeLabel('masculino', 182, 23, 15, 66.7)).toBe('Musculoso');
+});
+
 test('zonas: IMC segue o CDC, gordura por sexo e visceral por grau', () => {
   expect(zoneOf(32.2, bmiZones()).label).toBe('Obesidade');
   expect(zoneOf(22, bmiZones()).label).toBe('Padrão');

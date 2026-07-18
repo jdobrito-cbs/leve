@@ -4,6 +4,7 @@ import {
   fatMassZones,
   subcutaneousZones,
   visceralZones,
+  whrZones,
   zoneOf,
   ZONE,
   type GaugeZone,
@@ -225,6 +226,10 @@ export function reportHtml(r: BodyReport): string {
           ]),
         )
       : '';
+  const whrGauge =
+    ind.whr !== null
+      ? gaugeRow('WHR (cintura-quadril)', fmt(ind.whr, 2), miniGauge(ind.whr, whrZones(sexKey)))
+      : '';
   // Linhas de saúde/hidratação divididas em duas colunas para caber no A4.
   const vitalRows = [
     indicatorRow('Frequência cardíaca em repouso', v.restingHr !== null ? `${fmt(v.restingHr, 0)} bpm` : null),
@@ -247,7 +252,7 @@ export function reportHtml(r: BodyReport): string {
       -webkit-print-color-adjust: exact !important; print-color-adjust: exact; }
     @page { size: A4 portrait; margin: 0; }
     /* zoom leve garante o relatório inteiro numa única página A4 */
-    body { color: ${INK}; padding: 20px 28px; font-size: 12px; zoom: 0.89; }
+    body { color: ${INK}; padding: 20px 28px; font-size: 12px; zoom: 0.87; }
     .h1row { display: flex; align-items: center; gap: 9px; margin-bottom: 4px; }
     h1 { font-size: 21px; } h1 b { color: ${BLUE}; }
     .meta { color: ${MUTED}; display: flex; gap: 16px; padding: 8px 0 12px; border-bottom: 2px solid ${INK}; }
@@ -284,7 +289,7 @@ export function reportHtml(r: BodyReport): string {
     .ctitle { font-weight: 700; margin-bottom: 3px; } .ctitle small { color: ${MUTED}; font-weight: 400; }
     .cfoot { display: flex; justify-content: space-between; color: ${MUTED}; font-size: 10px; }
     table.ind { width: 100%; border-collapse: collapse; }
-    table.ind td { padding: 7px 8px; border: 1px solid ${LINE}; }
+    table.ind td { padding: 5px 8px; border: 1px solid ${LINE}; }
     .ival { text-align: right; font-weight: 700; }
     .scorebox { display: flex; gap: 18px; align-items: center; margin-top: 6px; }
     .score { font-size: 44px; font-weight: 800; color: ${BLUE}; } .score small { font-size: 12px; color: ${MUTED}; }
@@ -358,8 +363,12 @@ export function reportHtml(r: BodyReport): string {
         ${indicatorRow('Peso corporal livre de gordura', ind.fatFreeMassKg !== null ? `${fmt(ind.fatFreeMassKg)} kg` : null)}
         ${subcutGauge}
         ${indicatorRow('SMI', ind.smi !== null ? `${fmt(ind.smi)} kg/m²` : null)}
+        ${whrGauge}
         ${bodyAgeGauge}
         ${ind.bodyAge !== null && r.age === null ? indicatorRow('Idade do corpo', fmt(ind.bodyAge, 0)) : ''}
+        ${indicatorRow('Peso corporal ideal', `${fmt(r.idealWeightKg)} kg`)}
+        ${indicatorRow('Nível de obesidade', r.obesityLevel)}
+        ${indicatorRow('Tipo de corpo', r.bodyType)}
       </table>
     </div>
   </div>

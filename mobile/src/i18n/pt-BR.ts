@@ -369,6 +369,23 @@ export const strings = {
     excellent: 'Excelente',
     obesity: 'Obesidade',
   },
+  obesityLevels: {
+    under: 'Abaixo do peso',
+    normal: 'Peso normal',
+    over: 'Sobrepeso',
+    g1: 'Obesidade de grau I',
+    g2: 'Obesidade de grau II',
+    g3: 'Obesidade de grau III',
+  },
+  bodyTypes: {
+    slim: 'Magro',
+    hiddenFat: 'Gordura oculta',
+    standard: 'Padrão',
+    muscular: 'Musculoso',
+    athletic: 'Atlético',
+    overFat: 'Sobrepeso',
+    obese: 'Obesidade',
+  },
   bodyData: {
     section: 'Dados corporais',
     weight: 'Peso',
@@ -385,6 +402,10 @@ export const strings = {
     bmr: 'Taxa metabólica basal',
     metAge: 'Idade metabólica',
     yearsSuffix: 'anos',
+    whr: 'WHR (cintura-quadril)',
+    idealWeight: 'Peso corporal ideal',
+    obesityLevel: 'Nível de obesidade',
+    bodyType: 'Tipo de corpo',
   },
   metrics: {
     sleep_hours: 'Sono',
@@ -406,6 +427,8 @@ export const strings = {
     subcutaneous_fat_pct: 'Gordura subcutânea',
     protein_pct: 'Proteína',
     metabolic_age: 'Idade metabólica',
+    waist_cm: 'Cintura',
+    hip_cm: 'Quadril',
   },
   bodyComp: {
     title: 'Composição corporal',

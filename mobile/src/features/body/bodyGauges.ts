@@ -9,6 +9,7 @@ import {
   idealWeightBounds,
   subcutaneousZones,
   visceralZones,
+  whrZones,
   ZONE,
   type GaugeSpec,
 } from './bodyBands';
@@ -107,6 +108,14 @@ export function buildBodyGauges(report: BodyReport): GaugeSpec[] {
       zones: subcutaneousZones(sex),
     },
     {
+      key: 'whr',
+      label: B.whr,
+      unit: '',
+      value: ind.whr,
+      digits: 2,
+      zones: whrZones(sex),
+    },
+    {
       key: 'bmr',
       label: B.bmr,
       unit: 'kcal',
@@ -134,4 +143,17 @@ export function buildBodyGauges(report: BodyReport): GaugeSpec[] {
   }
 
   return specs.filter((s) => s.value !== null);
+}
+
+/** Linhas de texto do box (sem medidor): peso ideal, nível de obesidade, tipo. */
+export function buildBodyFacts(report: BodyReport): Array<{ label: string; value: string }> {
+  const facts = [
+    {
+      label: B.idealWeight,
+      value: `${report.idealWeightKg.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} kg`,
+    },
+    { label: B.obesityLevel, value: report.obesityLevel },
+  ];
+  if (report.bodyType) facts.push({ label: B.bodyType, value: report.bodyType });
+  return facts;
 }

@@ -48,7 +48,11 @@ test('documento traz nome, pontuação, seções e faixas', () => {
       subcutaneousPct: 23.5,
       smi: 9.7,
       bodyAge: 52,
+      whr: 0.92,
     },
+    idealWeightKg: 72.9,
+    obesityLevel: 'Obesidade de grau I',
+    bodyType: 'Obesidade',
     history: {
       weight: [
         { dayLabel: '08/07', value: 108 },
@@ -85,6 +89,10 @@ test('documento traz nome, pontuação, seções e faixas', () => {
   expect(html).toContain('Qualidade do sono (eficiência)');
   expect(html).toContain('Distúrbios respiratórios no sono');
   expect(html).toContain('3,2/h');
+  expect(html).toContain('WHR (cintura-quadril)');
+  expect(html).toContain('Peso corporal ideal');
+  expect(html).toContain('Obesidade de grau I');
+  expect(html).toContain('Tipo de corpo');
   expect(html).toContain('>66<');
   expect(html).toContain('Sugestão de teste.');
   expect(html).toContain('39,0–48,6');

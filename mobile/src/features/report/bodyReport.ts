@@ -1,6 +1,11 @@
 import { ageFromIsoDate } from '@/core/datetime';
 import type { MetricType } from '@/core/metrics';
-import { componentBandKg } from '@/features/body/bodyBands';
+import {
+  bodyTypeLabel,
+  componentBandKg,
+  idealBodyWeightKg,
+  obesityLevelLabel,
+} from '@/features/body/bodyBands';
 import type { AppDb } from '@/db/client';
 import { latestMetric, metricSeries } from '@/db/metricsRepo';
 import { getProfile } from '@/db/profileRepo';
@@ -60,7 +65,12 @@ export interface BodyReport {
     subcutaneousPct: number | null;
     smi: number | null;
     bodyAge: number | null;
+    /** Relação cintura-quadril (precisa das duas medidas registradas). */
+    whr: number | null;
   };
+  idealWeightKg: number;
+  obesityLevel: string;
+  bodyType: string | null;
   /** true quando parte da composição foi derivada de peso + gordura corporal. */
   compositionEstimated: boolean;
   /** Sinais vitais, sono e hidratação registrados no app. */
@@ -206,10 +216,12 @@ export async function buildBodyReport(db: AppDb): Promise<BodyReport | null> {
       waterTotalForDay(db, now),
       waterDailyTotals(db, 7, now),
     ]);
-  const [sleepH, sleepEff, breathing] = await Promise.all([
+  const [sleepH, sleepEff, breathing, waistCm, hipCm] = await Promise.all([
     last(db, 'sleep_hours'),
     last(db, 'sleep_efficiency_pct'),
     last(db, 'breathing_disturbances'),
+    last(db, 'waist_cm'),
+    last(db, 'hip_cm'),
   ]);
   const waterDays = water7.filter((d) => d.totalMl > 0);
   const waterAvg7dMl =
@@ -320,7 +332,14 @@ export async function buildBodyReport(db: AppDb): Promise<BodyReport | null> {
       smi:
         skeletalV !== null ? Math.round((skeletalV / (heightM * heightM)) * 10) / 10 : null,
       bodyAge: metAge ?? null,
+      whr:
+        waistCm !== null && hipCm !== null && hipCm > 0
+          ? Math.round((waistCm / hipCm) * 100) / 100
+          : null,
     },
+    idealWeightKg: idealBodyWeightKg(profile.heightCm),
+    obesityLevel: obesityLevelLabel(bmi.value),
+    bodyType: bodyTypeLabel(sex, profile.heightCm, bmi.value, fatPctV, muscleV ?? leanKg),
     compositionEstimated,
     vitals: {
       restingHr,
