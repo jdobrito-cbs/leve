@@ -108,7 +108,10 @@ export function CycleScreen() {
         </Card>
       ) : null}
       <DisclaimerBanner />
-      <Button label={strings.common.close} variant="secondary" onPress={() => router.back()} />
+      {/* Como aba própria não há para onde "voltar"; o botão só aparece vindo do Registrar. */}
+      {router.canGoBack?.() ? (
+        <Button label={strings.common.close} variant="secondary" onPress={() => router.back()} />
+      ) : null}
     </Screen>
   );
 }

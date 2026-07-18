@@ -1,14 +1,22 @@
-import { Redirect, Tabs } from 'expo-router';
+import { Redirect, Tabs, useSegments } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import { PropsWithChildren, useEffect, useState } from 'react';
 import { View } from 'react-native';
+import { db } from '@/db/client';
+import { getProfile } from '@/db/profileRepo';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSequence,
   withSpring,
 } from 'react-native-reanimated';
-import { ChartTabIcon, MuscleTabIcon, SproutTabIcon, UserTabIcon } from '@/design/tabIcons';
+import {
+  ChartTabIcon,
+  CycleTabIcon,
+  MuscleTabIcon,
+  SproutTabIcon,
+  UserTabIcon,
+} from '@/design/tabIcons';
 import { fonts } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
@@ -80,7 +88,7 @@ function Fab({ focused, signal }: { focused: boolean; signal: number }) {
   );
 }
 
-type TabName = 'index' | 'registrar' | 'academia' | 'progresso' | 'perfil';
+type TabName = 'index' | 'registrar' | 'academia' | 'progresso' | 'ciclo' | 'perfil';
 
 export default function TabsLayout() {
   const { loading, accepted } = useOnboarding();
@@ -90,8 +98,17 @@ export default function TabsLayout() {
     registrar: 0,
     academia: 0,
     progresso: 0,
+    ciclo: 0,
     perfil: 0,
   });
+  // A aba Ciclo só existe para o sexo feminino; re-lê ao navegar (Perfil pode mudar).
+  const segments = useSegments();
+  const [cycleTab, setCycleTab] = useState(false);
+  useEffect(() => {
+    getProfile(db)
+      .then((p) => setCycleTab(p?.sex === 'feminino'))
+      .catch(() => undefined);
+  }, [segments]);
 
   if (loading) return <View />;
   if (!accepted) return <Redirect href="/onboarding" />;
@@ -110,8 +127,9 @@ export default function TabsLayout() {
         // o que desmonta o botão central — mantém o layout vertical sempre.
         tabBarLabelPosition: 'below-icon',
         tabBarLabelStyle: { fontFamily: fonts.semibold, fontSize: 10 },
-        // 5 abas: sem folga lateral extra para caber tudo com conforto.
-        tabBarItemStyle: { paddingHorizontal: 0 },
+        // Até 6 abas: zera folgas e larguras mínimas para nada vazar da tela.
+        tabBarItemStyle: { paddingHorizontal: 0, marginHorizontal: 0, minWidth: 0, flex: 1 },
+        tabBarIconStyle: { marginHorizontal: 0 },
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopWidth: 0,
@@ -165,6 +183,19 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, focused }) => (
             <BouncyIcon focused={focused} signal={signals.progresso}>
               <ChartTabIcon color={color} focused={focused} signal={signals.progresso} />
+            </BouncyIcon>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="ciclo"
+        listeners={bump('ciclo')}
+        options={{
+          href: cycleTab ? '/ciclo' : null,
+          title: strings.tabs.cycle,
+          tabBarIcon: ({ color, focused }) => (
+            <BouncyIcon focused={focused} signal={signals.ciclo}>
+              <CycleTabIcon color={color} focused={focused} signal={signals.ciclo} />
             </BouncyIcon>
           ),
         }}

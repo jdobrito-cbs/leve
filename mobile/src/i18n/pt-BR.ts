@@ -19,6 +19,7 @@ export const strings = {
     log: 'Registrar',
     gym: 'Academia',
     progress: 'Progresso',
+    cycle: 'Ciclo',
     profile: 'Perfil',
   },
   gym: {
