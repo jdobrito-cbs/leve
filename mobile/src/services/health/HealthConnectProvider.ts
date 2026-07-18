@@ -154,8 +154,30 @@ export class HealthConnectProvider implements HealthProvider {
     for (const r of await read('SleepSession')) {
       const start = r.startTime ? new Date(r.startTime as string) : null;
       const end = r.endTime ? new Date(r.endTime as string) : null;
-      if (start && end && end > start) {
-        push('sleep_hours', Math.round(((end.getTime() - start.getTime()) / 36e5) * 10) / 10, end);
+      if (!start || !end || end <= start) continue;
+      const sessionMs = end.getTime() - start.getTime();
+      // Estágios (quando o relógio registra): 2/4/5/6 = dormindo, 1/7 = acordado.
+      const stages =
+        (r.stages as Array<{ startTime?: string; endTime?: string; stage?: number }> | undefined) ??
+        [];
+      let asleepMs = 0;
+      let awakeMs = 0;
+      for (const s of stages) {
+        if (!s.startTime || !s.endTime) continue;
+        const ms = new Date(s.endTime).getTime() - new Date(s.startTime).getTime();
+        if (!(ms > 0)) continue;
+        if (s.stage === 2 || s.stage === 4 || s.stage === 5 || s.stage === 6) asleepMs += ms;
+        else if (s.stage === 1 || s.stage === 7) awakeMs += ms;
+      }
+      const sleptMs = asleepMs > 0 ? asleepMs : sessionMs;
+      push('sleep_hours', Math.round((sleptMs / 36e5) * 10) / 10, end);
+      // Mesma régua do iPhone: % da noite efetivamente dormida.
+      if (asleepMs > 0 && sessionMs > asleepMs) {
+        push(
+          'sleep_efficiency_pct',
+          Math.min(100, Math.round((asleepMs / Math.max(sessionMs, asleepMs + awakeMs)) * 100)),
+          end,
+        );
       }
     }
     for (const r of await read('RestingHeartRate')) {
