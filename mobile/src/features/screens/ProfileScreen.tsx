@@ -36,7 +36,14 @@ function HealthSection() {
   const { colors } = useTheme();
   const health = useHealthConnection();
   const { premium } = usePremium();
+  const [connectDenied, setConnectDenied] = useState(false);
   const platformName = Platform.OS === 'ios' ? strings.health.iosName : strings.health.androidName;
+
+  async function onConnect() {
+    setConnectDenied(false);
+    const granted = await health.connect();
+    if (!granted) setConnectDenied(true);
+  }
 
   if (isLocked('healthSync', premium)) {
     return (
@@ -86,7 +93,14 @@ function HealthSection() {
           />
         </>
       ) : (
-        <Button label={strings.health.connect} onPress={health.connect} />
+        <>
+          <Button label={strings.health.connect} onPress={onConnect} />
+          {connectDenied ? (
+            <AppText variant="caption" style={{ color: colors.danger }}>
+              {strings.health.connectDenied}
+            </AppText>
+          ) : null}
+        </>
       )}
       <AppText variant="caption" muted>
         {strings.health.privacyNote}

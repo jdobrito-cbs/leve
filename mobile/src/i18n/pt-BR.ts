@@ -412,6 +412,8 @@ export const strings = {
     importedSuffix: 'pesos importados',
     unavailable:
       'Indisponível neste aparelho — requer o app de desenvolvimento (dev build) e o Health Connect/Apple Saúde.',
+    connectDenied:
+      'A permissão não foi concedida. Confira em Ajustes → Saúde → Compartilhamento de dados → Leve (iPhone) ou no app Health Connect (Android) e tente de novo.',
     privacyNote:
       'A importação só acontece quando você toca em importar; os dados ficam apenas neste aparelho e nunca são usados para publicidade.',
   },

@@ -15,14 +15,17 @@ interface QuantitySample {
  */
 interface HealthKitModule {
   isHealthDataAvailable(): Promise<boolean>;
-  requestAuthorization(
-    shareIdentifiers: string[],
-    readIdentifiers: string[],
-  ): Promise<boolean>;
+  /** v14: opções em objeto — { toRead, toShare }. */
+  requestAuthorization(options: { toRead: string[]; toShare: string[] }): Promise<boolean>;
+  /** v14 devolve { samples }; versões antigas devolviam o array direto. */
   queryQuantitySamples(
     identifier: string,
     options?: { filter?: { startDate?: Date; endDate?: Date }; limit?: number },
-  ): Promise<QuantitySample[]>;
+  ): Promise<QuantitySample[] | { samples?: QuantitySample[] }>;
+}
+
+function rowsOf(result: QuantitySample[] | { samples?: QuantitySample[] }): QuantitySample[] {
+  return Array.isArray(result) ? result : (result?.samples ?? []);
 }
 
 const BODY_MASS = 'HKQuantityTypeIdentifierBodyMass';
@@ -64,11 +67,12 @@ export class HealthKitProvider implements HealthProvider {
   async requestPermissions(): Promise<boolean> {
     if (!this.mod) return false;
     try {
-      return await this.mod.requestAuthorization(
-        [],
-        [BODY_MASS, STEP_COUNT, ...HK_METRICS.map((m) => m.id)],
-      );
-    } catch {
+      return await this.mod.requestAuthorization({
+        toRead: [BODY_MASS, STEP_COUNT, ...HK_METRICS.map((m) => m.id)],
+        toShare: [],
+      });
+    } catch (e) {
+      console.warn('[leve] HealthKit requestAuthorization falhou:', e);
       return false;
     }
   }
@@ -76,9 +80,11 @@ export class HealthKitProvider implements HealthProvider {
   async readWeight(since: Date): Promise<WeightSample[]> {
     if (!this.mod) return [];
     try {
-      const samples = await this.mod.queryQuantitySamples(BODY_MASS, {
-        filter: { startDate: since, endDate: new Date() },
-      });
+      const samples = rowsOf(
+        await this.mod.queryQuantitySamples(BODY_MASS, {
+          filter: { startDate: since, endDate: new Date() },
+        }),
+      );
       return samples
         .map((s) => ({
           kg: s.quantity ?? Number.NaN,
@@ -94,9 +100,11 @@ export class HealthKitProvider implements HealthProvider {
   async readSteps(since: Date): Promise<StepsSample[]> {
     if (!this.mod) return [];
     try {
-      const samples = await this.mod.queryQuantitySamples(STEP_COUNT, {
-        filter: { startDate: since, endDate: new Date() },
-      });
+      const samples = rowsOf(
+        await this.mod.queryQuantitySamples(STEP_COUNT, {
+          filter: { startDate: since, endDate: new Date() },
+        }),
+      );
       const byDay = new Map<string, number>();
       for (const s of samples) {
         if (!s.startDate || !s.quantity) continue;
@@ -114,9 +122,11 @@ export class HealthKitProvider implements HealthProvider {
     const samples: MetricSample[] = [];
     for (const { id, type } of HK_METRICS) {
       try {
-        const rows = await this.mod.queryQuantitySamples(id, {
-          filter: { startDate: since, endDate: new Date() },
-        });
+        const rows = rowsOf(
+          await this.mod.queryQuantitySamples(id, {
+            filter: { startDate: since, endDate: new Date() },
+          }),
+        );
         for (const s of rows) {
           if (typeof s.quantity === 'number' && Number.isFinite(s.quantity) && s.startDate) {
             samples.push({ type, value: s.quantity, takenAt: new Date(s.startDate) });
