@@ -16,6 +16,23 @@ export interface BackupRecord {
   updatedAt: string;
 }
 
+export interface PartnerKeyRecord {
+  id: string;
+  keyHash: string;
+  hint: string; // últimos 4 caracteres, para exibição
+  label: string; // nome do parceiro
+  createdAt: string;
+  revokedAt: string | null;
+}
+
+/** Armazenamento das chaves de parceiro emitidas pelo servidor. */
+export interface PartnerKeyStore {
+  createPartnerKey(label: string, keyHash: string, hint: string): Promise<PartnerKeyRecord>;
+  listPartnerKeys(): Promise<PartnerKeyRecord[]>;
+  findPartnerKeyByHash(keyHash: string): Promise<PartnerKeyRecord | null>;
+  revokePartnerKey(id: string): Promise<boolean>;
+}
+
 export interface Store {
   createUser(email: string, passwordHash: string): Promise<UserRecord>;
   findUserByEmail(email: string): Promise<UserRecord | null>;
@@ -34,7 +51,35 @@ export interface Store {
 }
 
 /** Store em memória — usado nos testes e como referência da interface. */
-export class MemoryStore implements Store {
+export class MemoryStore implements Store, PartnerKeyStore {
+  private partnerKeys = new Map<string, PartnerKeyRecord>();
+  private pkSeq = 0;
+
+  async createPartnerKey(label: string, keyHash: string, hint: string): Promise<PartnerKeyRecord> {
+    const record: PartnerKeyRecord = {
+      id: `pk${++this.pkSeq}`,
+      keyHash,
+      hint,
+      label,
+      createdAt: new Date().toISOString(),
+      revokedAt: null,
+    };
+    this.partnerKeys.set(record.id, record);
+    return record;
+  }
+  async listPartnerKeys() {
+    return [...this.partnerKeys.values()].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+  }
+  async findPartnerKeyByHash(keyHash: string) {
+    return [...this.partnerKeys.values()].find((k) => k.keyHash === keyHash) ?? null;
+  }
+  async revokePartnerKey(id: string) {
+    const record = this.partnerKeys.get(id);
+    if (!record || record.revokedAt) return false;
+    record.revokedAt = new Date().toISOString();
+    return true;
+  }
+
   private users = new Map<string, UserRecord>();
   private refresh = new Map<string, { userId: string; expiresAt: Date; revokedAt: Date | null }>();
   private consents = new Map<string, Map<string, ConsentRecord>>();

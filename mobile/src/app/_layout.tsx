@@ -14,6 +14,7 @@ import { db, initDb, isDbLockedError } from '@/db/client';
 import { getSetting } from '@/db/settingsRepo';
 import { seedFoodItemsIfEmpty } from '@/db/seed/tacoSeed';
 import { setThemeSignal, type ThemeMode } from '@/design/themeSignal';
+import { revalidatePartnerIfDue } from '@/features/premium/partnerServer';
 import { setMascotEvent } from '@/features/today/mascotSignal';
 import { autoSyncIfDue } from '@/services/health/healthSync';
 import { attachReminderMascotListeners } from '@/services/reminders/reminders';
@@ -86,6 +87,8 @@ export default function RootLayout() {
         setReady(true);
         // Busca automática da saúde na abertura (Premium; throttle de 1 h).
         autoSyncIfDue(db).catch(() => undefined);
+        // Chave de parceiro do servidor: reconfere (revogação vale aqui).
+        revalidatePartnerIfDue(db).catch(() => undefined);
       })
       .catch((e) => setError(e instanceof Error ? e : new Error(String(e))));
   }, []);

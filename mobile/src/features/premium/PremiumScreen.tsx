@@ -18,6 +18,7 @@ import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
 import { setEntitlement } from '@/features/premium/entitlement';
 import { verifyLicenseKey } from '@/features/premium/licenseKey';
+import { isServerPartnerKey, validatePartnerKey } from '@/features/premium/partnerServer';
 import { usePremium } from '@/features/premium/usePremium';
 import {
   PaidPlan,
@@ -87,7 +88,39 @@ export function PremiumScreen() {
   }
 
   async function confirmKey() {
-    const licenseId = verifyLicenseKey(keyStr);
+    const trimmed = keyStr.trim();
+
+    // Chave curta do servidor: validada online e revogável pelo painel.
+    if (isServerPartnerKey(trimmed)) {
+      setBusy(true);
+      try {
+        const result = await validatePartnerKey(trimmed);
+        if (result === null) {
+          setKeyError(strings.premium.keyOffline);
+          return;
+        }
+        if (!result.valid) {
+          setKeyError(strings.premium.keyInvalid);
+          return;
+        }
+        await setEntitlement(db, {
+          plan: 'partner',
+          licenseId: result.label ?? 'parceiro',
+          partnerKey: trimmed.toUpperCase(),
+          activatedAt: new Date().toISOString(),
+        });
+        setKeyOpen(false);
+        setKeyStr('');
+        setKeyError(null);
+        await refresh();
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
+
+    // Chave longa assinada offline (formato antigo) continua valendo.
+    const licenseId = verifyLicenseKey(trimmed);
     if (!licenseId) {
       setKeyError(strings.premium.keyInvalid);
       return;

@@ -1,8 +1,53 @@
 import type { PrismaClient } from '@prisma/client';
-import type { BackupRecord, ConsentRecord, Store, UserRecord } from './store.js';
+import type {
+  BackupRecord,
+  ConsentRecord,
+  PartnerKeyRecord,
+  PartnerKeyStore,
+  Store,
+  UserRecord,
+} from './store.js';
 
-export class PrismaStore implements Store {
+export class PrismaStore implements Store, PartnerKeyStore {
   constructor(private prisma: PrismaClient) {}
+
+  private toPartnerRecord(k: {
+    id: string;
+    keyHash: string;
+    hint: string;
+    label: string;
+    createdAt: Date;
+    revokedAt: Date | null;
+  }): PartnerKeyRecord {
+    return {
+      id: k.id,
+      keyHash: k.keyHash,
+      hint: k.hint,
+      label: k.label,
+      createdAt: k.createdAt.toISOString(),
+      revokedAt: k.revokedAt ? k.revokedAt.toISOString() : null,
+    };
+  }
+
+  async createPartnerKey(label: string, keyHash: string, hint: string): Promise<PartnerKeyRecord> {
+    const k = await this.prisma.partnerKey.create({ data: { label, keyHash, hint } });
+    return this.toPartnerRecord(k);
+  }
+  async listPartnerKeys(): Promise<PartnerKeyRecord[]> {
+    const rows = await this.prisma.partnerKey.findMany({ orderBy: { createdAt: 'desc' } });
+    return rows.map((k) => this.toPartnerRecord(k));
+  }
+  async findPartnerKeyByHash(keyHash: string): Promise<PartnerKeyRecord | null> {
+    const k = await this.prisma.partnerKey.findUnique({ where: { keyHash } });
+    return k ? this.toPartnerRecord(k) : null;
+  }
+  async revokePartnerKey(id: string): Promise<boolean> {
+    const updated = await this.prisma.partnerKey.updateMany({
+      where: { id, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+    return updated.count > 0;
+  }
 
   async createUser(email: string, passwordHash: string): Promise<UserRecord> {
     const u = await this.prisma.user.create({ data: { email, passwordHash } });

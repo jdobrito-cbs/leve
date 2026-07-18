@@ -9,8 +9,15 @@ import {
   verifyAccessToken,
   verifyPassword,
 } from './auth.js';
+import { ADMIN_PAGE_HTML } from './adminPage.js';
 import { buildHubBody, parseHubContent, type ScanResult } from './hub.js';
-import type { Store } from './store.js';
+import {
+  generatePartnerKey,
+  hashPartnerKey,
+  isPartnerKeyFormat,
+  partnerKeyHint,
+} from './partnerKeys.js';
+import type { PartnerKeyStore, Store } from './store.js';
 
 export interface HubConfig {
   baseUrl: string;
@@ -66,7 +73,13 @@ export interface ServerOptions {
   appToken?: string;
   store?: Store;
   jwtSecret?: string;
+  /** Chaves de parceiro geridas pelo dono (painel /admin). */
+  partnerStore?: PartnerKeyStore;
+  adminToken?: string;
 }
+
+const partnerCreateSchema = z.object({ label: z.string().trim().min(1).max(120) });
+const partnerValidateSchema = z.object({ key: z.string().min(4).max(40) });
 
 export function buildServer(options: ServerOptions) {
   // Stateless no scan por privacidade: a imagem não é armazenada nem registrada em log.
@@ -190,6 +203,71 @@ export function buildServer(options: ServerOptions) {
       await store.deleteUser(userId);
       return reply.code(204).send();
     });
+  }
+
+  const { partnerStore, adminToken } = options;
+  if (partnerStore) {
+    // Validação pública: o app confere a chave no resgate e periodicamente
+    // (revogação passa a valer na próxima verificação do aparelho).
+    app.post('/partner-keys/validate', async (req, reply) => {
+      const parsed = partnerValidateSchema.safeParse(req.body);
+      if (!parsed.success) return reply.code(400).send({ error: 'corpo inválido' });
+      if (!isPartnerKeyFormat(parsed.data.key)) return { valid: false };
+      const record = await partnerStore.findPartnerKeyByHash(hashPartnerKey(parsed.data.key));
+      if (!record || record.revokedAt) return { valid: false };
+      return { valid: true, label: record.label };
+    });
+
+    if (adminToken) {
+      const requireAdmin = (req: FastifyRequest, reply: FastifyReply): boolean => {
+        const header = req.headers.authorization ?? '';
+        const token = header.startsWith('Bearer ') ? header.slice(7) : '';
+        if (token !== adminToken) {
+          reply.code(401).send({ error: 'não autorizado' });
+          return false;
+        }
+        return true;
+      };
+
+      app.get('/admin', async (_req, reply) => {
+        return reply.type('text/html; charset=utf-8').send(ADMIN_PAGE_HTML);
+      });
+
+      app.get('/partner-keys', async (req, reply) => {
+        if (!requireAdmin(req, reply)) return;
+        const keys = await partnerStore.listPartnerKeys();
+        // Nunca devolve o hash — só metadados de exibição.
+        return keys.map(({ id, label, hint, createdAt, revokedAt }) => ({
+          id,
+          label,
+          hint,
+          createdAt,
+          revokedAt,
+        }));
+      });
+
+      app.post('/partner-keys', async (req, reply) => {
+        if (!requireAdmin(req, reply)) return;
+        const parsed = partnerCreateSchema.safeParse(req.body);
+        if (!parsed.success) return reply.code(400).send({ error: 'informe o nome do parceiro' });
+        const key = generatePartnerKey();
+        const record = await partnerStore.createPartnerKey(
+          parsed.data.label,
+          hashPartnerKey(key),
+          partnerKeyHint(key),
+        );
+        // Única resposta que contém o código completo.
+        return { id: record.id, label: record.label, key, createdAt: record.createdAt };
+      });
+
+      app.post('/partner-keys/:id/revoke', async (req, reply) => {
+        if (!requireAdmin(req, reply)) return;
+        const { id } = req.params as { id: string };
+        const done = await partnerStore.revokePartnerKey(id);
+        if (!done) return reply.code(404).send({ error: 'chave não encontrada ou já revogada' });
+        return { ok: true };
+      });
+    }
   }
 
   app.post('/scan-food', async (req, reply) => {

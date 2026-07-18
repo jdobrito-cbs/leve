@@ -46,3 +46,12 @@ model Backup {
   size      Int
   updatedAt DateTime @updatedAt
 }
+
+model PartnerKey {
+  id        String    @id @default(uuid())
+  keyHash   String    @unique
+  hint      String
+  label     String
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+}

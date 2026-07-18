@@ -474,6 +474,7 @@ export const strings = {
     keyPlaceholder: 'LEVE-…',
     redeem: 'Resgatar chave',
     keyInvalid: 'Chave inválida. Confira se copiou a chave completa.',
+    keyOffline: 'Sem conexão com o servidor para validar a chave. Tente novamente com internet.',
     activeTitle: 'Premium ativo',
     activePlans: {
       monthly: 'Assinatura mensal ativa',
