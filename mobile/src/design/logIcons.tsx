@@ -4,6 +4,7 @@ import {
   Footprints,
   PersonStanding,
   Pill,
+  Stethoscope,
   Syringe,
   Weight,
 } from 'lucide-react-native';
@@ -292,6 +293,33 @@ export function FootprintsWalkIcon({ size = SIZE }: IconProps) {
 }
 
 /** Ciclo: o coração do calendário pulsa como batimento. */
+/** Consultas: estetoscópio balança de leve, como pendurado no pescoço. */
+export function StethoscopeSwingIcon({ size = SIZE }: IconProps) {
+  const { colors } = useTheme();
+  const sway = useSharedValue(0);
+
+  useEffect(() => {
+    sway.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 900, easing: Easing.inOut(Easing.quad) }),
+        withTiming(-1, { duration: 900, easing: Easing.inOut(Easing.quad) }),
+      ),
+      -1,
+      true,
+    );
+  }, [sway]);
+
+  const style = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${sway.value * 7}deg` }],
+  }));
+
+  return (
+    <Animated.View style={[{ transformOrigin: '50% 15%' }, style]}>
+      <Stethoscope color={colors.primary} size={size} strokeWidth={1.9} />
+    </Animated.View>
+  );
+}
+
 export function CycleHeartIcon({ size = SIZE }: IconProps) {
   const { colors } = useTheme();
   const beat = useSharedValue(0);

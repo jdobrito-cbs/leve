@@ -9,9 +9,11 @@ import { latestWeight } from '@/db/weightRepo';
 import { getCloudAccount } from '@/services/cloudAccount';
 import { setSexSignal } from '@/features/profile/sexSignal';
 import { waterGoalFromWeightKg } from '@/features/water/waterGoal';
+import { listAppointments } from '@/db/appointmentsRepo';
 import {
   DEFAULT_REMINDERS,
   ReminderSettings,
+  applyAppointmentReminders,
   applyInsightsReminder,
   applyWaterReminders,
   requestNotificationPermission,
@@ -33,6 +35,7 @@ export interface ProfileForm {
   waterEnabled: boolean;
   waterTimesStr: string; // 'HH:MM, HH:MM'
   insightsEnabled: boolean;
+  appointmentsEnabled: boolean;
 }
 
 const EMPTY_FORM: ProfileForm = {
@@ -49,6 +52,7 @@ const EMPTY_FORM: ProfileForm = {
   waterEnabled: false,
   waterTimesStr: DEFAULT_REMINDERS.waterTimes.join(', '),
   insightsEnabled: false,
+  appointmentsEnabled: false,
 };
 
 export function useProfileForm() {
@@ -84,6 +88,7 @@ export function useProfileForm() {
       waterEnabled: r.waterEnabled,
       waterTimesStr: r.waterTimes.join(', '),
       insightsEnabled: r.insightsEnabled ?? false,
+      appointmentsEnabled: r.appointmentsEnabled ?? false,
     });
     setLoading(false);
   }, []);
@@ -101,16 +106,23 @@ export function useProfileForm() {
 
   const save = useCallback(async () => {
     setPermissionError(false);
-    let { doseEnabled, waterEnabled, insightsEnabled } = form;
+    let { doseEnabled, waterEnabled, insightsEnabled, appointmentsEnabled } = form;
 
-    if (doseEnabled || waterEnabled || insightsEnabled) {
+    if (doseEnabled || waterEnabled || insightsEnabled || appointmentsEnabled) {
       const granted = await requestNotificationPermission();
       if (!granted) {
         doseEnabled = false;
         waterEnabled = false;
         insightsEnabled = false;
+        appointmentsEnabled = false;
         setPermissionError(true);
-        setForm((f) => ({ ...f, doseEnabled: false, waterEnabled: false, insightsEnabled: false }));
+        setForm((f) => ({
+          ...f,
+          doseEnabled: false,
+          waterEnabled: false,
+          insightsEnabled: false,
+          appointmentsEnabled: false,
+        }));
       }
     }
 
@@ -133,6 +145,7 @@ export function useProfileForm() {
       waterEnabled,
       waterTimes: waterTimes.length ? waterTimes : DEFAULT_REMINDERS.waterTimes,
       insightsEnabled,
+      appointmentsEnabled,
     };
     // A aba Ciclo só muda depois de SALVAR o sexo (não no clique do chip).
     setSexSignal(form.sex ?? 'nao_informar');
@@ -145,6 +158,7 @@ export function useProfileForm() {
     );
     await applyWaterReminders(reminders.waterEnabled, reminders.waterTimes);
     await applyInsightsReminder(insightsEnabled);
+    await applyAppointmentReminders(appointmentsEnabled, await listAppointments(db));
     setSaved(true);
   }, [form]);
 

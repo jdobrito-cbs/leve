@@ -10,6 +10,7 @@ export interface ReminderSettings {
   waterEnabled: boolean;
   waterTimes: string[]; // 'HH:MM'
   insightsEnabled?: boolean;
+  appointmentsEnabled?: boolean;
 }
 
 export const DEFAULT_REMINDERS: ReminderSettings = {
@@ -17,6 +18,7 @@ export const DEFAULT_REMINDERS: ReminderSettings = {
   waterEnabled: false,
   waterTimes: ['09:00', '13:00', '17:00', '21:00'],
   insightsEnabled: false,
+  appointmentsEnabled: false,
 };
 
 const INSIGHTS_ID = 'insights-daily';
@@ -71,6 +73,49 @@ export async function applyInsightsReminder(enabled: boolean): Promise<void> {
       content: { title: strings.reminders.insightsTitle, body: strings.reminders.insightsBody },
       trigger: { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour: 20, minute: 0 },
     });
+  });
+}
+
+const APPT_PREFIX = 'appt-';
+const MAX_APPT_SLOTS = 80; // 20 consultas × 4 avisos
+
+/** Horas antes da consulta em que o aviso toca (0 = manhã do dia, às 08:00). */
+const APPT_OFFSETS_H = [3, 2, 1];
+
+/** Reagenda os avisos de todas as consultas futuras: no dia (08:00) e 3h/2h/1h antes. */
+export async function applyAppointmentReminders(
+  enabled: boolean,
+  appts: Array<{ id: number; place: string; specialty: string; scheduledAt: string }>,
+): Promise<void> {
+  await safely(async () => {
+    for (let i = 0; i < MAX_APPT_SLOTS; i++) {
+      await Notifications.cancelScheduledNotificationAsync(`${APPT_PREFIX}${i}`);
+    }
+    if (!enabled) return;
+    let slot = 0;
+    const now = Date.now();
+    for (const appt of appts) {
+      const at = new Date(appt.scheduledAt);
+      const body = `${appt.specialty} · ${appt.place}`;
+      const dayStart = new Date(at);
+      dayStart.setHours(8, 0, 0, 0);
+      const moments = [
+        { date: dayStart, title: strings.reminders.apptTodayTitle },
+        ...APPT_OFFSETS_H.map((h) => ({
+          date: new Date(at.getTime() - h * 3600 * 1000),
+          title: strings.reminders.apptSoonTitle.replace('{h}', String(h)),
+        })),
+      ];
+      for (const m of moments) {
+        if (slot >= MAX_APPT_SLOTS) break;
+        if (m.date.getTime() <= now || m.date.getTime() > at.getTime()) continue;
+        await Notifications.scheduleNotificationAsync({
+          identifier: `${APPT_PREFIX}${slot++}`,
+          content: { title: m.title, body },
+          trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: m.date },
+        });
+      }
+    }
   });
 }
 

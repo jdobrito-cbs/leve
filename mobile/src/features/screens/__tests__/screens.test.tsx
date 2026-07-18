@@ -53,6 +53,7 @@ jest.mock('@/features/profile/useProfileForm', () => ({
       waterEnabled: false,
       waterTimesStr: '09:00, 13:00, 17:00',
       insightsEnabled: false,
+      appointmentsEnabled: false,
     },
     setField: jest.fn(),
     save: mockSave,

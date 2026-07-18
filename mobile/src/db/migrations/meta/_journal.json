@@ -50,6 +50,13 @@
       "when": 1784335347004,
       "tag": "0006_late_tusk",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1784352246323,
+      "tag": "0007_aspiring_nomad",
+      "breakpoints": true
     }
   ]
 }

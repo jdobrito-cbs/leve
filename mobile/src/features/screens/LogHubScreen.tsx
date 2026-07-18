@@ -8,6 +8,7 @@ import {
   CycleHeartIcon,
   NotesWritingIcon,
   PillRollIcon,
+  StethoscopeSwingIcon,
   SyringeInjectIcon,
   UtensilsCrossIcon,
   WaterGlassIcon,
@@ -32,6 +33,7 @@ const baseItems: HubItem[] = [
   { Anim: NotesWritingIcon, label: strings.log.symptom, route: '/log/sintoma' },
   { Anim: BodyDanceIcon, label: strings.log.bodyComp, route: '/log/corpo' },
   { Anim: PillRollIcon, label: strings.meds.title, route: '/remedios' },
+  { Anim: StethoscopeSwingIcon, label: strings.appointments.title, route: '/consultas' },
 ];
 
 export function LogHubScreen() {

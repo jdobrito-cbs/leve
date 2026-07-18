@@ -16,6 +16,7 @@ import {
   SyringeInjectIcon,
   UtensilsCrossIcon,
 } from '@/design/logIcons';
+import { HappyPanda } from '@/design/pandas';
 import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { estimateRelativeCurve } from '@/features/pk/pharmacokinetics';
@@ -127,27 +128,37 @@ export function TodayScreen() {
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: spacing.xl }}>
-      {/* Topo sem box: só os textos sobre o azul do fundo. */}
+      {/* Topo sem box: textos à esquerda, panda à direita, sobre o azul. */}
       <View
         style={{
           paddingTop: insets.top + spacing.md,
           paddingHorizontal: spacing.md + spacing.xs,
-          gap: spacing.xs,
+          flexDirection: 'row',
+          alignItems: 'flex-end',
+          gap: spacing.sm,
         }}
       >
-        <AppText
-          style={{ color: colors.onHero, fontFamily: fonts.semibold, fontSize: 22, lineHeight: 28 }}
-        >
-          {summary.userName
-            ? strings.today.greetingWithName.replace('{name}', summary.userName)
-            : strings.today.greeting}
-        </AppText>
-        <AppText variant="display" style={{ color: colors.onHero }}>
-          {strings.tabs.today}
-        </AppText>
-        <AppText variant="caption" style={{ color: colors.onHero, opacity: 0.85 }}>
-          {strings.today.summaryLabel} {formatDateBR(new Date())}
-        </AppText>
+        <View style={{ flex: 1, gap: spacing.xs }}>
+          <AppText
+            style={{
+              color: colors.onHero,
+              fontFamily: fonts.semibold,
+              fontSize: 22,
+              lineHeight: 28,
+            }}
+          >
+            {summary.userName
+              ? strings.today.greetingWithName.replace('{name}', summary.userName)
+              : strings.today.greeting}
+          </AppText>
+          <AppText variant="display" style={{ color: colors.onHero }}>
+            {strings.tabs.today}
+          </AppText>
+          <AppText variant="caption" style={{ color: colors.onHero, opacity: 0.85 }}>
+            {strings.today.summaryLabel} {formatDateBR(new Date())}
+          </AppText>
+        </View>
+        <HappyPanda />
       </View>
       <View style={{ padding: spacing.md, gap: spacing.md }}>
         {/* 1 — Água (transborda quando passa de 100%) */}

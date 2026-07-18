@@ -9,6 +9,7 @@ export const PREMIUM_LOCKS = {
   gym: true, // academia
   cycle: true, // controle de ciclo menstrual
   bodyReport: true, // relatório corporal em PDF
+  appointments: true, // consultas médicas com lembretes
   insights: false,
   savedDishes: false,
 } as const;

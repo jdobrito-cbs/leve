@@ -292,6 +292,15 @@ export function ProfileScreen() {
             onValueChange={(v) => setField('insightsEnabled', v)}
           />
         </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <View style={{ flex: 1 }}>
+            <AppText>{strings.profile.appointmentsReminder}</AppText>
+          </View>
+          <AppSwitch
+            value={form.appointmentsEnabled}
+            onValueChange={(v) => setField('appointmentsEnabled', v)}
+          />
+        </View>
         {permissionError ? (
           <AppText variant="caption" style={{ color: colors.danger }}>
             {strings.profile.permissionDenied}

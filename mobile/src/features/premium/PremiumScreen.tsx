@@ -8,6 +8,7 @@ import {
   KeyRound,
   Pill,
   Sparkles,
+  Stethoscope,
 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
@@ -162,6 +163,12 @@ export function PremiumScreen() {
             <FileText size={17} color={colors.primary} />
           </IconChip>
           <AppText style={{ flex: 1 }}>{strings.premium.benefits.report}</AppText>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <IconChip size={34}>
+            <Stethoscope size={17} color={colors.primary} />
+          </IconChip>
+          <AppText style={{ flex: 1 }}>{strings.premium.benefits.appointments}</AppText>
         </View>
       </Card>
 

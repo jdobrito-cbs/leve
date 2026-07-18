@@ -120,6 +120,15 @@ export const medications = sqliteTable('medications', {
   active: integer('active').notNull().default(1),
 });
 
+// Consultas médicas agendadas (com lembretes no dia e 3h/2h/1h antes).
+export const appointments = sqliteTable('appointments', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  place: text('place').notNull(), // hospital/clínica
+  specialty: text('specialty').notNull(),
+  doctor: text('doctor'),
+  scheduledAt: text('scheduled_at').notNull(),
+});
+
 // Exercícios de academia (força e cardio) com estimativa de calorias.
 export const gymLogs = sqliteTable('gym_logs', {
   id: integer('id').primaryKey({ autoIncrement: true }),
