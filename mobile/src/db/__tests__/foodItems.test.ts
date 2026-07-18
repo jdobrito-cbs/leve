@@ -41,4 +41,5 @@ test('pratos regionais entram no seed e são encontrados por termos do dia a dia
   expect((await searchFoods(db, 'pirarucu')).length).toBeGreaterThanOrEqual(2);
   expect((await searchFoods(db, 'farinha')).length).toBeGreaterThan(3);
   expect((await searchFoods(db, 'tambaqui')).length).toBeGreaterThan(0);
+  expect((await searchFoods(db, 'ovinha')).map((f) => f.name)).toContain('Farinha ovinha');
 });

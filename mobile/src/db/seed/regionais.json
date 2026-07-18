@@ -26,6 +26,7 @@
   { "name": "Farofa pronta com bacon", "category": "Pratos regionais", "kcal": 410, "proteinG": 6, "carbsG": 68, "fatG": 12, "fiberG": 5.5 },
   { "name": "Farofa simples (de mandioca)", "category": "Pratos regionais", "kcal": 410, "proteinG": 1.6, "carbsG": 87, "fatG": 5, "fiberG": 6.4 },
   { "name": "Farinha d'água", "category": "Pratos regionais", "kcal": 348, "proteinG": 1, "carbsG": 86, "fatG": 0.4, "fiberG": 6.5 },
+  { "name": "Farinha ovinha", "category": "Pratos regionais", "kcal": 352, "proteinG": 1.2, "carbsG": 87, "fatG": 0.5, "fiberG": 6.2 },
   { "name": "Farinha de tapioca", "category": "Pratos regionais", "kcal": 350, "proteinG": 0.2, "carbsG": 88, "fatG": 0.1, "fiberG": 0.3 },
   { "name": "Pirarucu assado", "category": "Pratos regionais", "kcal": 122, "proteinG": 24, "carbsG": 0, "fatG": 2.5, "fiberG": 0 },
   { "name": "Pirarucu de casaca", "category": "Pratos regionais", "kcal": 180, "proteinG": 12, "carbsG": 15, "fatG": 8, "fiberG": 1 },

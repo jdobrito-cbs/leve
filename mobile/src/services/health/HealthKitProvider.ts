@@ -13,14 +13,21 @@ interface QuantitySample {
  * ATENÇÃO: iOS não é testável neste ambiente (sem Mac); o adapter é defensivo —
  * qualquer divergência de API resulta em listas vazias, nunca em crash.
  */
+/** Opções da v14: `limit` é OBRIGATÓRIO (0 = todos) e o período vai em filter.date. */
+interface HKQueryOptions {
+  filter?: { date?: { startDate?: Date; endDate?: Date } };
+  limit: number;
+  unit?: string;
+  ascending?: boolean;
+}
+
 interface HealthKitModule {
   isHealthDataAvailable(): Promise<boolean>;
   /** v14: opções em objeto — { toRead, toShare }. */
   requestAuthorization(options: { toRead: string[]; toShare: string[] }): Promise<boolean>;
-  /** v14 devolve { samples }; versões antigas devolviam o array direto. */
   queryQuantitySamples(
     identifier: string,
-    options?: { filter?: { startDate?: Date; endDate?: Date }; limit?: number },
+    options: HKQueryOptions,
   ): Promise<QuantitySample[] | { samples?: QuantitySample[] }>;
 }
 
@@ -82,7 +89,9 @@ export class HealthKitProvider implements HealthProvider {
     try {
       const samples = rowsOf(
         await this.mod.queryQuantitySamples(BODY_MASS, {
-          filter: { startDate: since, endDate: new Date() },
+          filter: { date: { startDate: since, endDate: new Date() } },
+          limit: 0,
+          unit: 'kg',
         }),
       );
       return samples
@@ -92,7 +101,8 @@ export class HealthKitProvider implements HealthProvider {
           source: 'healthkit',
         }))
         .filter((s) => Number.isFinite(s.kg) && s.kg > 0);
-    } catch {
+    } catch (e) {
+      console.warn('[leve] HealthKit leitura de peso falhou:', e);
       return [];
     }
   }
@@ -102,7 +112,8 @@ export class HealthKitProvider implements HealthProvider {
     try {
       const samples = rowsOf(
         await this.mod.queryQuantitySamples(STEP_COUNT, {
-          filter: { startDate: since, endDate: new Date() },
+          filter: { date: { startDate: since, endDate: new Date() } },
+          limit: 0,
         }),
       );
       const byDay = new Map<string, number>();
@@ -124,12 +135,16 @@ export class HealthKitProvider implements HealthProvider {
       try {
         const rows = rowsOf(
           await this.mod.queryQuantitySamples(id, {
-            filter: { startDate: since, endDate: new Date() },
+            filter: { date: { startDate: since, endDate: new Date() } },
+            limit: 0,
           }),
         );
         for (const s of rows) {
           if (typeof s.quantity === 'number' && Number.isFinite(s.quantity) && s.startDate) {
-            samples.push({ type, value: s.quantity, takenAt: new Date(s.startDate) });
+            // Percentuais podem vir como fração (0,314) — normaliza para 31,4%.
+            const isPct = type === 'body_fat_pct' || type === 'spo2';
+            const value = isPct && s.quantity <= 1 ? s.quantity * 100 : s.quantity;
+            samples.push({ type, value, takenAt: new Date(s.startDate) });
           }
         }
       } catch {
