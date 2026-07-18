@@ -178,7 +178,11 @@ export function ProfileScreen() {
         <Input
           label={strings.profile.medicationLabel}
           value={form.medication}
-          onChangeText={(v) => setField('medication', v)}        />
+          onChangeText={(v) => setField('medication', v)}
+        />
+        <AppText variant="caption" muted>
+          {strings.profile.medicationHint}
+        </AppText>
         <RulerField
           label={strings.profile.goalWeightLabel}
           value={form.goalWeightStr}

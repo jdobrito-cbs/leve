@@ -22,8 +22,10 @@ import {
 } from '@/design/components';
 import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
+import { normalizeText } from '@/core/text';
 import { db } from '@/db/client';
 import { addDose, deleteDose, lastInjectionSite, listDoses } from '@/db/doseRepo';
+import { getProfile } from '@/db/profileRepo';
 import { getSetting } from '@/db/settingsRepo';
 import { BodyMapPicker } from '@/features/dose/BodyMapPicker';
 import { InjectionSite, suggestNextSite } from '@/features/dose/rotation';
@@ -56,10 +58,24 @@ export function DoseScreen() {
   const [timeStr, setTimeStr] = useState(formatTimeHM(new Date()));
 
   const load = useCallback(async () => {
-    const [last, doses] = await Promise.all([lastInjectionSite(db), listDoses(db)]);
+    const [last, doses, profile] = await Promise.all([
+      lastInjectionSite(db),
+      listDoses(db),
+      getProfile(db).catch(() => null),
+    ]);
     setLastSite(last);
     setSite(suggestNextSite(last));
     setList(doses);
+    // Medicação atual do Perfil pré-seleciona o registro (se nada foi escolhido).
+    const profileMed = profile?.medication?.trim();
+    if (profileMed) {
+      const norm = normalizeText(profileMed);
+      const known = (Object.keys(strings.dose.medications) as MedKey[]).find(
+        (k) => k !== 'outra' && norm.includes(k),
+      );
+      setMedication((cur) => cur ?? known ?? 'outra');
+      if (!known) setCustomMed((cur) => (cur ? cur : profileMed));
+    }
   }, []);
 
   useEffect(() => {
