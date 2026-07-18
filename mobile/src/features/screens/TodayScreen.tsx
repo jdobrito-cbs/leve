@@ -113,7 +113,9 @@ export function TodayScreen() {
       contentContainerStyle={{ paddingBottom: spacing.xl }}
     >
       <HeroHeader>
-        <AppText variant="caption" style={{ color: colors.onHero, opacity: 0.85 }}>
+        <AppText
+          style={{ color: colors.onHero, fontFamily: fonts.semibold, fontSize: 22, lineHeight: 28 }}
+        >
           {summary.userName
             ? strings.today.greetingWithName.replace('{name}', summary.userName)
             : strings.today.greeting}
