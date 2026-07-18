@@ -1,5 +1,4 @@
-import { BottomTabBar } from '@react-navigation/bottom-tabs';
-import { Redirect, Tabs } from 'expo-router';
+import { Redirect, Tabs, usePathname } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import {
   PropsWithChildren,
@@ -7,7 +6,6 @@ import {
   useMemo,
   useState,
   useSyncExternalStore,
-  type ComponentProps,
   type ComponentType,
 } from 'react';
 import { View } from 'react-native';
@@ -117,19 +115,12 @@ function getGlassView(): ComponentType<{
   }
 }
 
-/** Só o que o círculo precisa; o resto repassa intacto à barra padrão. */
-interface GlassTabBarProps {
-  visibleCount: number;
-  activeIndex: number;
-  [key: string]: unknown;
-}
-
-/** Barra padrão + círculo de vidro que desliza até a aba selecionada. */
-function GlassTabBar({ visibleCount, activeIndex, ...props }: GlassTabBarProps) {
+/** Fundo da barra de abas: círculo de vidro que desliza até a aba ativa. */
+function GlassSlider({ count, activeIndex }: { count: number; activeIndex: number }) {
   const { mode } = useTheme();
   const [barW, setBarW] = useState(0);
   const x = useSharedValue(-9999);
-  const slot = visibleCount > 0 ? barW / visibleCount : 0;
+  const slot = count > 0 ? barW / count : 0;
   const Glass = useMemo(getGlassView, []);
 
   useEffect(() => {
@@ -143,12 +134,13 @@ function GlassTabBar({ visibleCount, activeIndex, ...props }: GlassTabBarProps) 
   const slide = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
 
   return (
-    <View onLayout={(e) => setBarW(e.nativeEvent.layout.width)}>
-      {/* fork interno do expo-router e pacote npm têm o mesmo formato em runtime */}
-      <BottomTabBar {...(props as unknown as ComponentProps<typeof BottomTabBar>)} />
+    <View
+      style={{ flex: 1 }}
+      pointerEvents="none"
+      onLayout={(e) => setBarW(e.nativeEvent.layout.width)}
+    >
       {slot > 0 && activeIndex >= 0 ? (
         <Animated.View
-          pointerEvents="none"
           style={[
             {
               position: 'absolute',
@@ -218,6 +210,10 @@ export default function TabsLayout() {
     ...(cycleTab ? ['ciclo'] : []),
     'perfil',
   ];
+  // Aba ativa pela rota atual ('/' = index; '/perfil' = perfil; fora das abas = -1).
+  const pathname = usePathname();
+  const activeTab = pathname === '/' ? 'index' : (pathname.split('/')[1] ?? '');
+  const activeIndex = visibleNames.indexOf(activeTab);
 
   if (loading) return <View />;
   if (!accepted) return <Redirect href="/onboarding" />;
@@ -228,15 +224,11 @@ export default function TabsLayout() {
 
   return (
     <Tabs
-      tabBar={(props) => (
-        <GlassTabBar
-          {...props}
-          visibleCount={visibleNames.length}
-          activeIndex={visibleNames.indexOf(props.state.routes[props.state.index]?.name ?? '')}
-        />
-      )}
       screenOptions={{
         headerShown: false,
+        tabBarBackground: () => (
+          <GlassSlider count={visibleNames.length} activeIndex={activeIndex} />
+        ),
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
         // Em telas largas (tablet/web) o padrão vira ícone ao lado do texto,
