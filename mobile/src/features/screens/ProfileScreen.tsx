@@ -7,6 +7,8 @@ import { Platform, Switch, View } from 'react-native';
 import { ageFromIsoDate, brDateToIso } from '@/core/datetime';
 import { db } from '@/db/client';
 import { exportAllData, wipeAllData } from '@/features/backup/exportData';
+import { buildBodyReport } from '@/features/report/bodyReport';
+import { reportHtml } from '@/features/report/reportHtml';
 import {
   AppText,
   Button,
@@ -95,6 +97,33 @@ export function ProfileScreen() {
   const { loading, form, setField, save, saved, permissionError, autoGoalMl } = useProfileForm();
   const birthIso = brDateToIso(form.birthDateStr);
   const age = birthIso ? ageFromIsoDate(birthIso) : null;
+  const [reportMsg, setReportMsg] = useState<string | null>(null);
+  const [reportBusy, setReportBusy] = useState(false);
+
+  async function generateReport() {
+    setReportMsg(null);
+    if (Platform.OS === 'web') {
+      setReportMsg(strings.report.webUnavailable);
+      return;
+    }
+    setReportBusy(true);
+    try {
+      const report = await buildBodyReport(db);
+      if (!report) {
+        setReportMsg(strings.report.missingData);
+        return;
+      }
+      const Print = require('expo-print') as typeof import('expo-print');
+      const { uri } = await Print.printToFileAsync({ html: reportHtml(report) });
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, { mimeType: 'application/pdf' });
+      }
+    } catch {
+      setReportMsg(strings.report.failed);
+    } finally {
+      setReportBusy(false);
+    }
+  }
 
   if (loading) return <Screen />;
 
@@ -270,6 +299,17 @@ export function ProfileScreen() {
           variant="secondary"
           onPress={() => router.push('/assinatura' as never)}
         />
+        <Button
+          label={strings.report.button}
+          variant="secondary"
+          onPress={generateReport}
+          disabled={reportBusy}
+        />
+        {reportMsg ? (
+          <AppText variant="caption" muted style={{ textAlign: 'center' }}>
+            {reportMsg}
+          </AppText>
+        ) : null}
         <Button
           label={strings.account.section}
           variant="secondary"

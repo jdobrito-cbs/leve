@@ -466,6 +466,13 @@ export const strings = {
     scanLockedBody: 'O escaneamento de comida por foto faz parte do Leve Premium.',
     discover: 'Conhecer o Leve Premium',
   },
+  report: {
+    button: 'Relatório corporal',
+    missingData:
+      'Para gerar o relatório, registre seu peso e preencha a altura no Perfil (medidas da balança enriquecem o resultado).',
+    webUnavailable: 'A geração de PDF está disponível no aplicativo do celular.',
+    failed: 'Não foi possível gerar o relatório agora. Tente novamente.',
+  },
   cloudAccount: {
     title: 'Guarde seus dados na sua nuvem',
     body: 'Entre com sua conta para preparar o backup dos seus registros no seu iCloud ou Google Drive. Você continua no controle: os dados são seus.',
