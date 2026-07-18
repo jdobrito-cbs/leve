@@ -10,6 +10,7 @@ export const profile = sqliteTable('profile', {
   waterGoalMl: real('water_goal_ml').notNull().default(2000),
   calorieGoalKcal: real('calorie_goal_kcal'),
   sex: text('sex'), // 'feminino' | 'masculino' | 'nao_informar'
+  birthDate: text('birth_date'), // 'YYYY-MM-DD'
 });
 
 export const waterLogs = sqliteTable('water_logs', {

@@ -1,11 +1,25 @@
 import {
+  ageFromIsoDate,
+  brDateToIso,
   dayRangeUtc,
   formatDateBR,
   formatTimeHM,
+  isoDateToBR,
   lastNDays,
   localDayKey,
   parseDateTimeBR,
 } from '../datetime';
+
+test('nascimento: conversões BR↔ISO e idade completa', () => {
+  expect(brDateToIso('01/03/1990')).toBe('1990-03-01');
+  expect(isoDateToBR('1990-03-01')).toBe('01/03/1990');
+  expect(brDateToIso('31/02/1990')).toBeNull();
+  const today = new Date(2026, 6, 17); // 17/07/2026
+  expect(ageFromIsoDate('1990-03-01', today)).toBe(36);
+  expect(ageFromIsoDate('1990-08-01', today)).toBe(35); // ainda não fez aniversário
+  expect(ageFromIsoDate('2030-01-01', today)).toBeNull();
+  expect(ageFromIsoDate('data-invalida', today)).toBeNull();
+});
 
 test('parseDateTimeBR aceita data/hora válidas e rejeita inválidas', () => {
   const d = parseDateTimeBR('07/07/2026', '14:30');

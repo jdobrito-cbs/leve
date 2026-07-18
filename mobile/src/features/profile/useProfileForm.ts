@@ -1,10 +1,12 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
+import { brDateToIso, isoDateToBR } from '@/core/datetime';
 import { parseDecimalBR } from '@/core/text';
 import { db } from '@/db/client';
 import { getProfile, updateProfile } from '@/db/profileRepo';
 import { getSetting, setSetting } from '@/db/settingsRepo';
 import { latestWeight } from '@/db/weightRepo';
+import { getCloudAccount } from '@/services/cloudAccount';
 import { waterGoalFromWeightKg } from '@/features/water/waterGoal';
 import {
   DEFAULT_REMINDERS,
@@ -19,6 +21,7 @@ export type SexOption = 'feminino' | 'masculino' | 'nao_informar';
 export interface ProfileForm {
   name: string;
   sex: SexOption | null;
+  birthDateStr: string; // 'DD/MM/AAAA'
   heightStr: string;
   medication: string;
   goalWeightStr: string;
@@ -35,6 +38,7 @@ export interface ProfileForm {
 const EMPTY_FORM: ProfileForm = {
   name: '',
   sex: null,
+  birthDateStr: '',
   heightStr: '',
   medication: '',
   goalWeightStr: '',
@@ -56,18 +60,21 @@ export function useProfileForm() {
   const [autoGoalMl, setAutoGoalMl] = useState<number | null>(null);
 
   const load = useCallback(async () => {
-    const [profile, reminders, waterAuto, weight, doseInterval] = await Promise.all([
+    const [profile, reminders, waterAuto, weight, doseInterval, account] = await Promise.all([
       getProfile(db),
       getSetting<ReminderSettings>(db, 'reminders'),
       getSetting<boolean>(db, 'waterGoalAuto'),
       latestWeight(db),
       getSetting<number>(db, 'doseIntervalDays'),
+      getCloudAccount(db).catch(() => null),
     ]);
     const r = reminders ?? DEFAULT_REMINDERS;
     setAutoGoalMl(weight ? waterGoalFromWeightKg(weight.weightKg) : null);
     setForm({
-      name: profile?.name ?? '',
+      // Sem nome salvo, usa o da conta conectada (Apple/Google).
+      name: profile?.name ?? account?.name ?? '',
       sex: (profile?.sex as SexOption | null) ?? null,
+      birthDateStr: profile?.birthDate ? isoDateToBR(profile.birthDate) : '',
       heightStr: profile?.heightCm ? String(profile.heightCm) : '',
       medication: profile?.medication ?? '',
       goalWeightStr: profile?.goalWeightKg ? String(profile.goalWeightKg) : '',
@@ -117,6 +124,7 @@ export function useProfileForm() {
     await updateProfile(db, {
       name: form.name.trim() || null,
       sex: form.sex,
+      birthDate: brDateToIso(form.birthDateStr),
       heightCm: parseDecimalBR(form.heightStr),
       medication: form.medication.trim() || null,
       goalWeightKg: parseDecimalBR(form.goalWeightStr),

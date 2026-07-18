@@ -17,6 +17,7 @@ export const strings = {
   tabs: { today: 'Hoje', log: 'Registrar', progress: 'Progresso', profile: 'Perfil' },
   today: {
     greeting: 'Olá!',
+    greetingWithName: 'Olá, {name}!',
     summaryLabel: 'Seu resumo do dia',
     ringLabel: 'registros hoje',
     waterRing: 'ml de água',
@@ -223,6 +224,8 @@ export const strings = {
     heightLabel: 'Altura (cm)',
     medicationLabel: 'Medicação atual',
     sexLabel: 'Sexo',
+    birthDateLabel: 'Data de nascimento',
+    ageSuffix: 'anos',
     sexes: { feminino: 'Feminino', masculino: 'Masculino', nao_informar: 'Prefiro não informar' },
     goalWeightLabel: 'Meta de peso (kg)',
     waterGoalLabel: 'Meta de água (ml)',

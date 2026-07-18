@@ -1,0 +1,88 @@
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { Calendar } from 'lucide-react-native';
+import { useState } from 'react';
+import { Platform, Pressable, View } from 'react-native';
+import { formatDateBR, parseDateTimeBR } from '@/core/datetime';
+import { strings } from '@/i18n/pt-BR';
+import { radius, spacing } from '../tokens';
+import { useTheme } from '../useTheme';
+import { AppText } from './AppText';
+import { maskDateBR } from './DateTimeField';
+import { Input } from './Input';
+
+interface Props {
+  label: string;
+  value: string; // 'DD/MM/AAAA'
+  onChange: (v: string) => void;
+}
+
+/** Campo de data com máscara DD/MM/AAAA e rolagem de data do sistema. */
+export function DateField({ label, value, onChange }: Props) {
+  const { colors } = useTheme();
+  const [open, setOpen] = useState(false);
+
+  const pickerValue =
+    parseDateTimeBR(/^\d{2}\/\d{2}\/\d{4}$/.test(value) ? value : formatDateBR(new Date()), '00:00') ??
+    new Date();
+
+  function onPicked(event: DateTimePickerEvent, selected?: Date) {
+    if (Platform.OS === 'android') setOpen(false);
+    if (event.type === 'dismissed' || !selected) return;
+    onChange(formatDateBR(selected));
+  }
+
+  return (
+    <View style={{ gap: spacing.xs }}>
+      <View style={{ flexDirection: 'row', gap: spacing.xs }}>
+        <View style={{ flex: 1 }}>
+          <Input
+            label={label}
+            value={value}
+            onChangeText={(v) => onChange(maskDateBR(v))}
+            placeholder="DD/MM/AAAA"
+            keyboardType="number-pad"
+            maxLength={10}
+          />
+        </View>
+        {Platform.OS !== 'web' ? (
+          <View style={{ justifyContent: 'flex-end' }}>
+            <Pressable
+              onPress={() => setOpen((v) => !v)}
+              hitSlop={8}
+              accessibilityLabel={label}
+              style={{
+                borderWidth: 1,
+                borderColor: open ? colors.primary : colors.border,
+                borderRadius: radius.sm,
+                backgroundColor: colors.surface,
+                paddingHorizontal: spacing.sm + 2,
+                paddingVertical: spacing.sm + 2,
+                justifyContent: 'center',
+              }}
+            >
+              <Calendar size={18} color={colors.primary} />
+            </Pressable>
+          </View>
+        ) : null}
+      </View>
+      {open ? (
+        <View style={{ gap: spacing.xs }}>
+          <DateTimePicker
+            value={pickerValue}
+            mode="date"
+            display="spinner"
+            maximumDate={new Date()}
+            onChange={onPicked}
+          />
+          {Platform.OS === 'ios' ? (
+            <Pressable onPress={() => setOpen(false)} hitSlop={8} style={{ alignSelf: 'flex-end' }}>
+              <AppText variant="caption" style={{ color: colors.primary }}>
+                {strings.common.close}
+              </AppText>
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
+    </View>
+  );
+}

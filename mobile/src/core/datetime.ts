@@ -45,6 +45,30 @@ export function parseDateTimeBR(dateStr: string, timeStr: string): Date | null {
   return date;
 }
 
+/** Idade completa em anos a partir de 'YYYY-MM-DD'; null se inválida. */
+export function ageFromIsoDate(iso: string, today: Date = new Date()): number | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!m) return null;
+  const [, y, mo, d] = m.map(Number);
+  let age = today.getFullYear() - y;
+  const beforeBirthday =
+    today.getMonth() + 1 < mo || (today.getMonth() + 1 === mo && today.getDate() < d);
+  if (beforeBirthday) age -= 1;
+  return age >= 0 && age < 130 ? age : null;
+}
+
+/** 'YYYY-MM-DD' → 'DD/MM/AAAA' (sem criar Date; evita fuso). */
+export function isoDateToBR(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : '';
+}
+
+/** 'DD/MM/AAAA' → 'YYYY-MM-DD'; null se inválida. */
+export function brDateToIso(br: string): string | null {
+  const date = parseDateTimeBR(br, '00:00');
+  return date ? localDayKey(date) : null;
+}
+
 /** ISO → 'DD/MM HH:MM' (hora local), para listas compactas. */
 export function formatDateTimeShort(iso: string): string {
   const d = new Date(iso);

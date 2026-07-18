@@ -71,7 +71,7 @@ jest.mock('@/services/health/healthSync', () => ({
 jest.mock('@/db/profileRepo', () => ({
   getProfile: jest
     .fn()
-    .mockResolvedValue({ waterGoalMl: 2000, calorieGoalKcal: null, goalWeightKg: 85 }),
+    .mockResolvedValue({ name: 'Jorge', waterGoalMl: 2000, calorieGoalKcal: null, goalWeightKg: 85 }),
 }));
 
 import { useTodaySummary } from '../useTodaySummary';
@@ -89,5 +89,6 @@ test('agrega os dados do dia', async () => {
   expect(result.current.nextDoseAt).toBe('2026-07-14T12:00:00.000Z');
   expect(result.current.symptomsCount).toBe(1);
   expect(result.current.recentSymptoms).toHaveLength(1);
+  expect(result.current.userName).toBe('Jorge');
   expect(result.current.steps).toBe(4200);
 });

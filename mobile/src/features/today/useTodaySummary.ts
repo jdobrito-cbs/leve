@@ -14,6 +14,7 @@ import { todayIntakes, type TodayIntake } from '@/features/meds/medsRepo';
 import { buildInsightInput } from '@/features/insights/data';
 import { buildInsights, type Insight } from '@/features/insights/insights';
 import { getEffectiveWaterGoal } from '@/features/water/waterGoal';
+import { getCloudAccount } from '@/services/cloudAccount';
 import { getHealthProvider } from '@/services/health/HealthProvider';
 import { autoSyncIfDue, readTodaySteps } from '@/services/health/healthSync';
 
@@ -26,6 +27,8 @@ export interface HealthLatest {
 
 export interface TodaySummary {
   loading: boolean;
+  /** Nome para a saudação: perfil, senão o da conta conectada. */
+  userName: string | null;
   waterMl: number;
   waterGoalMl: number;
   macros: DayMacros;
@@ -79,6 +82,7 @@ export function useTodaySummary(): TodaySummary {
   const [healthLatest, setHealthLatest] = useState<HealthLatest>(EMPTY_HEALTH);
   const [intakes, setIntakes] = useState<TodayIntake[]>([]);
   const [insights, setInsights] = useState<Insight[]>([]);
+  const [userName, setUserName] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     // Balança/wearable → app de saúde → Leve, sem toque (throttle de 1 h).
@@ -115,6 +119,12 @@ export function useTodaySummary(): TodaySummary {
     if (profile) {
       setCalorieGoalKcal(profile.calorieGoalKcal ?? null);
       setGoalWeightKg(profile.goalWeightKg ?? null);
+    }
+    try {
+      const account = profile?.name ? null : await getCloudAccount(db);
+      setUserName(profile?.name ?? account?.name ?? null);
+    } catch {
+      setUserName(profile?.name ?? null);
     }
     try {
       setDoseIntervalDays(await getSetting<number>(db, 'doseIntervalDays'));
@@ -167,6 +177,7 @@ export function useTodaySummary(): TodaySummary {
 
   return {
     loading,
+    userName,
     waterMl,
     waterGoalMl,
     macros,

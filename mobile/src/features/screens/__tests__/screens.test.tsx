@@ -42,6 +42,7 @@ jest.mock('@/features/profile/useProfileForm', () => ({
     form: {
       name: 'Jorge',
       sex: 'masculino',
+      birthDateStr: '01/01/1990',
       heightStr: '178',
       medication: 'semaglutida',
       goalWeightStr: '85',
@@ -64,6 +65,7 @@ jest.mock('@/features/profile/useProfileForm', () => ({
 jest.mock('@/features/today/useTodaySummary', () => ({
   useTodaySummary: () => ({
     loading: false,
+    userName: 'Jorge',
     waterMl: 1200,
     waterGoalMl: 2000,
     macros: { kcal: 850, proteinG: 62.5, carbsG: 90, fatG: 30, fiberG: 14 },
@@ -151,6 +153,7 @@ test('Hoje mostra todos os boxes na nova ordem', async () => {
       <TodayScreen />
     </SafeAreaProvider>,
   );
+  getByText('Olá, Jorge!'); // saudação com o nome do usuário
   getByText('1.200');
   getByText(strings.today.waterRing);
   getByText(strings.today.weightSection);

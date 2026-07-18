@@ -8,6 +8,7 @@ export { IconChip } from './IconChip';
 export { ProgressRing } from './ProgressRing';
 export { WaterRing } from './WaterRing';
 export { FitChart } from './FitChart';
+export { DateField } from './DateField';
 export { DateTimeField } from './DateTimeField';
 export { HeroHeader } from './HeroHeader';
 export { SegmentedChips } from './SegmentedChips';

@@ -114,7 +114,9 @@ export function TodayScreen() {
     >
       <HeroHeader>
         <AppText variant="caption" style={{ color: colors.onHero, opacity: 0.85 }}>
-          {strings.today.greeting}
+          {summary.userName
+            ? strings.today.greetingWithName.replace('{name}', summary.userName)
+            : strings.today.greeting}
         </AppText>
         <AppText variant="display" style={{ color: colors.onHero }}>
           {strings.tabs.today}

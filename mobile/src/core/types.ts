@@ -12,6 +12,7 @@ export interface Profile {
   waterGoalMl: number;
   calorieGoalKcal: number | null;
   sex: 'feminino' | 'masculino' | 'nao_informar' | null;
+  birthDate: string | null; // 'YYYY-MM-DD'
 }
 
 export interface WaterLog {

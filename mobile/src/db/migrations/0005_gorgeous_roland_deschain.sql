@@ -1,0 +1,1 @@
+ALTER TABLE `profile` ADD `birth_date` text;

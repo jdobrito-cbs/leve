@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import type { AppDb } from '@/db/client';
+import { getProfile, updateProfile } from '@/db/profileRepo';
 import { getSetting, setSetting } from '@/db/settingsRepo';
 
 /**
@@ -43,6 +44,11 @@ export async function signInWithApple(db: AppDb): Promise<CloudAccount | null> {
       connectedAt: new Date().toISOString(),
     };
     await setSetting(db, KEY, account);
+    // A conta preenche o nome do perfil quando ele ainda está vazio.
+    if (account.name) {
+      const profile = await getProfile(db);
+      if (!profile?.name) await updateProfile(db, { name: account.name });
+    }
     return account;
   } catch (e) {
     if ((e as { code?: string }).code === 'ERR_REQUEST_CANCELED') return null;

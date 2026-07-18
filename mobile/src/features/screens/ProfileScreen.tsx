@@ -3,12 +3,14 @@ import { router } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
 import { Platform, Switch, View } from 'react-native';
+import { ageFromIsoDate, brDateToIso } from '@/core/datetime';
 import { db } from '@/db/client';
 import { exportAllData, wipeAllData } from '@/features/backup/exportData';
 import {
   AppText,
   Button,
   Card,
+  DateField,
   DisclaimerBanner,
   Input,
   NumberField,
@@ -89,6 +91,8 @@ function HealthSection() {
 export function ProfileScreen() {
   const { colors } = useTheme();
   const { loading, form, setField, save, saved, permissionError, autoGoalMl } = useProfileForm();
+  const birthIso = brDateToIso(form.birthDateStr);
+  const age = birthIso ? ageFromIsoDate(birthIso) : null;
 
   if (loading) return <Screen />;
 
@@ -114,6 +118,16 @@ export function ProfileScreen() {
           value={form.sex}
           onChange={(v) => setField('sex', v)}
         />
+        <DateField
+          label={strings.profile.birthDateLabel}
+          value={form.birthDateStr}
+          onChange={(v) => setField('birthDateStr', v)}
+        />
+        {age !== null ? (
+          <AppText variant="caption" muted>
+            {age} {strings.profile.ageSuffix}
+          </AppText>
+        ) : null}
         <NumberField
           label={strings.profile.heightLabel}
           value={form.heightStr}
