@@ -17,6 +17,9 @@ export const strings = {
     profileBody:
       'Usamos para personalizar metas, gráficos e relatórios. Você pode ajustar depois no Perfil.',
     profileContinue: 'Concluir',
+    autoCalorieLabel: 'Meta de calorias (calculada automaticamente)',
+    autoCalorieHint:
+      'Estimativa informativa para manter o peso-meta. Não substitui avaliação médica ou nutricional — ajuste no Perfil se tiver orientação profissional.',
   },
   tabs: {
     today: 'Hoje',

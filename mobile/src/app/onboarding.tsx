@@ -2,7 +2,8 @@ import { router } from 'expo-router';
 import { Check, CloudUpload } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { brDateToIso, isoDateToBR } from '@/core/datetime';
+import { ageFromIsoDate, brDateToIso, isoDateToBR } from '@/core/datetime';
+import { parseDecimalBR } from '@/core/text';
 import {
   AppText,
   Button,
@@ -12,6 +13,7 @@ import {
   HeroHeader,
   IconChip,
   Input,
+  RulerField,
   SegmentedChips,
 } from '@/design/components';
 import { spacing } from '@/design/tokens';
@@ -19,6 +21,7 @@ import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
 import { getProfile, updateProfile } from '@/db/profileRepo';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
+import { estimateCalorieGoal } from '@/features/profile/calorieGoal';
 import { setSexSignal } from '@/features/profile/sexSignal';
 import type { SexOption } from '@/features/profile/useProfileForm';
 import { getCloudAccount, isAppleSignInSupported, signInWithApple } from '@/services/cloudAccount';
@@ -30,6 +33,8 @@ function ProfileStep() {
   const [name, setName] = useState('');
   const [sex, setSex] = useState<SexOption | null>(null);
   const [birthStr, setBirthStr] = useState('');
+  const [heightStr, setHeightStr] = useState('');
+  const [goalWeightStr, setGoalWeightStr] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -39,17 +44,39 @@ function ProfileStep() {
       setName(profile?.name ?? account?.name ?? '');
       if (profile?.sex) setSex(profile.sex as SexOption);
       if (profile?.birthDate) setBirthStr(isoDateToBR(profile.birthDate));
+      if (profile?.heightCm) setHeightStr(String(profile.heightCm));
+      if (profile?.goalWeightKg) setGoalWeightStr(String(profile.goalWeightKg));
     })();
   }, []);
 
   const birthIso = brDateToIso(birthStr);
-  const canSave = name.trim().length > 0 && sex !== null && birthIso !== null;
+  const age = birthIso ? ageFromIsoDate(birthIso) : null;
+  const heightCm = parseDecimalBR(heightStr);
+  const goalWeightKg = parseDecimalBR(goalWeightStr);
+  // Meta de calorias automática: manter o peso-meta (ajustável no Perfil).
+  const calorieGoal =
+    sex !== null && age !== null && heightCm && goalWeightKg
+      ? estimateCalorieGoal(sex, goalWeightKg, heightCm, age)
+      : null;
+  const canSave =
+    name.trim().length > 0 &&
+    sex !== null &&
+    birthIso !== null &&
+    !!heightCm &&
+    !!goalWeightKg;
 
   async function onSave() {
     if (!canSave || sex === null) return;
     setSaving(true);
     try {
-      await updateProfile(db, { name: name.trim(), sex, birthDate: birthIso });
+      await updateProfile(db, {
+        name: name.trim(),
+        sex,
+        birthDate: birthIso,
+        heightCm,
+        goalWeightKg,
+        calorieGoalKcal: calorieGoal,
+      });
       setSexSignal(sex);
       router.replace('/');
     } finally {
@@ -79,6 +106,38 @@ function ProfileStep() {
         value={birthStr}
         onChange={setBirthStr}
       />
+      <RulerField
+        label={strings.profile.heightLabel}
+        value={heightStr}
+        onChangeText={setHeightStr}
+        suffix="cm"
+        min={100}
+        max={230}
+        step={1}
+        majorEvery={5}
+        fallback={170}
+      />
+      <RulerField
+        label={strings.profile.goalWeightLabel}
+        value={goalWeightStr}
+        onChangeText={setGoalWeightStr}
+        suffix="kg"
+        min={30}
+        max={250}
+        step={0.1}
+        fallback={80}
+      />
+      {calorieGoal !== null ? (
+        <>
+          <AppText variant="caption" muted>
+            {strings.onboarding.autoCalorieLabel}
+          </AppText>
+          <AppText variant="title">≈ {calorieGoal.toLocaleString('pt-BR')} kcal/dia</AppText>
+          <AppText variant="caption" muted>
+            {strings.onboarding.autoCalorieHint}
+          </AppText>
+        </>
+      ) : null}
       <Button
         label={strings.onboarding.profileContinue}
         onPress={onSave}
