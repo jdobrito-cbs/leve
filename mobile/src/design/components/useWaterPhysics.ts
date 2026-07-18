@@ -37,6 +37,12 @@ export function useWaterPhysics(): {
 
   useEffect(() => {
     let sub: AccelSubscription | null = null;
+    // Checa o módulo nativo ANTES do require: em builds antigas o pacote
+    // inteiro (inclusive pedômetro) falharia na carga e sujaria o console.
+    const native = (
+      globalThis as unknown as { expo?: { modules?: Record<string, unknown> } }
+    ).expo?.modules;
+    if (!native?.ExponentAccelerometer) return;
     try {
       const { Accelerometer } = require('expo-sensors') as AccelModule;
       Accelerometer.setUpdateInterval(60);
