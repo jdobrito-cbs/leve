@@ -5,6 +5,7 @@ import { spacing } from '@/design/tokens';
 import { db } from '@/db/client';
 import {
   PeriodLog,
+  deletePeriod,
   endPeriod,
   listPeriods,
   openPeriod,
@@ -103,6 +104,10 @@ export function CycleScreen() {
                 p.endedAt ? ` — ${new Date(p.endedAt).toLocaleDateString('pt-BR')}` : ''
               }`}
               right={p.flow ? strings.cycle.flows[p.flow as FlowKey] : undefined}
+              onDelete={async () => {
+                await deletePeriod(db, p.id);
+                await load();
+              }}
             />
           ))}
         </Card>

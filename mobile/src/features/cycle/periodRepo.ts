@@ -37,6 +37,11 @@ export async function setFlow(db: AppDb, flow: string): Promise<void> {
   await db.update(periodLogs).set({ flow }).where(eq(periodLogs.id, open.id));
 }
 
+/** Apaga um ciclo registrado por engano (aberto ou já encerrado). */
+export async function deletePeriod(db: AppDb, id: number): Promise<void> {
+  await db.delete(periodLogs).where(eq(periodLogs.id, id));
+}
+
 export async function listPeriods(db: AppDb, limit = 12): Promise<PeriodLog[]> {
   return (await db
     .select()
