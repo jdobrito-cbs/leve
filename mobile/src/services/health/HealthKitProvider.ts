@@ -8,6 +8,12 @@ interface QuantitySample {
   startDate?: string | Date;
 }
 
+interface CategorySample {
+  value?: number | null;
+  startDate?: string | Date;
+  endDate?: string | Date;
+}
+
 /**
  * Superfície mínima usada do @kingstinct/react-native-healthkit.
  * ATENÇÃO: iOS não é testável neste ambiente (sem Mac); o adapter é defensivo —
@@ -29,6 +35,10 @@ interface HealthKitModule {
     identifier: string,
     options: HKQueryOptions,
   ): Promise<QuantitySample[] | { samples?: QuantitySample[] }>;
+  queryCategorySamples?(
+    identifier: string,
+    options: HKQueryOptions,
+  ): Promise<CategorySample[] | { samples?: CategorySample[] }>;
 }
 
 function rowsOf(result: QuantitySample[] | { samples?: QuantitySample[] }): QuantitySample[] {
@@ -37,6 +47,7 @@ function rowsOf(result: QuantitySample[] | { samples?: QuantitySample[] }): Quan
 
 const BODY_MASS = 'HKQuantityTypeIdentifierBodyMass';
 const STEP_COUNT = 'HKQuantityTypeIdentifierStepCount';
+const SLEEP = 'HKCategoryTypeIdentifierSleepAnalysis';
 
 /** Identificadores HealthKit → métrica do Leve (iOS não testável neste ambiente; adapter defensivo). */
 const HK_METRICS: Array<{ id: string; type: MetricType }> = [
@@ -48,6 +59,8 @@ const HK_METRICS: Array<{ id: string; type: MetricType }> = [
   { id: 'HKQuantityTypeIdentifierRespiratoryRate', type: 'respiratory_rate' },
   { id: 'HKQuantityTypeIdentifierActiveEnergyBurned', type: 'active_calories' },
   { id: 'HKQuantityTypeIdentifierAppleExerciseTime', type: 'exercise_minutes' },
+  // Apneia: distúrbios respiratórios por hora de sono (Apple Watch, iOS 18+).
+  { id: 'HKQuantityTypeIdentifierAppleSleepingBreathingDisturbances', type: 'breathing_disturbances' },
 ];
 
 function getModule(): HealthKitModule | null {
@@ -75,7 +88,7 @@ export class HealthKitProvider implements HealthProvider {
     if (!this.mod) return false;
     try {
       return await this.mod.requestAuthorization({
-        toRead: [BODY_MASS, STEP_COUNT, ...HK_METRICS.map((m) => m.id)],
+        toRead: [BODY_MASS, STEP_COUNT, SLEEP, ...HK_METRICS.map((m) => m.id)],
         toShare: [],
       });
     } catch (e) {
@@ -151,6 +164,62 @@ export class HealthKitProvider implements HealthProvider {
         // tipo indisponível neste aparelho — segue para o próximo
       }
     }
+    samples.push(...(await this.readSleep(since)));
     return samples;
+  }
+
+  /** Sono por noite a partir dos trechos do HealthKit: horas dormidas e
+   *  eficiência (% do tempo na cama efetivamente dormindo). */
+  private async readSleep(since: Date): Promise<MetricSample[]> {
+    if (!this.mod?.queryCategorySamples) return [];
+    try {
+      const rows = rowsOf(
+        (await this.mod.queryCategorySamples(SLEEP, {
+          filter: { date: { startDate: since, endDate: new Date() } },
+          limit: 0,
+        })) as CategorySample[] | { samples?: CategorySample[] },
+      ) as CategorySample[];
+      // Valores HKCategoryValueSleepAnalysis: 0 na cama, 2 acordado, 1/3/4/5 dormindo.
+      const nights = new Map<
+        string,
+        { asleepMs: number; inBedMs: number; awakeMs: number; end: Date }
+      >();
+      for (const s of rows) {
+        if (!s.startDate || !s.endDate || typeof s.value !== 'number') continue;
+        const start = new Date(s.startDate);
+        const end = new Date(s.endDate);
+        const ms = end.getTime() - start.getTime();
+        if (!(ms > 0)) continue;
+        const key = localDayKey(end);
+        const night = nights.get(key) ?? { asleepMs: 0, inBedMs: 0, awakeMs: 0, end };
+        if (s.value === 0) night.inBedMs += ms;
+        else if (s.value === 2) night.awakeMs += ms;
+        else night.asleepMs += ms;
+        if (end > night.end) night.end = end;
+        nights.set(key, night);
+      }
+      const out: MetricSample[] = [];
+      for (const night of nights.values()) {
+        if (night.asleepMs <= 0) continue;
+        out.push({
+          type: 'sleep_hours',
+          value: Math.round((night.asleepMs / 36e5) * 10) / 10,
+          takenAt: night.end,
+        });
+        // Sem trechos de "na cama"/"acordado" não há como medir eficiência.
+        if (night.inBedMs + night.awakeMs > 0) {
+          const denom = Math.max(night.inBedMs, night.asleepMs + night.awakeMs);
+          out.push({
+            type: 'sleep_efficiency_pct',
+            value: Math.min(100, Math.round((night.asleepMs / denom) * 100)),
+            takenAt: night.end,
+          });
+        }
+      }
+      return out;
+    } catch (e) {
+      console.warn('[leve] HealthKit leitura de sono falhou:', e);
+      return [];
+    }
   }
 }

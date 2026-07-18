@@ -21,6 +21,8 @@ import { autoSyncIfDue, readTodaySteps } from '@/services/health/healthSync';
 
 export interface HealthLatest {
   sleepHours: number | null;
+  sleepEfficiencyPct: number | null;
+  breathingDisturbances: number | null;
   restingHr: number | null;
   spo2: number | null;
   respiratoryRate: number | null;
@@ -60,6 +62,8 @@ export interface TodaySummary {
 const EMPTY_MACROS: DayMacros = { kcal: 0, proteinG: 0, carbsG: 0, fatG: 0, fiberG: 0 };
 const EMPTY_HEALTH: HealthLatest = {
   sleepHours: null,
+  sleepEfficiencyPct: null,
+  breathingDisturbances: null,
   restingHr: null,
   spo2: null,
   respiratoryRate: null,
@@ -154,14 +158,18 @@ export function useTodaySummary(): TodaySummary {
       // Saúde conectada + exercícios registrados na Academia.
       const gymKcal = await gymKcalForDay(db, now).catch(() => 0);
       setActiveCalories(Math.round(burned.reduce((a, m) => a + m.value, 0) + gymKcal));
-      const [sleep, hr, spo2, resp] = await Promise.all([
+      const [sleep, sleepEff, breathing, hr, spo2, resp] = await Promise.all([
         latestMetric(db, 'sleep_hours'),
+        latestMetric(db, 'sleep_efficiency_pct'),
+        latestMetric(db, 'breathing_disturbances'),
         latestMetric(db, 'heart_rate_resting'),
         latestMetric(db, 'spo2'),
         latestMetric(db, 'respiratory_rate'),
       ]);
       setHealthLatest({
         sleepHours: sleep?.value ?? null,
+        sleepEfficiencyPct: sleepEff?.value ?? null,
+        breathingDisturbances: breathing?.value ?? null,
         restingHr: hr?.value ?? null,
         spo2: spo2?.value ?? null,
         respiratoryRate: resp?.value ?? null,

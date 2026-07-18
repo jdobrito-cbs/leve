@@ -469,6 +469,18 @@ export function TodayScreen() {
                   value={`${fmt(summary.healthLatest.sleepHours, 1)} h`}
                 />
               ) : null}
+              {summary.healthLatest.sleepEfficiencyPct !== null ? (
+                <Metric
+                  label={strings.today.healthLabels.sleepQuality}
+                  value={`${fmt(summary.healthLatest.sleepEfficiencyPct)}%`}
+                />
+              ) : null}
+              {summary.healthLatest.breathingDisturbances !== null ? (
+                <Metric
+                  label={strings.today.healthLabels.breathing}
+                  value={`${fmt(summary.healthLatest.breathingDisturbances, 1)}/h`}
+                />
+              ) : null}
               {summary.healthLatest.restingHr !== null ? (
                 <Metric
                   label={strings.today.healthLabels.restingHr}

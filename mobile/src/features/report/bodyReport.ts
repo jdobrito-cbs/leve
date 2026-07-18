@@ -62,12 +62,15 @@ export interface BodyReport {
   };
   /** true quando parte da composição foi derivada de peso + gordura corporal. */
   compositionEstimated: boolean;
-  /** Sinais vitais e hidratação registrados no app. */
+  /** Sinais vitais, sono e hidratação registrados no app. */
   vitals: {
     restingHr: number | null;
     avgHr: number | null;
     spo2: number | null;
     respiratoryRate: number | null;
+    sleepHours: number | null;
+    sleepEfficiencyPct: number | null;
+    breathingDisturbances: number | null;
     waterTodayMl: number;
     waterAvg7dMl: number | null;
   };
@@ -231,6 +234,11 @@ export async function buildBodyReport(db: AppDb): Promise<BodyReport | null> {
       waterTotalForDay(db, now),
       waterDailyTotals(db, 7, now),
     ]);
+  const [sleepH, sleepEff, breathing] = await Promise.all([
+    last(db, 'sleep_hours'),
+    last(db, 'sleep_efficiency_pct'),
+    last(db, 'breathing_disturbances'),
+  ]);
   const waterDays = water7.filter((d) => d.totalMl > 0);
   const waterAvg7dMl =
     waterDays.length > 0
@@ -342,6 +350,9 @@ export async function buildBodyReport(db: AppDb): Promise<BodyReport | null> {
       avgHr,
       spo2,
       respiratoryRate: respRate,
+      sleepHours: sleepH,
+      sleepEfficiencyPct: sleepEff,
+      breathingDisturbances: breathing,
       waterTodayMl: waterToday,
       waterAvg7dMl,
     },

@@ -65,6 +65,9 @@ test('documento traz nome, pontuação, seções e faixas', () => {
       avgHr: 78,
       spo2: 97,
       respiratoryRate: 15,
+      sleepHours: 6.8,
+      sleepEfficiencyPct: 91,
+      breathingDisturbances: 3.2,
       waterTodayMl: 1800,
       waterAvg7dMl: 2100,
     },
@@ -79,6 +82,9 @@ test('documento traz nome, pontuação, seções e faixas', () => {
   expect(html).toContain('62 bpm');
   expect(html).toContain('Água ingerida hoje');
   expect(html).toContain('1.800 ml');
+  expect(html).toContain('Qualidade do sono (eficiência)');
+  expect(html).toContain('Distúrbios respiratórios no sono');
+  expect(html).toContain('3,2/h');
   expect(html).toContain('>66<');
   expect(html).toContain('Sugestão de teste.');
   expect(html).toContain('39,0–48,6');

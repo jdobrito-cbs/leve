@@ -108,6 +108,8 @@ export const strings = {
     healthEmpty: 'Conecte a saúde no Perfil para ver sono, batimentos e oxigênio.',
     healthLabels: {
       sleep: 'Sono',
+      sleepQuality: 'Qualidade do sono',
+      breathing: 'Distúrbios resp. (sono)',
       restingHr: 'FC repouso',
       spo2: 'Oxigênio',
       respiratoryRate: 'Freq. respiratória',

@@ -275,6 +275,9 @@ export function reportHtml(r: BodyReport): string {
         ${indicatorRow('Frequência cardíaca média', v.avgHr !== null ? `${fmt(v.avgHr, 0)} bpm` : null)}
         ${indicatorRow('Oxigênio no sangue (SpO₂)', v.spo2 !== null ? `${fmt(v.spo2, 0)}%` : null)}
         ${indicatorRow('Frequência respiratória', v.respiratoryRate !== null ? `${fmt(v.respiratoryRate, 0)} rpm` : null)}
+        ${indicatorRow('Sono (última noite)', v.sleepHours !== null ? `${fmt(v.sleepHours)} h` : null)}
+        ${indicatorRow('Qualidade do sono (eficiência)', v.sleepEfficiencyPct !== null ? `${fmt(v.sleepEfficiencyPct, 0)}%` : null)}
+        ${indicatorRow('Distúrbios respiratórios no sono', v.breathingDisturbances !== null ? `${fmt(v.breathingDisturbances)}/h` : null)}
         ${indicatorRow('Água ingerida hoje', `${v.waterTodayMl.toLocaleString('pt-BR')} ml`)}
         ${indicatorRow('Água por dia (média 7 dias)', v.waterAvg7dMl !== null ? `${v.waterAvg7dMl.toLocaleString('pt-BR')} ml` : null)}
       </table>
