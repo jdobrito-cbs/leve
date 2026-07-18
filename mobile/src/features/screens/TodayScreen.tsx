@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useMemo, type ComponentType, type PropsWithChildren } from 'react';
+import { useEffect, useMemo, type ComponentType, type PropsWithChildren } from 'react';
 import { Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -17,7 +17,7 @@ import {
   UtensilsCrossIcon,
 } from '@/design/logIcons';
 import { HappyPanda, HydratedPanda, ThirstyPanda } from '@/design/pandas';
-import { useMascot } from '@/features/today/mascotSignal';
+import { reportCaloricBalance, useMascot } from '@/features/today/mascotSignal';
 import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { estimateRelativeCurve } from '@/features/pk/pharmacokinetics';
@@ -109,6 +109,12 @@ export function TodayScreen() {
   const { height: winH } = useWindowDimensions();
   const summary = useTodaySummary();
   const mascot = useMascot();
+  // Saldo calórico virou positivo/zerado → panda do balanço por 1 minuto.
+  useEffect(() => {
+    if (!summary.loading) {
+      reportCaloricBalance(summary.activeCalories - summary.macros.kcal >= 0);
+    }
+  }, [summary.loading, summary.activeCalories, summary.macros.kcal]);
   // Azul sólido até a altura do cabeçalho (início do primeiro box); o degradê
   // acontece logo abaixo e termina na cor do tema.
   const blueEnd = Math.min(0.85, (insets.top + 128) / winH);

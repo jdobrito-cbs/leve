@@ -5,7 +5,14 @@ import { useSyncExternalStore } from 'react';
  * (aviso de beber água, gole registrado…) trocam o mascote por um período
  * curto e ele volta ao feliz sozinho.
  */
-export type MascotKind = 'happy' | 'thirsty' | 'hydrated' | 'slimmer' | 'meds' | 'dose';
+export type MascotKind =
+  | 'happy'
+  | 'thirsty'
+  | 'hydrated'
+  | 'slimmer'
+  | 'meds'
+  | 'dose'
+  | 'balance';
 
 export const MASCOT_EVENT_MS = 60_000;
 
@@ -45,4 +52,13 @@ export function subscribeMascot(listener: () => void): () => void {
 
 export function useMascot(): MascotKind {
   return useSyncExternalStore(subscribeMascot, getMascot, getMascot);
+}
+
+let lastBalancePositive: boolean | null = null;
+
+/** Dispara o panda do balanço quando o saldo calórico VIRA positivo/zerado
+ *  (não repete a cada atualização do Hoje enquanto continuar favorável). */
+export function reportCaloricBalance(positiveOrEven: boolean): void {
+  if (positiveOrEven && lastBalancePositive !== true) setMascotEvent('balance');
+  lastBalancePositive = positiveOrEven;
 }
