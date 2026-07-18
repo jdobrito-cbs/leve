@@ -4,12 +4,13 @@ import { Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LineChart } from 'react-native-gifted-charts';
-import { Scale, TrendingUp, Trophy } from 'lucide-react-native';
+import { TrendingUp, Trophy } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatDateBR, formatDateTimeShort } from '@/core/datetime';
 import { AppText, Card, FitChart, IconChip, WaterRing } from '@/design/components';
 import { OverflowDrips, OverflowFill } from '@/design/components/OverflowWater';
 import {
+  DrugstoreScaleIcon,
   FootprintsWalkIcon,
   NotesWritingIcon,
   PillRollIcon,
@@ -411,15 +412,12 @@ export function TodayScreen() {
 
         {/* 5b — Balanço calórico: consumidas × queimadas */}
         <Box index={4}>
-          <AppText variant="title">{strings.today.balanceSection}</AppText>
+          <TitleRow Anim={DrugstoreScaleIcon} title={strings.today.balanceSection} />
           {(() => {
             const kcalIn = Math.round(summary.macros.kcal);
             const kcalOut = Math.round(summary.activeCalories);
             const diff = kcalOut - kcalIn;
             const state = diff > 100 ? 'win' : diff >= -100 ? 'even' : 'over';
-            const Icon = state === 'win' ? Trophy : state === 'even' ? Scale : TrendingUp;
-            const iconColor =
-              state === 'win' ? colors.success : state === 'even' ? colors.primary : colors.warning;
             const message =
               state === 'win'
                 ? strings.today.balanceWin
@@ -433,9 +431,15 @@ export function TodayScreen() {
                     <Metric label={strings.today.balanceGained} value={`${fmt(kcalIn)} kcal`} />
                     <Metric label={strings.today.balanceBurned} value={`${fmt(kcalOut)} kcal`} />
                   </View>
-                  <IconChip size={44}>
-                    <Icon size={22} color={iconColor} />
-                  </IconChip>
+                  {state !== 'even' ? (
+                    <IconChip size={44}>
+                      {state === 'win' ? (
+                        <Trophy size={22} color={colors.success} />
+                      ) : (
+                        <TrendingUp size={22} color={colors.warning} />
+                      )}
+                    </IconChip>
+                  ) : null}
                 </View>
                 <AppText variant="caption" muted>
                   {message}

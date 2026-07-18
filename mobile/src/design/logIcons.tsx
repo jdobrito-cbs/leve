@@ -19,7 +19,8 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Circle, Path } from 'react-native-svg';
+import { View } from 'react-native';
 import { useTheme } from './useTheme';
 
 /**
@@ -294,6 +295,58 @@ export function FootprintsWalkIcon({ size = SIZE }: IconProps) {
 
 /** Ciclo: o coração do calendário pulsa como batimento. */
 /** Consultas: estetoscópio balança de leve, como pendurado no pescoço. */
+/** Balança de drogaria (de pesar gente): coluna com visor redondo e ponteiro
+ *  que oscila como numa pesagem. */
+export function DrugstoreScaleIcon({ size = SIZE }: IconProps) {
+  const { colors } = useTheme();
+  const swing = useSharedValue(0);
+
+  useEffect(() => {
+    swing.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 650, easing: Easing.inOut(Easing.quad) }),
+        withTiming(-0.55, { duration: 550, easing: Easing.inOut(Easing.quad) }),
+        withTiming(0.25, { duration: 450, easing: Easing.inOut(Easing.quad) }),
+        withTiming(0, { duration: 400, easing: Easing.inOut(Easing.quad) }),
+        withTiming(0, { duration: 800 }),
+      ),
+      -1,
+    );
+  }, [swing]);
+
+  const needle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${swing.value * 34}deg` }],
+  }));
+
+  return (
+    <View style={{ width: size, height: size }}>
+      <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={colors.primary} {...stroke}>
+        <Circle cx={12} cy={7} r={4.6} />
+        <Path d="M10.6 11.4v6M13.4 11.4v6" />
+        <Path d="M5.2 20.4h13.6" />
+      </Svg>
+      {/* Ponteiro do visor, girando em torno do centro do mostrador */}
+      <Animated.View
+        style={[
+          {
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width: size,
+            height: size,
+            transformOrigin: '50% 29%',
+          },
+          needle,
+        ]}
+      >
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={colors.primary} {...stroke}>
+          <Path d="M12 7V4.1" />
+        </Svg>
+      </Animated.View>
+    </View>
+  );
+}
+
 export function StethoscopeSwingIcon({ size = SIZE }: IconProps) {
   const { colors } = useTheme();
   const sway = useSharedValue(0);
