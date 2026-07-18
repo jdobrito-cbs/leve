@@ -133,7 +133,7 @@ export function PremiumScreen() {
         <Card style={{ flex: 1, gap: spacing.sm }}>
           <AppText variant="title">{strings.premium.monthly}</AppText>
           <AppText variant="caption" muted>
-            {prices.monthly ?? strings.premium.priceOnStore} · {strings.premium.perMonth}
+            {prices.monthly ?? strings.premium.monthlyPrice} · {strings.premium.perMonth}
           </AppText>
           <Button
             label={strings.premium.subscribe}
@@ -144,7 +144,7 @@ export function PremiumScreen() {
         <Card style={{ flex: 1, gap: spacing.sm }}>
           <AppText variant="title">{strings.premium.annual}</AppText>
           <AppText variant="caption" muted>
-            {prices.annual ?? strings.premium.priceOnStore} · {strings.premium.perYear}
+            {prices.annual ?? strings.premium.annualPrice} · {strings.premium.perYear}
           </AppText>
           <Button
             label={strings.premium.subscribe}
@@ -153,6 +153,9 @@ export function PremiumScreen() {
           />
         </Card>
       </View>
+      <AppText variant="caption" muted style={{ textAlign: 'center' }}>
+        {strings.premium.billedByStore}
+      </AppText>
       <Button
         label={strings.premium.restore}
         variant="secondary"

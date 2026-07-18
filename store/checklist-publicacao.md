@@ -34,6 +34,24 @@
 - [ ] Ícone 512×512 (Play) — exportar de assets/images/icon.png
 - [ ] Classificação etária: questionários das lojas (app de saúde, sem conteúdo sensível)
 
+## Assinaturas — Leve Premium (mensal R$ 10,00 · anual R$ 75,00)
+
+- [ ] Criar conta no RevenueCat (revenuecat.com, plano gratuito até US$ 2.500/mês de receita)
+- [ ] App Store Connect → Leve → Assinaturas: grupo "Leve Premium" com 2 produtos:
+      `leve.premium.monthly` (R$ 10,00/mês) e `leve.premium.annual` (R$ 75,00/ano)
+- [ ] Play Console → Leve → Produtos → Assinaturas: mesmos ids e preços
+- [ ] RevenueCat: criar o entitlement `premium`, vincular os produtos e montar a offering
+      padrão com os pacotes MONTHLY e ANNUAL
+- [ ] Copiar as chaves públicas do RevenueCat para o build:
+      `EXPO_PUBLIC_REVENUECAT_IOS_KEY` e `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY`
+      (em eas.json → build.production.env, ou .env local para testes)
+- [ ] Apple: inscrever-se no App Store Small Business Program (comissão cai de 30% para 15%;
+      a inscrição NÃO é automática) — developer.apple.com/app-store/small-business-program
+- [ ] Google: assinaturas já pagam 15% desde o 1º real (sem inscrição)
+- [ ] Testar compra sandbox nos dois aparelhos antes de publicar
+- [ ] Chaves de parceiro: `node mobile/scripts/gen-license.mjs N` (guardar backup seguro de
+      mobile/scripts/license-key.private.json — sem ele não se emitem novas chaves)
+
 ## Login social (pós-contas)
 
 - [ ] Google: criar OAuth client no Google Cloud → implementar verificação de id_token no servidor (campo provider/providerId já existe no banco)
