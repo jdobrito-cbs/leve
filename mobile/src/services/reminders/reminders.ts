@@ -15,7 +15,7 @@ export interface ReminderSettings {
 export const DEFAULT_REMINDERS: ReminderSettings = {
   doseEnabled: false,
   waterEnabled: false,
-  waterTimes: ['09:00', '13:00', '17:00'],
+  waterTimes: ['09:00', '13:00', '17:00', '21:00'],
   insightsEnabled: false,
 };
 

@@ -279,7 +279,8 @@ export function ProfileScreen() {
           <Input
             label={strings.profile.waterTimesLabel}
             value={form.waterTimesStr}
-            onChangeText={(v) => setField('waterTimesStr', v)}            placeholder="09:00, 13:00, 17:00"
+            onChangeText={(v) => setField('waterTimesStr', v)}
+            placeholder="09:00, 13:00, 17:00, 21:00"
           />
         ) : null}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>

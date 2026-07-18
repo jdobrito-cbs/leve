@@ -89,8 +89,8 @@ export function ValueRuler({
             data={ticks}
             horizontal
             showsHorizontalScrollIndicator={false}
-            snapToInterval={RULER_TICK_WIDTH}
-            decelerationRate="fast"
+            // Sem trava por traço: desliza livre e o valor arredonda sozinho.
+            decelerationRate="normal"
             initialScrollIndex={Math.round(valueToOffset(value, min, max, step) / RULER_TICK_WIDTH)}
             getItemLayout={(_, index) => ({
               length: RULER_TICK_WIDTH,
@@ -102,7 +102,7 @@ export function ValueRuler({
             maxToRenderPerBatch={120}
             contentContainerStyle={{ paddingHorizontal: width / 2 }}
             onScroll={report}
-            scrollEventThrottle={32}
+            scrollEventThrottle={16}
             onMomentumScrollEnd={report}
             onScrollEndDrag={report}
             keyExtractor={(i) => String(i)}
