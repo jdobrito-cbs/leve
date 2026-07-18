@@ -1,8 +1,21 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+﻿import { useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { BarChart, LineChart } from 'react-native-gifted-charts';
 import { METRIC_DEFS, MetricType } from '@/core/metrics';
-import { AppText, Card, DisclaimerBanner, FitChart, ListRow, Screen, SegmentedChips } from '@/design/components';
+import {
+  AppText,
+  Card,
+  DisclaimerBanner,
+  FitChart,
+  ListRow,
+  RangeGauge,
+  Screen,
+  SegmentedChips,
+} from '@/design/components';
+import { zoneOf, type GaugeSpec } from '@/features/body/bodyBands';
+import { buildBodyGauges } from '@/features/body/bodyGauges';
+import { buildBodyReport } from '@/features/report/bodyReport';
 import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
@@ -42,6 +55,61 @@ function dailyAverages(rows: MetricRow[]): { value: number }[] {
   return [...byDay.entries()]
     .sort(([a], [b]) => (a < b ? -1 : 1))
     .map(([, { sum, n }]) => ({ value: sum / n }));
+}
+
+/** Dados corporais no estilo da balança: valor + medidor de faixas por item. */
+function BodyDataSection() {
+  const [gauges, setGauges] = useState<GaugeSpec[] | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      let alive = true;
+      buildBodyReport(db)
+        .then((report) => {
+          if (alive) setGauges(report ? buildBodyGauges(report) : []);
+        })
+        .catch(() => {
+          if (alive) setGauges([]);
+        });
+      return () => {
+        alive = false;
+      };
+    }, []),
+  );
+
+  if (!gauges || gauges.length === 0) {
+    return (
+      <Card style={{ gap: spacing.md }}>
+        <AppText variant="title">{strings.bodyData.section}</AppText>
+        <AppText muted>{strings.progress.empty}</AppText>
+      </Card>
+    );
+  }
+
+  return (
+    <Card style={{ gap: spacing.lg }}>
+      <AppText variant="title">{strings.bodyData.section}</AppText>
+      {gauges.map((g) => {
+        const zone = zoneOf(g.value as number, g.zones);
+        return (
+          <View key={g.key} style={{ gap: 2 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm }}>
+              <AppText style={{ flex: 1 }}>{g.label}</AppText>
+              <AppText variant="caption" style={{ color: zone.color, fontFamily: fonts.semibold }}>
+                {zone.label}
+              </AppText>
+              <AppText style={{ fontFamily: fonts.bold, fontSize: 18 }}>
+                {(g.value as number).toLocaleString('pt-BR', { maximumFractionDigits: g.digits })}
+                {g.unit ? ` ${g.unit}` : ''}
+              </AppText>
+            </View>
+            <RangeGauge value={g.value as number} zones={g.zones} digits={g.digits} />
+          </View>
+        );
+      })}
+      <DisclaimerBanner />
+    </Card>
+  );
 }
 
 function BodyHealthSection({ metrics }: { metrics: MetricRow[] }) {
@@ -205,6 +273,8 @@ disableScroll
           {strings.progress.pkDisclaimer}
         </AppText>
       </Card>
+
+      <BodyDataSection />
 
       <BodyHealthSection metrics={metrics} />
 

@@ -9,7 +9,7 @@ import {
   type ComponentType,
   type ReactNode,
 } from 'react';
-import { View, type StyleProp, type ViewStyle } from 'react-native';
+import { useWindowDimensions, View, type StyleProp, type ViewStyle } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getSexSignal, setSexSignal, subscribeSex } from '@/features/profile/sexSignal';
@@ -126,6 +126,8 @@ function getGlassView(): ComponentType<{
     return null;
   }
 }
+// Resolvido uma vez na carga do módulo — nada de require no primeiro quadro.
+const GlassComponent = getGlassView();
 
 /** Botão de aba que aceita toque E arrasto: arrastar leva o vidro junto e,
  *  ao soltar, seleciona a aba sob o dedo — como no Liquid Glass do iOS. */
@@ -196,10 +198,14 @@ function GlassSlider({
   onWidth: (w: number) => void;
 }) {
   const { mode } = useTheme();
-  const [barW, setBarW] = useState(0);
+  // A barra ocupa a largura da tela: usar a janela como base elimina a espera
+  // pela medição de layout — o vidro aparece já no primeiro quadro.
+  const { width: winW } = useWindowDimensions();
+  const [measuredW, setMeasuredW] = useState(0);
+  const barW = measuredW > 0 ? measuredW : winW;
   const cx = useSharedValue(-9999); // centro da elipse
   const slot = count > 0 ? barW / count : 0;
-  const Glass = useMemo(getGlassView, []);
+  const Glass = GlassComponent;
 
   useEffect(() => {
     if (slot <= 0 || activeIndex < 0) return;
@@ -262,7 +268,7 @@ function GlassSlider({
       style={{ flex: 1 }}
       pointerEvents="none"
       onLayout={(e) => {
-        setBarW(e.nativeEvent.layout.width);
+        setMeasuredW(e.nativeEvent.layout.width);
         onWidth(e.nativeEvent.layout.width);
       }}
     >

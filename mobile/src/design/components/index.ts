@@ -11,6 +11,7 @@ export { FitChart } from './FitChart';
 export { AppSwitch } from './AppSwitch';
 export { DateField } from './DateField';
 export { PickerSheet } from './PickerSheet';
+export { RangeGauge } from './RangeGauge';
 export { RulerField } from './RulerField';
 export { ValueRuler } from './ValueRuler';
 export { DateTimeField } from './DateTimeField';

@@ -1,3 +1,14 @@
+import {
+  bandZones,
+  componentBandKg,
+  fatMassZones,
+  subcutaneousZones,
+  visceralZones,
+  zoneOf,
+  ZONE,
+  type GaugeZone,
+  type Sex,
+} from '@/features/body/bodyBands';
 import type { BodyReport, CompositionRow, RangedValue, SeriesPoint } from './bodyReport';
 
 /** Documento A4 do relatório corporal (HTML → PDF via expo-print), fiel ao
@@ -24,19 +35,49 @@ function statusOf(row: CompositionRow): { label: string; color: string } | null 
   return { label: 'Padrão', color: OK };
 }
 
-function compRow(label: string, color: string, row: CompositionRow, unit = 'kg'): string {
+/** Medidor compacto no estilo da balança: zonas coloridas + marcador. */
+function miniGauge(value: number, zones: GaugeZone[]): string {
+  const bounds = zones.filter((z) => z.to !== null).map((z) => z.to as number);
+  if (bounds.length === 0) return '';
+  const span = bounds.length > 1 ? bounds[bounds.length - 1] - bounds[0] : bounds[0];
+  const pad = Math.max(span * 0.5, bounds[0] * 0.25, 1);
+  const min = Math.max(0, bounds[0] - pad);
+  const max = bounds[bounds.length - 1] + pad;
+  const stops = [min, ...bounds, max];
+  const segs = zones
+    .map(
+      (z, i) =>
+        `<i style="flex:${Math.max(stops[i + 1] - stops[i], 0.001)};background:${z.color}"></i>`,
+    )
+    .join('');
+  const pos = Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
+  const zone = zoneOf(value, zones);
+  return `<div class="mini"><div class="minibar">${segs}</div><b style="left:${pos.toFixed(1)}%;border-color:${zone.color}"></b></div>`;
+}
+
+function compRow(
+  label: string,
+  color: string,
+  row: CompositionRow,
+  zones: GaugeZone[] | null,
+  unit = 'kg',
+): string {
   const st = statusOf(row);
   const value =
     row.value === null
       ? `<span class="cmiss">—</span>`
       : `${fmt(row.value)}<small> ${unit}</small>`;
   const badge = st ? `<span class="cstat" style="color:${st.color}">${st.label}</span>` : '';
-  return `<div class="crow">
-    <span class="dot" style="background:${color}"></span>
-    <span class="clabel">${label}</span>
-    ${badge}
-    <span class="cval">${value}<br/><em>(${fmt(row.min)}–${fmt(row.max)})</em></span>
-  </div>`;
+  const gauge = row.value !== null && zones ? miniGauge(row.value, zones) : '';
+  return `<div class="crow"><div style="flex:1">
+    <div class="crowline">
+      <span class="dot" style="background:${color}"></span>
+      <span class="clabel">${label}</span>
+      ${badge}
+      <span class="cval">${value}<br/><em>(${fmt(row.min)}–${fmt(row.max)})</em></span>
+    </div>
+    ${gauge}
+  </div></div>`;
 }
 
 /** Posição do fim da barra nas zonas Baixo (0–33%), Padrão (33–66%), Alto (66–100%). */
@@ -105,7 +146,7 @@ function donut(report: BodyReport): string {
 function chart(title: string, unit: string, points: SeriesPoint[]): string {
   if (points.length < 2) return '';
   const W = 330;
-  const H = 86;
+  const H = 78;
   const R = 40; // faixa direita para os rótulos de máx/mín
   const T = 6;
   const B = 6;
@@ -155,6 +196,35 @@ export function reportHtml(r: BodyReport): string {
   const when = `${String(dt.getDate()).padStart(2, '0')}/${String(dt.getMonth() + 1).padStart(2, '0')}/${dt.getFullYear()} ${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`;
   const ind = r.indicators;
   const v = r.vitals;
+  const sexKey: Sex = r.sex;
+  // Medidores dos indicadores: mesmas faixas do box "Dados corporais" do app.
+  const gaugeRow = (label: string, valueStr: string, gauge: string) =>
+    `<tr><td>${label}${gauge}</td><td class="ival">${valueStr}</td></tr>`;
+  const visceralGauge =
+    ind.visceralFat !== null ? gaugeRow('Grau de gordura visceral', fmt(ind.visceralFat, 0), miniGauge(ind.visceralFat, visceralZones())) : '';
+  const subcutGauge =
+    ind.subcutaneousPct !== null
+      ? gaugeRow('Gordura subcutânea', `${fmt(ind.subcutaneousPct)}%`, miniGauge(ind.subcutaneousPct, subcutaneousZones(sexKey)))
+      : '';
+  const bmrGauge = gaugeRow(
+    'Taxa metabólica basal',
+    `${fmt(ind.bmrKcal, 0)} kcal`,
+    miniGauge(ind.bmrKcal, [
+      { to: ind.bmrKcal, label: 'Baixo', color: ZONE.low },
+      { to: null, label: 'Padrão', color: ZONE.ok },
+    ]),
+  );
+  const bodyAgeGauge =
+    ind.bodyAge !== null && r.age !== null
+      ? gaugeRow(
+          'Idade do corpo',
+          fmt(ind.bodyAge, 0),
+          miniGauge(ind.bodyAge, [
+            { to: r.age, label: 'Excelente', color: ZONE.good },
+            { to: null, label: 'Alto', color: ZONE.warn },
+          ]),
+        )
+      : '';
   // Linhas de saúde/hidratação divididas em duas colunas para caber no A4.
   const vitalRows = [
     indicatorRow('Frequência cardíaca em repouso', v.restingHr !== null ? `${fmt(v.restingHr, 0)} bpm` : null),
@@ -177,7 +247,7 @@ export function reportHtml(r: BodyReport): string {
       -webkit-print-color-adjust: exact !important; print-color-adjust: exact; }
     @page { size: A4 portrait; margin: 0; }
     /* zoom leve garante o relatório inteiro numa única página A4 */
-    body { color: ${INK}; padding: 22px 28px; font-size: 12px; zoom: 0.93; }
+    body { color: ${INK}; padding: 20px 28px; font-size: 12px; zoom: 0.89; }
     .h1row { display: flex; align-items: center; gap: 9px; margin-bottom: 4px; }
     h1 { font-size: 21px; } h1 b { color: ${BLUE}; }
     .meta { color: ${MUTED}; display: flex; gap: 16px; padding: 8px 0 12px; border-bottom: 2px solid ${INK}; }
@@ -186,6 +256,11 @@ export function reportHtml(r: BodyReport): string {
     .col { flex: 1; min-width: 0; }
     .comp { display: flex; gap: 14px; align-items: center; }
     .crow { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid ${LINE}; }
+    .crowline { display: flex; align-items: center; gap: 8px; }
+    .mini { position: relative; margin: 3px 0 1px 17px; height: 9px; }
+    .minibar { display: flex; height: 5px; border-radius: 3px; overflow: hidden; }
+    .mini b { position: absolute; top: -2px; width: 9px; height: 9px; border-radius: 5px;
+      background: #fff; border: 2px solid ${INK}; transform: translateX(-50%); }
     .dot { width: 9px; height: 9px; border-radius: 5px; display: inline-block; flex-shrink: 0; }
     .clabel { flex: 1; }
     .cstat { font-weight: 700; font-size: 11px; }
@@ -243,12 +318,12 @@ export function reportHtml(r: BodyReport): string {
       <div class="comp">
         ${donut(r)}
         <div style="flex:1">
-          ${compRow('Água corporal', '#60A5FA', c.waterKg)}
-          ${compRow('Massa proteica', '#4ADE80', c.proteinKg)}
-          ${compRow('Massa gorda', '#FACC15', c.fatKg)}
-          ${compRow('Massa óssea', '#2DD4BF', c.boneKg)}
-          ${compRow('Massa muscular', '#A78BFA', c.muscleKg)}
-          ${compRow('Músculo esquelético', '#A3E635', c.skeletalKg)}
+          ${compRow('Água corporal', '#60A5FA', c.waterKg, bandZones(componentBandKg(sexKey, r.heightCm, 'water'), 'excellent'))}
+          ${compRow('Massa proteica', '#4ADE80', c.proteinKg, bandZones(componentBandKg(sexKey, r.heightCm, 'protein'), 'excellent'))}
+          ${compRow('Massa gorda', '#FACC15', c.fatKg, fatMassZones(sexKey, r.heightCm))}
+          ${compRow('Massa óssea', '#2DD4BF', c.boneKg, bandZones(componentBandKg(sexKey, r.heightCm, 'bone'), 'excellent'))}
+          ${compRow('Massa muscular', '#A78BFA', c.muscleKg, bandZones(componentBandKg(sexKey, r.heightCm, 'muscle'), 'excellent'))}
+          ${compRow('Músculo esquelético', '#A3E635', c.skeletalKg, bandZones(componentBandKg(sexKey, r.heightCm, 'skeletal'), 'excellent'))}
         </div>
       </div>
     </div>
@@ -278,12 +353,13 @@ export function reportHtml(r: BodyReport): string {
     <div class="col">
       <h2>Outros indicadores</h2>
       <table class="ind">
-        ${indicatorRow('Grau de gordura visceral', ind.visceralFat !== null ? fmt(ind.visceralFat, 0) : null)}
-        ${indicatorRow('Taxa metabólica basal', `${fmt(ind.bmrKcal, 0)} kcal`)}
+        ${visceralGauge}
+        ${bmrGauge}
         ${indicatorRow('Peso corporal livre de gordura', ind.fatFreeMassKg !== null ? `${fmt(ind.fatFreeMassKg)} kg` : null)}
-        ${indicatorRow('Gordura subcutânea', ind.subcutaneousPct !== null ? `${fmt(ind.subcutaneousPct)}%` : null)}
+        ${subcutGauge}
         ${indicatorRow('SMI', ind.smi !== null ? `${fmt(ind.smi)} kg/m²` : null)}
-        ${indicatorRow('Idade do corpo', ind.bodyAge !== null ? fmt(ind.bodyAge, 0) : null)}
+        ${bodyAgeGauge}
+        ${ind.bodyAge !== null && r.age === null ? indicatorRow('Idade do corpo', fmt(ind.bodyAge, 0)) : ''}
       </table>
     </div>
   </div>

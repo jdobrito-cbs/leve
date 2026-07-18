@@ -1,6 +1,12 @@
 import { render } from '@testing-library/react-native';
 
-jest.mock('expo-router', () => ({ router: { push: jest.fn(), back: jest.fn() } }));
+jest.mock('expo-router', () => ({
+  router: { push: jest.fn(), back: jest.fn() },
+  useFocusEffect: (cb: () => void | (() => void)) => {
+    const { useEffect } = require('react') as typeof import('react');
+    useEffect(cb, []);
+  },
+}));
 jest.mock('react-native-gifted-charts', () => ({
   BarChart: () => null,
   LineChart: () => null,

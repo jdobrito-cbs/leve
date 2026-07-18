@@ -1,7 +1,13 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-jest.mock('expo-router', () => ({ router: { push: jest.fn(), back: jest.fn(), replace: jest.fn() } }));
+jest.mock('expo-router', () => ({
+  router: { push: jest.fn(), back: jest.fn(), replace: jest.fn() },
+  useFocusEffect: (cb: () => void | (() => void)) => {
+    const { useEffect } = require('react') as typeof import('react');
+    useEffect(cb, []);
+  },
+}));
 jest.mock('@/db/client', () => ({ db: {} }));
 jest.mock('@/db/profileRepo', () => ({
   getProfile: jest.fn().mockResolvedValue({ sex: 'feminino' }),

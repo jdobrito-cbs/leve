@@ -1,5 +1,6 @@
 import { ageFromIsoDate } from '@/core/datetime';
 import type { MetricType } from '@/core/metrics';
+import { componentBandKg } from '@/features/body/bodyBands';
 import type { AppDb } from '@/db/client';
 import { latestMetric, metricSeries } from '@/db/metricsRepo';
 import { getProfile } from '@/db/profileRepo';
@@ -83,35 +84,7 @@ export interface BodyReport {
   suggestions: string[];
 }
 
-/** Faixas padrão como fração do peso corporal, por sexo. */
-const PCT_RANGES: Record<'masculino' | 'feminino', Record<string, [number, number]>> = {
-  masculino: {
-    water: [0.5, 0.65],
-    protein: [0.14, 0.18],
-    fat: [0.1, 0.2],
-    bone: [0.034, 0.042],
-    muscle: [0.466, 0.58],
-    skeletal: [0.293, 0.359],
-  },
-  feminino: {
-    water: [0.45, 0.6],
-    protein: [0.12, 0.16],
-    fat: [0.18, 0.28],
-    bone: [0.028, 0.036],
-    muscle: [0.36, 0.495],
-    skeletal: [0.243, 0.309],
-  },
-};
-
 const FAT_PCT_RANGE = { masculino: [10, 20], feminino: [18, 28] } as const;
-
-function ranged(value: number | null, weightKg: number, pct: [number, number]): CompositionRow {
-  return {
-    value,
-    min: Math.round(weightKg * pct[0] * 10) / 10,
-    max: Math.round(weightKg * pct[1] * 10) / 10,
-  };
-}
 
 /** Linha com valor registrado → RangedValue; sem registro → null (para a pontuação). */
 function withValue(row: CompositionRow): RangedValue | null {
@@ -203,7 +176,6 @@ export async function buildBodyReport(db: AppDb): Promise<BodyReport | null> {
   if (!profile?.heightCm || weight === null) return null;
   const sex: 'masculino' | 'feminino' = profile.sex === 'feminino' ? 'feminino' : 'masculino';
   const age = profile.birthDate ? ageFromIsoDate(profile.birthDate) : null;
-  const pct = PCT_RANGES[sex];
 
   const [fatPctV, waterKg, skeletalKg, muscleKg, leanKg, boneKg, visceral, subcut, proteinPct, metAge] =
     await Promise.all([
@@ -293,13 +265,18 @@ export async function buildBodyReport(db: AppDb): Promise<BodyReport | null> {
     max: Math.round(25 * heightM * heightM * 10) / 10,
   };
 
+  // Faixas no modelo da balança: derivadas do peso-ideal (IMC 18,5–25).
+  const row = (
+    value: number | null,
+    component: 'fat' | 'water' | 'protein' | 'bone' | 'muscle' | 'skeletal',
+  ): CompositionRow => ({ value, ...componentBandKg(sex, profile.heightCm!, component) });
   const composition = {
-    waterKg: ranged(waterV, weight, pct.water),
-    proteinKg: ranged(proteinV, weight, pct.protein),
-    fatKg: ranged(fatKg, weight, pct.fat),
-    boneKg: ranged(boneV, weight, pct.bone),
-    muscleKg: ranged(muscleV ?? leanKg, weight, pct.muscle),
-    skeletalKg: ranged(skeletalV, weight, pct.skeletal),
+    waterKg: row(waterV, 'water'),
+    proteinKg: row(proteinV, 'protein'),
+    fatKg: row(fatKg, 'fat'),
+    boneKg: row(boneV, 'bone'),
+    muscleKg: row(muscleV ?? leanKg, 'muscle'),
+    skeletalKg: row(skeletalV, 'skeletal'),
   };
 
   const weightAdjustKg = Math.min(0, Math.round((weightRange.max - weight) * 10) / 10);
