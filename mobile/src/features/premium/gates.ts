@@ -8,6 +8,7 @@ export const PREMIUM_LOCKS = {
   meds: true, // controle de medicamentos (Meus remédios)
   gym: true, // academia
   cycle: true, // controle de ciclo menstrual
+  bodyReport: true, // relatório corporal em PDF
   insights: false,
   savedDishes: false,
 } as const;

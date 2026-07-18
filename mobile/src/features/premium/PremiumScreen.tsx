@@ -1,5 +1,14 @@
 import { router } from 'expo-router';
-import { Camera, Droplet, Dumbbell, HeartPulse, KeyRound, Pill, Sparkles } from 'lucide-react-native';
+import {
+  Camera,
+  Droplet,
+  Dumbbell,
+  FileText,
+  HeartPulse,
+  KeyRound,
+  Pill,
+  Sparkles,
+} from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { AppText, Button, Card, IconChip, Input, Screen } from '@/design/components';
@@ -144,6 +153,12 @@ export function PremiumScreen() {
             <Droplet size={17} color={colors.primary} />
           </IconChip>
           <AppText style={{ flex: 1 }}>{strings.premium.benefits.cycle}</AppText>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <IconChip size={34}>
+            <FileText size={17} color={colors.primary} />
+          </IconChip>
+          <AppText style={{ flex: 1 }}>{strings.premium.benefits.report}</AppText>
         </View>
       </Card>
 

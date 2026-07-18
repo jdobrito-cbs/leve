@@ -431,6 +431,7 @@ export const strings = {
       meds: 'Controle de medicamentos com lembretes e adesão',
       gym: 'Academia: exercícios com cálculo de calorias queimadas',
       cycle: 'Controle de ciclo menstrual com previsão',
+      report: 'Relatório corporal em PDF com pontuação e faixas de referência',
     },
     medsLockedBody: 'O controle de medicamentos faz parte do Leve Premium.',
     gymLockedBody: 'O registro de academia faz parte do Leve Premium.',

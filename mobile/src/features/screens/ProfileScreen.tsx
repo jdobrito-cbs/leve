@@ -94,6 +94,7 @@ function HealthSection() {
 
 export function ProfileScreen() {
   const { colors } = useTheme();
+  const { premium } = usePremium();
   const { loading, form, setField, save, saved, permissionError, autoGoalMl } = useProfileForm();
   const birthIso = brDateToIso(form.birthDateStr);
   const age = birthIso ? ageFromIsoDate(birthIso) : null;
@@ -102,6 +103,10 @@ export function ProfileScreen() {
 
   async function generateReport() {
     setReportMsg(null);
+    if (isLocked('bodyReport', premium)) {
+      router.push('/assinatura' as never);
+      return;
+    }
     if (Platform.OS === 'web') {
       setReportMsg(strings.report.webUnavailable);
       return;
@@ -300,7 +305,11 @@ export function ProfileScreen() {
           onPress={() => router.push('/assinatura' as never)}
         />
         <Button
-          label={strings.report.button}
+          label={
+            isLocked('bodyReport', premium)
+              ? `${strings.report.button} · ${strings.premium.lockedTag}`
+              : strings.report.button
+          }
           variant="secondary"
           onPress={generateReport}
           disabled={reportBusy}
