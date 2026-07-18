@@ -225,9 +225,12 @@ export default function Onboarding() {
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: colors.background }}
-      contentContainerStyle={{ paddingBottom: spacing.xl }}
+      contentContainerStyle={{ paddingBottom: spacing.xl * 2 }}
       keyboardDismissMode="on-drag"
       keyboardShouldPersistTaps="handled"
+      // iOS: rola o conteúdo para cima quando o teclado abre — sem isto,
+      // altura, meta de peso e o botão Concluir somem atrás do teclado.
+      automaticallyAdjustKeyboardInsets
     >
       <HeroHeader>
         <AppText variant="caption" style={{ color: colors.onHero, opacity: 0.85 }}>

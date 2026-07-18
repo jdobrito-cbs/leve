@@ -17,6 +17,9 @@ export function Screen({ children }: PropsWithChildren) {
         contentContainerStyle={{ padding: spacing.md, gap: spacing.md }}
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
+        // iOS: rola o conteúdo para cima quando o teclado abre — sem isto,
+        // campos e botões no pé da tela ficam escondidos atrás do teclado.
+        automaticallyAdjustKeyboardInsets
       >
         {children}
       </ScrollView>
