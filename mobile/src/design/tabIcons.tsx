@@ -143,29 +143,27 @@ export function UserTabIcon({ color, focused, signal, size = 22 }: TabIconProps)
   );
 }
 
-/** Ciclo: coração que pulsa como batimento a cada toque. */
+/** Ciclo: gota que balança e "cai" suavemente a cada toque. */
 export function CycleTabIcon({ color, focused, signal, size = 22 }: TabIconProps) {
-  const beat = useSharedValue(1);
+  const drop = useSharedValue(0);
 
   useEffect(() => {
     if (!focused) return;
-    beat.value = withSequence(
-      withTiming(1.25, { duration: 120, easing: Easing.out(Easing.quad) }),
-      withTiming(0.95, { duration: 90 }),
-      withTiming(1.18, { duration: 110 }),
-      withSpring(1, { damping: 6, stiffness: 190 }),
+    drop.value = withSequence(
+      withTiming(-3, { duration: 110, easing: Easing.out(Easing.quad) }),
+      withSpring(0, { damping: 5, stiffness: 200 }),
     );
-  }, [focused, signal, beat]);
+  }, [focused, signal, drop]);
 
-  const heart = useAnimatedStyle(() => ({
-    transform: [{ scale: beat.value }],
+  const droplet = useAnimatedStyle(() => ({
+    transform: [{ translateY: drop.value }],
   }));
 
   return (
     <View style={{ width: size, height: size }}>
-      <Animated.View style={[{ position: 'absolute', inset: 0 }, heart]}>
+      <Animated.View style={[{ position: 'absolute', inset: 0 }, droplet]}>
         <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} {...stroke}>
-          <Path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+          <Path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" />
         </Svg>
       </Animated.View>
     </View>
