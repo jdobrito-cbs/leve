@@ -2,7 +2,7 @@
 import { router } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
-import { Platform, Switch, View } from 'react-native';
+import { Platform, View } from 'react-native';
 
 import { ageFromIsoDate, brDateToIso } from '@/core/datetime';
 import { db } from '@/db/client';
@@ -12,6 +12,7 @@ import { exportAllData, wipeAllData } from '@/features/backup/exportData';
 import { buildBodyReport } from '@/features/report/bodyReport';
 import { reportHtml } from '@/features/report/reportHtml';
 import {
+  AppSwitch,
   AppText,
   Button,
   Card,
@@ -212,10 +213,9 @@ export function ProfileScreen() {
               </AppText>
             ) : null}
           </View>
-          <Switch
+          <AppSwitch
             value={form.waterGoalAuto}
             onValueChange={(v) => setField('waterGoalAuto', v)}
-            trackColor={{ true: colors.primary, false: colors.border }}
           />
         </View>
         <AppText variant="caption" muted>
@@ -255,20 +255,18 @@ export function ProfileScreen() {
               {strings.profile.doseReminderHint}
             </AppText>
           </View>
-          <Switch
+          <AppSwitch
             value={form.doseEnabled}
             onValueChange={(v) => setField('doseEnabled', v)}
-            trackColor={{ true: colors.primary, false: colors.border }}
           />
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
           <View style={{ flex: 1 }}>
             <AppText>{strings.profile.waterReminder}</AppText>
           </View>
-          <Switch
+          <AppSwitch
             value={form.waterEnabled}
             onValueChange={(v) => setField('waterEnabled', v)}
-            trackColor={{ true: colors.primary, false: colors.border }}
           />
         </View>
         {form.waterEnabled ? (
@@ -282,10 +280,9 @@ export function ProfileScreen() {
           <View style={{ flex: 1 }}>
             <AppText>{strings.profile.insightsReminder}</AppText>
           </View>
-          <Switch
+          <AppSwitch
             value={form.insightsEnabled}
             onValueChange={(v) => setField('insightsEnabled', v)}
-            trackColor={{ true: colors.primary, false: colors.border }}
           />
         </View>
         {permissionError ? (
@@ -301,14 +298,13 @@ export function ProfileScreen() {
           <View style={{ flex: 1 }}>
             <AppText>{strings.profile.darkTheme}</AppText>
           </View>
-          <Switch
+          <AppSwitch
             value={mode === 'dark'}
             onValueChange={async (v) => {
               const m = v ? 'dark' : 'light';
               setThemeSignal(m);
               await setSetting(db, 'themeMode', m).catch(() => undefined);
             }}
-            trackColor={{ true: colors.primary, false: colors.border }}
           />
         </View>
       </Card>

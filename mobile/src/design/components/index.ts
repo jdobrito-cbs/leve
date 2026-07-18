@@ -8,6 +8,7 @@ export { IconChip } from './IconChip';
 export { ProgressRing } from './ProgressRing';
 export { WaterRing } from './WaterRing';
 export { FitChart } from './FitChart';
+export { AppSwitch } from './AppSwitch';
 export { DateField } from './DateField';
 export { PickerSheet } from './PickerSheet';
 export { RulerField } from './RulerField';
