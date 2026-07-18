@@ -51,9 +51,13 @@ test('importMetrics insere com dedup e latestMetrics devolve o último de cada',
   expect(latest.get('sleep_hours')?.origin).not.toBe('manual');
 });
 
-test('autoSyncIfDue respeita conexão e throttle de 1h', async () => {
+test('autoSyncIfDue exige premium e respeita conexão e throttle de 1h', async () => {
   const db = makeDb() as never;
   const provider = fakeProvider();
+  await setSetting(db, 'health', { connected: true });
+  expect(await autoSyncIfDue(db, provider)).toBe(false); // sem premium, não busca
+  await setSetting(db, 'entitlement', { plan: 'partner' });
+  await setSetting(db, 'health', { connected: false });
   expect(await autoSyncIfDue(db, provider)).toBe(false); // saúde não conectada
   await setSetting(db, 'health', { connected: true });
   expect(await autoSyncIfDue(db, provider)).toBe(true);

@@ -5,6 +5,8 @@ import type { AppDb } from '@/db/client';
 import { addMetric, importedMetricKeys } from '@/db/metricsRepo';
 import { getSetting, setSetting } from '@/db/settingsRepo';
 import { addWeight, weightsSince } from '@/db/weightRepo';
+import { getEntitlement, isPremium } from '@/features/premium/entitlement';
+import { isLocked } from '@/features/premium/gates';
 import { getHealthProvider, type HealthProvider } from './HealthProvider';
 
 /**
@@ -63,10 +65,12 @@ export async function importMetrics(
 const SYNC_THROTTLE_MS = 60 * 60 * 1000; // 1 h
 
 /**
- * Sync automático (balança → app de saúde → Leve sem toque): roda ao focar o
- * Hoje quando a saúde está conectada, no máximo 1x por hora.
+ * Sync automático (balança/relógio → app de saúde → Leve sem toque): roda na
+ * abertura do app e ao focar o Hoje, no máximo 1x por hora.
+ * Exclusivo do Leve Premium — sem assinatura ativa, nada é buscado.
  */
 export async function autoSyncIfDue(db: AppDb, provider?: HealthProvider): Promise<boolean> {
+  if (isLocked('healthSync', isPremium(await getEntitlement(db)))) return false;
   const health = await getSetting<{ connected?: boolean }>(db, 'health');
   if (!health?.connected) return false;
   const last = await getSetting<string>(db, 'lastHealthSyncAt');

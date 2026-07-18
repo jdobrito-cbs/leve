@@ -11,6 +11,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { AppText, Button, Screen } from '@/design/components';
 import { db, initDb, isDbLockedError } from '@/db/client';
 import { seedFoodItemsIfEmpty } from '@/db/seed/tacoSeed';
+import { autoSyncIfDue } from '@/services/health/healthSync';
 import { strings } from '@/i18n/pt-BR';
 
 // No Expo Go alguns módulos nativos não existem — não pode derrubar o app.
@@ -75,6 +76,8 @@ export default function RootLayout() {
       .then(() => {
         console.log('[leve] inicialização concluída');
         setReady(true);
+        // Busca automática da saúde na abertura (Premium; throttle de 1 h).
+        autoSyncIfDue(db).catch(() => undefined);
       })
       .catch((e) => setError(e instanceof Error ? e : new Error(String(e))));
   }, []);
