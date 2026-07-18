@@ -53,6 +53,7 @@ export function DoseScreen() {
   const [site, setSite] = useState<InjectionSite | null>(null);
   const [list, setList] = useState<DoseLog[]>([]);
   const [saved, setSaved] = useState(false);
+  const [rulerOpen, setRulerOpen] = useState(false);
   const [dateStr, setDateStr] = useState(formatDateBR(new Date()));
   const [timeStr, setTimeStr] = useState(formatTimeHM(new Date()));
 
@@ -121,29 +122,33 @@ export function DoseScreen() {
             label={strings.dose.customMedicationLabel}
             value={customMed}
             onChangeText={setCustomMed}
+            onFocus={() => setRulerOpen(false)}
           />
         ) : null}
         <NumberField
           label={strings.dose.doseLabel}
           value={doseStr}
           onChangeText={setDoseStr}
+          onFocus={() => setRulerOpen(true)}
           suffix="mg"
           placeholder="0,0"
         />
-        <ValueRuler
-          value={doseMg ?? 1}
-          min={0}
-          max={30}
-          step={0.1}
-          majorEvery={10}
-          labelEvery={10}
-          onChange={(v) => {
-            setSaved(false);
-            setDoseStr(
-              v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
-            );
-          }}
-        />
+        {rulerOpen ? (
+          <ValueRuler
+            value={doseMg ?? 1}
+            min={0}
+            max={30}
+            step={0.1}
+            majorEvery={10}
+            labelEvery={10}
+            onChange={(v) => {
+              setSaved(false);
+              setDoseStr(
+                v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+              );
+            }}
+          />
+        ) : null}
         <AppText variant="caption" muted>
           {strings.dose.routeLabel}
         </AppText>
@@ -166,6 +171,7 @@ export function DoseScreen() {
           timeValue={timeStr}
           onChangeDate={setDateStr}
           onChangeTime={setTimeStr}
+          onFieldFocus={() => setRulerOpen(false)}
         />
       </Card>
       <Button label={strings.dose.save} onPress={save} disabled={!valid} />

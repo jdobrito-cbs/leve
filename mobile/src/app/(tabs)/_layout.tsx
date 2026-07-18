@@ -8,7 +8,7 @@ import Animated, {
   withSequence,
   withSpring,
 } from 'react-native-reanimated';
-import { ChartTabIcon, SproutTabIcon, UserTabIcon } from '@/design/tabIcons';
+import { ChartTabIcon, MuscleTabIcon, SproutTabIcon, UserTabIcon } from '@/design/tabIcons';
 import { fonts } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
@@ -80,7 +80,7 @@ function Fab({ focused, signal }: { focused: boolean; signal: number }) {
   );
 }
 
-type TabName = 'index' | 'registrar' | 'progresso' | 'perfil';
+type TabName = 'index' | 'registrar' | 'academia' | 'progresso' | 'perfil';
 
 export default function TabsLayout() {
   const { loading, accepted } = useOnboarding();
@@ -88,6 +88,7 @@ export default function TabsLayout() {
   const [signals, setSignals] = useState<Record<TabName, number>>({
     index: 0,
     registrar: 0,
+    academia: 0,
     progresso: 0,
     perfil: 0,
   });
@@ -140,6 +141,18 @@ export default function TabsLayout() {
         options={{
           title: strings.tabs.log,
           tabBarIcon: ({ focused }) => <Fab focused={focused} signal={signals.registrar} />,
+        }}
+      />
+      <Tabs.Screen
+        name="academia"
+        listeners={bump('academia')}
+        options={{
+          title: strings.tabs.gym,
+          tabBarIcon: ({ color, focused }) => (
+            <BouncyIcon focused={focused} signal={signals.academia}>
+              <MuscleTabIcon color={color} focused={focused} signal={signals.academia} />
+            </BouncyIcon>
+          ),
         }}
       />
       <Tabs.Screen

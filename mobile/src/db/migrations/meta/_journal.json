@@ -43,6 +43,13 @@
       "when": 1784333911282,
       "tag": "0005_gorgeous_roland_deschain",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1784335347004,
+      "tag": "0006_late_tusk",
+      "breakpoints": true
     }
   ]
 }

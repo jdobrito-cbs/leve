@@ -14,10 +14,12 @@ interface Props {
   label: string;
   value: string; // 'DD/MM/AAAA'
   onChange: (v: string) => void;
+  /** Chamado quando o campo ganha foco (fecha réguas abertas na tela). */
+  onFieldFocus?: () => void;
 }
 
 /** Campo de data com máscara DD/MM/AAAA e rolagem de data do sistema. */
-export function DateField({ label, value, onChange }: Props) {
+export function DateField({ label, value, onChange, onFieldFocus }: Props) {
   const { colors } = useTheme();
   const [open, setOpen] = useState(false);
 
@@ -39,6 +41,7 @@ export function DateField({ label, value, onChange }: Props) {
             label={label}
             value={value}
             onChangeText={(v) => onChange(maskDateBR(v))}
+            onFocus={onFieldFocus}
             placeholder="DD/MM/AAAA"
             keyboardType="number-pad"
             maxLength={10}

@@ -7,6 +7,7 @@ import m0002 from './0002_lumpy_manta.sql';
 import m0003 from './0003_pretty_taskmaster.sql';
 import m0004 from './0004_bright_tusk.sql';
 import m0005 from './0005_gorgeous_roland_deschain.sql';
+import m0006 from './0006_late_tusk.sql';
 
   export default {
     journal,
@@ -16,7 +17,8 @@ m0001,
 m0002,
 m0003,
 m0004,
-m0005
+m0005,
+m0006
     }
   }
   

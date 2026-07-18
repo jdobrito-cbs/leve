@@ -24,6 +24,7 @@ export function WeightScreen() {
   const [list, setList] = useState<WeightLog[]>([]);
   const [value, setValue] = useState('');
   const [saved, setSaved] = useState(false);
+  const [rulerOpen, setRulerOpen] = useState(false);
   const [dateStr, setDateStr] = useState(formatDateBR(new Date()));
   const [timeStr, setTimeStr] = useState(formatTimeHM(new Date()));
 
@@ -77,24 +78,30 @@ export function WeightScreen() {
             setSaved(false);
             setValue(v);
           }}
+          onFocus={() => setRulerOpen(true)}
           suffix="kg"
           placeholder="0,0"
         />
-        <ValueRuler
-          value={kg ?? last?.weightKg ?? 80}
-          min={30}
-          max={250}
-          step={0.1}
-          onChange={(v) => {
-            setSaved(false);
-            setValue(v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }));
-          }}
-        />
+        {rulerOpen ? (
+          <ValueRuler
+            value={kg ?? last?.weightKg ?? 80}
+            min={30}
+            max={250}
+            step={0.1}
+            onChange={(v) => {
+              setSaved(false);
+              setValue(
+                v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+              );
+            }}
+          />
+        ) : null}
         <DateTimeField
           dateValue={dateStr}
           timeValue={timeStr}
           onChangeDate={setDateStr}
           onChangeTime={setTimeStr}
+          onFieldFocus={() => setRulerOpen(false)}
         />
         {diff !== null ? (
           <AppText variant="caption" muted>

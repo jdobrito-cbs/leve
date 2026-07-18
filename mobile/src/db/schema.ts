@@ -120,6 +120,19 @@ export const medications = sqliteTable('medications', {
   active: integer('active').notNull().default(1),
 });
 
+// Exercícios de academia (força e cardio) com estimativa de calorias.
+export const gymLogs = sqliteTable('gym_logs', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  exercise: text('exercise').notNull(), // chave do catálogo
+  kind: text('kind').notNull(), // 'forca' | 'cardio'
+  weightKg: real('weight_kg'),
+  sets: integer('sets'),
+  reps: integer('reps'),
+  minutes: real('minutes'),
+  kcal: real('kcal').notNull(),
+  loggedAt: text('logged_at').notNull(),
+});
+
 export const medIntakes = sqliteTable('med_intakes', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   medicationId: integer('medication_id').notNull(),

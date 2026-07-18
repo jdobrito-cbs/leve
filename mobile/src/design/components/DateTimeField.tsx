@@ -14,6 +14,8 @@ interface Props {
   timeValue: string;
   onChangeDate: (v: string) => void;
   onChangeTime: (v: string) => void;
+  /** Chamado quando qualquer campo interno ganha foco (fecha réguas abertas). */
+  onFieldFocus?: () => void;
 }
 
 /** Máscara progressiva DD/MM/AAAA a partir só dos dígitos digitados. */
@@ -32,7 +34,13 @@ export function maskTimeHM(text: string): string {
 }
 
 /** Data e hora do registro (pré-preenchidas com agora; edite para lançar registros antigos). */
-export function DateTimeField({ dateValue, timeValue, onChangeDate, onChangeTime }: Props) {
+export function DateTimeField({
+  dateValue,
+  timeValue,
+  onChangeDate,
+  onChangeTime,
+  onFieldFocus,
+}: Props) {
   const { colors } = useTheme();
   const [picker, setPicker] = useState<'date' | 'time' | null>(null);
 
@@ -83,6 +91,7 @@ export function DateTimeField({ dateValue, timeValue, onChangeDate, onChangeTime
               label={strings.common.dateLabel}
               value={dateValue}
               onChangeText={(v) => onChangeDate(maskDateBR(v))}
+              onFocus={onFieldFocus}
               placeholder="DD/MM/AAAA"
               keyboardType="number-pad"
               maxLength={10}
@@ -98,6 +107,7 @@ export function DateTimeField({ dateValue, timeValue, onChangeDate, onChangeTime
               label={strings.common.timeLabel}
               value={timeValue}
               onChangeText={(v) => onChangeTime(maskTimeHM(v))}
+              onFocus={onFieldFocus}
               placeholder="HH:MM"
               keyboardType="number-pad"
               maxLength={5}

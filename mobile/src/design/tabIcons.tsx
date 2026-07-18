@@ -142,3 +142,46 @@ export function UserTabIcon({ color, focused, signal, size = 22 }: TabIconProps)
     </View>
   );
 }
+
+/** Academia: boneco em pose de duplo bíceps — os braços "bombam" a cada toque. */
+export function MuscleTabIcon({ color, focused, signal, size = 22 }: TabIconProps) {
+  const pump = useSharedValue(1);
+
+  useEffect(() => {
+    if (!focused) return;
+    pump.value = withSequence(
+      withTiming(1.22, { duration: 130, easing: Easing.out(Easing.quad) }),
+      withSpring(1, { damping: 5, stiffness: 180 }),
+    );
+  }, [focused, signal, pump]);
+
+  const arms = useAnimatedStyle(() => ({
+    transform: [{ scale: pump.value }],
+  }));
+
+  return (
+    <View style={{ width: size, height: size }}>
+      {/* Cabeça, tronco e pernas (firmes) */}
+      <Svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={color}
+        style={{ position: 'absolute' }}
+        {...stroke}
+      >
+        <Circle cx="12" cy="4.6" r="2.1" />
+        <Path d="M9.3 9.2h5.4l-1 6.6h-3.4z" />
+        <Path d="M10.3 15.8 9.5 21M13.7 15.8l.8 5.2" />
+      </Svg>
+      {/* Braços flexionados (camada que bomba) */}
+      <Animated.View style={[{ position: 'absolute', inset: 0, transformOrigin: '50% 45%' }, arms]}>
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} {...stroke}>
+          <Path d="M9.3 9.8 6.4 11.2 6.8 7.9" />
+          <Path d="M14.7 9.8 17.6 11.2 17.2 7.9" />
+        </Svg>
+      </Animated.View>
+    </View>
+  );
+}
