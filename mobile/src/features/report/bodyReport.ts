@@ -3,7 +3,7 @@ import type { MetricType } from '@/core/metrics';
 import type { AppDb } from '@/db/client';
 import { latestMetric, metricSeries } from '@/db/metricsRepo';
 import { getProfile } from '@/db/profileRepo';
-import { listWeights } from '@/db/weightRepo';
+import { listWeights, weightsSince } from '@/db/weightRepo';
 
 /**
  * Relatório de composição corporal montado com os dados registrados no app
@@ -13,6 +13,13 @@ import { listWeights } from '@/db/weightRepo';
 
 export interface RangedValue {
   value: number;
+  min: number;
+  max: number;
+}
+
+/** Linha da composição: a faixa sempre existe; o valor pode não ter registro. */
+export interface CompositionRow {
+  value: number | null;
   min: number;
   max: number;
 }
@@ -30,12 +37,12 @@ export interface BodyReport {
   weightKg: number;
   generatedAt: Date;
   composition: {
-    waterKg: RangedValue | null;
-    proteinKg: RangedValue | null;
-    fatKg: RangedValue | null;
-    boneKg: RangedValue | null;
-    muscleKg: RangedValue | null;
-    skeletalKg: RangedValue | null;
+    waterKg: CompositionRow;
+    proteinKg: CompositionRow;
+    fatKg: CompositionRow;
+    boneKg: CompositionRow;
+    muscleKg: CompositionRow;
+    skeletalKg: CompositionRow;
   };
   bmi: RangedValue;
   fatPct: RangedValue | null;
@@ -83,13 +90,35 @@ const PCT_RANGES: Record<'masculino' | 'feminino', Record<string, [number, numbe
 
 const FAT_PCT_RANGE = { masculino: [10, 20], feminino: [18, 28] } as const;
 
-function ranged(value: number | null, weightKg: number, pct: [number, number]): RangedValue | null {
-  if (value === null) return null;
+function ranged(value: number | null, weightKg: number, pct: [number, number]): CompositionRow {
   return {
     value,
     min: Math.round(weightKg * pct[0] * 10) / 10,
     max: Math.round(weightKg * pct[1] * 10) / 10,
   };
+}
+
+/** Linha com valor registrado → RangedValue; sem registro → null (para a pontuação). */
+function withValue(row: CompositionRow): RangedValue | null {
+  return row.value === null ? null : { value: row.value, min: row.min, max: row.max };
+}
+
+/** Média por dia — importações trazem várias amostras diárias e o gráfico vira rabisco. */
+function dailyAverages(rows: Array<{ loggedAt: string; value: number }>): SeriesPoint[] {
+  const byDay = new Map<string, { sum: number; n: number }>();
+  for (const r of rows) {
+    const day = r.loggedAt.slice(0, 10);
+    const agg = byDay.get(day) ?? { sum: 0, n: 0 };
+    agg.sum += r.value;
+    agg.n += 1;
+    byDay.set(day, agg);
+  }
+  return [...byDay.entries()]
+    .sort(([a], [b]) => (a < b ? -1 : 1))
+    .map(([day, { sum, n }]) => ({
+      dayLabel: `${day.slice(8, 10)}/${day.slice(5, 7)}`,
+      value: Math.round((sum / n) * 10) / 10,
+    }));
 }
 
 /** Taxa metabólica basal (Mifflin-St Jeor). */
@@ -152,11 +181,6 @@ async function last(db: AppDb, type: MetricType): Promise<number | null> {
   return (await latestMetric(db, type))?.value ?? null;
 }
 
-function dayLabel(iso: string): string {
-  const d = new Date(iso);
-  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
-}
-
 export async function buildBodyReport(db: AppDb): Promise<BodyReport | null> {
   const profile = await getProfile(db);
   const weights = await listWeights(db, 30);
@@ -182,9 +206,10 @@ export async function buildBodyReport(db: AppDb): Promise<BodyReport | null> {
 
   const since30 = new Date();
   since30.setDate(since30.getDate() - 30);
-  const [muscleSeries, fatSeries] = await Promise.all([
+  const [muscleSeries, fatSeries, weights30] = await Promise.all([
     metricSeries(db, 'muscle_mass_kg', since30),
     metricSeries(db, 'body_fat_pct', since30),
+    weightsSince(db, since30),
   ]);
 
   const fatKg = fatPctV !== null ? Math.round(weight * fatPctV) / 100 : null;
@@ -211,19 +236,19 @@ export async function buildBodyReport(db: AppDb): Promise<BodyReport | null> {
 
   const weightAdjustKg = Math.min(0, Math.round((weightRange.max - weight) * 10) / 10);
   const fatAdjustKg =
-    composition.fatKg !== null
+    composition.fatKg.value !== null
       ? Math.min(0, Math.round((composition.fatKg.max - composition.fatKg.value) * 10) / 10)
       : null;
   const muscleAdjustKg =
-    composition.muscleKg !== null
+    composition.muscleKg.value !== null
       ? Math.max(0, Math.round((composition.muscleKg.min - composition.muscleKg.value) * 10) / 10)
       : null;
 
   const scoreInput: ScoreInput = {
     fatPct,
     bmi,
-    water: composition.waterKg,
-    muscle: composition.muscleKg,
+    water: withValue(composition.waterKg),
+    muscle: withValue(composition.muscleKg),
     visceral: visceral,
   };
 
@@ -252,11 +277,11 @@ export async function buildBodyReport(db: AppDb): Promise<BodyReport | null> {
       bodyAge: metAge ?? null,
     },
     history: {
-      weight: [...weights]
-        .reverse()
-        .map((w) => ({ dayLabel: dayLabel(w.loggedAt), value: w.weightKg })),
-      muscle: muscleSeries.map((m) => ({ dayLabel: dayLabel(m.loggedAt), value: m.value })),
-      fatPct: fatSeries.map((m) => ({ dayLabel: dayLabel(m.loggedAt), value: m.value })),
+      weight: dailyAverages(
+        weights30.map((w) => ({ loggedAt: w.loggedAt, value: w.weightKg })),
+      ),
+      muscle: dailyAverages(muscleSeries),
+      fatPct: dailyAverages(fatSeries),
     },
     score: scoreOf(scoreInput),
     suggestions: suggestionsOf(scoreInput),
