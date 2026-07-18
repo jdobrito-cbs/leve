@@ -59,6 +59,8 @@ export interface BodyReport {
     smi: number | null;
     bodyAge: number | null;
   };
+  /** true quando parte da composição foi derivada de peso + gordura corporal. */
+  compositionEstimated: boolean;
   history: {
     weight: SeriesPoint[];
     muscle: SeriesPoint[];
@@ -212,8 +214,43 @@ export async function buildBodyReport(db: AppDb): Promise<BodyReport | null> {
     weightsSince(db, since30),
   ]);
 
+  const round1 = (n: number) => Math.round(n * 10) / 10;
   const fatKg = fatPctV !== null ? Math.round(weight * fatPctV) / 100 : null;
-  const proteinKg = proteinPct !== null ? Math.round(weight * proteinPct) / 100 : null;
+
+  // O Apple Saúde não tem água/proteína/óssea/esquelético — quando a balança
+  // não os informa, derivamos da decomposição padrão de bioimpedância sobre a
+  // massa livre de gordura (água 73,2%, óssea 6,8%, proteína = restante,
+  // músculo esquelético 57,5%), a mesma usada pelos relatórios de balança.
+  let compositionEstimated = false;
+  const ffm = fatPctV !== null ? weight * (1 - fatPctV / 100) : leanKg;
+  let waterV = waterKg;
+  let boneV = boneKg;
+  let proteinV = proteinPct !== null ? Math.round(weight * proteinPct) / 100 : null;
+  let muscleV = muscleKg;
+  let skeletalV = skeletalKg;
+  if (ffm !== null) {
+    if (boneV === null) {
+      boneV = round1(ffm * 0.068);
+      compositionEstimated = true;
+    }
+    if (waterV === null) {
+      waterV = round1(ffm * 0.732);
+      compositionEstimated = true;
+    }
+    if (proteinV === null) {
+      proteinV = round1(Math.max(0, ffm - waterV - boneV));
+      compositionEstimated = true;
+    }
+    if (muscleV === null) {
+      muscleV = round1(ffm - boneV);
+      compositionEstimated = true;
+    }
+    if (skeletalV === null) {
+      skeletalV = round1(ffm * 0.575);
+      compositionEstimated = true;
+    }
+  }
+
   const heightM = profile.heightCm / 100;
   const bmi: RangedValue = { value: bmiOf(weight, profile.heightCm), min: 18.5, max: 25 };
   const fatRange = FAT_PCT_RANGE[sex];
@@ -226,12 +263,12 @@ export async function buildBodyReport(db: AppDb): Promise<BodyReport | null> {
   };
 
   const composition = {
-    waterKg: ranged(waterKg, weight, pct.water),
-    proteinKg: ranged(proteinKg, weight, pct.protein),
+    waterKg: ranged(waterV, weight, pct.water),
+    proteinKg: ranged(proteinV, weight, pct.protein),
     fatKg: ranged(fatKg, weight, pct.fat),
-    boneKg: ranged(boneKg, weight, pct.bone),
-    muscleKg: ranged(muscleKg ?? leanKg, weight, pct.muscle),
-    skeletalKg: ranged(skeletalKg, weight, pct.skeletal),
+    boneKg: ranged(boneV, weight, pct.bone),
+    muscleKg: ranged(muscleV ?? leanKg, weight, pct.muscle),
+    skeletalKg: ranged(skeletalV, weight, pct.skeletal),
   };
 
   const weightAdjustKg = Math.min(0, Math.round((weightRange.max - weight) * 10) / 10);
@@ -273,9 +310,10 @@ export async function buildBodyReport(db: AppDb): Promise<BodyReport | null> {
         fatPctV !== null ? Math.round(weight * (100 - fatPctV)) / 100 : (leanKg ?? null),
       subcutaneousPct: subcut,
       smi:
-        skeletalKg !== null ? Math.round((skeletalKg / (heightM * heightM)) * 10) / 10 : null,
+        skeletalV !== null ? Math.round((skeletalV / (heightM * heightM)) * 10) / 10 : null,
       bodyAge: metAge ?? null,
     },
+    compositionEstimated,
     history: {
       weight: dailyAverages(
         weights30.map((w) => ({ loggedAt: w.loggedAt, value: w.weightKg })),

@@ -4,6 +4,7 @@ import type { BodyReport, CompositionRow, RangedValue, SeriesPoint } from './bod
  *  padrão dos relatórios de bioimpedância (Fitdays). */
 
 const BLUE = '#2563EB';
+const BAR_BLUE = '#1D4ED8'; // azul escuro das barras da análise geral
 const INK = '#0F172A';
 const MUTED = '#64748B';
 const LINE = '#E2E8F0';
@@ -156,7 +157,9 @@ export function reportHtml(r: BodyReport): string {
 
   return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"/>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, Roboto, 'Segoe UI', sans-serif; }
+    /* Sem isto o WebKit apaga fundos coloridos ao imprimir — as barras somem. */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, Roboto, 'Segoe UI', sans-serif;
+      -webkit-print-color-adjust: exact !important; print-color-adjust: exact; }
     body { color: ${INK}; padding: 26px 30px; font-size: 12px; }
     h1 { font-size: 21px; margin-bottom: 4px; } h1 b { color: ${BLUE}; }
     .meta { color: ${MUTED}; display: flex; gap: 16px; padding: 8px 0 12px; border-bottom: 2px solid ${INK}; }
@@ -180,7 +183,7 @@ export function reportHtml(r: BodyReport): string {
     .btrack { width: auto; }
     .btrackbg { position: relative; background: ${GRID}; border-radius: 5px; }
     .btrackbg > i { position: absolute; top: 2px; bottom: 2px; border-left: 1px dashed ${MUTED}; }
-    .bfill { position: relative; z-index: 1; background: ${BLUE}; border-radius: 5px; color: #fff;
+    .bfill { position: relative; z-index: 1; background: ${BAR_BLUE}; border-radius: 5px; color: #fff;
       font-size: 10px; text-align: right; padding: 3px 6px; white-space: nowrap; }
     .bextra { width: 82px; text-align: right; color: ${INK}; font-weight: 600; font-size: 11px; }
     tr.bhead .bextra { color: ${MUTED}; font-weight: 400; font-size: 10px; }
@@ -258,6 +261,6 @@ export function reportHtml(r: BodyReport): string {
     <div class="score">${r.score}<small> pontos</small></div>
     <div class="sug">${r.suggestions.join(' ')}</div>
   </div>
-  <div class="footer">Gerado pelo Leve a partir dos seus registros. Faixas de referência padrão de bioimpedância.</div>
+  <div class="footer">Gerado pelo Leve a partir dos seus registros. Faixas de referência padrão de bioimpedância.${r.compositionEstimated ? ' Água corporal, massa proteica, massa óssea, massa muscular e músculo esquelético estimados a partir do peso e da gordura corporal (decomposição padrão de bioimpedância) quando a balança não os informa.' : ''}</div>
   </body></html>`;
 }

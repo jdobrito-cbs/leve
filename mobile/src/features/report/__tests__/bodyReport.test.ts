@@ -59,6 +59,7 @@ test('documento traz nome, pontuação, seções e faixas', () => {
     },
     score: 66,
     suggestions: ['Sugestão de teste.'],
+    compositionEstimated: false,
   };
   const html = reportHtml(r);
   expect(html).toContain('Jorge');
