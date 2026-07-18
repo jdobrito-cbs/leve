@@ -17,6 +17,8 @@ npm run dev
 
 Produção com Docker: `docker compose up -d --build`
 
+Painel e validação atendem apps iOS e Android igualmente (chamadas HTTP padrão). Em produção, publique o servidor com **HTTPS** — os dois sistemas bloqueiam `http://` simples em apps das lojas; no teste local o endereço `http://SEU-IP:3333` funciona nos builds de desenvolvimento.
+
 ## API
 
 - `POST /scan-food` → `{ "imageBase64": "...", "mimeType": "image/jpeg" }` → `{ "foods": [{ "name", "portionGrams", "confidence" }] }`. Se `APP_TOKEN` estiver definido, o app envia o header `x-leve-app`.
