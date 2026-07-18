@@ -140,8 +140,10 @@ export function ProfileScreen() {
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, { mimeType: 'application/pdf' });
       }
-    } catch {
-      setReportMsg(strings.report.failed);
+    } catch (e) {
+      // Build instalada sem o módulo nativo de impressão (anterior ao expo-print).
+      const missingModule = e instanceof Error && /ExpoPrint|native module/i.test(e.message);
+      setReportMsg(missingModule ? strings.report.needsUpdate : strings.report.failed);
     } finally {
       setReportBusy(false);
     }

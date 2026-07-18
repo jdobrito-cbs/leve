@@ -16,7 +16,7 @@ import {
   SyringeInjectIcon,
   UtensilsCrossIcon,
 } from '@/design/logIcons';
-import { HappyPanda, ThirstyPanda } from '@/design/pandas';
+import { HappyPanda, HydratedPanda, ThirstyPanda } from '@/design/pandas';
 import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { estimateRelativeCurve } from '@/features/pk/pharmacokinetics';
@@ -158,12 +158,18 @@ export function TodayScreen() {
             {strings.today.summaryLabel} {formatDateBR(new Date())}
           </AppText>
         </View>
-        {/* Panda com sede enquanto a meta de água não foi batida; feliz ao bater. */}
-        {summary.waterGoalMl > 0 && summary.waterMl < summary.waterGoalMl ? (
-          <ThirstyPanda width={128} />
-        ) : (
-          <HappyPanda />
-        )}
+        {/* Mascote da água: hidratado logo após um gole e com a meta batida;
+            com sede enquanto a meta não veio; feliz quando não há meta. */}
+        {(() => {
+          const goalMet =
+            summary.waterGoalMl > 0 && summary.waterMl >= summary.waterGoalMl;
+          const drankRecently =
+            summary.lastWaterAt != null &&
+            Date.now() - new Date(summary.lastWaterAt).getTime() < 30 * 60 * 1000;
+          if (goalMet || drankRecently) return <HydratedPanda width={128} />;
+          if (summary.waterGoalMl > 0) return <ThirstyPanda width={128} />;
+          return <HappyPanda />;
+        })()}
       </View>
       <View style={{ padding: spacing.md, gap: spacing.md }}>
         {/* 1 — Água (transborda quando passa de 100%) */}

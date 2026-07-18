@@ -28,16 +28,32 @@ function weekdayLabel(dayKey: string): string {
 
 const fmtMg = (n: number) => n.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
 
+/** Média por dia — importações de saúde trazem milhares de amostras e o
+ *  gráfico com todas elas trava a tela. */
+function dailyAverages(rows: MetricRow[]): { value: number }[] {
+  const byDay = new Map<string, { sum: number; n: number }>();
+  for (const r of rows) {
+    const day = r.loggedAt.slice(0, 10);
+    const agg = byDay.get(day) ?? { sum: 0, n: 0 };
+    agg.sum += r.value;
+    agg.n += 1;
+    byDay.set(day, agg);
+  }
+  return [...byDay.entries()]
+    .sort(([a], [b]) => (a < b ? -1 : 1))
+    .map(([, { sum, n }]) => ({ value: sum / n }));
+}
+
 function BodyHealthSection({ metrics }: { metrics: MetricRow[] }) {
   const { colors } = useTheme();
   const [selected, setSelected] = useState<MetricType | null>(null);
-  const [series, setSeries] = useState<MetricRow[]>([]);
+  const [series, setSeries] = useState<{ value: number }[]>([]);
 
   useEffect(() => {
     if (!selected) return;
     const since = new Date();
     since.setDate(since.getDate() - 90);
-    metricSeries(db, selected, since).then(setSeries);
+    metricSeries(db, selected, since).then((rows) => setSeries(dailyAverages(rows)));
   }, [selected]);
 
   if (metrics.length === 0) {
@@ -72,7 +88,7 @@ function BodyHealthSection({ metrics }: { metrics: MetricRow[] }) {
       />
       {selected && series.length > 1 ? (
         <FitChart>{(fitWidth) => (<LineChart width={fitWidth}
-          data={series.map((s) => ({ value: s.value }))}
+          data={series}
           color={colors.primary}
           thickness={3}
           height={100}
@@ -103,6 +119,12 @@ export function ProgressScreen() {
       const since = new Date();
       since.setDate(since.getDate() - Number(range));
       filtered = weights.filter((w) => new Date(w.loggedAt) >= since);
+    }
+    // Importações de saúde podem trazer milhares de pesos; o gráfico trava.
+    if (filtered.length > 120) {
+      const step = Math.ceil(filtered.length / 120);
+      const last = filtered.length - 1;
+      filtered = filtered.filter((_, i) => i % step === 0 || i === last);
     }
     return filtered.map((w) => ({ value: w.weightKg }));
   }, [weights, range]);

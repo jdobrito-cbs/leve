@@ -9,7 +9,10 @@ jest.mock('expo-router', () => ({
     }, []);
   },
 }));
-jest.mock('@/db/waterRepo', () => ({ waterTotalForDay: jest.fn().mockResolvedValue(500) }));
+jest.mock('@/db/waterRepo', () => ({
+  waterTotalForDay: jest.fn().mockResolvedValue(500),
+  latestWaterAt: jest.fn().mockResolvedValue(null),
+}));
 jest.mock('@/db/foodLogRepo', () => ({
   macrosForDay: jest
     .fn()

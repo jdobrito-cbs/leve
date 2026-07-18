@@ -9,7 +9,7 @@ import { latestMetric, metricSeries } from '@/db/metricsRepo';
 import { getProfile } from '@/db/profileRepo';
 import { getSetting } from '@/db/settingsRepo';
 import { listSymptoms, symptomsForDay } from '@/db/symptomRepo';
-import { waterTotalForDay } from '@/db/waterRepo';
+import { latestWaterAt, waterTotalForDay } from '@/db/waterRepo';
 import { firstWeight, listWeights } from '@/db/weightRepo';
 import { todayIntakes, type TodayIntake } from '@/features/meds/medsRepo';
 import { buildInsightInput } from '@/features/insights/data';
@@ -32,6 +32,8 @@ export interface TodaySummary {
   userName: string | null;
   waterMl: number;
   waterGoalMl: number;
+  /** Horário (ISO) do último registro de água de hoje, ou null. */
+  lastWaterAt: string | null;
   macros: DayMacros;
   kcal: number;
   calorieGoalKcal: number | null;
@@ -67,6 +69,7 @@ export function useTodaySummary(): TodaySummary {
   const [loading, setLoading] = useState(true);
   const [waterMl, setWaterMl] = useState(0);
   const [waterGoalMl, setWaterGoalMl] = useState(2000);
+  const [lastWaterAt, setLastWaterAt] = useState<string | null>(null);
   const [macros, setMacros] = useState<DayMacros>(EMPTY_MACROS);
   const [calorieGoalKcal, setCalorieGoalKcal] = useState<number | null>(null);
   const [lastWeightKg, setLastWeightKg] = useState<number | null>(null);
@@ -105,6 +108,11 @@ export function useTodaySummary(): TodaySummary {
       ]);
     setRecentSymptoms(await listSymptoms(db, 7));
     setWaterMl(water);
+    try {
+      setLastWaterAt(await latestWaterAt(db, now));
+    } catch {
+      setLastWaterAt(null);
+    }
     setMacros(dayMacros);
     setLastWeightKg(recentWeights[0]?.weightKg ?? null);
     // Gráfico: do primeiro peso registrado aos 5 últimos.
@@ -186,6 +194,7 @@ export function useTodaySummary(): TodaySummary {
     userName,
     waterMl,
     waterGoalMl,
+    lastWaterAt,
     macros,
     kcal: macros.kcal,
     calorieGoalKcal,

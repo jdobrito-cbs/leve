@@ -507,6 +507,8 @@ export const strings = {
       'Para gerar o relatório, registre seu peso e preencha a altura no Perfil (medidas da balança enriquecem o resultado).',
     webUnavailable: 'A geração de PDF está disponível no aplicativo do celular.',
     failed: 'Não foi possível gerar o relatório agora. Tente novamente.',
+    needsUpdate:
+      'A geração de PDF precisa de uma versão mais recente do aplicativo. Atualize o app e tente de novo.',
   },
   cloudAccount: {
     title: 'Guarde seus dados na sua nuvem',

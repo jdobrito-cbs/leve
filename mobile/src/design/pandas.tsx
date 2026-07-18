@@ -10,6 +10,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import Svg, { Ellipse, Path } from 'react-native-svg';
+import { HydratedPandaArt } from './hydratedPandaArt';
 import { ThirstyPandaArt } from './thirstyPandaArt';
 
 /**
@@ -144,6 +145,44 @@ export function ThirstyPanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
       {/* Gotas de suor caindo das têmporas */}
       <SweatDrop x={360 * s} y={110 * s} scale={s * 2.2} delayMs={0} />
       <SweatDrop x={210 * s} y={104 * s} scale={s * 2.2} delayMs={700} />
+    </View>
+  );
+}
+
+/** Panda hidratado — aparece ao registrar água e enquanto a meta está batida.
+ *  viewBox original: 604×413. Única animação: a água da garrafa balançando. */
+export function HydratedPanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
+  const height = (413 / 604) * width;
+  const s = width / 604;
+  const slosh = useSharedValue(0);
+
+  useEffect(() => {
+    slosh.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 900, easing: Easing.inOut(Easing.quad) }),
+        withTiming(-1, { duration: 900, easing: Easing.inOut(Easing.quad) }),
+      ),
+      -1,
+      true,
+    );
+  }, [slosh]);
+
+  const water = useAnimatedStyle(() => ({
+    transform: [{ translateX: slosh.value * 2 * s }, { rotate: `${slosh.value * 5}deg` }],
+  }));
+
+  return (
+    <View style={{ width, height }}>
+      <HydratedPandaArt width={width} height={height} />
+      {/* Superfície da água da garrafa, balançando */}
+      <Animated.View
+        style={[{ position: 'absolute', left: 259 * s, top: 257 * s }, water]}
+      >
+        <Svg width={62 * s} height={14 * s} viewBox="0 0 62 14">
+          <Ellipse cx={31} cy={7} rx={29} ry={5.5} fill="#54BAE4" opacity={0.9} />
+          <Ellipse cx={20} cy={5.5} rx={8} ry={2.2} fill="#BFE6F5" opacity={0.8} />
+        </Svg>
+      </Animated.View>
     </View>
   );
 }
