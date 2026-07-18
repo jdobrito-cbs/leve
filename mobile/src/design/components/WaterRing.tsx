@@ -10,6 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { useTheme } from '../useTheme';
+import { useWaterPhysics } from './useWaterPhysics';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -56,6 +57,8 @@ export function WaterRing({ progress, size = 148, strokeWidth = 12, children }: 
   const phase = useSharedValue(0);
   const level = useSharedValue(0);
   const ring = useSharedValue(0);
+  // Física real: ângulo segue a gravidade do aparelho; boost = chacoalhão.
+  const { angle, boost } = useWaterPhysics();
 
   useEffect(() => {
     phase.value = withRepeat(withTiming(1, { duration: 2800, easing: Easing.linear }), -1, false);
@@ -70,17 +73,40 @@ export function WaterRing({ progress, size = 148, strokeWidth = 12, children }: 
     strokeDashoffset: circumference * (1 - ring.value),
   }));
 
-  // topo da água dentro do copo: fundo quando 0, topo quando 1
+  // A água inteira gira ao contrário da inclinação do aparelho → superfície
+  // sempre nivelada com o chão de verdade (rotação em volta do centro do copo).
+  const tiltLayer = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${-angle.value}rad` }],
+  }));
+
+  // topo da água dentro do copo: fundo quando 0, topo quando 1.
+  // O boost do chacoalhão vira tremida extra nas duas camadas, dessincronizada.
   const backWave = useAnimatedStyle(() => ({
     transform: [
-      { translateX: -phase.value * size },
-      { translateY: cupSize * (1 - level.value) + 3 },
+      {
+        translateX:
+          -phase.value * size + Math.sin(phase.value * Math.PI * 6) * boost.value * 12,
+      },
+      {
+        translateY:
+          cupSize * (1 - level.value) +
+          3 +
+          Math.sin(phase.value * Math.PI * 8) * boost.value * 9,
+      },
     ],
   }));
   const frontWave = useAnimatedStyle(() => ({
     transform: [
-      { translateX: -((phase.value * 1.6) % 1) * size },
-      { translateY: cupSize * (1 - level.value) },
+      {
+        translateX:
+          -((phase.value * 1.6) % 1) * size -
+          Math.sin(phase.value * Math.PI * 7) * boost.value * 12,
+      },
+      {
+        translateY:
+          cupSize * (1 - level.value) -
+          Math.sin(phase.value * Math.PI * 9 + 1.3) * boost.value * 9,
+      },
     ],
   }));
 
@@ -106,15 +132,19 @@ export function WaterRing({ progress, size = 148, strokeWidth = 12, children }: 
           overflow: 'hidden',
         }}
       >
-        <Animated.View style={[waveLayer, backWave]}>
-          <Svg width={size * 2} height={size * 2}>
-            <Path d={wave} fill={statusColor} opacity={0.22} />
-          </Svg>
-        </Animated.View>
-        <Animated.View style={[waveLayer, frontWave]}>
-          <Svg width={size * 2} height={size * 2}>
-            <Path d={wave} fill={statusColor} opacity={0.3} />
-          </Svg>
+        <Animated.View
+          style={[{ position: 'absolute', left: 0, top: 0, right: 0, bottom: 0 }, tiltLayer]}
+        >
+          <Animated.View style={[waveLayer, backWave]}>
+            <Svg width={size * 2} height={size * 2}>
+              <Path d={wave} fill={statusColor} opacity={0.22} />
+            </Svg>
+          </Animated.View>
+          <Animated.View style={[waveLayer, frontWave]}>
+            <Svg width={size * 2} height={size * 2}>
+              <Path d={wave} fill={statusColor} opacity={0.3} />
+            </Svg>
+          </Animated.View>
         </Animated.View>
       </View>
       <Svg
