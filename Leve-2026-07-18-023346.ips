@@ -1,0 +1,279 @@
+{"app_name":"Leve","timestamp":"2026-07-18 02:33:46.00 -0400","app_version":"1.0.0","slice_uuid":"594f84cb-2147-374e-b744-3d182535ee11","build_version":"1","platform":2,"bundleID":"app.leve.mobile","share_with_app_devs":0,"is_first_party":0,"bug_type":"309","os_version":"iPhone OS 26.5.2 (23F84)","roots_installed":0,"name":"Leve","incident_id":"6DDA1440-5B4C-425C-9E89-FA4F6ED2BC9E"}
+{
+  "uptime" : 51,
+  "procRole" : "Foreground",
+  "version" : 2,
+  "userID" : 501,
+  "deployVersion" : 210,
+  "modelCode" : "iPhone18,2",
+  "coalitionID" : 651,
+  "osVersion" : {
+    "isEmbedded" : true,
+    "train" : "iPhone OS 26.5.2",
+    "releaseType" : "User",
+    "build" : "23F84"
+  },
+  "captureTime" : "2026-07-18 02:33:44.6238 -0400",
+  "codeSigningMonitor" : 2,
+  "incident" : "6DDA1440-5B4C-425C-9E89-FA4F6ED2BC9E",
+  "pid" : 428,
+  "translated" : false,
+  "cpuType" : "ARM-64",
+  "procLaunch" : "2026-07-18 02:33:44.1530 -0400",
+  "procStartAbsTime" : 1223978434,
+  "procExitAbsTime" : 1235247632,
+  "procName" : "Leve",
+  "procPath" : "\/private\/var\/containers\/Bundle\/Application\/C007DB74-111A-487D-9F58-A8F390E06E85\/Leve.app\/Leve",
+  "bundleInfo" : {"CFBundleShortVersionString":"1.0.0","CFBundleVersion":"1","CFBundleIdentifier":"app.leve.mobile"},
+  "storeInfo" : {"deviceIdentifierForVendor":"4797DD80-43FF-4EBC-B42E-D496F6E61F73","thirdParty":true},
+  "parentProc" : "launchd",
+  "parentPid" : 1,
+  "coalitionName" : "app.leve.mobile",
+  "crashReporterKey" : "8831bef17a105a331a7e414f81341be9966fef75",
+  "appleIntelligenceStatus" : {"state":"available"},
+  "developerMode" : 1,
+  "bootProgressRegister" : "0x2000000c",
+  "wasUnlockedSinceBoot" : 1,
+  "isLocked" : 0,
+  "codeSigningID" : "app.leve.mobile",
+  "codeSigningTeamID" : "DPP5G27935",
+  "codeSigningFlags" : 570434305,
+  "codeSigningValidationCategory" : 5,
+  "codeSigningTrustLevel" : 4,
+  "codeSigningAuxiliaryInfo" : 9007199254740992,
+  "instructionByteStream" : {"beforePC":"AByhTgCoMW4DACYeY0AA0QRoYzglaGM4gAAFy8ADX9YwQYDSARAA1A==","atPC":"AwEAVH8jA9X9e7+p\/QMAkcSV\/5e\/AwCR\/XvBqP8PX9bAA1\/WEC2A0g=="},
+  "bootSessionUUID" : "57E48803-D2A8-4C60-B9BC-2456D2035D4F",
+  "basebandVersion" : "1.60.02",
+  "exception" : {"codes":"0x0000000000000000, 0x0000000000000000","rawCodes":[0,0],"type":"EXC_CRASH","signal":"SIGABRT"},
+  "termination" : {"code":4,"flags":518,"namespace":"DYLD","indicator":"Symbol missing","details":["(terminated at launch; ignore backtrace)"],"reasons":["Symbol not found: _$s15ExpoModulesCore9AnyModulePAAE09_decorateE06object2iny0aB3JSI16JavaScriptObjectV_AG0jK7RuntimeCtKF","Referenced from: <1482750C-6A20-3173-965B-0EB3C837A0E5> \/Volumes\/VOLUME\/*\/Leve.app\/Frameworks\/ExpoPrint.framework\/ExpoPrint","Expected in:     <BAF8FA98-751F-3B6E-8FD4-421A23E1EAE7> \/Volumes\/VOLUME\/*\/Leve.app\/Frameworks\/ExpoModulesCore.framework\/ExpoModulesCore"]},
+  "faultingThread" : 0,
+  "threads" : [{"triggered":true,"id":7009,"threadState":{"x":[{"value":6},{"value":4},{"value":6125042512},{"value":395},{"value":6125041488},{"value":0},{"value":99},{"value":0},{"value":32},{"value":11370321237370732570},{"value":8375313264,"symbolLocation":57904,"symbol":"lsl::sPoolBytes"},{"value":18446744073709551600},{"value":131072},{"value":6561693696},{"value":18},{"value":0},{"value":521},{"value":6125041024},{"value":0},{"value":0},{"value":6125041488},{"value":395},{"value":6125042512},{"value":4},{"value":6},{"value":8375284680,"symbolLocation":29320,"symbol":"lsl::sPoolBytes"},{"value":8375276592,"symbolLocation":21232,"symbol":"lsl::sPoolBytes"},{"value":0},{"value":0}],"flavor":"ARM_THREAD_STATE64","lr":{"value":6563460872},"cpsr":{"value":2147483648},"fp":{"value":6125041440},"sp":{"value":6125041376},"esr":{"value":1442840704,"description":"(Syscall)"},"pc":{"value":6563144244,"matchesCrashFrame":1},"far":{"value":0}},"frames":[{"imageOffset":283188,"symbol":"__abort_with_payload","symbolLocation":8,"imageIndex":18},{"imageOffset":599816,"symbol":"abort_with_payload_wrapper_internal","symbolLocation":104,"imageIndex":18},{"imageOffset":599868,"symbol":"abort_with_payload","symbolLocation":16,"imageIndex":18},{"imageOffset":74776,"symbol":"dyld4::halt(char const*, dyld4::StructuredError const*)","symbolLocation":312,"imageIndex":18},{"imageOffset":326880,"symbol":"dyld4::prepare(dyld4::APIs&, mach_o::UnsafeHeader const*)","symbolLocation":4932,"imageIndex":18},{"imageOffset":321920,"symbol":"dyld4::start(dyld4::KernelArgs*, void*, void*, unsigned long long)::$_1::operator()() const","symbolLocation":320,"imageIndex":18},{"imageOffset":19396,"symbol":"start","symbolLocation":6840,"imageIndex":18}]}],
+  "usedImages" : [
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4341825536,
+    "size" : 30228480,
+    "uuid" : "594f84cb-2147-374e-b744-3d182535ee11",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/C007DB74-111A-487D-9F58-A8F390E06E85\/Leve.app\/Leve",
+    "name" : "Leve"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4432429056,
+    "size" : 720896,
+    "uuid" : "07cdaab3-fd33-3359-a356-56aeef04ac0b",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/C007DB74-111A-487D-9F58-A8F390E06E85\/Leve.app\/Frameworks\/ExpoFileSystem.framework\/ExpoFileSystem",
+    "name" : "ExpoFileSystem"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4428185600,
+    "size" : 81920,
+    "uuid" : "a691bc9f-d934-368b-808a-c9d9a7747b13",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/C007DB74-111A-487D-9F58-A8F390E06E85\/Leve.app\/Frameworks\/ExpoFont.framework\/ExpoFont",
+    "name" : "ExpoFont"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4434329600,
+    "size" : 491520,
+    "uuid" : "ba9149be-1733-3420-b882-d155ac60423f",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/C007DB74-111A-487D-9F58-A8F390E06E85\/Leve.app\/Frameworks\/ExpoImage.framework\/ExpoImage",
+    "name" : "ExpoImage"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4441735168,
+    "size" : 2244608,
+    "uuid" : "baf8fa98-751f-3b6e-8fd4-421a23e1eae7",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/C007DB74-111A-487D-9F58-A8F390E06E85\/Leve.app\/Frameworks\/ExpoModulesCore.framework\/ExpoModulesCore",
+    "name" : "ExpoModulesCore"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4435509248,
+    "size" : 393216,
+    "uuid" : "b7d876ba-0ae8-3460-83a3-82f0c6609053",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/C007DB74-111A-487D-9F58-A8F390E06E85\/Leve.app\/Frameworks\/ExpoModulesJSI.framework\/ExpoModulesJSI",
+    "name" : "ExpoModulesJSI"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4428447744,
+    "size" : 65536,
+    "uuid" : "ed435ff2-2165-32a5-922b-f3451ef187a2",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/C007DB74-111A-487D-9F58-A8F390E06E85\/Leve.app\/Frameworks\/ExpoModulesWorklets.framework\/ExpoModulesWorklets",
+    "name" : "ExpoModulesWorklets"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4430544896,
+    "size" : 163840,
+    "uuid" : "1482750c-6a20-3173-965b-0eb3c837a0e5",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/C007DB74-111A-487D-9F58-A8F390E06E85\/Leve.app\/Frameworks\/ExpoPrint.framework\/ExpoPrint",
+    "name" : "ExpoPrint"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4463591424,
+    "size" : 3915776,
+    "uuid" : "56a5ecee-5b17-3173-887b-038b84030745",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/C007DB74-111A-487D-9F58-A8F390E06E85\/Leve.app\/Frameworks\/RNReanimated.framework\/RNReanimated",
+    "name" : "RNReanimated"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4448010240,
+    "size" : 1294336,
+    "uuid" : "6f54a87c-ff0c-3683-aa42-de2b2ef2487b",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/C007DB74-111A-487D-9F58-A8F390E06E85\/Leve.app\/Frameworks\/RNWorklets.framework\/RNWorklets",
+    "name" : "RNWorklets"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4548132864,
+    "size" : 17121280,
+    "uuid" : "0cc730ec-9af4-3a34-8b0b-e14ec38d0600",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/C007DB74-111A-487D-9F58-A8F390E06E85\/Leve.app\/Frameworks\/React.framework\/React",
+    "name" : "React"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4452679680,
+    "size" : 1425408,
+    "uuid" : "3b28f8bc-70de-3af4-ace6-c848848d8b91",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/C007DB74-111A-487D-9F58-A8F390E06E85\/Leve.app\/Frameworks\/ReactNativeDependencies.framework\/ReactNativeDependencies",
+    "name" : "ReactNativeDependencies"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4436934656,
+    "size" : 540672,
+    "uuid" : "91f328e5-cf1b-3d2f-b406-96e5c24bd922",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/C007DB74-111A-487D-9F58-A8F390E06E85\/Leve.app\/Frameworks\/SDWebImage.framework\/SDWebImage",
+    "name" : "SDWebImage"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4428054528,
+    "size" : 65536,
+    "uuid" : "91fd5381-192c-3566-8230-cd831a98bfd7",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/C007DB74-111A-487D-9F58-A8F390E06E85\/Leve.app\/Frameworks\/SDWebImageAVIFCoder.framework\/SDWebImageAVIFCoder",
+    "name" : "SDWebImageAVIFCoder"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4428660736,
+    "size" : 32768,
+    "uuid" : "789a5f6f-475b-3c06-a8ff-8c787fccd48b",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/C007DB74-111A-487D-9F58-A8F390E06E85\/Leve.app\/Frameworks\/SDWebImageSVGCoder.framework\/SDWebImageSVGCoder",
+    "name" : "SDWebImageSVGCoder"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4438032384,
+    "size" : 671744,
+    "uuid" : "44cd394b-be39-3ff8-b774-8aaeb3326e9f",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/C007DB74-111A-487D-9F58-A8F390E06E85\/Leve.app\/Frameworks\/SDWebImageWebPCoder.framework\/SDWebImageWebPCoder",
+    "name" : "SDWebImageWebPCoder"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4479172608,
+    "size" : 3162112,
+    "uuid" : "3b364bdd-e3b5-342f-8ff4-7b2e7add2c5f",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/C007DB74-111A-487D-9F58-A8F390E06E85\/Leve.app\/Frameworks\/hermesvm.framework\/hermesvm",
+    "name" : "hermesvm"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64",
+    "base" : 4494671872,
+    "size" : 7536640,
+    "uuid" : "3f0be6d0-bac3-38d2-8c71-078362d797a1",
+    "path" : "\/private\/var\/containers\/Bundle\/Application\/C007DB74-111A-487D-9F58-A8F390E06E85\/Leve.app\/Frameworks\/libavif.framework\/libavif",
+    "name" : "libavif"
+  },
+  {
+    "source" : "P",
+    "arch" : "arm64e",
+    "base" : 6562861056,
+    "size" : 676224,
+    "uuid" : "02f772fd-9e38-35a4-b9fa-9cce3a090e6d",
+    "path" : "\/usr\/lib\/dyld",
+    "name" : "dyld"
+  },
+  {
+    "size" : 0,
+    "source" : "A",
+    "base" : 0,
+    "uuid" : "00000000-0000-0000-0000-000000000000"
+  }
+],
+  "sharedCache" : {
+  "base" : 6561693696,
+  "size" : 5397200896,
+  "uuid" : "dd3932e2-0790-3abe-8e02-72e2ccad430a"
+},
+  "vmSummary" : "ReadOnly portion of Libraries: Total=2.2G resident=0K(0%) swapped_out_or_unallocated=2.2G(100%)\nWritable regions: Total=4241K written=321K(8%) resident=321K(8%) swapped_out=0K(0%) unallocated=3920K(92%)\n\n                                VIRTUAL   REGION \nREGION TYPE                        SIZE    COUNT (non-coalesced) \n===========                     =======  ======= \nSTACK GUARD                         16K        1 \nStack                             1008K        1 \n__AUTH                            11.5M      950 \n__AUTH_CONST                     125.0M     1398 \n__CTF                               824        1 \n__DATA                            59.2M     1364 \n__DATA_CONST                      42.5M     1420 \n__DATA_DIRTY                      12.1M     1223 \n__FONT_DATA                        2352        1 \n__LINKEDIT                       305.6M       19 \n__LLVM_COV                          64K        1 \n__OBJC_RO                         85.1M        1 \n__OBJC_RW                         3210K        1 \n__TEXT                             1.9G     1441 \n__TPRO_CONST                       128K        2 \ndyld private memory               1200K        4 \npage table in kernel               321K        1 \nshared memory                       32K        1 \n===========                     =======  ======= \nTOTAL                              2.5G     7830 \n",
+  "legacyInfo" : {
+  "threadTriggered" : {
+
+  }
+},
+  "logWritingSignature" : "b2ee187c10f50b00e3df268e906e107e90e7fed9",
+  "roots_installed" : 0,
+  "bug_type" : "309",
+  "trmStatus" : 1,
+  "sandboxProfileName" : "container",
+  "trialInfo" : {
+  "rollouts" : [
+    {
+      "rolloutId" : "60f8ddccefea4203d95cbeef",
+      "factorPackIds" : [
+
+      ],
+      "deploymentId" : 240000025
+    },
+    {
+      "rolloutId" : "695fd05d8ca5554688521e5e",
+      "factorPackIds" : [
+        "695fd08781fcd20ded79c1d3",
+        "695fd0d28ca5554688521e5f",
+        "695fd09c8774dc09015a80e9",
+        "695fd0b18774dc09015a80ea"
+      ],
+      "deploymentId" : 3
+    }
+  ],
+  "experiments" : [
+    {
+      "treatmentId" : "ede3209a-74f5-4df6-8ab2-49adebef92a4",
+      "experimentId" : "69c58cc2a1c8055a26cc2a27",
+      "deploymentId" : 400000006
+    },
+    {
+      "treatmentId" : "b94e9aec-71bd-46f0-b53b-72fe0d8e9aa4",
+      "experimentId" : "67e32776f470dc0e83d9e147",
+      "deploymentId" : 400000014
+    }
+  ]
+}
+}
