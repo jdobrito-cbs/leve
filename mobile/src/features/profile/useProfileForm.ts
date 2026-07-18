@@ -24,7 +24,6 @@ export interface ProfileForm {
   sex: SexOption | null;
   birthDateStr: string; // 'DD/MM/AAAA'
   heightStr: string;
-  medication: string;
   goalWeightStr: string;
   doseIntervalStr: string;
   waterGoalStr: string;
@@ -41,7 +40,6 @@ const EMPTY_FORM: ProfileForm = {
   sex: null,
   birthDateStr: '',
   heightStr: '',
-  medication: '',
   goalWeightStr: '',
   doseIntervalStr: '7',
   waterGoalStr: '2000',
@@ -77,7 +75,6 @@ export function useProfileForm() {
       sex: (profile?.sex as SexOption | null) ?? null,
       birthDateStr: profile?.birthDate ? isoDateToBR(profile.birthDate) : '',
       heightStr: profile?.heightCm ? String(profile.heightCm) : '',
-      medication: profile?.medication ?? '',
       goalWeightStr: profile?.goalWeightKg ? String(profile.goalWeightKg) : '',
       doseIntervalStr: doseInterval !== null ? String(doseInterval) : '7',
       waterGoalStr: profile?.waterGoalMl ? String(profile.waterGoalMl) : '2000',
@@ -127,7 +124,6 @@ export function useProfileForm() {
       sex: form.sex,
       birthDate: brDateToIso(form.birthDateStr),
       heightCm: parseDecimalBR(form.heightStr),
-      medication: form.medication.trim() || null,
       goalWeightKg: parseDecimalBR(form.goalWeightStr),
       waterGoalMl: parseDecimalBR(form.waterGoalStr) ?? 2000,
       calorieGoalKcal: parseDecimalBR(form.calorieGoalStr),

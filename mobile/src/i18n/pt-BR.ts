@@ -271,8 +271,6 @@ export const strings = {
     editSection: 'Seus dados e metas',
     nameLabel: 'Nome',
     heightLabel: 'Altura (cm)',
-    medicationLabel: 'Medicação atual',
-    medicationHint: 'Pré-seleciona a medicação ao registrar uma dose.',
     appearanceSection: 'Aparência',
     darkTheme: 'Tema escuro',
     sexLabel: 'Sexo',

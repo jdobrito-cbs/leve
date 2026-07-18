@@ -44,7 +44,6 @@ jest.mock('@/features/profile/useProfileForm', () => ({
       sex: 'masculino',
       birthDateStr: '01/01/1990',
       heightStr: '178',
-      medication: 'semaglutida',
       goalWeightStr: '85',
       doseIntervalStr: '7',
       waterGoalStr: '2000',
