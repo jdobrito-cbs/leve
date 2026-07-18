@@ -1,6 +1,14 @@
+import { BottomTabBar, type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Redirect, Tabs } from 'expo-router';
 import { Plus } from 'lucide-react-native';
-import { PropsWithChildren, useEffect, useState, useSyncExternalStore } from 'react';
+import {
+  PropsWithChildren,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+  type ComponentType,
+} from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getSexSignal, setSexSignal, subscribeSex } from '@/features/profile/sexSignal';
@@ -90,6 +98,89 @@ function Fab({ focused, signal }: { focused: boolean; signal: number }) {
   );
 }
 
+const GLASS_CIRCLE = 46;
+
+/** Vidro líquido do iOS 26 quando disponível; senão, círculo translúcido. */
+function getGlassView(): ComponentType<{
+  style?: object;
+  glassEffectStyle?: string;
+}> | null {
+  try {
+    const mod = require('expo-glass-effect') as {
+      GlassView: ComponentType<{ style?: object; glassEffectStyle?: string }>;
+      isLiquidGlassAvailable(): boolean;
+    };
+    return mod.isLiquidGlassAvailable() ? mod.GlassView : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Barra padrão + círculo de vidro que desliza até a aba selecionada. */
+function GlassTabBar({
+  visibleCount,
+  activeIndex,
+  ...props
+}: BottomTabBarProps & { visibleCount: number; activeIndex: number }) {
+  const { mode } = useTheme();
+  const [barW, setBarW] = useState(0);
+  const x = useSharedValue(-9999);
+  const slot = visibleCount > 0 ? barW / visibleCount : 0;
+  const Glass = useMemo(getGlassView, []);
+
+  useEffect(() => {
+    if (slot <= 0 || activeIndex < 0) return;
+    const target = activeIndex * slot + slot / 2 - GLASS_CIRCLE / 2;
+    // Primeira medição posiciona sem animar; depois, sempre desliza com mola.
+    if (x.value < -5000) x.value = target;
+    else x.value = withSpring(target, { damping: 17, stiffness: 190 });
+  }, [activeIndex, slot, x]);
+
+  const slide = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
+
+  return (
+    <View onLayout={(e) => setBarW(e.nativeEvent.layout.width)}>
+      <BottomTabBar {...props} />
+      {slot > 0 && activeIndex >= 0 ? (
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            {
+              position: 'absolute',
+              top: 9,
+              left: 0,
+              width: GLASS_CIRCLE,
+              height: GLASS_CIRCLE,
+              borderRadius: GLASS_CIRCLE / 2,
+              overflow: 'hidden',
+            },
+            slide,
+          ]}
+        >
+          {Glass ? (
+            <Glass
+              style={{ flex: 1, borderRadius: GLASS_CIRCLE / 2 }}
+              glassEffectStyle="clear"
+            />
+          ) : (
+            <View
+              style={{
+                flex: 1,
+                borderRadius: GLASS_CIRCLE / 2,
+                backgroundColor:
+                  mode === 'light' ? 'rgba(37,99,235,0.10)' : 'rgba(148,197,255,0.14)',
+                borderWidth: 1,
+                borderColor:
+                  mode === 'light' ? 'rgba(37,99,235,0.18)' : 'rgba(148,197,255,0.22)',
+              }}
+            />
+          )}
+        </Animated.View>
+      ) : null}
+    </View>
+  );
+}
+
 type TabName = 'index' | 'registrar' | 'academia' | 'progresso' | 'ciclo' | 'perfil';
 
 export default function TabsLayout() {
@@ -114,6 +205,14 @@ export default function TabsLayout() {
       .catch(() => undefined);
   }, []);
   const cycleTab = sexLive === 'feminino';
+  const visibleNames: string[] = [
+    'index',
+    'registrar',
+    'academia',
+    'progresso',
+    ...(cycleTab ? ['ciclo'] : []),
+    'perfil',
+  ];
 
   if (loading) return <View />;
   if (!accepted) return <Redirect href="/onboarding" />;
@@ -124,6 +223,13 @@ export default function TabsLayout() {
 
   return (
     <Tabs
+      tabBar={(props) => (
+        <GlassTabBar
+          {...props}
+          visibleCount={visibleNames.length}
+          activeIndex={visibleNames.indexOf(props.state.routes[props.state.index]?.name ?? '')}
+        />
+      )}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
