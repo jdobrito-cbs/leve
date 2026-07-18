@@ -7,7 +7,6 @@ import {
   useMemo,
   useState,
   useSyncExternalStore,
-  type ComponentProps,
   type ComponentType,
 } from 'react';
 import { View } from 'react-native';
@@ -117,15 +116,15 @@ function getGlassView(): ComponentType<{
   }
 }
 
-/** Tipo do tabBar exatamente como o Tabs do expo-router espera. */
-type ExpoTabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>['tabBar']>>[0];
+/** Só o que o círculo precisa; o resto repassa intacto à barra padrão. */
+interface GlassTabBarProps {
+  visibleCount: number;
+  activeIndex: number;
+  [key: string]: unknown;
+}
 
 /** Barra padrão + círculo de vidro que desliza até a aba selecionada. */
-function GlassTabBar({
-  visibleCount,
-  activeIndex,
-  ...props
-}: ExpoTabBarProps & { visibleCount: number; activeIndex: number }) {
+function GlassTabBar({ visibleCount, activeIndex, ...props }: GlassTabBarProps) {
   const { mode } = useTheme();
   const [barW, setBarW] = useState(0);
   const x = useSharedValue(-9999);
