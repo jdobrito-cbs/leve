@@ -13,9 +13,9 @@ import {
   DateTimeField,
   ListRow,
   NumberField,
+  RulerField,
   Screen,
   SegmentedChips,
-  ValueRuler,
 } from '@/design/components';
 import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
@@ -52,7 +52,6 @@ export function GymScreen() {
   const [list, setList] = useState<GymLog[]>([]);
   const [todayKcal, setTodayKcal] = useState(0);
   const [saved, setSaved] = useState(false);
-  const [rulerOpen, setRulerOpen] = useState(false);
   const [dateStr, setDateStr] = useState(formatDateBR(new Date()));
   const [timeStr, setTimeStr] = useState(formatTimeHM(new Date()));
   const at = parseDateTimeBR(dateStr, timeStr);
@@ -132,31 +131,22 @@ export function GymScreen() {
       <Card style={{ gap: spacing.md }}>
         {kind === 'forca' ? (
           <>
-            <NumberField
+            <RulerField
               label={strings.gym.weightLabel}
               value={weightStr}
               onChangeText={(v) => {
                 setSaved(false);
                 setWeightStr(v);
               }}
-              onFocus={() => setRulerOpen(true)}
               suffix="kg"
               placeholder="0"
+              min={0}
+              max={300}
+              step={0.5}
+              majorEvery={10}
+              labelEvery={20}
+              fallback={20}
             />
-            {rulerOpen ? (
-              <ValueRuler
-                value={weightKg ?? 20}
-                min={0}
-                max={300}
-                step={0.5}
-                majorEvery={10}
-                labelEvery={20}
-                onChange={(v) => {
-                  setSaved(false);
-                  setWeightStr(v.toLocaleString('pt-BR', { maximumFractionDigits: 1 }));
-                }}
-              />
-            ) : null}
             <NumberField
               label={strings.gym.setsLabel}
               value={setsStr}
@@ -164,7 +154,6 @@ export function GymScreen() {
                 setSaved(false);
                 setSetsStr(v);
               }}
-              onFocus={() => setRulerOpen(false)}
               placeholder="3"
             />
             <NumberField
@@ -174,7 +163,6 @@ export function GymScreen() {
                 setSaved(false);
                 setRepsStr(v);
               }}
-              onFocus={() => setRulerOpen(false)}
               placeholder="12"
             />
           </>
@@ -186,7 +174,6 @@ export function GymScreen() {
               setSaved(false);
               setMinutesStr(v);
             }}
-            onFocus={() => setRulerOpen(false)}
             placeholder="30"
           />
         )}
@@ -195,7 +182,6 @@ export function GymScreen() {
           timeValue={timeStr}
           onChangeDate={setDateStr}
           onChangeTime={setTimeStr}
-          onFieldFocus={() => setRulerOpen(false)}
         />
         {kcal !== null ? (
           <AppText>

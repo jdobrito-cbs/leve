@@ -6,8 +6,8 @@ import { formatDateBR, formatTimeHM, parseDateTimeBR } from '@/core/datetime';
 import { strings } from '@/i18n/pt-BR';
 import { radius, spacing } from '../tokens';
 import { useTheme } from '../useTheme';
-import { AppText } from './AppText';
 import { Input } from './Input';
+import { PickerSheet } from './PickerSheet';
 
 interface Props {
   dateValue: string;
@@ -119,22 +119,30 @@ export function DateTimeField({
         </View>
       </View>
       {picker !== null ? (
-        <View style={{ gap: spacing.xs }}>
+        Platform.OS === 'ios' ? (
+          <PickerSheet
+            visible
+            onConfirm={() => setPicker(null)}
+            onCancel={() => setPicker(null)}
+          >
+            <DateTimePicker
+              value={pickerValue}
+              mode={picker}
+              display={picker === 'date' ? 'inline' : 'spinner'}
+              is24Hour
+              onChange={onPicked}
+            />
+          </PickerSheet>
+        ) : (
+          // Android: o seletor nativo já abre como diálogo com OK/Cancelar.
           <DateTimePicker
             value={pickerValue}
             mode={picker}
-            display={picker === 'date' ? (Platform.OS === 'ios' ? 'inline' : 'default') : 'spinner'}
+            display={picker === 'date' ? 'default' : 'spinner'}
             is24Hour
             onChange={onPicked}
           />
-          {Platform.OS === 'ios' ? (
-            <Pressable onPress={() => setPicker(null)} hitSlop={8} style={{ alignSelf: 'flex-end' }}>
-              <AppText variant="caption" style={{ color: colors.primary }}>
-                {strings.common.close}
-              </AppText>
-            </Pressable>
-          ) : null}
-        </View>
+        )
       ) : null}
     </View>
   );

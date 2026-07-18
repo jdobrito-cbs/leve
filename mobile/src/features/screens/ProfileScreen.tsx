@@ -1,11 +1,10 @@
-import * as FileSystem from 'expo-file-system/legacy';
+﻿import * as FileSystem from 'expo-file-system/legacy';
 import { router } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
 import { Platform, Switch, View } from 'react-native';
 
 import { ageFromIsoDate, brDateToIso } from '@/core/datetime';
-import { parseDecimalBR } from '@/core/text';
 import { db } from '@/db/client';
 import { exportAllData, wipeAllData } from '@/features/backup/exportData';
 import {
@@ -16,9 +15,9 @@ import {
   DisclaimerBanner,
   Input,
   NumberField,
+  RulerField,
   Screen,
   SegmentedChips,
-  ValueRuler,
 } from '@/design/components';
 import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
@@ -96,8 +95,6 @@ export function ProfileScreen() {
   const { loading, form, setField, save, saved, permissionError, autoGoalMl } = useProfileForm();
   const birthIso = brDateToIso(form.birthDateStr);
   const age = birthIso ? ageFromIsoDate(birthIso) : null;
-  // Régua visível: só a do campo focado por último.
-  const [ruler, setRuler] = useState<'height' | 'goalWeight' | 'calorieGoal' | null>(null);
 
   if (loading) return <Screen />;
 
@@ -111,9 +108,7 @@ export function ProfileScreen() {
         <Input
           label={strings.profile.nameLabel}
           value={form.name}
-          onChangeText={(v) => setField('name', v)}
-          onFocus={() => setRuler(null)}
-        />
+          onChangeText={(v) => setField('name', v)}        />
         <AppText variant="caption" muted>
           {strings.profile.sexLabel}
         </AppText>
@@ -127,66 +122,43 @@ export function ProfileScreen() {
         <DateField
           label={strings.profile.birthDateLabel}
           value={form.birthDateStr}
-          onChange={(v) => setField('birthDateStr', v)}
-          onFieldFocus={() => setRuler(null)}
-        />
+          onChange={(v) => setField('birthDateStr', v)}        />
         {age !== null ? (
           <AppText variant="caption" muted>
             {age} {strings.profile.ageSuffix}
           </AppText>
         ) : null}
-        <NumberField
+        <RulerField
           label={strings.profile.heightLabel}
           value={form.heightStr}
           onChangeText={(v) => setField('heightStr', v)}
-          onFocus={() => setRuler('height')}
           suffix="cm"
+          min={100}
+          max={230}
+          step={1}
+          majorEvery={5}
+          labelEvery={10}
+          decimals={0}
+          fallback={170}
         />
-        {ruler === 'height' ? (
-          <ValueRuler
-            value={parseDecimalBR(form.heightStr) ?? 170}
-            min={100}
-            max={230}
-            step={1}
-            majorEvery={5}
-            labelEvery={10}
-            decimals={0}
-            onChange={(v) => setField('heightStr', String(Math.round(v)))}
-          />
-        ) : null}
         <Input
           label={strings.profile.medicationLabel}
           value={form.medication}
-          onChangeText={(v) => setField('medication', v)}
-          onFocus={() => setRuler(null)}
-        />
-        <NumberField
+          onChangeText={(v) => setField('medication', v)}        />
+        <RulerField
           label={strings.profile.goalWeightLabel}
           value={form.goalWeightStr}
           onChangeText={(v) => setField('goalWeightStr', v)}
-          onFocus={() => setRuler('goalWeight')}
           suffix="kg"
+          min={30}
+          max={250}
+          step={0.1}
+          fallback={80}
         />
-        {ruler === 'goalWeight' ? (
-          <ValueRuler
-            value={parseDecimalBR(form.goalWeightStr) ?? 80}
-            min={30}
-            max={250}
-            step={0.1}
-            onChange={(v) =>
-              setField(
-                'goalWeightStr',
-                v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
-              )
-            }
-          />
-        ) : null}
         <NumberField
           label={strings.dose.intervalLabel}
           value={form.doseIntervalStr}
-          onChangeText={(v) => setField('doseIntervalStr', v)}
-          onFocus={() => setRuler(null)}
-          suffix={strings.dose.days}
+          onChangeText={(v) => setField('doseIntervalStr', v)}          suffix={strings.dose.days}
         />
         <AppText variant="caption" muted>
           {strings.dose.intervalHint}
@@ -213,30 +185,22 @@ export function ProfileScreen() {
           <NumberField
             label={strings.profile.waterGoalLabel}
             value={form.waterGoalStr}
-            onChangeText={(v) => setField('waterGoalStr', v)}
-            onFocus={() => setRuler(null)}
-            suffix="ml"
+            onChangeText={(v) => setField('waterGoalStr', v)}            suffix="ml"
           />
         ) : null}
-        <NumberField
+        <RulerField
           label={strings.profile.calorieGoalLabel}
           value={form.calorieGoalStr}
           onChangeText={(v) => setField('calorieGoalStr', v)}
-          onFocus={() => setRuler('calorieGoal')}
           suffix="kcal"
+          min={800}
+          max={4000}
+          step={50}
+          majorEvery={2}
+          labelEvery={10}
+          decimals={0}
+          fallback={2000}
         />
-        {ruler === 'calorieGoal' ? (
-          <ValueRuler
-            value={parseDecimalBR(form.calorieGoalStr) ?? 2000}
-            min={800}
-            max={4000}
-            step={50}
-            majorEvery={2}
-            labelEvery={10}
-            decimals={0}
-            onChange={(v) => setField('calorieGoalStr', String(Math.round(v)))}
-          />
-        ) : null}
         <AppText variant="caption" muted>
           {strings.profile.calorieGoalHint}
         </AppText>
@@ -271,9 +235,7 @@ export function ProfileScreen() {
           <Input
             label={strings.profile.waterTimesLabel}
             value={form.waterTimesStr}
-            onChangeText={(v) => setField('waterTimesStr', v)}
-            onFocus={() => setRuler(null)}
-            placeholder="09:00, 13:00, 17:00"
+            onChangeText={(v) => setField('waterTimesStr', v)}            placeholder="09:00, 13:00, 17:00"
           />
         ) : null}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>

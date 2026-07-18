@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import type { DoseLog, SymptomLog, WeightLog } from '@/core/types';
 import { db } from '@/db/client';
 import { latestDose, listDoses } from '@/db/doseRepo';
+import { gymKcalForDay } from '@/db/gymRepo';
 import { DayMacros, macrosForDay } from '@/db/foodLogRepo';
 import { latestMetric, metricSeries } from '@/db/metricsRepo';
 import { getProfile } from '@/db/profileRepo';
@@ -139,7 +140,9 @@ export function useTodaySummary(): TodaySummary {
     }
     try {
       const burned = await metricSeries(db, 'active_calories', startOfDay);
-      setActiveCalories(Math.round(burned.reduce((a, m) => a + m.value, 0)));
+      // Saúde conectada + exercícios registrados na Academia.
+      const gymKcal = await gymKcalForDay(db, now).catch(() => 0);
+      setActiveCalories(Math.round(burned.reduce((a, m) => a + m.value, 0) + gymKcal));
       const [sleep, hr, spo2, resp] = await Promise.all([
         latestMetric(db, 'sleep_hours'),
         latestMetric(db, 'heart_rate_resting'),

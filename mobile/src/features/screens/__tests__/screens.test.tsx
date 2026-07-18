@@ -171,8 +171,11 @@ test('Hoje mostra todos os boxes na nova ordem', async () => {
   getByText(/62,5 g/);
   getByText(strings.today.nutrition.fiber);
   getByText(strings.today.activitySection);
-  getByText(/320 kcal/);
+  expect(getAllByText(/320 kcal/).length).toBe(2); // atividades + balanço (perdidas)
   getByText('4.200');
+  getByText(strings.today.balanceSection);
+  getByText(strings.today.balanceOver); // 850 consumidas × 320 queimadas
+  getByText(strings.today.balanceGained);
   getByText(strings.today.medRemindersSection);
   getByText(/Metformina/);
   getByText(strings.today.healthSection);

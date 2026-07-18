@@ -170,16 +170,25 @@ export function MuscleTabIcon({ color, focused, signal, size = 22 }: TabIconProp
         stroke={color}
         style={{ position: 'absolute' }}
         {...stroke}
+        strokeWidth={2.3}
       >
-        <Circle cx="12" cy="4.6" r="2.1" />
-        <Path d="M9.3 9.2h5.4l-1 6.6h-3.4z" />
-        <Path d="M10.3 15.8 9.5 21M13.7 15.8l.8 5.2" />
+        <Circle cx="12" cy="4.2" r="2.4" />
+        <Path d="M9 9h6l-1.1 7.2h-3.8z" />
+        <Path d="M10.1 16.2 9.2 21.4M13.9 16.2l.9 5.2" />
       </Svg>
       {/* Braços flexionados (camada que bomba) */}
       <Animated.View style={[{ position: 'absolute', inset: 0, transformOrigin: '50% 45%' }, arms]}>
-        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} {...stroke}>
-          <Path d="M9.3 9.8 6.4 11.2 6.8 7.9" />
-          <Path d="M14.7 9.8 17.6 11.2 17.2 7.9" />
+        <Svg
+          width={size}
+          height={size}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={color}
+          {...stroke}
+          strokeWidth={2.3}
+        >
+          <Path d="M9 9.7 5.6 11.4 6.1 7.4" />
+          <Path d="M15 9.7l3.4 1.7-.5-4" />
         </Svg>
       </Animated.View>
     </View>

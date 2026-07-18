@@ -9,6 +9,8 @@ export { ProgressRing } from './ProgressRing';
 export { WaterRing } from './WaterRing';
 export { FitChart } from './FitChart';
 export { DateField } from './DateField';
+export { PickerSheet } from './PickerSheet';
+export { RulerField } from './RulerField';
 export { ValueRuler } from './ValueRuler';
 export { DateTimeField } from './DateTimeField';
 export { HeroHeader } from './HeroHeader';

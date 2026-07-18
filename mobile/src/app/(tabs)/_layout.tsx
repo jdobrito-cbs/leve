@@ -109,7 +109,9 @@ export default function TabsLayout() {
         // Em telas largas (tablet/web) o padrão vira ícone ao lado do texto,
         // o que desmonta o botão central — mantém o layout vertical sempre.
         tabBarLabelPosition: 'below-icon',
-        tabBarLabelStyle: { fontFamily: fonts.semibold, fontSize: 11 },
+        tabBarLabelStyle: { fontFamily: fonts.semibold, fontSize: 10 },
+        // 5 abas: sem folga lateral extra para caber tudo com conforto.
+        tabBarItemStyle: { paddingHorizontal: 0 },
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopWidth: 0,

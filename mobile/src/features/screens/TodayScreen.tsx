@@ -3,6 +3,7 @@ import { useMemo, type ComponentType, type PropsWithChildren } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LineChart } from 'react-native-gifted-charts';
+import { Scale, TrendingUp, Trophy } from 'lucide-react-native';
 import { formatDateTimeShort } from '@/core/datetime';
 import { AppText, Card, FitChart, HeroHeader, IconChip, WaterRing } from '@/design/components';
 import { OverflowDrips, OverflowFill } from '@/design/components/OverflowWater';
@@ -390,6 +391,42 @@ export function TodayScreen() {
               {strings.today.activityHint}
             </AppText>
           )}
+        </Box>
+
+        {/* 5b — Balanço calórico: consumidas × queimadas */}
+        <Box index={4}>
+          <AppText variant="title">{strings.today.balanceSection}</AppText>
+          {(() => {
+            const kcalIn = Math.round(summary.macros.kcal);
+            const kcalOut = Math.round(summary.activeCalories);
+            const diff = kcalOut - kcalIn;
+            const state = diff > 100 ? 'win' : diff >= -100 ? 'even' : 'over';
+            const Icon = state === 'win' ? Trophy : state === 'even' ? Scale : TrendingUp;
+            const iconColor =
+              state === 'win' ? colors.success : state === 'even' ? colors.primary : colors.warning;
+            const message =
+              state === 'win'
+                ? strings.today.balanceWin
+                : state === 'even'
+                  ? strings.today.balanceEven
+                  : strings.today.balanceOver;
+            return (
+              <>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <View style={{ flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+                    <Metric label={strings.today.balanceGained} value={`${fmt(kcalIn)} kcal`} />
+                    <Metric label={strings.today.balanceBurned} value={`${fmt(kcalOut)} kcal`} />
+                  </View>
+                  <IconChip size={44}>
+                    <Icon size={22} color={iconColor} />
+                  </IconChip>
+                </View>
+                <AppText variant="caption" muted>
+                  {message}
+                </AppText>
+              </>
+            );
+          })()}
         </Box>
 
         {/* 6 — Lembretes de medicações */}

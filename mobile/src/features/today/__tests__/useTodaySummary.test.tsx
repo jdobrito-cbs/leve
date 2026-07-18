@@ -31,6 +31,9 @@ jest.mock('@/db/metricsRepo', () => ({
 jest.mock('@/features/meds/medsRepo', () => ({
   todayIntakes: jest.fn().mockResolvedValue([]),
 }));
+jest.mock('@/db/gymRepo', () => ({
+  gymKcalForDay: jest.fn().mockResolvedValue(80),
+}));
 jest.mock('@/db/doseRepo', () => ({
   latestDose: jest.fn().mockResolvedValue({
     medication: 'semaglutida',
@@ -90,5 +93,6 @@ test('agrega os dados do dia', async () => {
   expect(result.current.symptomsCount).toBe(1);
   expect(result.current.recentSymptoms).toHaveLength(1);
   expect(result.current.userName).toBe('Jorge');
+  expect(result.current.activeCalories).toBe(400); // saúde (320) + academia (80)
   expect(result.current.steps).toBe(4200);
 });

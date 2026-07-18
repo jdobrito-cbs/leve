@@ -3,12 +3,11 @@ import { Calendar } from 'lucide-react-native';
 import { useState } from 'react';
 import { Platform, Pressable, View } from 'react-native';
 import { formatDateBR, parseDateTimeBR } from '@/core/datetime';
-import { strings } from '@/i18n/pt-BR';
 import { radius, spacing } from '../tokens';
 import { useTheme } from '../useTheme';
-import { AppText } from './AppText';
 import { maskDateBR } from './DateTimeField';
 import { Input } from './Input';
+import { PickerSheet } from './PickerSheet';
 
 interface Props {
   label: string;
@@ -69,7 +68,18 @@ export function DateField({ label, value, onChange, onFieldFocus }: Props) {
         ) : null}
       </View>
       {open ? (
-        <View style={{ gap: spacing.xs }}>
+        Platform.OS === 'ios' ? (
+          <PickerSheet visible onConfirm={() => setOpen(false)} onCancel={() => setOpen(false)}>
+            <DateTimePicker
+              value={pickerValue}
+              mode="date"
+              display="spinner"
+              maximumDate={new Date()}
+              onChange={onPicked}
+            />
+          </PickerSheet>
+        ) : (
+          // Android: diálogo nativo com OK/Cancelar próprios.
           <DateTimePicker
             value={pickerValue}
             mode="date"
@@ -77,14 +87,7 @@ export function DateField({ label, value, onChange, onFieldFocus }: Props) {
             maximumDate={new Date()}
             onChange={onPicked}
           />
-          {Platform.OS === 'ios' ? (
-            <Pressable onPress={() => setOpen(false)} hitSlop={8} style={{ alignSelf: 'flex-end' }}>
-              <AppText variant="caption" style={{ color: colors.primary }}>
-                {strings.common.close}
-              </AppText>
-            </Pressable>
-          ) : null}
-        </View>
+        )
       ) : null}
     </View>
   );

@@ -9,9 +9,8 @@ import {
   Card,
   DateTimeField,
   ListRow,
-  NumberField,
+  RulerField,
   Screen,
-  ValueRuler,
 } from '@/design/components';
 import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
@@ -24,7 +23,6 @@ export function WeightScreen() {
   const [list, setList] = useState<WeightLog[]>([]);
   const [value, setValue] = useState('');
   const [saved, setSaved] = useState(false);
-  const [rulerOpen, setRulerOpen] = useState(false);
   const [dateStr, setDateStr] = useState(formatDateBR(new Date()));
   const [timeStr, setTimeStr] = useState(formatTimeHM(new Date()));
 
@@ -71,37 +69,25 @@ export function WeightScreen() {
         </Card>
       ) : null}
       <Card style={{ gap: spacing.md }}>
-        <NumberField
+        <RulerField
           label={strings.weight.inputLabel}
           value={value}
           onChangeText={(v) => {
             setSaved(false);
             setValue(v);
           }}
-          onFocus={() => setRulerOpen(true)}
           suffix="kg"
           placeholder="0,0"
+          min={30}
+          max={250}
+          step={0.1}
+          fallback={last?.weightKg ?? 80}
         />
-        {rulerOpen ? (
-          <ValueRuler
-            value={kg ?? last?.weightKg ?? 80}
-            min={30}
-            max={250}
-            step={0.1}
-            onChange={(v) => {
-              setSaved(false);
-              setValue(
-                v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
-              );
-            }}
-          />
-        ) : null}
         <DateTimeField
           dateValue={dateStr}
           timeValue={timeStr}
           onChangeDate={setDateStr}
           onChangeTime={setTimeStr}
-          onFieldFocus={() => setRulerOpen(false)}
         />
         {diff !== null ? (
           <AppText variant="caption" muted>
