@@ -11,7 +11,7 @@ import {
 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import { AppText, Button, Card, IconChip, Input, Screen } from '@/design/components';
+import { AppText, Button, Card, IconChip, Input, PickerSheet, Screen } from '@/design/components';
 import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
@@ -31,6 +31,8 @@ export function PremiumScreen() {
   const { entitlement, premium, refresh } = usePremium();
   const [prices, setPrices] = useState<PlanPrices>({ monthly: null, annual: null });
   const [keyStr, setKeyStr] = useState('');
+  const [keyOpen, setKeyOpen] = useState(false);
+  const [keyError, setKeyError] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -83,11 +85,10 @@ export function PremiumScreen() {
     }
   }
 
-  async function redeem() {
-    setMessage(null);
+  async function confirmKey() {
     const licenseId = verifyLicenseKey(keyStr);
     if (!licenseId) {
-      setMessage({ text: strings.premium.keyInvalid, ok: false });
+      setKeyError(strings.premium.keyInvalid);
       return;
     }
     await setEntitlement(db, {
@@ -95,7 +96,9 @@ export function PremiumScreen() {
       licenseId,
       activatedAt: new Date().toISOString(),
     });
+    setKeyOpen(false);
     setKeyStr('');
+    setKeyError(null);
     await refresh();
   }
 
@@ -203,21 +206,38 @@ export function PremiumScreen() {
           </IconChip>
           <AppText variant="title">{strings.premium.keySectionTitle}</AppText>
         </View>
-        <Input
-          label={strings.premium.keyLabel}
-          value={keyStr}
-          onChangeText={setKeyStr}
-          placeholder={strings.premium.keyPlaceholder}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
         <Button
           label={strings.premium.redeem}
           variant="secondary"
-          onPress={redeem}
-          disabled={keyStr.trim().length === 0}
+          onPress={() => {
+            setKeyStr('');
+            setKeyError(null);
+            setKeyOpen(true);
+          }}
         />
       </Card>
+
+      {/* Modal da chave: campo sempre visível acima do teclado + OK. */}
+      <PickerSheet visible={keyOpen} onConfirm={confirmKey} onCancel={() => setKeyOpen(false)}>
+        <AppText variant="title">{strings.premium.keySectionTitle}</AppText>
+        <Input
+          label={strings.premium.keyLabel}
+          value={keyStr}
+          onChangeText={(v) => {
+            setKeyError(null);
+            setKeyStr(v);
+          }}
+          placeholder={strings.premium.keyPlaceholder}
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoFocus
+        />
+        {keyError ? (
+          <AppText variant="caption" style={{ color: colors.danger }}>
+            {keyError}
+          </AppText>
+        ) : null}
+      </PickerSheet>
 
       {message ? (
         <AppText

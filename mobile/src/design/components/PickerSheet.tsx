@@ -1,5 +1,5 @@
 import { PropsWithChildren } from 'react';
-import { Modal, Pressable, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, View } from 'react-native';
 import { strings } from '@/i18n/pt-BR';
 import { radius, spacing } from '../tokens';
 import { useTheme } from '../useTheme';
@@ -23,19 +23,22 @@ export function PickerSheet({ visible, onConfirm, onCancel, children }: PropsWit
         style={{ flex: 1, backgroundColor: 'rgba(2, 8, 23, 0.5)' }}
         onPress={onCancel}
       />
-      <View
-        style={{
-          backgroundColor: colors.surface,
-          borderTopLeftRadius: radius.lg,
-          borderTopRightRadius: radius.lg,
-          padding: spacing.md,
-          paddingBottom: spacing.lg,
-          gap: spacing.md,
-        }}
-      >
-        {children}
-        <Button label={strings.common.confirm} onPress={onConfirm} />
-      </View>
+      {/* O teclado empurra a folha para cima — o campo nunca fica escondido. */}
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <View
+          style={{
+            backgroundColor: colors.surface,
+            borderTopLeftRadius: radius.lg,
+            borderTopRightRadius: radius.lg,
+            padding: spacing.md,
+            paddingBottom: spacing.lg,
+            gap: spacing.md,
+          }}
+        >
+          {children}
+          <Button label={strings.common.confirm} onPress={onConfirm} />
+        </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

@@ -39,25 +39,25 @@ test('bloqueios configurados: scan e saúde exigem premium; o resto é livre', (
   expect(isLocked('scanFood', true)).toBe(false);
 });
 
-test('chave inválida mostra erro; loja sem configuração avisa', async () => {
+test('modal da chave: inválida mostra erro dentro do modal', async () => {
   mockVerify.mockReturnValue(null);
   const { getByText, getByPlaceholderText } = await render(<PremiumScreen />);
   getByText(strings.premium.benefitsTitle);
+  await fireEvent.press(getByText(strings.premium.redeem)); // abre o modal
   await fireEvent.changeText(getByPlaceholderText(strings.premium.keyPlaceholder), 'LEVE-x');
-  await fireEvent.press(getByText(strings.premium.redeem));
+  await fireEvent.press(getByText(strings.common.confirm)); // OK
   await waitFor(() => getByText(strings.premium.keyInvalid));
-  const subscribeButtons = getByText(strings.premium.monthly);
-  expect(subscribeButtons).toBeTruthy();
 });
 
-test('chave válida ativa o desbloqueio definitivo de parceiro', async () => {
+test('chave válida no modal ativa o desbloqueio definitivo de parceiro', async () => {
   mockVerify.mockReturnValue('a1b2c3');
   const { getByText, getByPlaceholderText } = await render(<PremiumScreen />);
+  await fireEvent.press(getByText(strings.premium.redeem));
   await fireEvent.changeText(
     getByPlaceholderText(strings.premium.keyPlaceholder),
     'LEVE-chave-de-teste',
   );
-  await fireEvent.press(getByText(strings.premium.redeem));
+  await fireEvent.press(getByText(strings.common.confirm));
   await waitFor(() => getByText(strings.premium.activeTitle));
   getByText(strings.premium.activePlans.partner);
   expect(mockStore.entitlement).toMatchObject({ plan: 'partner', licenseId: 'a1b2c3' });
