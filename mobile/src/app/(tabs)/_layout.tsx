@@ -1,8 +1,9 @@
-import { Redirect, Tabs, useSegments } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import { Plus } from 'lucide-react-native';
-import { PropsWithChildren, useEffect, useState } from 'react';
+import { PropsWithChildren, useEffect, useState, useSyncExternalStore } from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getSexSignal, setSexSignal, subscribeSex } from '@/features/profile/sexSignal';
 import { db } from '@/db/client';
 import { getProfile } from '@/db/profileRepo';
 import Animated, {
@@ -103,14 +104,16 @@ export default function TabsLayout() {
     ciclo: 0,
     perfil: 0,
   });
-  // A aba Ciclo só existe para o sexo feminino; re-lê ao navegar (Perfil pode mudar).
-  const segments = useSegments();
-  const [cycleTab, setCycleTab] = useState(false);
+  // A aba Ciclo só existe para o sexo feminino; o Perfil emite o sinal
+  // na hora do clique, e aqui só carregamos o valor salvo na primeira vez.
+  const sexLive = useSyncExternalStore(subscribeSex, getSexSignal, getSexSignal);
   useEffect(() => {
+    if (getSexSignal() !== null) return;
     getProfile(db)
-      .then((p) => setCycleTab(p?.sex === 'feminino'))
+      .then((p) => setSexSignal(p?.sex ?? 'nao_informar'))
       .catch(() => undefined);
-  }, [segments]);
+  }, []);
+  const cycleTab = sexLive === 'feminino';
 
   if (loading) return <View />;
   if (!accepted) return <Redirect href="/onboarding" />;
