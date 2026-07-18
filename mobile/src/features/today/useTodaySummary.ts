@@ -121,11 +121,14 @@ export function useTodaySummary(): TodaySummary {
       setCalorieGoalKcal(profile.calorieGoalKcal ?? null);
       setGoalWeightKg(profile.goalWeightKg ?? null);
     }
+    // Saudação usa só o primeiro nome (nomes extensos poluem o topo).
+    const firstName = (full: string | null | undefined) =>
+      full?.trim().split(/\s+/)[0] ?? null;
     try {
       const account = profile?.name ? null : await getCloudAccount(db);
-      setUserName(profile?.name ?? account?.name ?? null);
+      setUserName(firstName(profile?.name ?? account?.name));
     } catch {
-      setUserName(profile?.name ?? null);
+      setUserName(firstName(profile?.name));
     }
     try {
       setDoseIntervalDays(await getSetting<number>(db, 'doseIntervalDays'));
