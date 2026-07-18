@@ -37,6 +37,29 @@ async function safely(run: () => Promise<void>): Promise<void> {
   }
 }
 
+/** Chama `onWater` quando um aviso de água chega (app aberto), é tocado, ou
+ *  quando o app foi aberto a partir de um aviso recente (partida fria). */
+export function attachWaterReminderListener(onWater: () => void): void {
+  try {
+    Notifications.addNotificationReceivedListener((n) => {
+      if (n.request.identifier.startsWith(WATER_PREFIX)) onWater();
+    });
+    Notifications.addNotificationResponseReceivedListener((r) => {
+      if (r.notification.request.identifier.startsWith(WATER_PREFIX)) onWater();
+    });
+    Notifications.getLastNotificationResponseAsync()
+      .then((r) => {
+        if (!r || !r.notification.request.identifier.startsWith(WATER_PREFIX)) return;
+        const raw = r.notification.date;
+        const ts = raw > 1e12 ? raw : raw * 1000; // iOS reporta em segundos
+        if (Date.now() - ts < 10 * 60 * 1000) onWater();
+      })
+      .catch(() => undefined);
+  } catch (e) {
+    console.warn('Lembretes indisponíveis neste ambiente:', e);
+  }
+}
+
 /** Reagenda os lembretes DAILY de todos os remédios ativos (apoio de memória). */
 export async function applyMedicationReminders(
   meds: Array<{ id: number; name: string; doseText: string | null; times: string[] }>,

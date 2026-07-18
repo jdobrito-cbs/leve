@@ -13,6 +13,10 @@ export const strings = {
     privacyNote: 'Seus dados ficam no seu aparelho. Nada é enviado sem o seu consentimento.',
     acceptLabel: 'Li e entendi',
     continueButton: 'Começar',
+    profileTitle: 'Seus dados',
+    profileBody:
+      'Usamos para personalizar metas, gráficos e relatórios. Você pode ajustar depois no Perfil.',
+    profileContinue: 'Concluir',
   },
   tabs: {
     today: 'Hoje',

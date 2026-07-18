@@ -36,11 +36,19 @@ export async function signInWithApple(db: AppDb): Promise<CloudAccount | null> {
         Apple.AppleAuthenticationScope.EMAIL,
       ],
     });
+    const fullName =
+      [credential.fullName?.givenName, credential.fullName?.familyName]
+        .filter(Boolean)
+        .join(' ') || null;
+    // A Apple envia nome/e-mail apenas na PRIMEIRA autorização do Apple ID;
+    // nos logins seguintes vêm nulos — preserva o que já foi salvo.
+    const prev = await getCloudAccount(db);
+    const samePrev = prev?.provider === 'apple' && prev.userId === credential.user;
     const account: CloudAccount = {
       provider: 'apple',
       userId: credential.user,
-      name: credential.fullName?.givenName ?? null,
-      email: credential.email ?? null,
+      name: fullName ?? (samePrev ? prev.name : null),
+      email: credential.email ?? (samePrev ? prev.email : null),
       connectedAt: new Date().toISOString(),
     };
     await setSetting(db, KEY, account);

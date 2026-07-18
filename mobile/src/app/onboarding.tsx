@@ -1,22 +1,100 @@
 import { router } from 'expo-router';
 import { Check, CloudUpload } from 'lucide-react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { AppText, Button, Card, DisclaimerBanner, HeroHeader, IconChip } from '@/design/components';
+import { brDateToIso, isoDateToBR } from '@/core/datetime';
+import {
+  AppText,
+  Button,
+  Card,
+  DateField,
+  DisclaimerBanner,
+  HeroHeader,
+  IconChip,
+  Input,
+  SegmentedChips,
+} from '@/design/components';
 import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
+import { getProfile, updateProfile } from '@/db/profileRepo';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
-import { isAppleSignInSupported, signInWithApple } from '@/services/cloudAccount';
+import { setSexSignal } from '@/features/profile/sexSignal';
+import type { SexOption } from '@/features/profile/useProfileForm';
+import { getCloudAccount, isAppleSignInSupported, signInWithApple } from '@/services/cloudAccount';
 import { strings } from '@/i18n/pt-BR';
 
-function AccountStep() {
+/** Dados básicos obrigatórios — a conta Apple/Google não fornece sexo nem
+ *  nascimento (a Apple envia só nome/e-mail, e apenas no primeiro login). */
+function ProfileStep() {
+  const [name, setName] = useState('');
+  const [sex, setSex] = useState<SexOption | null>(null);
+  const [birthStr, setBirthStr] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const profile = await getProfile(db).catch(() => null);
+      const account = await getCloudAccount(db).catch(() => null);
+      setName(profile?.name ?? account?.name ?? '');
+      if (profile?.sex) setSex(profile.sex as SexOption);
+      if (profile?.birthDate) setBirthStr(isoDateToBR(profile.birthDate));
+    })();
+  }, []);
+
+  const birthIso = brDateToIso(birthStr);
+  const canSave = name.trim().length > 0 && sex !== null && birthIso !== null;
+
+  async function onSave() {
+    if (!canSave || sex === null) return;
+    setSaving(true);
+    try {
+      await updateProfile(db, { name: name.trim(), sex, birthDate: birthIso });
+      setSexSignal(sex);
+      router.replace('/');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Card style={{ gap: spacing.md }}>
+      <AppText variant="title">{strings.onboarding.profileTitle}</AppText>
+      <AppText variant="caption" muted>
+        {strings.onboarding.profileBody}
+      </AppText>
+      <Input label={strings.profile.nameLabel} value={name} onChangeText={setName} />
+      <AppText variant="caption" muted>
+        {strings.profile.sexLabel}
+      </AppText>
+      <SegmentedChips
+        options={(
+          Object.keys(strings.profile.sexes) as Array<keyof typeof strings.profile.sexes>
+        ).map((value) => ({ value, label: strings.profile.sexes[value] }))}
+        value={sex}
+        onChange={(v) => setSex(v as SexOption)}
+      />
+      <DateField
+        label={strings.profile.birthDateLabel}
+        value={birthStr}
+        onChange={setBirthStr}
+      />
+      <Button
+        label={strings.onboarding.profileContinue}
+        onPress={onSave}
+        disabled={!canSave || saving}
+      />
+    </Card>
+  );
+}
+
+function AccountStep({ onDone }: { onDone: () => void }) {
   const { colors } = useTheme();
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   function finish() {
-    router.replace('/');
+    onDone();
   }
 
   async function onApple() {
@@ -73,7 +151,7 @@ export default function Onboarding() {
   const { colors } = useTheme();
   const [checked, setChecked] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [step, setStep] = useState<'consent' | 'account'>('consent');
+  const [step, setStep] = useState<'consent' | 'account' | 'profile'>('consent');
 
   async function onContinue() {
     setSaving(true);
@@ -138,8 +216,10 @@ export default function Onboarding() {
               disabled={!checked || saving}
             />
           </Card>
+        ) : step === 'account' ? (
+          <AccountStep onDone={() => setStep('profile')} />
         ) : (
-          <AccountStep />
+          <ProfileStep />
         )}
       </View>
     </ScrollView>

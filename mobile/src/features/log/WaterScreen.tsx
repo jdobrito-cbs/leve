@@ -7,6 +7,7 @@ import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
 import { addWater, waterTotalForDay } from '@/db/waterRepo';
+import { setMascotEvent } from '@/features/today/mascotSignal';
 import { getEffectiveWaterGoal } from '@/features/water/waterGoal';
 import { strings } from '@/i18n/pt-BR';
 
@@ -34,6 +35,8 @@ export function WaterScreen() {
 
   async function add(amountMl: number) {
     await addWater(db, amountMl, new Date());
+    // Gole registrado → panda hidratado por 1 minuto no Hoje.
+    setMascotEvent('hydrated');
     setCustom('');
     await load();
   }

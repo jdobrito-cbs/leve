@@ -13,7 +13,9 @@ import { db, initDb, isDbLockedError } from '@/db/client';
 import { getSetting } from '@/db/settingsRepo';
 import { seedFoodItemsIfEmpty } from '@/db/seed/tacoSeed';
 import { setThemeSignal, type ThemeMode } from '@/design/themeSignal';
+import { setMascotEvent } from '@/features/today/mascotSignal';
 import { autoSyncIfDue } from '@/services/health/healthSync';
+import { attachWaterReminderListener } from '@/services/reminders/reminders';
 import { strings } from '@/i18n/pt-BR';
 
 // No Expo Go alguns módulos nativos não existem — não pode derrubar o app.
@@ -89,6 +91,8 @@ export default function RootLayout() {
 
   useEffect(() => {
     load();
+    // Aviso da hora de beber água → panda com sede por 1 minuto.
+    attachWaterReminderListener(() => setMascotEvent('thirsty'));
   }, [load]);
 
   // Vigia: travou em alguma etapa → vira erro legível em vez de spinner eterno.

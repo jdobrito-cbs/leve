@@ -17,6 +17,7 @@ import {
   UtensilsCrossIcon,
 } from '@/design/logIcons';
 import { HappyPanda, HydratedPanda, ThirstyPanda } from '@/design/pandas';
+import { useMascot } from '@/features/today/mascotSignal';
 import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { estimateRelativeCurve } from '@/features/pk/pharmacokinetics';
@@ -107,6 +108,7 @@ export function TodayScreen() {
   const insets = useSafeAreaInsets();
   const { height: winH } = useWindowDimensions();
   const summary = useTodaySummary();
+  const mascot = useMascot();
   // Azul sólido até a altura do cabeçalho (início do primeiro box); o degradê
   // acontece logo abaixo e termina na cor do tema.
   const blueEnd = Math.min(0.85, (insets.top + 128) / winH);
@@ -158,18 +160,15 @@ export function TodayScreen() {
             {strings.today.summaryLabel} {formatDateBR(new Date())}
           </AppText>
         </View>
-        {/* Mascote da água: hidratado logo após um gole e com a meta batida;
-            com sede enquanto a meta não veio; feliz quando não há meta. */}
-        {(() => {
-          const goalMet =
-            summary.waterGoalMl > 0 && summary.waterMl >= summary.waterGoalMl;
-          const drankRecently =
-            summary.lastWaterAt != null &&
-            Date.now() - new Date(summary.lastWaterAt).getTime() < 30 * 60 * 1000;
-          if (goalMet || drankRecently) return <HydratedPanda width={128} />;
-          if (summary.waterGoalMl > 0) return <ThirstyPanda width={128} />;
-          return <HappyPanda />;
-        })()}
+        {/* Mascote: feliz por padrão; eventos trocam por 1 min e ele volta
+            sozinho (aviso de água → sede; gole registrado → hidratado). */}
+        {mascot === 'thirsty' ? (
+          <ThirstyPanda width={128} />
+        ) : mascot === 'hydrated' ? (
+          <HydratedPanda width={128} />
+        ) : (
+          <HappyPanda />
+        )}
       </View>
       <View style={{ padding: spacing.md, gap: spacing.md }}>
         {/* 1 — Água (transborda quando passa de 100%) */}
