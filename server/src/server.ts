@@ -58,6 +58,7 @@ import {
   LOCK_MS,
   MAX_FAILED,
   otpauthUrl,
+  qrDataUrl,
   readSessionCookie,
   serializeSessionCookie,
   signAdminSession,
@@ -509,7 +510,8 @@ export async function buildServer(options: ServerOptions) {
       if (sess.admin.totpEnabled) return reply.code(409).send({ error: '2FA já ativo' });
       const secret = generateTotpSecret();
       await adminStore.updateAdmin(sess.admin.id, { totpSecretEnc: encryptSecret(secret, encKey) });
-      return { secret, otpauthUrl: otpauthUrl(secret, sess.admin.username) };
+      const url = otpauthUrl(secret, sess.admin.username);
+      return { secret, otpauthUrl: url, qr: qrDataUrl(url) };
     });
 
     // Confirma o 2FA com um código válido e devolve os códigos de backup (uma vez).

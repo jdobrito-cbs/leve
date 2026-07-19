@@ -13,6 +13,7 @@ import {
   encryptSecret,
   generateBackupCodes,
   hashBackupCode,
+  qrDataUrl,
   readSessionCookie,
   signAdminSession,
   totpAt,
@@ -62,6 +63,14 @@ describe('TOTP (RFC 6238)', () => {
     // Código do passo anterior ainda vale (relógio levemente atrasado).
     const prev = totpAt(secret, 29_000, 6);
     expect(verifyTotp(secret, prev, 59_000)).toBe(true);
+  });
+});
+
+describe('QR code do 2FA', () => {
+  it('gera um data URL de imagem a partir do otpauth', () => {
+    const url = qrDataUrl('otpauth://totp/Leve:jorge?secret=JBSWY3DPEHPK3PXP&issuer=Leve');
+    expect(url).toMatch(/^data:image\/gif;base64,/);
+    expect(url.length).toBeGreaterThan(200);
   });
 });
 

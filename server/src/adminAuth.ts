@@ -8,6 +8,7 @@ import {
   timingSafeEqual,
 } from 'node:crypto';
 import jwt from 'jsonwebtoken';
+import qrcode from 'qrcode-generator';
 import type { AdminRecord, AdminRole } from './store.js';
 
 /**
@@ -109,6 +110,15 @@ export function otpauthUrl(secretBase32: string, account: string, issuer = 'Leve
     period: '30',
   });
   return `otpauth://totp/${label}?${params.toString()}`;
+}
+
+/** QR code (data URL GIF) do otpauth para escanear no app autenticador.
+ *  data: é permitido pelo CSP em <img>; nenhuma dependência de rede. */
+export function qrDataUrl(text: string): string {
+  const qr = qrcode(0, 'M');
+  qr.addData(text);
+  qr.make();
+  return qr.createDataURL(4, 8);
 }
 
 // ---------------------------------------------------------------------------

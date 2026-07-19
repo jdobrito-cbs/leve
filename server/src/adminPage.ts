@@ -71,6 +71,8 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
     text-align:center;color:var(--blue);user-select:all}
   .secretbox{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px;
     text-align:center;font-size:17px;font-weight:700;letter-spacing:2px;user-select:all;word-break:break-all}
+  .qrbox{background:#fff;border-radius:14px;padding:12px;width:max-content;margin:2px auto 10px;line-height:0}
+  .qrbox img{display:block;width:200px;height:200px;image-rendering:pixelated}
   .codes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
   .codes span{background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:9px;
     text-align:center;font-size:15px;letter-spacing:1px;user-select:all}
@@ -177,11 +179,12 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
       <p class="lead">Obrigatória para todos. Você vai precisar de um app autenticador (Google Authenticator, Authy, etc.).</p>
       <div class="card">
         <ol class="steps">
-          <li>Abra seu app autenticador e escolha adicionar uma conta manualmente.</li>
-          <li>Informe o nome "Leve" e cole a chave abaixo.</li>
+          <li>Abra seu app autenticador (Google Authenticator, Authy, etc.).</li>
+          <li>Escaneie o QR code abaixo — ou adicione manualmente com a chave.</li>
           <li>Digite o código de 6 dígitos que aparecer para confirmar.</li>
         </ol>
-        <label>Chave de configuração</label>
+        <div class="qrbox"><img id="en-qr" alt="QR code para o app autenticador" width="200" height="200"/></div>
+        <div class="center faint" style="margin:2px 0 8px">ou digite esta chave no app</div>
         <div class="secretbox mono" id="en-secret">…</div>
         <div class="center" style="margin:10px 0 16px"><a class="link" id="en-link" href="#">Abrir no app autenticador</a></div>
         <div class="field">
@@ -359,6 +362,7 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
     api('/admin/2fa/setup','POST').then(function(r){
       if(!r.ok){$('en-err').textContent=(r.json&&r.json.error)||'erro ao iniciar';return;}
       $('en-secret').textContent=(r.json.secret||'').replace(/(.{4})/g,'$1 ').trim();
+      if(r.json.qr)$('en-qr').src=r.json.qr;
       $('en-link').setAttribute('href',r.json.otpauthUrl||'#');
       $('en-code').focus();
     });
