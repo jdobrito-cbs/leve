@@ -18,6 +18,7 @@ import { getEffectiveWaterGoal } from '@/features/water/waterGoal';
 import { getCloudAccount } from '@/services/cloudAccount';
 import { getHealthProvider } from '@/services/health/HealthProvider';
 import { autoSyncIfDue, readTodaySteps } from '@/services/health/healthSync';
+import { checkMovementIfDue } from '@/services/activity/movementCheck';
 
 export interface HealthLatest {
   sleepHours: number | null;
@@ -95,6 +96,8 @@ export function useTodaySummary(): TodaySummary {
   const refresh = useCallback(async () => {
     // Balança/wearable → app de saúde → Leve, sem toque (throttle de 1 h).
     await autoSyncIfDue(db).catch(() => undefined);
+    // Mesmo ciclo: sem passos na última hora → aviso de levantar e caminhar.
+    checkMovementIfDue(db).catch(() => undefined);
     const now = new Date();
     const startOfDay = new Date(now);
     startOfDay.setHours(0, 0, 0, 0);

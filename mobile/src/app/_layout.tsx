@@ -17,6 +17,10 @@ import { setThemeSignal, type ThemeMode } from '@/design/themeSignal';
 import { revalidatePartnerIfDue } from '@/features/premium/partnerServer';
 import { setMascotEvent } from '@/features/today/mascotSignal';
 import { autoSyncIfDue } from '@/services/health/healthSync';
+import { checkMovementIfDue } from '@/services/activity/movementCheck';
+// Importa no escopo global: o defineTask da tarefa horária precisa existir
+// também quando o sistema acorda o app em segundo plano (partida headless).
+import { registerHealthBackgroundTask } from '@/services/activity/backgroundTasks';
 import { attachReminderMascotListeners } from '@/services/reminders/reminders';
 import { strings } from '@/i18n/pt-BR';
 
@@ -87,6 +91,10 @@ export default function RootLayout() {
         setReady(true);
         // Busca automática da saúde na abertura (Premium; throttle de 1 h).
         autoSyncIfDue(db).catch(() => undefined);
+        // Sem passos na última hora → aviso de levantar (mesmo ciclo de 1 h).
+        checkMovementIfDue(db).catch(() => undefined);
+        // Tarefa horária em segundo plano (sync + movimento) — melhor esforço.
+        registerHealthBackgroundTask().catch(() => undefined);
         // Chave de parceiro do servidor: reconfere (revogação vale aqui).
         revalidatePartnerIfDue(db).catch(() => undefined);
       })

@@ -11,6 +11,19 @@ export interface ReminderSettings {
   waterTimes: string[]; // 'HH:MM'
   insightsEnabled?: boolean;
   appointmentsEnabled?: boolean;
+  /** Lembretes diários dos remédios de apoio (horários de cada remédio). */
+  medsEnabled?: boolean;
+  /** Aviso diário na hora de dormir; horário vem do sono no app de saúde. */
+  sleepEnabled?: boolean;
+  sleepTime?: string; // 'HH:MM'
+  /** true = segue a detecção automática; false = horário fixado pelo usuário. */
+  sleepAuto?: boolean;
+  /** "Bom dia" + copo de água na hora típica de acordar. */
+  wakeEnabled?: boolean;
+  wakeTime?: string; // 'HH:MM'
+  wakeAuto?: boolean;
+  /** Aviso para levantar e caminhar quando não há passos na última hora. */
+  movementEnabled?: boolean;
 }
 
 export const DEFAULT_REMINDERS: ReminderSettings = {
@@ -19,6 +32,12 @@ export const DEFAULT_REMINDERS: ReminderSettings = {
   waterTimes: ['09:00', '13:00', '17:00', '21:00'],
   insightsEnabled: false,
   appointmentsEnabled: false,
+  medsEnabled: true,
+  sleepEnabled: false,
+  sleepAuto: true,
+  wakeEnabled: false,
+  wakeAuto: true,
+  movementEnabled: false,
 };
 
 const INSIGHTS_ID = 'insights-daily';
@@ -70,12 +89,14 @@ export function attachReminderMascotListeners(handlers: {
 
 /** Reagenda os lembretes DAILY de todos os remédios ativos (apoio de memória). */
 export async function applyMedicationReminders(
+  enabled: boolean,
   meds: Array<{ id: number; name: string; doseText: string | null; times: string[] }>,
 ): Promise<void> {
   await safely(async () => {
     for (let i = 0; i < MAX_MED_SLOTS; i++) {
       await Notifications.cancelScheduledNotificationAsync(`${MED_PREFIX}${i}`);
     }
+    if (!enabled) return;
     let slot = 0;
     for (const med of meds) {
       for (const time of med.times) {
@@ -91,6 +112,54 @@ export async function applyMedicationReminders(
         });
       }
     }
+  });
+}
+
+const SLEEP_ID = 'sleep-reminder';
+// Prefixo water- de propósito: tocar no aviso matinal acorda o panda com sede.
+const MORNING_ID = 'water-morning';
+const MOVE_ID = 'movement-alert';
+
+/** Aviso diário na hora de dormir (horário do sono do app de saúde ou do usuário). */
+export async function applySleepReminder(enabled: boolean, time: string | undefined): Promise<void> {
+  await safely(async () => {
+    await Notifications.cancelScheduledNotificationAsync(SLEEP_ID);
+    if (!enabled || !time || !/^\d{2}:\d{2}$/.test(time)) return;
+    const [hour, minute] = time.split(':').map(Number);
+    await Notifications.scheduleNotificationAsync({
+      identifier: SLEEP_ID,
+      content: { title: strings.reminders.sleepTitle, body: strings.reminders.sleepBody },
+      trigger: { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour, minute },
+    });
+  });
+}
+
+/** "Bom dia" + copo de água, entregue na hora típica de acordar — fica na tela
+ *  bloqueada e aparece quando a pessoa pega o celular pela primeira vez. */
+export async function applyMorningWaterReminder(
+  enabled: boolean,
+  time: string | undefined,
+): Promise<void> {
+  await safely(async () => {
+    await Notifications.cancelScheduledNotificationAsync(MORNING_ID);
+    if (!enabled || !time || !/^\d{2}:\d{2}$/.test(time)) return;
+    const [hour, minute] = time.split(':').map(Number);
+    await Notifications.scheduleNotificationAsync({
+      identifier: MORNING_ID,
+      content: { title: strings.reminders.morningTitle, body: strings.reminders.morningBody },
+      trigger: { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour, minute },
+    });
+  });
+}
+
+/** Aviso imediato de levantar e caminhar (sem passos na última hora). */
+export async function sendMovementAlert(): Promise<void> {
+  await safely(async () => {
+    await Notifications.scheduleNotificationAsync({
+      identifier: MOVE_ID,
+      content: { title: strings.reminders.moveTitle, body: strings.reminders.moveBody },
+      trigger: null,
+    });
   });
 }
 

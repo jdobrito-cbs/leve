@@ -13,10 +13,15 @@ import {
 import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
+import { getSetting } from '@/db/settingsRepo';
 import { isLocked } from '@/features/premium/gates';
 import { usePremium } from '@/features/premium/usePremium';
 import { strings } from '@/i18n/pt-BR';
-import { applyMedicationReminders, requestNotificationPermission } from '@/services/reminders/reminders';
+import {
+  applyMedicationReminders,
+  requestNotificationPermission,
+  type ReminderSettings,
+} from '@/services/reminders/reminders';
 import {
   DAILY_DOSE_COUNTS,
   Medication,
@@ -45,7 +50,13 @@ export function MedsScreen() {
   const [name, setName] = useState('');
   const [doseText, setDoseText] = useState('');
   const [doseCount, setDoseCount] = useState('1');
-  const autoTimes = timesForDailyCount(Number(doseCount));
+  // Horários sugeridos pelo sistema, editáveis pela pessoa antes de adicionar.
+  const [timesStr, setTimesStr] = useState(timesForDailyCount(1).join(', '));
+
+  function pickDoseCount(v: string) {
+    setDoseCount(v);
+    setTimesStr(timesForDailyCount(Number(v)).join(', '));
+  }
 
   const load = useCallback(async () => {
     setMeds(await listMedications(db));
@@ -79,23 +90,31 @@ export function MedsScreen() {
 
   async function reschedule() {
     const active = await listMedications(db);
+    const r = await getSetting<ReminderSettings>(db, 'reminders');
     await applyMedicationReminders(
+      r?.medsEnabled ?? true,
       active.map((m) => ({ id: m.id, name: m.name, doseText: m.doseText, times: parseTimes(m.times) })),
     );
   }
 
   async function add() {
     if (!name.trim()) return;
+    const custom = timesStr
+      .split(',')
+      .map((t) => t.trim())
+      .filter((t) => /^\d{2}:\d{2}$/.test(t))
+      .sort();
     await addMedication(db, {
       name: name.trim(),
       doseText: doseText.trim() || null,
-      times: autoTimes,
+      times: custom.length ? custom : timesForDailyCount(Number(doseCount)),
     });
     await requestNotificationPermission();
     await reschedule();
     setName('');
     setDoseText('');
     setDoseCount('1');
+    setTimesStr(timesForDailyCount(1).join(', '));
     await load();
   }
 
@@ -161,9 +180,15 @@ export function MedsScreen() {
         <AppText variant="caption" muted>
           {strings.meds.dosesPerDayLabel}
         </AppText>
-        <SegmentedChips options={DOSE_COUNT_OPTIONS} value={doseCount} onChange={setDoseCount} />
+        <SegmentedChips options={DOSE_COUNT_OPTIONS} value={doseCount} onChange={pickDoseCount} />
+        <Input
+          label={strings.meds.timesLabel}
+          value={timesStr}
+          onChangeText={setTimesStr}
+          placeholder="08:00, 20:00"
+        />
         <AppText variant="caption" muted>
-          {strings.meds.timesPreview}: {autoTimes.join(' · ')}
+          {strings.meds.timesHint}
         </AppText>
         <Button label={strings.meds.add} onPress={add} disabled={!name.trim()} />
         <AppText variant="caption" muted>

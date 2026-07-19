@@ -7,7 +7,14 @@ import { getSetting, setSetting } from '@/db/settingsRepo';
 import { addWeight, weightsSince } from '@/db/weightRepo';
 import { getEntitlement, isPremium } from '@/features/premium/entitlement';
 import { isLocked } from '@/features/premium/gates';
+import {
+  applyMorningWaterReminder,
+  applySleepReminder,
+  DEFAULT_REMINDERS,
+  type ReminderSettings,
+} from '@/services/reminders/reminders';
 import { getHealthProvider, type HealthProvider } from './HealthProvider';
+import { typicalBedtime, typicalWakeTime } from './sleepSchedule';
 
 /**
  * Importa pesos do provider para o banco local (opt-in, acionado pelo usuário).
@@ -78,8 +85,40 @@ export async function autoSyncIfDue(db: AppDb, provider?: HealthProvider): Promi
   const p = provider ?? getHealthProvider();
   await importWeights(db, p);
   await importMetrics(db, p);
+  await detectSleepSchedule(db, p).catch(() => undefined);
   await setSetting(db, 'lastHealthSyncAt', new Date().toISOString());
   return true;
+}
+
+/**
+ * Detecta os horários típicos de dormir e acordar (últimas 14 noites) e guarda
+ * como sugestão. Se o lembrete correspondente está ligado no modo automático,
+ * reagenda com o horário novo; horário fixado pelo usuário nunca é alterado.
+ */
+export async function detectSleepSchedule(db: AppDb, provider: HealthProvider): Promise<void> {
+  const since = new Date();
+  since.setDate(since.getDate() - 14);
+  const nights = await provider.readSleepNights(since);
+  const bed = typicalBedtime(nights);
+  const wake = typicalWakeTime(nights);
+  if (!bed && !wake) return;
+  if (bed) await setSetting(db, 'sleepBedtimeDetected', bed);
+  if (wake) await setSetting(db, 'sleepWakeDetected', wake);
+
+  const r =
+    (await getSetting<ReminderSettings>(db, 'reminders')) ?? DEFAULT_REMINDERS;
+  let changed = false;
+  if (bed && r.sleepEnabled && r.sleepAuto !== false && r.sleepTime !== bed) {
+    r.sleepTime = bed;
+    await applySleepReminder(true, bed);
+    changed = true;
+  }
+  if (wake && r.wakeEnabled && r.wakeAuto !== false && r.wakeTime !== wake) {
+    r.wakeTime = wake;
+    await applyMorningWaterReminder(true, wake);
+    changed = true;
+  }
+  if (changed) await setSetting(db, 'reminders', r);
 }
 
 /** Passos de hoje segundo o provider; null quando não há dado (ou provider indisponível). */

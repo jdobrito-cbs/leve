@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import { localDayKey } from '@/core/datetime';
 import type { MetricSample, MetricType } from '@/core/metrics';
-import type { HealthProvider, StepsSample, WeightSample } from './HealthProvider';
+import type { HealthProvider, SleepNight, StepsSample, WeightSample } from './HealthProvider';
 
 interface WeightRecord {
   weight?: { inKilograms?: number | null } | null;
@@ -115,6 +115,55 @@ export class HealthConnectProvider implements HealthProvider {
         byDay.set(day, (byDay.get(day) ?? 0) + r.count);
       }
       return [...byDay.entries()].map(([date, count]) => ({ date, count }));
+    } catch {
+      return [];
+    }
+  }
+
+  async readStepsWindow(start: Date, end: Date): Promise<number | null> {
+    if (!this.mod) return null;
+    try {
+      const { records } = await this.mod.readRecords('Steps', {
+        timeRangeFilter: {
+          operator: 'between',
+          startTime: start.toISOString(),
+          endTime: end.toISOString(),
+        },
+      });
+      return (records as StepsRecord[]).reduce((sum, r) => sum + (r.count ?? 0), 0);
+    } catch {
+      return null;
+    }
+  }
+
+  /** Noites de sono (deitar → acordar); sonecas <3h ficam de fora, como no iPhone. */
+  async readSleepNights(since: Date): Promise<SleepNight[]> {
+    if (!this.mod) return [];
+    try {
+      const { records } = await this.mod.readRecords('SleepSession', {
+        timeRangeFilter: {
+          operator: 'between',
+          startTime: since.toISOString(),
+          endTime: new Date().toISOString(),
+        },
+      });
+      const nights = new Map<string, { start: Date; end: Date; totalMs: number }>();
+      for (const r of records as Array<{ startTime?: string; endTime?: string }>) {
+        if (!r.startTime || !r.endTime) continue;
+        const start = new Date(r.startTime);
+        const end = new Date(r.endTime);
+        const ms = end.getTime() - start.getTime();
+        if (!(ms > 0)) continue;
+        const key = localDayKey(end);
+        const night = nights.get(key) ?? { start, end, totalMs: 0 };
+        if (start < night.start) night.start = start;
+        if (end > night.end) night.end = end;
+        night.totalMs += ms;
+        nights.set(key, night);
+      }
+      return [...nights.values()]
+        .filter((n) => n.totalMs >= 3 * 36e5)
+        .map(({ start, end }) => ({ start, end }));
     } catch {
       return [];
     }

@@ -9,6 +9,9 @@ jest.mock('expo-notifications', () => ({
 
 import {
   applyAppointmentReminders,
+  applyMedicationReminders,
+  applyMorningWaterReminder,
+  applySleepReminder,
   applyWaterReminders,
   scheduleDoseReminder,
 } from '../reminders';
@@ -54,5 +57,37 @@ test('água agenda um DAILY por horário e cancela os antigos', async () => {
   expect(mockSchedule).toHaveBeenCalledTimes(2);
   mockSchedule.mockClear();
   await applyWaterReminders(false, []);
+  expect(mockSchedule).not.toHaveBeenCalled();
+});
+
+test('hora de dormir e bom dia agendam DAILY no horário; desligado ou inválido não', async () => {
+  await applySleepReminder(true, '23:10');
+  expect(mockSchedule).toHaveBeenCalledWith(
+    expect.objectContaining({
+      identifier: 'sleep-reminder',
+      trigger: expect.objectContaining({ hour: 23, minute: 10 }),
+    }),
+  );
+  await applyMorningWaterReminder(true, '06:50');
+  expect(mockSchedule).toHaveBeenCalledWith(
+    expect.objectContaining({
+      identifier: 'water-morning',
+      trigger: expect.objectContaining({ hour: 6, minute: 50 }),
+    }),
+  );
+  mockSchedule.mockClear();
+  await applySleepReminder(false, '23:10');
+  await applySleepReminder(true, undefined);
+  await applyMorningWaterReminder(true, '25h77');
+  expect(mockSchedule).not.toHaveBeenCalled();
+});
+
+test('remédios: agenda por horário quando ligado; desligado só cancela', async () => {
+  const meds = [{ id: 1, name: 'Metformina', doseText: '850 mg', times: ['08:00', '20:00'] }];
+  await applyMedicationReminders(true, meds);
+  expect(mockSchedule).toHaveBeenCalledTimes(2);
+  mockSchedule.mockClear();
+  await applyMedicationReminders(false, meds);
+  expect(mockCancel).toHaveBeenCalledWith('med-0');
   expect(mockSchedule).not.toHaveBeenCalled();
 });

@@ -15,9 +15,13 @@ import {
   ReminderSettings,
   applyAppointmentReminders,
   applyInsightsReminder,
+  applyMedicationReminders,
+  applyMorningWaterReminder,
+  applySleepReminder,
   applyWaterReminders,
   requestNotificationPermission,
 } from '@/services/reminders/reminders';
+import { listMedications, parseTimes } from '@/features/meds/medsRepo';
 
 export type SexOption = 'feminino' | 'masculino' | 'nao_informar';
 
@@ -36,6 +40,12 @@ export interface ProfileForm {
   waterTimesStr: string; // 'HH:MM, HH:MM'
   insightsEnabled: boolean;
   appointmentsEnabled: boolean;
+  medsEnabled: boolean;
+  sleepEnabled: boolean;
+  sleepTimeStr: string; // 'HH:MM'
+  wakeEnabled: boolean;
+  wakeTimeStr: string; // 'HH:MM'
+  movementEnabled: boolean;
 }
 
 const EMPTY_FORM: ProfileForm = {
@@ -53,6 +63,12 @@ const EMPTY_FORM: ProfileForm = {
   waterTimesStr: DEFAULT_REMINDERS.waterTimes.join(', '),
   insightsEnabled: false,
   appointmentsEnabled: false,
+  medsEnabled: true,
+  sleepEnabled: false,
+  sleepTimeStr: '22:30',
+  wakeEnabled: false,
+  wakeTimeStr: '07:00',
+  movementEnabled: false,
 };
 
 export function useProfileForm() {
@@ -61,17 +77,24 @@ export function useProfileForm() {
   const [saved, setSaved] = useState(false);
   const [permissionError, setPermissionError] = useState(false);
   const [autoGoalMl, setAutoGoalMl] = useState<number | null>(null);
+  const [detectedBedtime, setDetectedBedtime] = useState<string | null>(null);
+  const [detectedWake, setDetectedWake] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const [profile, reminders, waterAuto, weight, doseInterval, account] = await Promise.all([
-      getProfile(db),
-      getSetting<ReminderSettings>(db, 'reminders'),
-      getSetting<boolean>(db, 'waterGoalAuto'),
-      latestWeight(db),
-      getSetting<number>(db, 'doseIntervalDays'),
-      getCloudAccount(db).catch(() => null),
-    ]);
+    const [profile, reminders, waterAuto, weight, doseInterval, account, bedDet, wakeDet] =
+      await Promise.all([
+        getProfile(db),
+        getSetting<ReminderSettings>(db, 'reminders'),
+        getSetting<boolean>(db, 'waterGoalAuto'),
+        latestWeight(db),
+        getSetting<number>(db, 'doseIntervalDays'),
+        getCloudAccount(db).catch(() => null),
+        getSetting<string>(db, 'sleepBedtimeDetected'),
+        getSetting<string>(db, 'sleepWakeDetected'),
+      ]);
     const r = reminders ?? DEFAULT_REMINDERS;
+    setDetectedBedtime(bedDet);
+    setDetectedWake(wakeDet);
     setAutoGoalMl(weight ? waterGoalFromWeightKg(weight.weightKg) : null);
     setForm({
       // Sem nome salvo, usa o da conta conectada (Apple/Google).
@@ -89,6 +112,12 @@ export function useProfileForm() {
       waterTimesStr: r.waterTimes.join(', '),
       insightsEnabled: r.insightsEnabled ?? false,
       appointmentsEnabled: r.appointmentsEnabled ?? false,
+      medsEnabled: r.medsEnabled ?? true,
+      sleepEnabled: r.sleepEnabled ?? false,
+      sleepTimeStr: r.sleepTime ?? bedDet ?? '22:30',
+      wakeEnabled: r.wakeEnabled ?? false,
+      wakeTimeStr: r.wakeTime ?? wakeDet ?? '07:00',
+      movementEnabled: r.movementEnabled ?? false,
     });
     setLoading(false);
   }, []);
@@ -106,15 +135,37 @@ export function useProfileForm() {
 
   const save = useCallback(async () => {
     setPermissionError(false);
-    let { doseEnabled, waterEnabled, insightsEnabled, appointmentsEnabled } = form;
+    let {
+      doseEnabled,
+      waterEnabled,
+      insightsEnabled,
+      appointmentsEnabled,
+      medsEnabled,
+      sleepEnabled,
+      wakeEnabled,
+      movementEnabled,
+    } = form;
 
-    if (doseEnabled || waterEnabled || insightsEnabled || appointmentsEnabled) {
+    const anyOn =
+      doseEnabled ||
+      waterEnabled ||
+      insightsEnabled ||
+      appointmentsEnabled ||
+      medsEnabled ||
+      sleepEnabled ||
+      wakeEnabled ||
+      movementEnabled;
+    if (anyOn) {
       const granted = await requestNotificationPermission();
       if (!granted) {
         doseEnabled = false;
         waterEnabled = false;
         insightsEnabled = false;
         appointmentsEnabled = false;
+        medsEnabled = false;
+        sleepEnabled = false;
+        wakeEnabled = false;
+        movementEnabled = false;
         setPermissionError(true);
         setForm((f) => ({
           ...f,
@@ -122,6 +173,10 @@ export function useProfileForm() {
           waterEnabled: false,
           insightsEnabled: false,
           appointmentsEnabled: false,
+          medsEnabled: false,
+          sleepEnabled: false,
+          wakeEnabled: false,
+          movementEnabled: false,
         }));
       }
     }
@@ -140,12 +195,26 @@ export function useProfileForm() {
       waterGoalMl: parseDecimalBR(form.waterGoalStr) ?? 2000,
       calorieGoalKcal: parseDecimalBR(form.calorieGoalStr),
     });
+    const validTime = (s: string, fallback: string) =>
+      /^\d{2}:\d{2}$/.test(s.trim()) ? s.trim() : fallback;
+    const sleepTime = validTime(form.sleepTimeStr, detectedBedtime ?? '22:30');
+    const wakeTime = validTime(form.wakeTimeStr, detectedWake ?? '07:00');
     const reminders: ReminderSettings = {
       doseEnabled,
       waterEnabled,
       waterTimes: waterTimes.length ? waterTimes : DEFAULT_REMINDERS.waterTimes,
       insightsEnabled,
       appointmentsEnabled,
+      medsEnabled,
+      sleepEnabled,
+      sleepTime,
+      // Igual ao detectado (ou sem detecção ainda) = segue o sono automaticamente;
+      // horário próprio digitado = fica fixo e o sync não mexe.
+      sleepAuto: detectedBedtime === null || sleepTime === detectedBedtime,
+      wakeEnabled,
+      wakeTime,
+      wakeAuto: detectedWake === null || wakeTime === detectedWake,
+      movementEnabled,
     };
     // A aba Ciclo só muda depois de SALVAR o sexo (não no clique do chip).
     setSexSignal(form.sex ?? 'nao_informar');
@@ -159,8 +228,30 @@ export function useProfileForm() {
     await applyWaterReminders(reminders.waterEnabled, reminders.waterTimes);
     await applyInsightsReminder(insightsEnabled);
     await applyAppointmentReminders(appointmentsEnabled, await listAppointments(db));
+    await applySleepReminder(sleepEnabled, sleepTime);
+    await applyMorningWaterReminder(wakeEnabled, wakeTime);
+    const activeMeds = await listMedications(db);
+    await applyMedicationReminders(
+      medsEnabled,
+      activeMeds.map((m) => ({
+        id: m.id,
+        name: m.name,
+        doseText: m.doseText,
+        times: parseTimes(m.times),
+      })),
+    );
     setSaved(true);
-  }, [form]);
+  }, [form, detectedBedtime, detectedWake]);
 
-  return { loading, form, setField, save, saved, permissionError, autoGoalMl };
+  return {
+    loading,
+    form,
+    setField,
+    save,
+    saved,
+    permissionError,
+    autoGoalMl,
+    detectedBedtime,
+    detectedWake,
+  };
 }

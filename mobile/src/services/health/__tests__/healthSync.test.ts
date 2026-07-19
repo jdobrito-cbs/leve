@@ -6,7 +6,13 @@ import { latestWeight, weightsSince } from '@/db/weightRepo';
 import { getSetting, setSetting } from '@/db/settingsRepo';
 import { latestMetrics } from '@/db/metricsRepo';
 import type { HealthProvider } from '../HealthProvider';
-import { autoSyncIfDue, importMetrics, importWeights, readTodaySteps } from '../healthSync';
+import {
+  autoSyncIfDue,
+  detectSleepSchedule,
+  importMetrics,
+  importWeights,
+  readTodaySteps,
+} from '../healthSync';
 
 function makeDb() {
   const sqlite = new Database(':memory:');
@@ -28,6 +34,8 @@ function fakeProvider(): HealthProvider {
       { type: 'body_fat_pct', value: 31.4, takenAt: new Date('2026-07-01T08:00:00.000Z') },
       { type: 'sleep_hours', value: 6.5, takenAt: new Date('2026-07-01T07:00:00.000Z') },
     ],
+    readSleepNights: async () => [],
+    readStepsWindow: async () => null,
   };
 }
 
@@ -63,6 +71,35 @@ test('autoSyncIfDue exige premium e respeita conexão e throttle de 1h', async (
   expect(await autoSyncIfDue(db, provider)).toBe(true);
   expect(await getSetting(db, 'lastHealthSyncAt')).not.toBeNull();
   expect(await autoSyncIfDue(db, provider)).toBe(false); // dentro da 1h
+});
+
+test('detectSleepSchedule guarda sugestões e atualiza lembrete automático', async () => {
+  const db = makeDb() as never;
+  const provider: HealthProvider = {
+    ...fakeProvider(),
+    readSleepNights: async () => [
+      { start: new Date(2026, 6, 10, 22, 55), end: new Date(2026, 6, 11, 6, 55) },
+      { start: new Date(2026, 6, 11, 23, 0), end: new Date(2026, 6, 12, 7, 0) },
+      { start: new Date(2026, 6, 12, 23, 5), end: new Date(2026, 6, 13, 7, 5) },
+      { start: new Date(2026, 6, 13, 23, 0), end: new Date(2026, 6, 14, 7, 0) },
+    ],
+  };
+  await setSetting(db, 'reminders', {
+    doseEnabled: false,
+    waterEnabled: false,
+    waterTimes: [],
+    sleepEnabled: true,
+    sleepAuto: true,
+    wakeEnabled: true,
+    wakeAuto: false,
+    wakeTime: '06:00', // fixado pelo usuário — a detecção não pode mexer
+  });
+  await detectSleepSchedule(db, provider);
+  expect(await getSetting(db, 'sleepBedtimeDetected')).toBe('23:00');
+  expect(await getSetting(db, 'sleepWakeDetected')).toBe('07:00');
+  const r = await getSetting<{ sleepTime?: string; wakeTime?: string }>(db, 'reminders');
+  expect(r?.sleepTime).toBe('23:00'); // automático seguiu a detecção
+  expect(r?.wakeTime).toBe('06:00'); // fixo permaneceu intocado
 });
 
 test('readTodaySteps devolve o total do dia ou null', async () => {

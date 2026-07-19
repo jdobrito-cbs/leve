@@ -110,7 +110,17 @@ function HealthSection() {
 export function ProfileScreen() {
   const { colors, mode } = useTheme();
   const { premium } = usePremium();
-  const { loading, form, setField, save, saved, permissionError, autoGoalMl } = useProfileForm();
+  const {
+    loading,
+    form,
+    setField,
+    save,
+    saved,
+    permissionError,
+    autoGoalMl,
+    detectedBedtime,
+    detectedWake,
+  } = useProfileForm();
   const birthIso = brDateToIso(form.birthDateStr);
   const age = birthIso ? ageFromIsoDate(birthIso) : null;
   const [reportMsg, setReportMsg] = useState<string | null>(null);
@@ -288,6 +298,84 @@ export function ProfileScreen() {
             placeholder="09:00, 13:00, 17:00, 21:00"
           />
         ) : null}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <View style={{ flex: 1 }}>
+            <AppText>{strings.profile.medsReminder}</AppText>
+            <AppText variant="caption" muted>
+              {strings.profile.medsReminderHint}
+            </AppText>
+          </View>
+          <AppSwitch
+            value={form.medsEnabled}
+            onValueChange={(v) => setField('medsEnabled', v)}
+          />
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <View style={{ flex: 1 }}>
+            <AppText>{strings.profile.sleepReminder}</AppText>
+            <AppText variant="caption" muted>
+              {strings.profile.sleepReminderHint}
+            </AppText>
+          </View>
+          <AppSwitch
+            value={form.sleepEnabled}
+            onValueChange={(v) => setField('sleepEnabled', v)}
+          />
+        </View>
+        {form.sleepEnabled ? (
+          <>
+            <Input
+              label={strings.profile.sleepTimeLabel}
+              value={form.sleepTimeStr}
+              onChangeText={(v) => setField('sleepTimeStr', v)}
+              placeholder="22:30"
+            />
+            <AppText variant="caption" muted>
+              {detectedBedtime
+                ? strings.profile.sleepDetected.replace('{time}', detectedBedtime)
+                : strings.profile.sleepNotDetected}
+            </AppText>
+          </>
+        ) : null}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <View style={{ flex: 1 }}>
+            <AppText>{strings.profile.wakeReminder}</AppText>
+            <AppText variant="caption" muted>
+              {strings.profile.wakeReminderHint}
+            </AppText>
+          </View>
+          <AppSwitch
+            value={form.wakeEnabled}
+            onValueChange={(v) => setField('wakeEnabled', v)}
+          />
+        </View>
+        {form.wakeEnabled ? (
+          <>
+            <Input
+              label={strings.profile.wakeTimeLabel}
+              value={form.wakeTimeStr}
+              onChangeText={(v) => setField('wakeTimeStr', v)}
+              placeholder="07:00"
+            />
+            <AppText variant="caption" muted>
+              {detectedWake
+                ? strings.profile.wakeDetected.replace('{time}', detectedWake)
+                : strings.profile.wakeNotDetected}
+            </AppText>
+          </>
+        ) : null}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <View style={{ flex: 1 }}>
+            <AppText>{strings.profile.movementReminder}</AppText>
+            <AppText variant="caption" muted>
+              {strings.profile.movementReminderHint}
+            </AppText>
+          </View>
+          <AppSwitch
+            value={form.movementEnabled}
+            onValueChange={(v) => setField('movementEnabled', v)}
+          />
+        </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
           <View style={{ flex: 1 }}>
             <AppText>{strings.profile.insightsReminder}</AppText>
