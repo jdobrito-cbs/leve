@@ -1,5 +1,9 @@
 import type { PrismaClient } from '@prisma/client';
 import type {
+  AdminPatch,
+  AdminRecord,
+  AdminRole,
+  AdminStore,
   BackupRecord,
   ConsentRecord,
   PartnerKeyRecord,
@@ -8,7 +12,7 @@ import type {
   UserRecord,
 } from './store.js';
 
-export class PrismaStore implements Store, PartnerKeyStore {
+export class PrismaStore implements Store, PartnerKeyStore, AdminStore {
   constructor(private prisma: PrismaClient) {}
 
   private toPartnerRecord(k: {
@@ -18,6 +22,8 @@ export class PrismaStore implements Store, PartnerKeyStore {
     label: string;
     createdAt: Date;
     revokedAt: Date | null;
+    boundDeviceId: string | null;
+    boundAt: Date | null;
   }): PartnerKeyRecord {
     return {
       id: k.id,
@@ -26,6 +32,8 @@ export class PrismaStore implements Store, PartnerKeyStore {
       label: k.label,
       createdAt: k.createdAt.toISOString(),
       revokedAt: k.revokedAt ? k.revokedAt.toISOString() : null,
+      boundDeviceId: k.boundDeviceId,
+      boundAt: k.boundAt ? k.boundAt.toISOString() : null,
     };
   }
 
@@ -47,6 +55,100 @@ export class PrismaStore implements Store, PartnerKeyStore {
       data: { revokedAt: new Date() },
     });
     return updated.count > 0;
+  }
+  async bindPartnerKey(id: string, deviceId: string): Promise<boolean> {
+    // Só prende se ainda estiver livre e ativa (condição na cláusula where).
+    const updated = await this.prisma.partnerKey.updateMany({
+      where: { id, revokedAt: null, boundDeviceId: null },
+      data: { boundDeviceId: deviceId, boundAt: new Date() },
+    });
+    return updated.count > 0;
+  }
+  async unbindPartnerKey(id: string): Promise<boolean> {
+    const updated = await this.prisma.partnerKey.updateMany({
+      where: { id, NOT: { boundDeviceId: null } },
+      data: { boundDeviceId: null, boundAt: null },
+    });
+    return updated.count > 0;
+  }
+
+  private toAdminRecord(a: {
+    id: string;
+    username: string;
+    role: string;
+    passwordHash: string;
+    totpSecretEnc: string | null;
+    totpEnabled: boolean;
+    backupCodeHashes: string[];
+    tokenVersion: number;
+    failedAttempts: number;
+    lockedUntil: Date | null;
+    createdAt: Date;
+  }): AdminRecord {
+    return {
+      id: a.id,
+      username: a.username,
+      role: a.role as AdminRole,
+      passwordHash: a.passwordHash,
+      totpSecretEnc: a.totpSecretEnc,
+      totpEnabled: a.totpEnabled,
+      backupCodeHashes: a.backupCodeHashes,
+      tokenVersion: a.tokenVersion,
+      failedAttempts: a.failedAttempts,
+      lockedUntil: a.lockedUntil ? a.lockedUntil.toISOString() : null,
+      createdAt: a.createdAt.toISOString(),
+    };
+  }
+
+  async countAdmins(): Promise<number> {
+    return this.prisma.adminUser.count();
+  }
+  async createAdmin(rec: Omit<AdminRecord, 'id' | 'createdAt'>): Promise<AdminRecord> {
+    const a = await this.prisma.adminUser.create({
+      data: {
+        username: rec.username,
+        role: rec.role,
+        passwordHash: rec.passwordHash,
+        totpSecretEnc: rec.totpSecretEnc,
+        totpEnabled: rec.totpEnabled,
+        backupCodeHashes: rec.backupCodeHashes,
+        tokenVersion: rec.tokenVersion,
+        failedAttempts: rec.failedAttempts,
+        lockedUntil: rec.lockedUntil ? new Date(rec.lockedUntil) : null,
+      },
+    });
+    return this.toAdminRecord(a);
+  }
+  async listAdmins(): Promise<AdminRecord[]> {
+    const rows = await this.prisma.adminUser.findMany({ orderBy: { createdAt: 'asc' } });
+    return rows.map((a) => this.toAdminRecord(a));
+  }
+  async findAdminByUsername(username: string): Promise<AdminRecord | null> {
+    const a = await this.prisma.adminUser.findUnique({ where: { username } });
+    return a ? this.toAdminRecord(a) : null;
+  }
+  async findAdminById(id: string): Promise<AdminRecord | null> {
+    const a = await this.prisma.adminUser.findUnique({ where: { id } });
+    return a ? this.toAdminRecord(a) : null;
+  }
+  async updateAdmin(id: string, patch: AdminPatch): Promise<AdminRecord | null> {
+    const a = await this.prisma.adminUser.update({
+      where: { id },
+      data: {
+        ...patch,
+        lockedUntil:
+          patch.lockedUntil === undefined
+            ? undefined
+            : patch.lockedUntil === null
+              ? null
+              : new Date(patch.lockedUntil),
+      },
+    });
+    return this.toAdminRecord(a);
+  }
+  async deleteAdmin(id: string): Promise<boolean> {
+    await this.prisma.adminUser.delete({ where: { id } });
+    return true;
   }
 
   async createUser(email: string, passwordHash: string): Promise<UserRecord> {

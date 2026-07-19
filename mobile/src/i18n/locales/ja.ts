@@ -546,6 +546,7 @@ export const strings: Strings = {
     redeem: 'キーを使用',
     keyInvalid: '無効なキーです。キー全体をコピーしたかご確認ください。',
     keyOffline: 'キーを検証するためのサーバーに接続できません。インターネットに接続して、もう一度お試しください。',
+    keyInUse: 'このキーは別の端末で使用中です。解除を依頼するか、元の端末を使用してください。',
     activeTitle: 'Premium 有効',
     activePlans: {
       monthly: '月額サブスクリプションが有効です',

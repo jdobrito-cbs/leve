@@ -40,7 +40,32 @@ import {
   isPartnerKeyFormat,
   partnerKeyHint,
 } from './partnerKeys.js';
-import type { PartnerKeyStore, Store } from './store.js';
+import {
+  adminEncKey,
+  adminSessionSecret,
+  canChangePassword,
+  canCreateAdmin,
+  canDeleteAdmin,
+  canResetTotp,
+  clearSessionCookie,
+  decryptSecret,
+  encryptSecret,
+  ENROLL_TTL_SEC,
+  FULL_TTL_SEC,
+  generateBackupCodes,
+  generateTotpSecret,
+  hashBackupCode,
+  LOCK_MS,
+  MAX_FAILED,
+  otpauthUrl,
+  readSessionCookie,
+  serializeSessionCookie,
+  signAdminSession,
+  verifyAdminSession,
+  verifyTotp,
+  type AdminScope,
+} from './adminAuth.js';
+import type { AdminRecord, AdminStore, PartnerKeyStore, Store } from './store.js';
 
 export interface HubConfig {
   baseUrl: string;
@@ -110,11 +135,49 @@ export interface ServerOptions {
   jwtSecret?: string;
   /** Chaves de parceiro geridas pelo dono (painel /painel). */
   partnerStore?: PartnerKeyStore;
+  /** Administradores do painel (login + 2FA); ausente = só o ADMIN_TOKEN. */
+  adminStore?: AdminStore;
   adminToken?: string;
 }
 
 const partnerCreateSchema = z.object({ label: z.string().trim().min(1).max(120) });
-const partnerValidateSchema = z.object({ key: z.string().min(4).max(40) });
+const partnerValidateSchema = z.object({
+  key: z.string().min(4).max(40),
+  // Id do aparelho (gerado no app) para a trava de 1 dispositivo; opcional para
+  // compatibilidade com versões antigas do app, que validam só pela chave.
+  deviceId: z.string().trim().min(8).max(200).optional(),
+});
+
+// Painel: usuário legível, senha forte o suficiente para hash scrypt.
+const adminUsernameSchema = z
+  .string()
+  .trim()
+  .min(3)
+  .max(40)
+  .regex(/^[a-zA-Z0-9._-]+$/, 'use letras, números, ponto, hífen ou sublinhado');
+const adminPasswordSchema = z.string().min(8).max(200);
+const adminSetupSchema = z.object({
+  adminToken: z.string().min(1),
+  username: adminUsernameSchema,
+  password: adminPasswordSchema,
+});
+const adminLoginSchema = z.object({
+  username: z.string().min(1).max(40),
+  password: z.string().min(1).max(200),
+  code: z.string().trim().max(9).optional(),
+  backupCode: z.string().trim().max(20).optional(),
+});
+const adminConfirm2faSchema = z.object({ code: z.string().trim().min(6).max(7) });
+const adminCreateSchema = z.object({ username: adminUsernameSchema, password: adminPasswordSchema });
+const adminOwnPasswordSchema = z.object({
+  currentPassword: z.string().min(1).max(200),
+  newPassword: adminPasswordSchema,
+});
+const adminSetPasswordSchema = z.object({ newPassword: adminPasswordSchema });
+const adminRecoverSchema = z.object({
+  adminToken: z.string().min(1),
+  newPassword: adminPasswordSchema,
+});
 
 export async function buildServer(options: ServerOptions) {
   // Corpo pequeno por padrão (barra DoS de memória); só /scan-food e /backup
@@ -287,10 +350,334 @@ export async function buildServer(options: ServerOptions) {
     });
   }
 
-  const { partnerStore, adminToken } = options;
+  const { partnerStore, adminStore, adminToken } = options;
+
+  // Segredos derivados do ADMIN_TOKEN: assinam a sessão e cifram o segredo TOTP.
+  const adminSecret = adminToken ? adminSessionSecret(adminToken) : '';
+  const encKey = adminToken ? adminEncKey(adminToken) : Buffer.alloc(0);
+
+  /** Carrega o admin logado a partir do cookie de sessão (null se inválido). */
+  const loadSession = async (
+    req: FastifyRequest,
+    scope: 'full' | 'any',
+  ): Promise<{ admin: AdminRecord; scope: AdminScope } | null> => {
+    if (!adminStore || !adminToken) return null;
+    const raw = readSessionCookie(req.headers.cookie);
+    if (!raw) return null;
+    const session = verifyAdminSession(raw, adminSecret);
+    if (!session) return null;
+    if (scope === 'full' && session.scope !== 'full') return null;
+    const admin = await adminStore.findAdminById(session.sub);
+    if (!admin) return null;
+    if (admin.tokenVersion !== session.ver) return null; // sessão invalidada (troca de senha/reset)
+    return { admin, scope: session.scope };
+  };
+
+  /** Conta uma tentativa falha e bloqueia por um tempo ao passar do limite. */
+  const registerFailure = async (admin: AdminRecord): Promise<void> => {
+    if (!adminStore) return;
+    const failed = admin.failedAttempts + 1;
+    if (failed >= MAX_FAILED) {
+      await adminStore.updateAdmin(admin.id, {
+        failedAttempts: 0,
+        lockedUntil: new Date(Date.now() + LOCK_MS).toISOString(),
+      });
+    } else {
+      await adminStore.updateAdmin(admin.id, { failedAttempts: failed });
+    }
+  };
+
+  const setSession = (reply: FastifyReply, admin: AdminRecord, scope: AdminScope): void => {
+    const ttl = scope === 'full' ? FULL_TTL_SEC : ENROLL_TTL_SEC;
+    reply.header('set-cookie', serializeSessionCookie(signAdminSession(admin, scope, adminSecret, ttl), ttl));
+  };
+
+  // Painel (HTML) servido sempre que há ADMIN_TOKEN; as ações exigem sessão.
+  if (adminToken) {
+    app.get('/painel', async (_req, reply) =>
+      reply.type('text/html; charset=utf-8').send(ADMIN_PAGE_HTML),
+    );
+    app.get('/admin', async (_req, reply) => reply.redirect('/painel'));
+  }
+
+  // API de administradores (login + 2FA + CRUD). Precisa de store + ADMIN_TOKEN.
+  if (adminStore && adminToken) {
+    app.get(
+      '/admin/setup-state',
+      { config: { rateLimit: { max: 60, timeWindow: '1 minute' } } },
+      async () => ({ needsSetup: (await adminStore.countAdmins()) === 0 }),
+    );
+
+    // Cadastro do master — só na primeira vez e exige o ADMIN_TOKEN do servidor.
+    app.post(
+      '/admin/setup',
+      { config: { rateLimit: { max: 5, timeWindow: '1 minute' } } },
+      async (req, reply) => {
+        const parsed = adminSetupSchema.safeParse(req.body);
+        if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
+        if ((await adminStore.countAdmins()) > 0) {
+          return reply.code(409).send({ error: 'painel já configurado' });
+        }
+        if (!safeEqual(parsed.data.adminToken, adminToken)) {
+          return reply.code(401).send({ error: 'código do servidor incorreto' });
+        }
+        const master = await adminStore.createAdmin({
+          username: parsed.data.username,
+          role: 'master',
+          passwordHash: hashPassword(parsed.data.password),
+          totpSecretEnc: null,
+          totpEnabled: false,
+          backupCodeHashes: [],
+          tokenVersion: 0,
+          failedAttempts: 0,
+          lockedUntil: null,
+        });
+        setSession(reply, master, 'enroll'); // segue direto para configurar o 2FA
+        return { ok: true, needEnroll: true };
+      },
+    );
+
+    app.post(
+      '/admin/login',
+      { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } },
+      async (req, reply) => {
+        const parsed = adminLoginSchema.safeParse(req.body);
+        if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
+        const admin = await adminStore.findAdminByUsername(parsed.data.username);
+        if (admin?.lockedUntil && new Date(admin.lockedUntil).getTime() > Date.now()) {
+          return reply.code(429).send({ error: 'muitas tentativas; tente mais tarde' });
+        }
+        // Verifica sempre (hash real ou dummy) para não vazar usuários por timing.
+        const pwOk = verifyPassword(parsed.data.password, admin?.passwordHash ?? DUMMY_PASSWORD_HASH);
+        if (!admin || !pwOk) {
+          if (admin) await registerFailure(admin);
+          return reply.code(401).send({ error: 'usuário ou senha incorretos' });
+        }
+        if (!admin.totpEnabled) {
+          // Senha certa, mas 2FA ainda não configurado → sessão de configuração.
+          await adminStore.updateAdmin(admin.id, { failedAttempts: 0, lockedUntil: null });
+          setSession(reply, admin, 'enroll');
+          return { ok: true, needEnroll: true };
+        }
+        // 2FA obrigatório: aceita o código do app OU um código de backup.
+        let second = false;
+        if (parsed.data.backupCode) {
+          const hash = hashBackupCode(parsed.data.backupCode);
+          if (admin.backupCodeHashes.includes(hash)) {
+            await adminStore.updateAdmin(admin.id, {
+              backupCodeHashes: admin.backupCodeHashes.filter((h) => h !== hash),
+            });
+            second = true;
+          }
+        } else if (parsed.data.code) {
+          const secret = admin.totpSecretEnc ? decryptSecret(admin.totpSecretEnc, encKey) : null;
+          second = Boolean(secret && verifyTotp(secret, parsed.data.code));
+        } else {
+          return reply.code(401).send({ error: 'informe o código de verificação', need2fa: true });
+        }
+        if (!second) {
+          await registerFailure(admin);
+          return reply.code(401).send({ error: 'código de verificação incorreto', need2fa: true });
+        }
+        await adminStore.updateAdmin(admin.id, { failedAttempts: 0, lockedUntil: null });
+        setSession(reply, admin, 'full');
+        return { ok: true };
+      },
+    );
+
+    app.post('/admin/logout', async (_req, reply) => {
+      reply.header('set-cookie', clearSessionCookie());
+      return reply.code(204).send();
+    });
+
+    app.get('/admin/me', async (req, reply) => {
+      const sess = await loadSession(req, 'any');
+      if (!sess) return reply.code(401).send({ error: 'não autenticado' });
+      return {
+        id: sess.admin.id,
+        username: sess.admin.username,
+        role: sess.admin.role,
+        totpEnabled: sess.admin.totpEnabled,
+        needEnroll: sess.scope === 'enroll' || !sess.admin.totpEnabled,
+      };
+    });
+
+    // Configuração do 2FA: gera o segredo e devolve a URL otpauth (para QR/manual).
+    app.post('/admin/2fa/setup', async (req, reply) => {
+      const sess = await loadSession(req, 'any');
+      if (!sess) return reply.code(401).send({ error: 'não autenticado' });
+      if (sess.admin.totpEnabled) return reply.code(409).send({ error: '2FA já ativo' });
+      const secret = generateTotpSecret();
+      await adminStore.updateAdmin(sess.admin.id, { totpSecretEnc: encryptSecret(secret, encKey) });
+      return { secret, otpauthUrl: otpauthUrl(secret, sess.admin.username) };
+    });
+
+    // Confirma o 2FA com um código válido e devolve os códigos de backup (uma vez).
+    app.post('/admin/2fa/confirm', async (req, reply) => {
+      const sess = await loadSession(req, 'any');
+      if (!sess) return reply.code(401).send({ error: 'não autenticado' });
+      if (sess.admin.totpEnabled) return reply.code(409).send({ error: '2FA já ativo' });
+      const parsed = adminConfirm2faSchema.safeParse(req.body);
+      if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
+      const secret = sess.admin.totpSecretEnc ? decryptSecret(sess.admin.totpSecretEnc, encKey) : null;
+      if (!secret) return reply.code(400).send({ error: 'inicie a configuração do 2FA' });
+      if (!verifyTotp(secret, parsed.data.code)) {
+        return reply.code(400).send({ error: 'código incorreto' });
+      }
+      const codes = generateBackupCodes();
+      const updated = await adminStore.updateAdmin(sess.admin.id, {
+        totpEnabled: true,
+        backupCodeHashes: codes.map(hashBackupCode),
+        tokenVersion: sess.admin.tokenVersion + 1,
+        failedAttempts: 0,
+        lockedUntil: null,
+      });
+      if (updated) setSession(reply, updated, 'full');
+      return { ok: true, backupCodes: codes };
+    });
+
+    app.get('/admin/list', async (req, reply) => {
+      const sess = await loadSession(req, 'full');
+      if (!sess) return reply.code(401).send({ error: 'não autenticado' });
+      const admins = await adminStore.listAdmins();
+      return admins.map((a) => ({
+        id: a.id,
+        username: a.username,
+        role: a.role,
+        totpEnabled: a.totpEnabled,
+        createdAt: a.createdAt,
+        isSelf: a.id === sess.admin.id,
+      }));
+    });
+
+    // Cadastrar novo administrador — só o master.
+    app.post('/admin', async (req, reply) => {
+      const sess = await loadSession(req, 'full');
+      if (!sess) return reply.code(401).send({ error: 'não autenticado' });
+      if (!canCreateAdmin(sess.admin)) return reply.code(403).send({ error: 'só o master cadastra' });
+      const parsed = adminCreateSchema.safeParse(req.body);
+      if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
+      if (await adminStore.findAdminByUsername(parsed.data.username)) {
+        return reply.code(409).send({ error: 'usuário já existe' });
+      }
+      const created = await adminStore.createAdmin({
+        username: parsed.data.username,
+        role: 'admin',
+        passwordHash: hashPassword(parsed.data.password),
+        totpSecretEnc: null,
+        totpEnabled: false,
+        backupCodeHashes: [],
+        tokenVersion: 0,
+        failedAttempts: 0,
+        lockedUntil: null,
+      });
+      return { ok: true, id: created.id };
+    });
+
+    // Trocar a PRÓPRIA senha (exige a senha atual; mantém a sessão viva).
+    app.post('/admin/password', async (req, reply) => {
+      const sess = await loadSession(req, 'full');
+      if (!sess) return reply.code(401).send({ error: 'não autenticado' });
+      const parsed = adminOwnPasswordSchema.safeParse(req.body);
+      if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
+      if (!verifyPassword(parsed.data.currentPassword, sess.admin.passwordHash)) {
+        return reply.code(401).send({ error: 'senha atual incorreta' });
+      }
+      const updated = await adminStore.updateAdmin(sess.admin.id, {
+        passwordHash: hashPassword(parsed.data.newPassword),
+        tokenVersion: sess.admin.tokenVersion + 1,
+      });
+      if (updated) setSession(reply, updated, 'full'); // renova o cookie (segue logado)
+      return { ok: true };
+    });
+
+    // Redefinir a senha de OUTRO admin (sem senha atual), conforme a matriz.
+    app.post('/admin/:id/password', async (req, reply) => {
+      const sess = await loadSession(req, 'full');
+      if (!sess) return reply.code(401).send({ error: 'não autenticado' });
+      const { id } = req.params as { id: string };
+      if (id === sess.admin.id) {
+        return reply.code(400).send({ error: 'use a troca da própria senha' });
+      }
+      const target = await adminStore.findAdminById(id);
+      if (!target) return reply.code(404).send({ error: 'administrador não encontrado' });
+      if (!canChangePassword(sess.admin, target)) {
+        return reply.code(403).send({ error: 'sem permissão' });
+      }
+      const parsed = adminSetPasswordSchema.safeParse(req.body);
+      if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
+      await adminStore.updateAdmin(id, {
+        passwordHash: hashPassword(parsed.data.newPassword),
+        tokenVersion: target.tokenVersion + 1, // derruba as sessões dele
+        failedAttempts: 0,
+        lockedUntil: null,
+      });
+      return { ok: true };
+    });
+
+    // Excluir administrador — só o master, e nunca o próprio master.
+    app.delete('/admin/:id', async (req, reply) => {
+      const sess = await loadSession(req, 'full');
+      if (!sess) return reply.code(401).send({ error: 'não autenticado' });
+      const { id } = req.params as { id: string };
+      const target = await adminStore.findAdminById(id);
+      if (!target) return reply.code(404).send({ error: 'administrador não encontrado' });
+      if (!canDeleteAdmin(sess.admin, target)) {
+        return reply.code(403).send({ error: 'sem permissão' });
+      }
+      await adminStore.deleteAdmin(id);
+      return { ok: true };
+    });
+
+    // Resetar o 2FA de outro admin (recuperação) — só o master.
+    app.post('/admin/:id/reset-2fa', async (req, reply) => {
+      const sess = await loadSession(req, 'full');
+      if (!sess) return reply.code(401).send({ error: 'não autenticado' });
+      const { id } = req.params as { id: string };
+      const target = await adminStore.findAdminById(id);
+      if (!target) return reply.code(404).send({ error: 'administrador não encontrado' });
+      if (!canResetTotp(sess.admin, target)) {
+        return reply.code(403).send({ error: 'sem permissão' });
+      }
+      await adminStore.updateAdmin(id, {
+        totpEnabled: false,
+        totpSecretEnc: null,
+        backupCodeHashes: [],
+        tokenVersion: target.tokenVersion + 1,
+      });
+      return { ok: true };
+    });
+
+    // Porta dos fundos: com o ADMIN_TOKEN do servidor, redefine a senha do master
+    // e zera o 2FA dele (recuperação quando tudo mais foi perdido).
+    app.post(
+      '/admin/recover',
+      { config: { rateLimit: { max: 5, timeWindow: '1 minute' } } },
+      async (req, reply) => {
+        const parsed = adminRecoverSchema.safeParse(req.body);
+        if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
+        if (!safeEqual(parsed.data.adminToken, adminToken)) {
+          return reply.code(401).send({ error: 'código do servidor incorreto' });
+        }
+        const master = (await adminStore.listAdmins()).find((a) => a.role === 'master');
+        if (!master) return reply.code(404).send({ error: 'sem master; use o cadastro inicial' });
+        await adminStore.updateAdmin(master.id, {
+          passwordHash: hashPassword(parsed.data.newPassword),
+          totpEnabled: false,
+          totpSecretEnc: null,
+          backupCodeHashes: [],
+          tokenVersion: master.tokenVersion + 1,
+          failedAttempts: 0,
+          lockedUntil: null,
+        });
+        return { ok: true };
+      },
+    );
+  }
+
   if (partnerStore) {
-    // Validação pública: o app confere a chave no resgate e periodicamente
-    // (revogação passa a valer na próxima verificação do aparelho).
+    // Validação pública: o app confere a chave no resgate e periodicamente.
+    // Com deviceId, prende a chave a 1 aparelho no primeiro resgate.
     app.post(
       '/partner-keys/validate',
       { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } },
@@ -300,46 +687,48 @@ export async function buildServer(options: ServerOptions) {
         if (!isPartnerKeyFormat(parsed.data.key)) return { valid: false };
         const record = await partnerStore.findPartnerKeyByHash(hashPartnerKey(parsed.data.key));
         if (!record || record.revokedAt) return { valid: false };
+        const deviceId = parsed.data.deviceId;
+        if (deviceId) {
+          if (!record.boundDeviceId) {
+            await partnerStore.bindPartnerKey(record.id, deviceId); // primeiro resgate
+            return { valid: true, label: record.label };
+          }
+          if (record.boundDeviceId !== deviceId) {
+            return { valid: false, reason: 'bound_elsewhere' };
+          }
+        }
         return { valid: true, label: record.label };
       },
     );
 
     if (adminToken) {
-      const requireAdmin = (req: FastifyRequest, reply: FastifyReply): boolean => {
+      // Autoriza o gestor: sessão do painel OU o ADMIN_TOKEN (chave-mestra).
+      const requireAdmin = async (req: FastifyRequest, reply: FastifyReply): Promise<boolean> => {
+        if (await loadSession(req, 'full')) return true;
         const header = req.headers.authorization ?? '';
         const token = header.startsWith('Bearer ') ? header.slice(7) : '';
-        // Comparação em tempo constante — o `!==` vazava o token por timing.
-        if (!token || !safeEqual(token, adminToken)) {
-          reply.code(401).send({ error: 'não autorizado' });
-          return false;
-        }
-        return true;
+        if (token && safeEqual(token, adminToken)) return true;
+        reply.code(401).send({ error: 'não autorizado' });
+        return false;
       };
 
-      // Painel do dono em /painel (a raiz do domínio é a landing do produto).
-      app.get('/painel', async (_req, reply) => {
-        return reply.type('text/html; charset=utf-8').send(ADMIN_PAGE_HTML);
-      });
-      // Endereço antigo continua funcionando para quem tem o link salvo.
-      app.get('/admin', async (_req, reply) => {
-        return reply.redirect('/painel');
-      });
-
       app.get('/partner-keys', async (req, reply) => {
-        if (!requireAdmin(req, reply)) return;
+        if (!(await requireAdmin(req, reply))) return;
         const keys = await partnerStore.listPartnerKeys();
-        // Nunca devolve o hash — só metadados de exibição.
-        return keys.map(({ id, label, hint, createdAt, revokedAt }) => ({
+        // Nunca devolve o hash nem o id do aparelho — só metadados de exibição.
+        return keys.map(({ id, label, hint, createdAt, revokedAt, boundDeviceId, boundAt }) => ({
           id,
           label,
           hint,
           createdAt,
           revokedAt,
+          bound: Boolean(boundDeviceId),
+          boundAt,
         }));
       });
 
       app.post('/partner-keys', async (req, reply) => {
-        if (!requireAdmin(req, reply)) return;
+        if (!(await requireAdmin(req, reply))) return;
         const parsed = partnerCreateSchema.safeParse(req.body);
         if (!parsed.success) return reply.code(400).send({ error: 'informe o nome do parceiro' });
         const key = generatePartnerKey();
@@ -353,10 +742,19 @@ export async function buildServer(options: ServerOptions) {
       });
 
       app.post('/partner-keys/:id/revoke', async (req, reply) => {
-        if (!requireAdmin(req, reply)) return;
+        if (!(await requireAdmin(req, reply))) return;
         const { id } = req.params as { id: string };
         const done = await partnerStore.revokePartnerKey(id);
         if (!done) return reply.code(404).send({ error: 'chave não encontrada ou já revogada' });
+        return { ok: true };
+      });
+
+      // Desvincular: libera a chave para o parceiro usar em outro aparelho.
+      app.post('/partner-keys/:id/unbind', async (req, reply) => {
+        if (!(await requireAdmin(req, reply))) return;
+        const { id } = req.params as { id: string };
+        const done = await partnerStore.unbindPartnerKey(id);
+        if (!done) return reply.code(404).send({ error: 'chave não encontrada ou já livre' });
         return { ok: true };
       });
     }

@@ -546,6 +546,7 @@ export const strings: Strings = {
     redeem: 'Canjear clave',
     keyInvalid: 'Clave no válida. Verifica que copiaste la clave completa.',
     keyOffline: 'Sin conexión con el servidor para validar la clave. Inténtalo de nuevo con internet.',
+    keyInUse: 'Esta clave ya se usa en otro dispositivo. Pide que la desvinculen o usa el dispositivo original.',
     activeTitle: 'Premium activo',
     activePlans: {
       monthly: 'Suscripción mensual activa',

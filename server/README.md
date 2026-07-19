@@ -14,8 +14,9 @@ npm run dev
 ```
 
 - Saúde: `http://localhost:3333/health`
-- **Painel de parceiros: `http://localhost:3333/painel`** (produção: `https://www.levemobile.com.br/painel`) — informe o ADMIN_TOKEN, gere chaves com o nome do parceiro e revogue quando quiser. O código completo aparece só na criação.
-- Sem banco de dados, as chaves ficam em `./data/partner-keys.json`. Com `DATABASE_URL` + `JWT_SECRET` (PostgreSQL), contas/backup ligam e as chaves migram para o banco (`npx prisma migrate deploy`).
+- **Painel do dono: `http://localhost:3333/painel`** (produção: `https://www.levemobile.com.br/painel`) — login com usuário e senha + **2FA obrigatório** (app autenticador). No **primeiro acesso**, cadastre o administrador master informando o ADMIN_TOKEN do servidor; depois é possível cadastrar outros administradores, gerar/revogar chaves de parceiro e desvincular a chave do aparelho. O código da chave aparece só na criação.
+- As sessões e o segredo do 2FA derivam do **ADMIN_TOKEN**: girá-lo encerra as sessões e exige reconfigurar o 2FA. Ele é também a chave-mestra de recuperação (`POST /admin/recover`) e libera o cadastro inicial.
+- Sem banco de dados, as chaves ficam em `./data/partner-keys.json` e os administradores em `./data/admins.json`. Com `DATABASE_URL` + `JWT_SECRET` (PostgreSQL), contas/backup ligam e tudo vai para o banco — aplique o schema com `npx prisma db push` após atualizar.
 
 Produção com Docker: `docker compose up -d --build`
 
@@ -25,8 +26,9 @@ Painel e validação atendem apps iOS e Android igualmente (chamadas HTTP padrã
 
 - `POST /scan-food` → `{ "imageBase64": "...", "mimeType": "image/jpeg" }` → `{ "foods": [{ "name", "portionGrams", "confidence" }] }`. Se `APP_TOKEN` estiver definido, o app envia o header `x-leve-app`.
 - `POST /food-info` → `{ "name": "alimento digitado" }` → `{ "found", "unit", "kcalPer100", "proteinG", "carbsG", "fatG", "fiberG" }` (consulta nutricional do alimento manual; mesmo header opcional).
-- `POST /partner-keys/validate` → `{ "key": "LEVE-XXXX-XXXX-XXXX" }` → `{ "valid": true|false, "label"? }` (público; usado pelo app no resgate e na reverificação).
-- `GET/POST /partner-keys`, `POST /partner-keys/:id/revoke` → gestão (exigem `Authorization: Bearer ADMIN_TOKEN`).
+- `POST /partner-keys/validate` → `{ "key": "LEVE-XXXX-XXXX-XXXX", "deviceId"? }` → `{ "valid": true|false, "label"?, "reason"? }` (público; com `deviceId`, prende a chave a 1 aparelho no primeiro resgate; `reason: "bound_elsewhere"` quando já está presa a outro).
+- `GET/POST /partner-keys`, `POST /partner-keys/:id/revoke`, `POST /partner-keys/:id/unbind` → gestão (sessão do painel **ou** `Authorization: Bearer ADMIN_TOKEN`).
+- Painel do dono (login + 2FA): `POST /admin/setup` (1ª vez), `/admin/login`, `/admin/logout`, `/admin/2fa/setup`, `/admin/2fa/confirm`, `GET /admin/me`, `GET /admin/list`, `POST /admin` (novo admin), `POST /admin/password` (própria), `POST /admin/:id/password`, `DELETE /admin/:id`, `POST /admin/:id/reset-2fa`, `POST /admin/recover` (chave-mestra).
 
 ## App (mobile)
 

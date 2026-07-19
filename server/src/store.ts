@@ -23,6 +23,8 @@ export interface PartnerKeyRecord {
   label: string; // nome do parceiro
   createdAt: string;
   revokedAt: string | null;
+  boundDeviceId: string | null; // aparelho que resgatou a chave (trava de 1 aparelho)
+  boundAt: string | null;
 }
 
 /** Armazenamento das chaves de parceiro emitidas pelo servidor. */
@@ -31,6 +33,53 @@ export interface PartnerKeyStore {
   listPartnerKeys(): Promise<PartnerKeyRecord[]>;
   findPartnerKeyByHash(keyHash: string): Promise<PartnerKeyRecord | null>;
   revokePartnerKey(id: string): Promise<boolean>;
+  /** Prende a chave a um aparelho no primeiro resgate. */
+  bindPartnerKey(id: string, deviceId: string): Promise<boolean>;
+  /** Solta a chave (o parceiro pode revincular em outro aparelho). */
+  unbindPartnerKey(id: string): Promise<boolean>;
+}
+
+export type AdminRole = 'master' | 'admin';
+
+export interface AdminRecord {
+  id: string;
+  username: string;
+  role: AdminRole;
+  passwordHash: string;
+  /** Segredo TOTP cifrado (iv:tag:ct em base64); null enquanto não há 2FA. */
+  totpSecretEnc: string | null;
+  totpEnabled: boolean;
+  /** Hashes (sha256) dos códigos de backup ainda não usados. */
+  backupCodeHashes: string[];
+  /** Sobe a cada troca de senha/reset para invalidar sessões antigas. */
+  tokenVersion: number;
+  failedAttempts: number;
+  lockedUntil: string | null;
+  createdAt: string;
+}
+
+export type AdminPatch = Partial<
+  Pick<
+    AdminRecord,
+    | 'passwordHash'
+    | 'totpSecretEnc'
+    | 'totpEnabled'
+    | 'backupCodeHashes'
+    | 'tokenVersion'
+    | 'failedAttempts'
+    | 'lockedUntil'
+  >
+>;
+
+/** Administradores do painel (login + 2FA). Funciona com banco ou em arquivo. */
+export interface AdminStore {
+  countAdmins(): Promise<number>;
+  createAdmin(rec: Omit<AdminRecord, 'id' | 'createdAt'>): Promise<AdminRecord>;
+  listAdmins(): Promise<AdminRecord[]>;
+  findAdminByUsername(username: string): Promise<AdminRecord | null>;
+  findAdminById(id: string): Promise<AdminRecord | null>;
+  updateAdmin(id: string, patch: AdminPatch): Promise<AdminRecord | null>;
+  deleteAdmin(id: string): Promise<boolean>;
 }
 
 export interface Store {
@@ -51,7 +100,7 @@ export interface Store {
 }
 
 /** Store em memória — usado nos testes e como referência da interface. */
-export class MemoryStore implements Store, PartnerKeyStore {
+export class MemoryStore implements Store, PartnerKeyStore, AdminStore {
   private partnerKeys = new Map<string, PartnerKeyRecord>();
   private pkSeq = 0;
 
@@ -63,6 +112,8 @@ export class MemoryStore implements Store, PartnerKeyStore {
       label,
       createdAt: new Date().toISOString(),
       revokedAt: null,
+      boundDeviceId: null,
+      boundAt: null,
     };
     this.partnerKeys.set(record.id, record);
     return record;
@@ -78,6 +129,53 @@ export class MemoryStore implements Store, PartnerKeyStore {
     if (!record || record.revokedAt) return false;
     record.revokedAt = new Date().toISOString();
     return true;
+  }
+  async bindPartnerKey(id: string, deviceId: string) {
+    const record = this.partnerKeys.get(id);
+    if (!record || record.revokedAt || record.boundDeviceId) return false;
+    record.boundDeviceId = deviceId;
+    record.boundAt = new Date().toISOString();
+    return true;
+  }
+  async unbindPartnerKey(id: string) {
+    const record = this.partnerKeys.get(id);
+    if (!record || !record.boundDeviceId) return false;
+    record.boundDeviceId = null;
+    record.boundAt = null;
+    return true;
+  }
+
+  private admins = new Map<string, AdminRecord>();
+  private adminSeq = 0;
+
+  async countAdmins() {
+    return this.admins.size;
+  }
+  async createAdmin(rec: Omit<AdminRecord, 'id' | 'createdAt'>): Promise<AdminRecord> {
+    if ([...this.admins.values()].some((a) => a.username === rec.username)) {
+      throw new Error('usuário já existe');
+    }
+    const admin: AdminRecord = { ...rec, id: `a${++this.adminSeq}`, createdAt: new Date().toISOString() };
+    this.admins.set(admin.id, admin);
+    return admin;
+  }
+  async listAdmins() {
+    return [...this.admins.values()].sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1));
+  }
+  async findAdminByUsername(username: string) {
+    return [...this.admins.values()].find((a) => a.username === username) ?? null;
+  }
+  async findAdminById(id: string) {
+    return this.admins.get(id) ?? null;
+  }
+  async updateAdmin(id: string, patch: AdminPatch) {
+    const admin = this.admins.get(id);
+    if (!admin) return null;
+    Object.assign(admin, patch);
+    return admin;
+  }
+  async deleteAdmin(id: string) {
+    return this.admins.delete(id);
   }
 
   private users = new Map<string, UserRecord>();

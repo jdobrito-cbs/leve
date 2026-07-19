@@ -35,6 +35,8 @@ export class FilePartnerKeyStore implements PartnerKeyStore {
       label,
       createdAt: new Date().toISOString(),
       revokedAt: null,
+      boundDeviceId: null,
+      boundAt: null,
     };
     all.push(record);
     this.save(all);
@@ -46,7 +48,10 @@ export class FilePartnerKeyStore implements PartnerKeyStore {
   }
 
   async findPartnerKeyByHash(keyHash: string): Promise<PartnerKeyRecord | null> {
-    return this.load().find((k) => k.keyHash === keyHash) ?? null;
+    // Compatível com arquivos antigos sem os campos de vínculo.
+    const found = this.load().find((k) => k.keyHash === keyHash);
+    if (!found) return null;
+    return { ...found, boundDeviceId: found.boundDeviceId ?? null, boundAt: found.boundAt ?? null };
   }
 
   async revokePartnerKey(id: string): Promise<boolean> {
@@ -54,6 +59,26 @@ export class FilePartnerKeyStore implements PartnerKeyStore {
     const record = all.find((k) => k.id === id);
     if (!record || record.revokedAt) return false;
     record.revokedAt = new Date().toISOString();
+    this.save(all);
+    return true;
+  }
+
+  async bindPartnerKey(id: string, deviceId: string): Promise<boolean> {
+    const all = this.load();
+    const record = all.find((k) => k.id === id);
+    if (!record || record.revokedAt || record.boundDeviceId) return false;
+    record.boundDeviceId = deviceId;
+    record.boundAt = new Date().toISOString();
+    this.save(all);
+    return true;
+  }
+
+  async unbindPartnerKey(id: string): Promise<boolean> {
+    const all = this.load();
+    const record = all.find((k) => k.id === id);
+    if (!record || !record.boundDeviceId) return false;
+    record.boundDeviceId = null;
+    record.boundAt = null;
     this.save(all);
     return true;
   }

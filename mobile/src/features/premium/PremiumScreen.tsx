@@ -18,7 +18,7 @@ import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
 import { setEntitlement } from '@/features/premium/entitlement';
 import { verifyLicenseKey } from '@/features/premium/licenseKey';
-import { isServerPartnerKey, validatePartnerKey } from '@/features/premium/partnerServer';
+import { getDeviceId, isServerPartnerKey, validatePartnerKey } from '@/features/premium/partnerServer';
 import { usePremium } from '@/features/premium/usePremium';
 import {
   PaidPlan,
@@ -94,13 +94,17 @@ export function PremiumScreen() {
     if (isServerPartnerKey(trimmed)) {
       setBusy(true);
       try {
-        const result = await validatePartnerKey(trimmed);
+        const result = await validatePartnerKey(trimmed, await getDeviceId(db));
         if (result === null) {
           setKeyError(strings.premium.keyOffline);
           return;
         }
         if (!result.valid) {
-          setKeyError(strings.premium.keyInvalid);
+          setKeyError(
+            result.reason === 'bound_elsewhere'
+              ? strings.premium.keyInUse
+              : strings.premium.keyInvalid,
+          );
           return;
         }
         await setEntitlement(db, {

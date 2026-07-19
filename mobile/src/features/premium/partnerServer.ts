@@ -21,17 +21,43 @@ export function isServerPartnerKey(key: string): boolean {
 export interface PartnerValidation {
   valid: boolean;
   label?: string;
+  /** 'bound_elsewhere' quando a chave já está presa a outro aparelho. */
+  reason?: string;
 }
 
-/** null = não deu para falar com o servidor (sem rede, servidor fora do ar). */
-export async function validatePartnerKey(key: string): Promise<PartnerValidation | null> {
+const DEVICE_KEY = 'partnerDeviceId';
+
+/** Id de instalação (não é dado de hardware): só precisa ser único por aparelho
+ *  e estável. Gerado uma vez e guardado localmente. */
+function randomId(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+  });
+}
+
+/** Devolve o id deste aparelho, criando e salvando na primeira vez. */
+export async function getDeviceId(db: AppDb): Promise<string> {
+  const saved = await getSetting<string>(db, DEVICE_KEY);
+  if (saved) return saved;
+  const id = randomId();
+  await setSetting(db, DEVICE_KEY, id);
+  return id;
+}
+
+/** null = não deu para falar com o servidor (sem rede, servidor fora do ar).
+ *  Com deviceId, o servidor prende a chave a este aparelho no primeiro uso. */
+export async function validatePartnerKey(
+  key: string,
+  deviceId?: string,
+): Promise<PartnerValidation | null> {
   const base = leveServerUrl();
   if (!base) return null;
   try {
     const res = await fetch(`${base}/partner-keys/validate`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ key: key.trim() }),
+      body: JSON.stringify(deviceId ? { key: key.trim(), deviceId } : { key: key.trim() }),
     });
     if (!res.ok) return null;
     return (await res.json()) as PartnerValidation;
@@ -50,7 +76,7 @@ export async function revalidatePartnerIfDue(db: AppDb): Promise<void> {
   if (ent.plan !== 'partner' || !ent.partnerKey) return;
   const last = (await getSetting<number>(db, RECHECK_KEY)) ?? 0;
   if (Date.now() - last < RECHECK_MS) return;
-  const result = await validatePartnerKey(ent.partnerKey);
+  const result = await validatePartnerKey(ent.partnerKey, await getDeviceId(db));
   if (result === null) return;
   await setSetting(db, RECHECK_KEY, Date.now());
   if (!result.valid) await setEntitlement(db, { plan: 'free' });

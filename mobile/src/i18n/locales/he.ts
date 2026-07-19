@@ -546,6 +546,7 @@ export const strings: Strings = {
     redeem: 'לממש מפתח',
     keyInvalid: 'מפתח לא תקין. יש לוודא שהמפתח הועתק במלואו.',
     keyOffline: 'אין חיבור לשרת לאימות המפתח. יש לנסות שוב עם חיבור לאינטרנט.',
+    keyInUse: 'מפתח זה כבר בשימוש במכשיר אחר. בקש לנתק אותו או השתמש במכשיר המקורי.',
     activeTitle: 'Premium פעיל',
     activePlans: {
       monthly: 'מינוי חודשי פעיל',

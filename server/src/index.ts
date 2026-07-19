@@ -1,3 +1,4 @@
+import { FileAdminStore } from './fileAdminStore.js';
 import { FilePartnerKeyStore } from './filePartnerKeyStore.js';
 import { buildServer, makeFoodHubCaller, makeHubCaller } from './server.js';
 
@@ -32,21 +33,25 @@ if (ADMIN_TOKEN && ADMIN_TOKEN.length < 16) {
 async function main() {
   let store;
   let partnerStore;
+  let adminStore;
   if (DATABASE_URL && JWT_SECRET) {
     const { PrismaClient } = await import('@prisma/client');
     const { PrismaStore } = await import('./prismaStore.js');
     const prismaStore = new PrismaStore(new PrismaClient());
     store = prismaStore;
     partnerStore = prismaStore;
+    adminStore = prismaStore;
     console.log('contas/backup: ATIVOS (PostgreSQL)');
   } else {
-    // Sem banco: chaves de parceiro em arquivo local (painel funciona igual).
-    partnerStore = new FilePartnerKeyStore(`${DATA_DIR ?? './data'}/partner-keys.json`);
+    // Sem banco: chaves de parceiro e administradores em arquivo local.
+    const dir = DATA_DIR ?? './data';
+    partnerStore = new FilePartnerKeyStore(`${dir}/partner-keys.json`);
+    adminStore = new FileAdminStore(`${dir}/admins.json`);
     console.warn('contas/backup: desativados (defina DATABASE_URL e JWT_SECRET para ativar)');
   }
 
-  if (ADMIN_TOKEN) console.log('painel de parceiros: ATIVO em /painel');
-  else console.warn('painel de parceiros: desativado (defina ADMIN_TOKEN para ativar)');
+  if (ADMIN_TOKEN) console.log('painel do dono: ATIVO em /painel (login + 2FA)');
+  else console.warn('painel do dono: desativado (defina ADMIN_TOKEN para ativar)');
 
   const hub = { baseUrl: HUB_BASE_URL!, apiKey: HUB_API_KEY!, model: HUB_MODEL! };
   const app = await buildServer({
@@ -56,6 +61,7 @@ async function main() {
     store,
     jwtSecret: JWT_SECRET || undefined,
     partnerStore,
+    adminStore,
     adminToken: ADMIN_TOKEN || undefined,
   });
 

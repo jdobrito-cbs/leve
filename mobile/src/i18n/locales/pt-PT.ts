@@ -546,6 +546,7 @@ export const strings: Strings = {
     redeem: 'Resgatar chave',
     keyInvalid: 'Chave inválida. Verifique se copiou a chave completa.',
     keyOffline: 'Sem ligação ao servidor para validar a chave. Tente novamente com internet.',
+    keyInUse: 'Esta chave já está a ser usada noutro aparelho. Peça para desvincular no painel ou use o aparelho original.',
     activeTitle: 'Premium ativo',
     activePlans: {
       monthly: 'Subscrição mensal ativa',

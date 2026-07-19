@@ -48,10 +48,26 @@ model Backup {
 }
 
 model PartnerKey {
-  id        String    @id @default(uuid())
-  keyHash   String    @unique
-  hint      String
-  label     String
-  createdAt DateTime  @default(now())
-  revokedAt DateTime?
+  id            String    @id @default(uuid())
+  keyHash       String    @unique
+  hint          String
+  label         String
+  createdAt     DateTime  @default(now())
+  revokedAt     DateTime?
+  boundDeviceId String?
+  boundAt       DateTime?
+}
+
+model AdminUser {
+  id               String    @id @default(uuid())
+  username         String    @unique
+  role             String    @default("admin")
+  passwordHash     String
+  totpSecretEnc    String?
+  totpEnabled      Boolean   @default(false)
+  backupCodeHashes String[]  @default([])
+  tokenVersion     Int       @default(0)
+  failedAttempts   Int       @default(0)
+  lockedUntil      DateTime?
+  createdAt        DateTime  @default(now())
 }

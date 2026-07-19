@@ -546,6 +546,7 @@ export const strings: Strings = {
     redeem: 'Utiliser la clé',
     keyInvalid: 'Clé invalide. Vérifiez que vous avez copié la clé complète.',
     keyOffline: 'Pas de connexion au serveur pour valider la clé. Réessayez avec Internet.',
+    keyInUse: 'Cette clé est déjà utilisée sur un autre appareil. Demandez à la dissocier ou utilisez l’appareil d’origine.',
     activeTitle: 'Premium actif',
     activePlans: {
       monthly: 'Abonnement mensuel actif',
