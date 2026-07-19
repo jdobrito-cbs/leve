@@ -158,6 +158,53 @@ export function zoneOf(value: number, zones: GaugeZone[]): GaugeZone {
   return zones[zones.length - 1];
 }
 
+/**
+ * Geometria dos medidores, igual à da balança: cada zona ocupa a MESMA largura
+ * visual e o marcador fica na posição proporcional DENTRO da sua zona.
+ * Nas zonas abertas (início/fim), o avanço é assintótico em relação ao
+ * excesso — o marcador se aproxima da borda sem nunca colar nela, evitando a
+ * leitura falsa de "estourou a régua".
+ * Retorna a fração 0..1 da largura total onde o marcador deve ficar.
+ */
+export function gaugeMarkerFraction(value: number, zones: GaugeZone[]): number {
+  const bounds = zones.filter((z) => z.to !== null).map((z) => z.to as number);
+  const n = zones.length;
+  if (bounds.length === 0 || n === 0) return 0.5;
+
+  let k = zones.findIndex((z) => z.to === null || value <= (z.to as number));
+  if (k < 0) k = n - 1;
+
+  const firstSpan = bounds.length > 1 ? bounds[1] - bounds[0] : Math.max(bounds[0] * 0.5, 1);
+  const lastSpan =
+    bounds.length > 1
+      ? bounds[bounds.length - 1] - bounds[bounds.length - 2]
+      : Math.max(bounds[0] * 0.5, 1);
+
+  let f: number;
+  if (k === 0) {
+    // Primeira zona: aproxima da fronteira conforme o valor sobe até ela.
+    const deficit = Math.max(0, bounds[0] - value);
+    f = 1 - deficit / (deficit + firstSpan);
+  } else if (zones[k].to === null) {
+    // Última zona (aberta): avanço assintótico pelo excesso.
+    const excess = Math.max(0, value - bounds[bounds.length - 1]);
+    f = excess / (excess + lastSpan);
+  } else {
+    const a = bounds[k - 1];
+    const b = zones[k].to as number;
+    f = b > a ? (value - a) / (b - a) : 0.5;
+  }
+  return (k + Math.min(Math.max(f, 0), 1)) / n;
+}
+
+/** Posições (0..1) das fronteiras numéricas na régua de zonas iguais. */
+export function gaugeBoundaryFractions(zones: GaugeZone[]): number[] {
+  const n = zones.length;
+  return zones
+    .map((z, i) => (z.to !== null ? (i + 1) / n : null))
+    .filter((v): v is number => v !== null);
+}
+
 /** WHR (cintura ÷ quadril): excelente | padrão | alto | muito alto (OMS). */
 export function whrZones(sex: Sex): GaugeZone[] {
   const [a, b, c] = sex === 'feminino' ? [0.75, 0.8, 0.85] : [0.85, 0.9, 0.95];

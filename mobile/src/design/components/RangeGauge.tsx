@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { AppText } from './AppText';
-import type { GaugeZone } from '@/features/body/bodyBands';
+import {
+  gaugeBoundaryFractions,
+  gaugeMarkerFraction,
+  zoneOf,
+  type GaugeZone,
+} from '@/features/body/bodyBands';
 import { useTheme } from '../useTheme';
 
 interface Props {
@@ -15,9 +20,9 @@ const fmtN = (n: number, digits: number) =>
   n.toLocaleString('pt-BR', { maximumFractionDigits: digits });
 
 /**
- * Medidor no estilo da balança: barra segmentada por zonas coloridas, números
- * das fronteiras acima, rótulos abaixo e um marcador redondo na posição atual.
- * A régua se estende meia-zona antes da 1ª fronteira e meia depois da última.
+ * Medidor no estilo da balança: zonas de LARGURA IGUAL, números das fronteiras
+ * acima (nas divisas), rótulos abaixo e marcador redondo na posição
+ * proporcional dentro da zona — sem nunca colar nas bordas da régua.
  */
 export function RangeGauge({ value, zones, digits = 1 }: Props) {
   const { colors } = useTheme();
@@ -25,19 +30,12 @@ export function RangeGauge({ value, zones, digits = 1 }: Props) {
 
   const bounds = zones.filter((z) => z.to !== null).map((z) => z.to as number);
   if (bounds.length === 0) return null;
-  const spanSeed = bounds.length > 1 ? bounds[bounds.length - 1] - bounds[0] : bounds[0];
-  const pad = Math.max(spanSeed * 0.5, bounds[0] * 0.25, 1);
-  const min = Math.max(0, bounds[0] - pad);
-  const max = bounds[bounds.length - 1] + pad;
-  const toX = (v: number) => Math.min(1, Math.max(0, (v - min) / (max - min)));
-
-  // Segmentos coloridos: cada zona vai da fronteira anterior à sua.
-  const stops = [min, ...bounds, max];
-  const marker = toX(value) * width;
+  const boundaryFracs = gaugeBoundaryFractions(zones);
+  const marker = gaugeMarkerFraction(value, zones) * width;
 
   return (
     <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
-      {/* números das fronteiras */}
+      {/* números das fronteiras, nas divisas das zonas */}
       <View style={{ height: 14 }}>
         {width > 0
           ? bounds.map((b, i) => (
@@ -47,7 +45,7 @@ export function RangeGauge({ value, zones, digits = 1 }: Props) {
                 muted
                 style={{
                   position: 'absolute',
-                  left: toX(b) * width - 24,
+                  left: boundaryFracs[i] * width - 24,
                   width: 48,
                   textAlign: 'center',
                   fontSize: 11,
@@ -58,17 +56,11 @@ export function RangeGauge({ value, zones, digits = 1 }: Props) {
             ))
           : null}
       </View>
-      {/* barra segmentada + marcador */}
+      {/* barra de zonas iguais + marcador */}
       <View style={{ height: 14, justifyContent: 'center' }}>
         <View style={{ flexDirection: 'row', height: 6, borderRadius: 3, overflow: 'hidden' }}>
           {zones.map((zone, i) => (
-            <View
-              key={i}
-              style={{
-                flex: Math.max(stops[i + 1] - stops[i], 0.0001),
-                backgroundColor: zone.color,
-              }}
-            />
+            <View key={i} style={{ flex: 1, backgroundColor: zone.color }} />
           ))}
         </View>
         {width > 0 ? (
@@ -80,24 +72,20 @@ export function RangeGauge({ value, zones, digits = 1 }: Props) {
               height: 14,
               borderRadius: 7,
               borderWidth: 3,
-              borderColor: zones.find((z) => z.to === null || value <= z.to)?.color ?? colors.primary,
+              borderColor: zoneOf(value, zones).color,
               backgroundColor: colors.surface,
             }}
           />
         ) : null}
       </View>
-      {/* rótulos das zonas */}
+      {/* rótulos das zonas, um por segmento igual */}
       <View style={{ flexDirection: 'row' }}>
         {zones.map((zone, i) => (
           <AppText
             key={i}
             variant="caption"
             muted
-            style={{
-              flex: Math.max(stops[i + 1] - stops[i], 0.0001),
-              textAlign: 'center',
-              fontSize: 10,
-            }}
+            style={{ flex: 1, textAlign: 'center', fontSize: 10 }}
           >
             {zone.label}
           </AppText>

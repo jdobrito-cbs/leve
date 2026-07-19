@@ -2,6 +2,7 @@ import {
   bandZones,
   componentBandKg,
   fatMassZones,
+  gaugeMarkerFraction,
   subcutaneousZones,
   visceralZones,
   whrZones,
@@ -36,22 +37,12 @@ function statusOf(row: CompositionRow): { label: string; color: string } | null 
   return { label: 'Padrão', color: OK };
 }
 
-/** Medidor compacto no estilo da balança: zonas coloridas + marcador. */
+/** Medidor compacto no estilo da balança: zonas de largura IGUAL e marcador
+ *  na posição proporcional dentro da zona (mesma geometria do app). */
 function miniGauge(value: number, zones: GaugeZone[]): string {
-  const bounds = zones.filter((z) => z.to !== null).map((z) => z.to as number);
-  if (bounds.length === 0) return '';
-  const span = bounds.length > 1 ? bounds[bounds.length - 1] - bounds[0] : bounds[0];
-  const pad = Math.max(span * 0.5, bounds[0] * 0.25, 1);
-  const min = Math.max(0, bounds[0] - pad);
-  const max = bounds[bounds.length - 1] + pad;
-  const stops = [min, ...bounds, max];
-  const segs = zones
-    .map(
-      (z, i) =>
-        `<i style="flex:${Math.max(stops[i + 1] - stops[i], 0.001)};background:${z.color}"></i>`,
-    )
-    .join('');
-  const pos = Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
+  if (zones.filter((z) => z.to !== null).length === 0) return '';
+  const segs = zones.map((z) => `<i style="flex:1;background:${z.color}"></i>`).join('');
+  const pos = gaugeMarkerFraction(value, zones) * 100;
   const zone = zoneOf(value, zones);
   return `<div class="mini"><div class="minibar">${segs}</div><b style="left:${pos.toFixed(1)}%;border-color:${zone.color}"></b></div>`;
 }
@@ -81,14 +72,17 @@ function compRow(
   </div></div>`;
 }
 
-/** Posição do fim da barra nas zonas Baixo (0–33%), Padrão (33–66%), Alto (66–100%). */
+/** Posição do fim da barra nas zonas Baixo/Padrão/Alto — mesma geometria dos
+ *  medidores (proporcional dentro da zona; excesso assintótico, sem colar). */
 function barPos(r: RangedValue): number {
-  const { value, min, max } = r;
-  let pos: number;
-  if (value <= min) pos = (value / min) * 33;
-  else if (value <= max) pos = 33 + ((value - min) / (max - min)) * 33;
-  else pos = 66 + Math.min(1, (value - max) / Math.max(0.001, max - min)) * 32;
-  return Math.max(16, Math.min(98, pos));
+  const zones: GaugeZone[] = [
+    { to: r.min, label: '', color: '' },
+    { to: r.max, label: '', color: '' },
+    { to: null, label: '', color: '' },
+  ];
+  const pos = gaugeMarkerFraction(r.value, zones) * 100;
+  // Piso = largura mínima do chip com o número dentro; teto evita colar na borda.
+  return Math.max(14, Math.min(97, pos));
 }
 
 function barHead(extraLabel: string): string {
