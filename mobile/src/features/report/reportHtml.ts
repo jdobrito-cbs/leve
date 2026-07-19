@@ -218,19 +218,6 @@ export function reportHtml(r: BodyReport): string {
       { to: null, label: 'Padrão', color: ZONE.ok },
     ]),
   );
-  const bodyAgeGauge =
-    ind.bodyAge !== null && r.age !== null
-      ? gaugeRow(
-          'Idade metabólica',
-          fmt(ind.bodyAge, 0),
-          miniGauge(ind.bodyAge, [
-            { to: r.age, label: 'Excelente', color: ZONE.good },
-            { to: null, label: 'Alto', color: ZONE.warn },
-          ]),
-        )
-      : ind.bodyAge !== null
-        ? indicatorRow('Idade metabólica', fmt(ind.bodyAge, 0))
-        : indicatorRow('Idade metabólica', '—');
   const whrGauge =
     ind.whr !== null
       ? gaugeRow('WHR (cintura-quadril)', fmt(ind.whr, 2), miniGauge(ind.whr, whrZones(sexKey)))
@@ -371,7 +358,6 @@ export function reportHtml(r: BodyReport): string {
         ${subcutGauge}
         ${indicatorRow('SMI', ind.smi !== null ? `${fmt(ind.smi)} kg/m²` : null)}
         ${whrGauge}
-        ${bodyAgeGauge}
         ${indicatorRow('Peso corporal ideal', `${fmt(r.idealWeightKg)} kg`)}
         ${indicatorRow('Nível de obesidade', r.obesityLevel)}
         ${indicatorRow('Tipo de corpo', r.bodyType)}
