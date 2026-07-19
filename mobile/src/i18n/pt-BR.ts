@@ -518,10 +518,11 @@ const ptBR = {
       gym: 'Academia: exercícios com cálculo de calorias queimadas',
       cycle: 'Controle de ciclo menstrual com previsão',
       report: 'Relatório corporal em PDF com pontuação e faixas de referência',
-      appointments: 'Consultas médicas com avisos no dia e horas antes',
+      appointments: 'Agende suas consultas médicas marcadas em hospitais e clínicas e receba avisos no dia e nas horas antes do horário inserido',
     },
     medsLockedBody: 'O controle de medicamentos faz parte do Leve Premium.',
-    appointmentsLockedBody: 'As consultas médicas com lembretes fazem parte do Leve Premium.',
+    appointmentsLockedBody: 
+      'A agenda das suas consultas marcadas em hospitais e clínicas, com avisos, faz parte do Leve Premium.',
     gymLockedBody: 'O registro de academia faz parte do Leve Premium.',
     cycleLockedBody: 'O controle de ciclo menstrual faz parte do Leve Premium.',
     monthly: 'Mensal',

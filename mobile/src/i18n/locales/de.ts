@@ -518,10 +518,11 @@ export const strings: Strings = {
       gym: 'Training: Übungen mit Berechnung der verbrannten Kalorien',
       cycle: 'Zyklusverfolgung mit Vorhersage',
       report: 'Körperbericht als PDF mit Punktzahl und Referenzbereichen',
-      appointments: 'Arzttermine mit Hinweisen am Termintag und Stunden vorher',
+      appointments: 'Tragen Sie Ihre in Krankenhäusern und Kliniken vereinbarten Arzttermine ein und erhalten Sie Erinnerungen am Tag selbst und in den Stunden vor der eingegebenen Uhrzeit',
     },
     medsLockedBody: 'Die Medikamentenverwaltung ist Teil von Leve Premium.',
-    appointmentsLockedBody: 'Arzttermine mit Erinnerungen sind Teil von Leve Premium.',
+    appointmentsLockedBody: 
+      'Der Terminplan Ihrer vereinbarten Arzttermine mit Erinnerungen ist Teil von Leve Premium.',
     gymLockedBody: 'Die Trainingserfassung ist Teil von Leve Premium.',
     cycleLockedBody: 'Die Zyklusverfolgung ist Teil von Leve Premium.',
     monthly: 'Monatlich',

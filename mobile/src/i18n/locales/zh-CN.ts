@@ -518,10 +518,11 @@ export const strings: Strings = {
       gym: '健身：记录运动并计算消耗的卡路里',
       cycle: '月经周期管理，含预测',
       report: '带评分和参考区间的 PDF 身体报告',
-      appointments: '就诊管理，当天及提前数小时提醒',
+      appointments: '登记您在医院或诊所预约的就诊，并在当天以及所填时间前几小时收到提醒',
     },
     medsLockedBody: '药品管理是 Leve Premium 的一部分。',
-    appointmentsLockedBody: '带提醒的就诊管理是 Leve Premium 的一部分。',
+    appointmentsLockedBody: 
+      '已预约就诊的日程与提醒是 Leve Premium 的功能。',
     gymLockedBody: '健身记录是 Leve Premium 的一部分。',
     cycleLockedBody: '月经周期管理是 Leve Premium 的一部分。',
     monthly: '月付',

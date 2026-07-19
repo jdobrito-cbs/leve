@@ -519,10 +519,11 @@ export const strings: Strings = {
       gym: 'الجيم: تمارين مع حساب السعرات المحروقة',
       cycle: 'متابعة الدورة الشهرية مع التوقّع',
       report: 'تقرير الجسم بصيغة PDF مع درجة ونطاقات مرجعية',
-      appointments: 'المواعيد الطبية مع تنبيهات في يوم الموعد وقبله بساعات',
+      appointments: 'سجّل مواعيدك الطبية المحجوزة في المستشفيات والعيادات وتلقَّ تنبيهات في اليوم نفسه وفي الساعات التي تسبق الوقت المُدخل',
     },
     medsLockedBody: 'إدارة الأدوية جزء من Leve Premium.',
-    appointmentsLockedBody: 'المواعيد الطبية مع التذكيرات جزء من Leve Premium.',
+    appointmentsLockedBody: 
+      'جدول مواعيدك المحجوزة مع التنبيهات جزء من Leve Premium.',
     gymLockedBody: 'تسجيل الجيم جزء من Leve Premium.',
     cycleLockedBody: 'متابعة الدورة الشهرية جزء من Leve Premium.',
     monthly: 'شهري',

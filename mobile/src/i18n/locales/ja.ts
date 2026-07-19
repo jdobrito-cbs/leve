@@ -518,10 +518,11 @@ export const strings: Strings = {
       gym: 'ジム：消費カロリー計算付きのエクササイズ記録',
       cycle: '予測付きの月経周期管理',
       report: 'スコアと基準範囲付きの PDF ボディレポート',
-      appointments: '当日と数時間前に通知が届く診察の予定管理',
+      appointments: '病院やクリニックで予約した診察の予定を登録し、当日と入力した時刻の数時間前に通知を受け取れます',
     },
     medsLockedBody: 'お薬管理は Leve Premium の機能です。',
-    appointmentsLockedBody: 'リマインダー付きの診察予定は Leve Premium の機能です。',
+    appointmentsLockedBody: 
+      '予約した診察の予定表とその通知は Leve Premium の機能です。',
     gymLockedBody: 'ジムの記録は Leve Premium の機能です。',
     cycleLockedBody: '月経周期の管理は Leve Premium の機能です。',
     monthly: '月額',

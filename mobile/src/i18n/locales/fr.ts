@@ -518,10 +518,11 @@ export const strings: Strings = {
       gym: 'Sport : exercices avec calcul des calories brûlées',
       cycle: 'Suivi du cycle menstruel avec prévision',
       report: 'Rapport corporel en PDF avec score et plages de référence',
-      appointments: 'Rendez-vous médicaux avec notifications le jour même et quelques heures avant',
+      appointments: 'Enregistrez vos rendez-vous médicaux pris dans des hôpitaux et cliniques et recevez des rappels le jour même et dans les heures précédant l\'heure saisie',
     },
     medsLockedBody: 'Le suivi des médicaments fait partie de Leve Premium.',
-    appointmentsLockedBody: 'Les rendez-vous médicaux avec rappels font partie de Leve Premium.',
+    appointmentsLockedBody: 
+      'L’agenda de vos rendez-vous pris, avec rappels, fait partie de Leve Premium.',
     gymLockedBody: 'L\'enregistrement des séances de sport fait partie de Leve Premium.',
     cycleLockedBody: 'Le suivi du cycle menstruel fait partie de Leve Premium.',
     monthly: 'Mensuel',

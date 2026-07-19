@@ -518,10 +518,11 @@ export const strings: Strings = {
       gym: 'Gym: exercises with calories-burned calculation',
       cycle: 'Menstrual cycle tracking with prediction',
       report: 'Body report in PDF with a score and reference ranges',
-      appointments: 'Medical appointments with alerts on the day and hours before',
+      appointments: 'Schedule the medical appointments you booked at hospitals and clinics and get alerts on the day and in the hours before the time you entered',
     },
     medsLockedBody: 'Medication tracking is part of Leve Premium.',
-    appointmentsLockedBody: 'Medical appointments with reminders are part of Leve Premium.',
+    appointmentsLockedBody: 
+      'Your booked-appointments schedule, with alerts, is part of Leve Premium.',
     gymLockedBody: 'Gym logging is part of Leve Premium.',
     cycleLockedBody: 'Menstrual cycle tracking is part of Leve Premium.',
     monthly: 'Monthly',

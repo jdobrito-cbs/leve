@@ -518,10 +518,11 @@ export const strings: Strings = {
       gym: 'Gimnasio: ejercicios con cálculo de calorías quemadas',
       cycle: 'Control del ciclo menstrual con predicción',
       report: 'Informe corporal en PDF con puntuación y rangos de referencia',
-      appointments: 'Citas médicas con avisos el mismo día y horas antes',
+      appointments: 'Agenda tus citas médicas reservadas en hospitales y clínicas y recibe avisos el mismo día y en las horas previas a la hora ingresada',
     },
     medsLockedBody: 'El control de medicamentos forma parte de Leve Premium.',
-    appointmentsLockedBody: 'Las citas médicas con recordatorios forman parte de Leve Premium.',
+    appointmentsLockedBody: 
+      'La agenda de tus citas reservadas, con avisos, forma parte de Leve Premium.',
     gymLockedBody: 'El registro de gimnasio forma parte de Leve Premium.',
     cycleLockedBody: 'El control del ciclo menstrual forma parte de Leve Premium.',
     monthly: 'Mensual',

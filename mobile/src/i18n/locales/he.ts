@@ -518,10 +518,11 @@ export const strings: Strings = {
       gym: 'חדר כושר: תרגילים עם חישוב קלוריות שנשרפו',
       cycle: 'מעקב מחזור חודשי עם תחזית',
       report: 'דוח גוף ב-PDF עם ניקוד וטווחי ייחוס',
-      appointments: 'תורים לרופא עם התראות ביום התור ושעות לפניו',
+      appointments: 'רשמו את התורים הרפואיים שקבעתם בבתי חולים ובמרפאות וקבלו התראות ביום התור ובשעות שלפני השעה שהוזנה',
     },
     medsLockedBody: 'ניהול התרופות הוא חלק מ-Leve Premium.',
-    appointmentsLockedBody: 'תורים לרופא עם תזכורות הם חלק מ-Leve Premium.',
+    appointmentsLockedBody: 
+      'לוח התורים שקבעתם, עם התראות, הוא חלק מ-Leve Premium.',
     gymLockedBody: 'רישום חדר הכושר הוא חלק מ-Leve Premium.',
     cycleLockedBody: 'מעקב המחזור החודשי הוא חלק מ-Leve Premium.',
     monthly: 'חודשי',
