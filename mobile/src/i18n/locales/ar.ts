@@ -360,6 +360,7 @@ export const strings: Strings = {
     hydrationLow: 'شرب الماء لديك أقل بكثير من الهدف مؤخرًا',
   },
   about: {
+    website: 'الموقع الرسمي',
     title: 'حول',
     version: 'الإصدار',
     privacyPolicy: 'سياسة الخصوصية',

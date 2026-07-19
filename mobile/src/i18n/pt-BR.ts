@@ -359,6 +359,7 @@ const ptBR = {
     hydrationLow: 'Sua ingestão de água tem ficado bem abaixo da meta',
   },
   about: {
+    website: 'Site oficial',
     title: 'Sobre',
     version: 'Versão',
     privacyPolicy: 'Política de privacidade',

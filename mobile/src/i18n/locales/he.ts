@@ -359,6 +359,7 @@ export const strings: Strings = {
     hydrationLow: 'צריכת המים שלך נמוכה משמעותית מהיעד לאחרונה',
   },
   about: {
+    website: 'האתר הרשמי',
     title: 'אודות',
     version: 'גרסה',
     privacyPolicy: 'מדיניות פרטיות',

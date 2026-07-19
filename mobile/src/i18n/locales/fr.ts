@@ -359,6 +359,7 @@ export const strings: Strings = {
     hydrationLow: 'Votre consommation d\'eau est restée bien en dessous de l\'objectif',
   },
   about: {
+    website: 'Site officiel',
     title: 'À propos',
     version: 'Version',
     privacyPolicy: 'Politique de confidentialité',

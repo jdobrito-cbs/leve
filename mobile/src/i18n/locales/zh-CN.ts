@@ -359,6 +359,7 @@ export const strings: Strings = {
     hydrationLow: '您的饮水量一直明显低于目标',
   },
   about: {
+    website: '官方网站',
     title: '关于',
     version: '版本',
     privacyPolicy: '隐私政策',

@@ -359,6 +359,7 @@ export const strings: Strings = {
     hydrationLow: '水分摂取が目標をかなり下回っています',
   },
   about: {
+    website: '公式サイト',
     title: 'このアプリについて',
     version: 'バージョン',
     privacyPolicy: 'プライバシーポリシー',

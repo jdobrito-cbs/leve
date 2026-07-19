@@ -359,6 +359,7 @@ export const strings: Strings = {
     hydrationLow: 'आपका पानी का सेवन लक्ष्य से काफ़ी कम रह रहा है',
   },
   about: {
+    website: 'आधिकारिक वेबसाइट',
     title: 'ऐप के बारे में',
     version: 'संस्करण',
     privacyPolicy: 'गोपनीयता नीति',
