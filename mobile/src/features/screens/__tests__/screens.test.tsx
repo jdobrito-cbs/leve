@@ -221,16 +221,24 @@ test('Progresso mostra as seções', async () => {
   getByText(strings.progress.dosesSection);
 });
 
-test('Perfil mostra metas, lembretes, conta e privacidade; exportar e excluir funcionam', async () => {
+test('Perfil mostra metas, lembretes, conta/privacidade e sobre', async () => {
   const { getByText } = await render(<ProfileScreen />);
   getByText(strings.profile.editSection);
   getByText(strings.profile.remindersSection);
   getByText(new RegExp(strings.health.section));
   getByText(strings.health.connect);
-  getByText(strings.account.section);
-  getByText(strings.profile.privacySection);
+  getByText(strings.accountPrivacy.title);
+  getByText(strings.about.title);
   await fireEvent.press(getByText(strings.profile.save));
   expect(mockSave).toHaveBeenCalled();
+});
+
+test('Conta e privacidade: exportar e excluir funcionam', async () => {
+  const { AccountPrivacyScreen } =
+    require('@/features/account/AccountPrivacyScreen') as typeof import('@/features/account/AccountPrivacyScreen');
+  const { getByText } = await render(<AccountPrivacyScreen />);
+  getByText(strings.accountPrivacy.accountSection);
+  getByText(strings.accountPrivacy.backup);
 
   await fireEvent.press(getByText(strings.profile.exportData));
   expect(mockExportAll).toHaveBeenCalled();

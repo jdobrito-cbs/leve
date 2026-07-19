@@ -360,6 +360,22 @@ export const strings = {
     hrUp: 'Sua frequência cardíaca de repouso está acima da sua média do mês',
     hydrationLow: 'Sua ingestão de água tem ficado bem abaixo da meta',
   },
+  about: {
+    title: 'Sobre',
+    version: 'Versão',
+    privacyPolicy: 'Política de privacidade',
+    terms: 'Termos de uso',
+    medicalNotice: 'Aviso médico e nutricional',
+    copyright: '© 2026 Jorge Brito e Jorge Manoel Reis Brito',
+  },
+  accountPrivacy: {
+    title: 'Conta e privacidade',
+    accountSection: 'Conta',
+    appleId: 'Apple ID',
+    googleAccount: 'Conta Google',
+    noAccount: 'Nenhuma conta conectada.',
+    backup: 'Backup',
+  },
   gauge: {
     low: 'Baixo',
     thin: 'Fino',

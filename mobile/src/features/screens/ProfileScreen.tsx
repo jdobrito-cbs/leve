@@ -1,5 +1,4 @@
-﻿import * as FileSystem from 'expo-file-system/legacy';
-import { router } from 'expo-router';
+﻿import { router } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useState } from 'react';
 import { Platform, View } from 'react-native';
@@ -8,7 +7,6 @@ import { ageFromIsoDate, brDateToIso } from '@/core/datetime';
 import { db } from '@/db/client';
 import { setSetting } from '@/db/settingsRepo';
 import { setThemeSignal } from '@/design/themeSignal';
-import { exportAllData, wipeAllData } from '@/features/backup/exportData';
 import { buildBodyReport } from '@/features/report/bodyReport';
 import { reportHtml } from '@/features/report/reportHtml';
 import {
@@ -363,51 +361,16 @@ export function ProfileScreen() {
           </AppText>
         ) : null}
         <Button
-          label={strings.account.section}
+          label={strings.accountPrivacy.title}
           variant="secondary"
-          onPress={() => router.push('/conta' as never)}
+          onPress={() => router.push('/conta-privacidade' as never)}
+        />
+        <Button
+          label={strings.about.title}
+          variant="secondary"
+          onPress={() => router.push('/sobre' as never)}
         />
       </Card>
-
-      <PrivacySection />
     </Screen>
-  );
-}
-
-function PrivacySection() {
-  const { colors } = useTheme();
-  const [exported, setExported] = useState(false);
-  const [confirmWipe, setConfirmWipe] = useState(false);
-
-  async function exportData() {
-    const data = await exportAllData(db);
-    const path = `${FileSystem.cacheDirectory}leve-meus-dados.json`;
-    await FileSystem.writeAsStringAsync(path, JSON.stringify(data, null, 2));
-    setExported(true);
-    if (await Sharing.isAvailableAsync()) {
-      await Sharing.shareAsync(path, { mimeType: 'application/json' });
-    }
-  }
-
-  async function deleteData() {
-    if (!confirmWipe) return setConfirmWipe(true);
-    await wipeAllData(db);
-    router.replace('/onboarding' as never);
-  }
-
-  return (
-    <Card style={{ gap: spacing.md }}>
-      <AppText variant="title">{strings.profile.privacySection}</AppText>
-      <Button label={strings.profile.exportData} variant="secondary" onPress={exportData} />
-      <AppText variant="caption" muted>
-        {exported ? strings.profile.exported : strings.profile.exportHint}
-      </AppText>
-      <Button label={strings.profile.deleteData} variant="secondary" onPress={deleteData} />
-      {confirmWipe ? (
-        <AppText variant="caption" style={{ color: colors.danger }}>
-          {strings.profile.deleteDataConfirm}
-        </AppText>
-      ) : null}
-    </Card>
   );
 }
