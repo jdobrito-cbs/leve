@@ -719,6 +719,9 @@ const ptBR = {
       'Relatório informativo gerado pelos seus registros — não substitui avaliação médica.',
   },
   language: {
+    chooseTitle: 'Escolha o idioma do app',
+    chooseHint: 'Dá para mudar depois em Perfil → Idioma e unidades.',
+    confirm: 'Continuar',
     sectionTitle: 'Idioma e unidades',
     languageLabel: 'Idioma do app',
     auto: 'Automático (idioma do aparelho)',

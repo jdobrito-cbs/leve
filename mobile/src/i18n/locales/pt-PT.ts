@@ -719,6 +719,9 @@ export const strings: Strings = {
       'Relatório informativo gerado a partir dos seus registos — não substitui avaliação médica.',
   },
   language: {
+    chooseTitle: 'Escolha o idioma da aplicação',
+    chooseHint: 'Pode mudar depois em Perfil → Idioma e unidades.',
+    confirm: 'Continuar',
     sectionTitle: 'Idioma e unidades',
     languageLabel: 'Idioma da aplicação',
     auto: 'Automático (idioma do dispositivo)',

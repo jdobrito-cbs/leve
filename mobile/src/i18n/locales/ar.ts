@@ -718,6 +718,9 @@ export const strings: Strings = {
       'تقرير إرشادي مُنشأ من سجلاتك — لا يغني عن التقييم الطبي.',
   },
   language: {
+    chooseTitle: 'اختر لغة التطبيق',
+    chooseHint: 'يمكنك تغييرها لاحقًا من الملف الشخصي ← اللغة والوحدات.',
+    confirm: 'متابعة',
     sectionTitle: 'اللغة والوحدات',
     languageLabel: 'لغة التطبيق',
     auto: 'تلقائي (لغة الجهاز)',

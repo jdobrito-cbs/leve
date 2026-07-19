@@ -719,6 +719,9 @@ export const strings: Strings = {
       'Rapport informatif généré à partir de vos enregistrements — il ne remplace pas une évaluation médicale.',
   },
   language: {
+    chooseTitle: 'Choisissez la langue de l\'app',
+    chooseHint: 'Vous pourrez la modifier plus tard dans Profil → Langue et unités.',
+    confirm: 'Continuer',
     sectionTitle: 'Langue et unités',
     languageLabel: 'Langue de l\'app',
     auto: 'Automatique (langue de l\'appareil)',

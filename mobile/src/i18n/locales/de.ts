@@ -719,6 +719,9 @@ export const strings: Strings = {
       'Informativer Bericht auf Basis Ihrer Einträge — er ersetzt keine ärztliche Untersuchung.',
   },
   language: {
+    chooseTitle: 'Wählen Sie die App-Sprache',
+    chooseHint: 'Sie können sie später unter Profil → Sprache und Einheiten ändern.',
+    confirm: 'Weiter',
     sectionTitle: 'Sprache und Einheiten',
     languageLabel: 'App-Sprache',
     auto: 'Automatisch (Gerätesprache)',

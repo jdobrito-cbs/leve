@@ -719,6 +719,9 @@ export const strings: Strings = {
       '本报告为根据您的记录生成的参考性报告——不能替代医学评估。',
   },
   language: {
+    chooseTitle: '选择应用语言',
+    chooseHint: '之后可在「个人资料 → 语言与单位」中更改。',
+    confirm: '继续',
     sectionTitle: '语言与单位',
     languageLabel: '应用语言',
     auto: '自动（跟随设备语言）',

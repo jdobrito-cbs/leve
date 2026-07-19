@@ -719,6 +719,9 @@ export const strings: Strings = {
       'Informational report generated from your entries — it does not replace a medical evaluation.',
   },
   language: {
+    chooseTitle: 'Choose the app language',
+    chooseHint: 'You can change it later in Profile → Language and units.',
+    confirm: 'Continue',
     sectionTitle: 'Language and units',
     languageLabel: 'App language',
     auto: 'Automatic (device language)',

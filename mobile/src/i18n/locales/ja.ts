@@ -719,6 +719,9 @@ export const strings: Strings = {
       'このレポートはあなたの記録から作成された参考情報であり、医師の診断に代わるものではありません。',
   },
   language: {
+    chooseTitle: 'アプリの言語を選んでください',
+    chooseHint: '「プロフィール → 言語と単位」で後から変更できます。',
+    confirm: '続ける',
     sectionTitle: '言語と単位',
     languageLabel: 'アプリの言語',
     auto: '自動（端末の言語）',

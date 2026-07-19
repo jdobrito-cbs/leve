@@ -13,6 +13,7 @@ import {
   HeroHeader,
   IconChip,
   Input,
+  ListRow,
   RulerField,
   SegmentedChips,
 } from '@/design/components';
@@ -40,6 +41,13 @@ import {
   signInWithGoogle,
 } from '@/services/cloudAccount';
 import { strings } from '@/i18n/pt-BR';
+import { setSetting } from '@/db/settingsRepo';
+import {
+  LANGUAGES,
+  resolveAutoLanguage,
+  setActiveLanguage,
+  type LanguageCode,
+} from '@/i18n/engine';
 
 /** Dados básicos obrigatórios — a conta Apple/Google não fornece sexo nem
  *  nascimento (a Apple envia só nome/e-mail, e apenas no primeiro login). */
@@ -168,6 +176,40 @@ function ProfileStep() {
   );
 }
 
+/** Primeira coisa na primeira abertura: escolher o idioma. O da região do
+ *  aparelho vem pré-selecionado e a tela muda de idioma ao tocar na opção. */
+function LanguageStep({ onDone }: { onDone: () => void }) {
+  const [selected, setSelected] = useState<LanguageCode>(resolveAutoLanguage());
+
+  function pick(code: LanguageCode) {
+    setSelected(code);
+    setActiveLanguage(code);
+  }
+
+  async function confirm() {
+    await setSetting(db, 'language', selected).catch(() => undefined);
+    onDone();
+  }
+
+  return (
+    <Card style={{ gap: spacing.sm }}>
+      <AppText variant="title">{strings.language.chooseTitle}</AppText>
+      <AppText variant="caption" muted>
+        {strings.language.chooseHint}
+      </AppText>
+      {LANGUAGES.map((l) => (
+        <ListRow
+          key={l.code}
+          title={l.label}
+          right={selected === l.code ? '✓' : undefined}
+          onPress={() => pick(l.code)}
+        />
+      ))}
+      <Button label={strings.language.confirm} onPress={confirm} />
+    </Card>
+  );
+}
+
 function AccountStep({ onDone }: { onDone: () => void }) {
   const { colors } = useTheme();
   const [message, setMessage] = useState<string | null>(null);
@@ -250,7 +292,7 @@ export default function Onboarding() {
   const { colors } = useTheme();
   const [checked, setChecked] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [step, setStep] = useState<'consent' | 'account' | 'profile'>('consent');
+  const [step, setStep] = useState<'language' | 'consent' | 'account' | 'profile'>('language');
 
   async function onContinue() {
     setSaving(true);
@@ -284,7 +326,9 @@ export default function Onboarding() {
         </AppText>
       </HeroHeader>
       <View style={{ padding: spacing.md, gap: spacing.md, marginTop: -spacing.lg, zIndex: 1 }}>
-        {step === 'consent' ? (
+        {step === 'language' ? (
+          <LanguageStep onDone={() => setStep('consent')} />
+        ) : step === 'consent' ? (
           <Card style={{ gap: spacing.md }}>
             <DisclaimerBanner />
             <AppText variant="caption" muted>

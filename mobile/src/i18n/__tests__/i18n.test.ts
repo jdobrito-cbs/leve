@@ -17,6 +17,8 @@ test('todos os idiomas anunciados carregam e mantêm placeholders', () => {
     setActiveLanguage(code);
     // Chave de cada seção nova + placeholder preservado.
     expect(strings.language.sectionTitle.length).toBeGreaterThan(0);
+    expect(strings.language.chooseTitle.length).toBeGreaterThan(0);
+    expect(strings.reportPdf.title.length).toBeGreaterThan(0);
     expect(strings.profile.sleepDetected).toContain('{time}');
     expect(strings.meal.per100).toContain('{unit}');
     expect(strings.reminders.morningBody.length).toBeGreaterThan(0);
