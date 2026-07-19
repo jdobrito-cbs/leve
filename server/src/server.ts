@@ -25,6 +25,7 @@ function safeEqual(a: string, b: string): boolean {
 const DUMMY_PASSWORD_HASH = hashPassword('leve-dummy-password-for-timing');
 import { ADMIN_PAGE_HTML } from './adminPage.js';
 import { LANDING_PAGE_HTML } from './landingPage.js';
+import { MEDICAL_PAGE_HTML, PRIVACY_PAGE_HTML, TERMS_PAGE_HTML } from './legalPages.js';
 import {
   buildFoodInfoBody,
   buildHubBody,
@@ -150,6 +151,13 @@ export async function buildServer(options: ServerOptions) {
   app.get('/', async (_req, reply) => {
     return reply.type('text/html; charset=utf-8').send(LANDING_PAGE_HTML);
   });
+
+  // Documentos legais públicos (exigidos pelas lojas em URL pública).
+  const htmlPage = (html: string) => async (_req: FastifyRequest, reply: FastifyReply) =>
+    reply.type('text/html; charset=utf-8').send(html);
+  app.get('/privacidade', htmlPage(PRIVACY_PAGE_HTML));
+  app.get('/termos', htmlPage(TERMS_PAGE_HTML));
+  app.get('/aviso-medico', htmlPage(MEDICAL_PAGE_HTML));
 
   if (store && jwtSecret) {
     const issueTokens = async (userId: string) => {

@@ -65,6 +65,13 @@ describe('POST /scan-food', () => {
     expect(home.statusCode).toBe(200);
     expect(home.body).toContain('Leve');
     expect(home.body).toContain('não substitui');
+    // Documentos legais públicos (exigência das lojas).
+    const priv = await app.inject({ method: 'GET', url: '/privacidade' });
+    expect(priv.statusCode).toBe(200);
+    expect(priv.headers['content-type']).toContain('text/html');
+    expect(priv.body).toContain('privacidade');
+    expect((await app.inject({ method: 'GET', url: '/termos' })).statusCode).toBe(200);
+    expect((await app.inject({ method: 'GET', url: '/aviso-medico' })).statusCode).toBe(200);
     const painel = await app.inject({ method: 'GET', url: '/painel' });
     expect(painel.statusCode).toBe(200);
     const old = await app.inject({ method: 'GET', url: '/admin' });
