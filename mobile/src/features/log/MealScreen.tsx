@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { formatDateBR, formatTimeHM, localDayKey, parseDateTimeBR } from '@/core/datetime';
 import { parseDecimalBR } from '@/core/text';
-import type { FoodItem, FoodLog, LogOrigin, MealPeriod } from '@/core/types';
+import type { FoodItem, FoodLog, LogOrigin, MealPeriod, PortionUnit } from '@/core/types';
+import { lookupFoodInfo } from '@/services/nutrition/foodInfo';
 import type { FoodCandidate } from '@/services/vision/VisionProvider';
 import { getVisionProvider, isScanConfigured } from '@/services/vision/VisionProvider';
 import {
@@ -75,6 +76,20 @@ function scaled(per100: number | null | undefined, portion: number): number | nu
     : Math.round(((per100 * portion) / 100) * 10) / 10;
 }
 
+/** Extrai a porção de referência ("1 fatia (60 g)") para o atalho de preenchimento. */
+function refPortionShortcut(item: FoodItem): { label: string; value: number } | null {
+  const m = item.referencePortion?.match(/\((\d+(?:[.,]\d+)?)\s*(g|ml)\)/);
+  if (!m) return null;
+  const value = parseDecimalBR(m[1]);
+  if (value === null || value <= 0 || value === 100) return null;
+  return { label: item.referencePortion!, value };
+}
+
+const UNIT_OPTIONS: Array<{ value: PortionUnit; label: string }> = [
+  { value: 'g', label: 'g' },
+  { value: 'ml', label: 'ml' },
+];
+
 function fmtKcal(v: number | null): string {
   return v !== null ? `${v.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} kcal` : '—';
 }
@@ -90,7 +105,10 @@ export function MealScreen() {
   const [portionStr, setPortionStr] = useState('100');
   const [manualName, setManualName] = useState('');
   const [manualWeightStr, setManualWeightStr] = useState('');
+  const [manualUnit, setManualUnit] = useState<PortionUnit>('g');
   const [manualBase, setManualBase] = useState<FoodItem | null>(null);
+  const [lookingUp, setLookingUp] = useState(false);
+  const [lookupNote, setLookupNote] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [scanError, setScanError] = useState<string | null>(null);
   const [scanCandidates, setScanCandidates] = useState<FoodCandidate[]>([]);
@@ -174,6 +192,7 @@ export function MealScreen() {
     pushToPlate({
       name: selected.name,
       grams: portion,
+      unit: selected.unit,
       calories: scaled(selected.calories, portion),
       proteinG: scaled(selected.proteinG, portion),
       carbsG: scaled(selected.carbsG, portion),
@@ -187,20 +206,43 @@ export function MealScreen() {
     setFromScan(false);
   }
 
-  function addManualToPlate() {
+  async function addManualToPlate() {
     if (!manualName.trim() || manualGrams === null || manualGrams <= 0) return;
+    let base: Pick<FoodItem, 'calories' | 'proteinG' | 'carbsG' | 'fatG' | 'fiberG'> | null =
+      manualBase;
+    let unit = manualUnit;
+    setLookupNote(false);
+    // Sem base local: busca automática das calorias na internet (quando liberada).
+    if (!base && !scanLocked && !lookingUp) {
+      setLookingUp(true);
+      const info = await lookupFoodInfo(manualName.trim()).catch(() => null);
+      setLookingUp(false);
+      if (info) {
+        base = {
+          calories: info.kcalPer100,
+          proteinG: info.proteinG,
+          carbsG: info.carbsG,
+          fatG: info.fatG,
+          fiberG: info.fiberG,
+        };
+        if (info.unit === 'ml' || info.unit === 'g') unit = info.unit;
+        setLookupNote(true);
+      }
+    }
     pushToPlate({
       name: manualName.trim(),
       grams: manualGrams,
-      calories: manualBase ? scaled(manualBase.calories, manualGrams) : null,
-      proteinG: manualBase ? scaled(manualBase.proteinG, manualGrams) : null,
-      carbsG: manualBase ? scaled(manualBase.carbsG, manualGrams) : null,
-      fatG: manualBase ? scaled(manualBase.fatG, manualGrams) : null,
-      fiberG: manualBase ? scaled(manualBase.fiberG, manualGrams) : null,
+      unit,
+      calories: base ? scaled(base.calories, manualGrams) : null,
+      proteinG: base ? scaled(base.proteinG, manualGrams) : null,
+      carbsG: base ? scaled(base.carbsG, manualGrams) : null,
+      fatG: base ? scaled(base.fatG, manualGrams) : null,
+      fiberG: base ? scaled(base.fiberG, manualGrams) : null,
       origin: fromScan ? 'scan' : 'manual',
     });
     setManualName('');
     setManualWeightStr('');
+    setManualUnit('g');
     setFromScan(false);
   }
 
@@ -210,6 +252,7 @@ export function MealScreen() {
       await addFoodLog(db, {
         name: item.name,
         portionGrams: item.grams,
+        portionUnit: item.unit,
         calories: item.calories,
         proteinG: item.proteinG,
         carbsG: item.carbsG,
@@ -348,14 +391,22 @@ export function MealScreen() {
               <AppText variant="title">{selected.name}</AppText>
               <AppText variant="caption" muted>
                 {selected.calories ?? '—'} kcal · P {selected.proteinG ?? '—'} g · C{' '}
-                {selected.carbsG ?? '—'} g · G {selected.fatG ?? '—'} g ({strings.meal.per100g})
+                {selected.carbsG ?? '—'} g · G {selected.fatG ?? '—'} g (
+                {strings.meal.per100.replace('{unit}', selected.unit)})
               </AppText>
               <NumberField
                 label={strings.meal.portionLabel}
                 value={portionStr}
                 onChangeText={setPortionStr}
-                suffix="g"
+                suffix={selected.unit}
               />
+              {refPortionShortcut(selected) ? (
+                <Button
+                  label={refPortionShortcut(selected)!.label}
+                  variant="secondary"
+                  onPress={() => setPortionStr(String(refPortionShortcut(selected)!.value))}
+                />
+              ) : null}
               {portion !== null && portion > 0 ? (
                 <AppText>
                   {scaled(selected.calories, portion) ?? '—'} kcal · P{' '}
@@ -440,17 +491,35 @@ export function MealScreen() {
             label={strings.meal.weightLabel}
             value={manualWeightStr}
             onChangeText={setManualWeightStr}
-            suffix="g"
+            suffix={manualUnit}
             placeholder="0"
+          />
+          <SegmentedChips
+            options={UNIT_OPTIONS}
+            value={manualUnit}
+            onChange={setManualUnit}
           />
           {manualBase ? (
             <AppText variant="caption" muted>
               {strings.meal.baseLabel}: {manualBase.name} · {manualBase.calories ?? '—'} kcal{' '}
-              {strings.meal.per100g}
+              {strings.meal.per100.replace('{unit}', manualBase.unit)}
             </AppText>
           ) : manualName.trim().length >= 2 ? (
             <AppText variant="caption" muted>
-              {strings.meal.noBase}
+              {scanLocked ? strings.meal.noBase : strings.meal.noBaseWillLookup}
+            </AppText>
+          ) : null}
+          {lookingUp ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+              <ActivityIndicator />
+              <AppText variant="caption" muted>
+                {strings.meal.lookupSearching}
+              </AppText>
+            </View>
+          ) : null}
+          {lookupNote ? (
+            <AppText variant="caption" muted>
+              {strings.meal.lookupNote}
             </AppText>
           ) : null}
           {manualBase && manualGrams !== null && manualGrams > 0 ? (
@@ -464,7 +533,7 @@ export function MealScreen() {
           <Button
             label={strings.meal.addToPlate}
             onPress={addManualToPlate}
-            disabled={!manualName.trim() || manualGrams === null || manualGrams <= 0}
+            disabled={!manualName.trim() || manualGrams === null || manualGrams <= 0 || lookingUp}
           />
         </Card>
       )}
@@ -476,7 +545,7 @@ export function MealScreen() {
             <ListRow
               key={`${item.name}-${index}`}
               title={item.name}
-              subtitle={item.grams !== null ? `${item.grams} g` : undefined}
+              subtitle={item.grams !== null ? `${item.grams} ${item.unit}` : undefined}
               right={fmtKcal(item.calories)}
               onDelete={() => setPlate((p) => p.filter((_, i) => i !== index))}
             />
@@ -536,7 +605,7 @@ export function MealScreen() {
                 <ListRow
                   key={f.id}
                   title={f.name}
-                  subtitle={f.portionGrams ? `${f.portionGrams} g` : undefined}
+                  subtitle={f.portionGrams ? `${f.portionGrams} ${f.portionUnit ?? 'g'}` : undefined}
                   right={f.calories !== null ? fmtKcal(f.calories) : undefined}
                   onDelete={async () => {
                     await deleteFoodLog(db, f.id);

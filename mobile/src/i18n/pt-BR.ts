@@ -216,7 +216,7 @@ export const strings = {
     proteinLabel: 'Proteína (g)',
     carbsLabel: 'Carboidrato (g)',
     fatLabel: 'Gordura (g)',
-    per100g: 'por 100 g',
+    per100: 'por 100 {unit}',
     todayList: 'Refeições de hoje',
     todayTotal: 'Total do dia',
     add: 'Adicionar refeição',
@@ -241,6 +241,11 @@ export const strings = {
     weightLabel: 'Peso da porção (g)',
     baseLabel: 'Base nutricional',
     noBase: 'Sem correspondência na tabela — o item será salvo sem calorias.',
+    noBaseWillLookup:
+      'Sem correspondência na tabela — ao adicionar, o Leve busca as calorias na internet.',
+    lookupSearching: 'Buscando calorias na internet…',
+    lookupNote:
+      'Estimativa obtida pela internet — confira no rótulo quando possível.',
     dayList: 'Refeições do dia',
     scanTab: 'Escanear',
     scanButton: 'Escanear com a câmera',

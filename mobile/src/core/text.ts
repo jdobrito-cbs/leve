@@ -1,8 +1,11 @@
+/** Minúsculas, sem acentos e sem pontuação — "Goiaba, doce, cascão" → "goiaba doce cascao".
+ *  Assim "goiabada", "doce de leite" e afins encontram os nomes com vírgula da TACO. */
 export function normalizeText(s: string): string {
   return s
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
     .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
     .trim();
 }
 

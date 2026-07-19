@@ -1,5 +1,5 @@
 import { FilePartnerKeyStore } from './filePartnerKeyStore.js';
-import { buildServer, makeHubCaller } from './server.js';
+import { buildServer, makeFoodHubCaller, makeHubCaller } from './server.js';
 
 const {
   HUB_BASE_URL,
@@ -37,8 +37,10 @@ async function main() {
   if (ADMIN_TOKEN) console.log('painel de parceiros: ATIVO em /admin');
   else console.warn('painel de parceiros: desativado (defina ADMIN_TOKEN para ativar)');
 
+  const hub = { baseUrl: HUB_BASE_URL!, apiKey: HUB_API_KEY!, model: HUB_MODEL! };
   const app = buildServer({
-    callHub: makeHubCaller({ baseUrl: HUB_BASE_URL!, apiKey: HUB_API_KEY!, model: HUB_MODEL! }),
+    callHub: makeHubCaller(hub),
+    callFoodHub: makeFoodHubCaller(hub),
     appToken: APP_TOKEN || undefined,
     store,
     jwtSecret: JWT_SECRET || undefined,

@@ -1,49 +1,921 @@
 [
-  { "name": "Bife de alcatra grelhado", "category": "Pratos regionais", "kcal": 241, "proteinG": 31.9, "carbsG": 0, "fatG": 11.6, "fiberG": 0 },
-  { "name": "Bife de contra-filé grelhado", "category": "Pratos regionais", "kcal": 194, "proteinG": 29.5, "carbsG": 0, "fatG": 7.6, "fiberG": 0 },
-  { "name": "Picadinho de carne bovina", "category": "Pratos regionais", "kcal": 153, "proteinG": 15.5, "carbsG": 4.5, "fatG": 8, "fiberG": 0.5 },
-  { "name": "Feijão preto com calabresa", "category": "Pratos regionais", "kcal": 118, "proteinG": 7.5, "carbsG": 12.5, "fatG": 4.5, "fiberG": 6 },
-  { "name": "Feijão carioca com bacon", "category": "Pratos regionais", "kcal": 110, "proteinG": 6.8, "carbsG": 12, "fatG": 4, "fiberG": 5.5 },
-  { "name": "Feijão verde (de corda) cozido", "category": "Pratos regionais", "kcal": 78, "proteinG": 5.1, "carbsG": 13.5, "fatG": 0.6, "fiberG": 7.5 },
-  { "name": "Linguiça calabresa frita", "category": "Pratos regionais", "kcal": 296, "proteinG": 17.4, "carbsG": 1.4, "fatG": 24.5, "fiberG": 0 },
-  { "name": "Carne de sol grelhada", "category": "Pratos regionais", "kcal": 245, "proteinG": 33, "carbsG": 0, "fatG": 12, "fiberG": 0 },
-  { "name": "Paçoca de carne de sol", "category": "Pratos regionais", "kcal": 380, "proteinG": 24, "carbsG": 30, "fatG": 17, "fiberG": 4 },
-  { "name": "Arroz carreteiro", "category": "Pratos regionais", "kcal": 160, "proteinG": 9, "carbsG": 17, "fatG": 6, "fiberG": 0.8 },
-  { "name": "Galinhada", "category": "Pratos regionais", "kcal": 128, "proteinG": 9.5, "carbsG": 14, "fatG": 3.8, "fiberG": 0.9 },
-  { "name": "Moqueca de peixe", "category": "Pratos regionais", "kcal": 117, "proteinG": 11, "carbsG": 3.5, "fatG": 6.8, "fiberG": 0.6 },
-  { "name": "Bobó de camarão", "category": "Pratos regionais", "kcal": 142, "proteinG": 7.5, "carbsG": 12, "fatG": 7.5, "fiberG": 1.2 },
-  { "name": "Escondidinho de carne seca", "category": "Pratos regionais", "kcal": 176, "proteinG": 9.5, "carbsG": 14.5, "fatG": 9, "fiberG": 1 },
-  { "name": "Rabada cozida", "category": "Pratos regionais", "kcal": 213, "proteinG": 19, "carbsG": 1.5, "fatG": 14.5, "fiberG": 0.2 },
-  { "name": "Vaca atolada", "category": "Pratos regionais", "kcal": 165, "proteinG": 12, "carbsG": 12, "fatG": 8, "fiberG": 1 },
-  { "name": "Buchada de bode", "category": "Pratos regionais", "kcal": 130, "proteinG": 17, "carbsG": 1, "fatG": 6.5, "fiberG": 0 },
-  { "name": "Pato no tucupi", "category": "Pratos regionais", "kcal": 130, "proteinG": 15, "carbsG": 3, "fatG": 6, "fiberG": 0.3 },
-  { "name": "Frango com quiabo", "category": "Pratos regionais", "kcal": 120, "proteinG": 12, "carbsG": 4, "fatG": 6, "fiberG": 1.2 },
-  { "name": "Mungunzá doce", "category": "Pratos regionais", "kcal": 112, "proteinG": 2.4, "carbsG": 23.5, "fatG": 1.2, "fiberG": 0.7 },
-  { "name": "Tapioca pronta (sem recheio)", "category": "Pratos regionais", "kcal": 240, "proteinG": 0.2, "carbsG": 59.4, "fatG": 0.1, "fiberG": 0.5 },
-  { "name": "Cuscuz nordestino com manteiga", "category": "Pratos regionais", "kcal": 150, "proteinG": 2.5, "carbsG": 24, "fatG": 4.8, "fiberG": 1.5 },
-  { "name": "Pirão de peixe", "category": "Pratos regionais", "kcal": 78, "proteinG": 1.5, "carbsG": 16, "fatG": 0.5, "fiberG": 0.4 },
-  { "name": "Baião de dois com queijo coalho", "category": "Pratos regionais", "kcal": 158, "proteinG": 7.8, "carbsG": 18, "fatG": 6, "fiberG": 2.5 },
-  { "name": "Farofa pronta com bacon", "category": "Pratos regionais", "kcal": 410, "proteinG": 6, "carbsG": 68, "fatG": 12, "fiberG": 5.5 },
-  { "name": "Farofa simples (de mandioca)", "category": "Pratos regionais", "kcal": 410, "proteinG": 1.6, "carbsG": 87, "fatG": 5, "fiberG": 6.4 },
-  { "name": "Farinha d'água", "category": "Pratos regionais", "kcal": 348, "proteinG": 1, "carbsG": 86, "fatG": 0.4, "fiberG": 6.5 },
-  { "name": "Farinha ovinha", "category": "Pratos regionais", "kcal": 352, "proteinG": 1.2, "carbsG": 87, "fatG": 0.5, "fiberG": 6.2 },
-  { "name": "Farinha de tapioca", "category": "Pratos regionais", "kcal": 350, "proteinG": 0.2, "carbsG": 88, "fatG": 0.1, "fiberG": 0.3 },
-  { "name": "Pirarucu assado", "category": "Pratos regionais", "kcal": 122, "proteinG": 24, "carbsG": 0, "fatG": 2.5, "fiberG": 0 },
-  { "name": "Pirarucu de casaca", "category": "Pratos regionais", "kcal": 180, "proteinG": 12, "carbsG": 15, "fatG": 8, "fiberG": 1 },
-  { "name": "Tambaqui assado", "category": "Pratos regionais", "kcal": 190, "proteinG": 22, "carbsG": 0, "fatG": 11, "fiberG": 0 },
-  { "name": "Filhote grelhado (peixe)", "category": "Pratos regionais", "kcal": 105, "proteinG": 20, "carbsG": 0, "fatG": 2.5, "fiberG": 0 },
-  { "name": "Caldeirada de peixe", "category": "Pratos regionais", "kcal": 95, "proteinG": 12, "carbsG": 4, "fatG": 3.5, "fiberG": 0.5 },
-  { "name": "Açaí com farinha", "category": "Pratos regionais", "kcal": 145, "proteinG": 1.5, "carbsG": 22, "fatG": 5.5, "fiberG": 3.8 },
-  { "name": "Caruru (preparado)", "category": "Pratos regionais", "kcal": 115, "proteinG": 5, "carbsG": 9, "fatG": 7, "fiberG": 2.5 },
-  { "name": "Arroz paraense (jambu e camarão)", "category": "Pratos regionais", "kcal": 155, "proteinG": 7, "carbsG": 20, "fatG": 5.5, "fiberG": 1 },
-  { "name": "Charque acebolado", "category": "Pratos regionais", "kcal": 260, "proteinG": 25, "carbsG": 3, "fatG": 16, "fiberG": 0.3 },
-  { "name": "Bolinho de piracuí", "category": "Pratos regionais", "kcal": 210, "proteinG": 12, "carbsG": 22, "fatG": 8, "fiberG": 0.8 },
-  { "name": "Queijo coalho grelhado", "category": "Pratos regionais", "kcal": 307, "proteinG": 22, "carbsG": 3.5, "fatG": 23, "fiberG": 0 },
-  { "name": "Tapioca com queijo", "category": "Pratos regionais", "kcal": 280, "proteinG": 8, "carbsG": 45, "fatG": 7.5, "fiberG": 0.5 },
-  { "name": "Tapioca com coco", "category": "Pratos regionais", "kcal": 290, "proteinG": 2, "carbsG": 55, "fatG": 6.5, "fiberG": 1.5 },
-  { "name": "Mingau de tapioca", "category": "Pratos regionais", "kcal": 95, "proteinG": 2, "carbsG": 20, "fatG": 1, "fiberG": 0.2 },
-  { "name": "Mingau de milho", "category": "Pratos regionais", "kcal": 90, "proteinG": 2.5, "carbsG": 17, "fatG": 1.5, "fiberG": 0.5 },
-  { "name": "Quibebe de jerimum", "category": "Pratos regionais", "kcal": 45, "proteinG": 1.2, "carbsG": 10, "fatG": 0.4, "fiberG": 1.6 },
-  { "name": "Galinha à cabidela", "category": "Pratos regionais", "kcal": 140, "proteinG": 15, "carbsG": 4, "fatG": 7, "fiberG": 0.3 },
-  { "name": "Mocotó cozido", "category": "Pratos regionais", "kcal": 150, "proteinG": 18, "carbsG": 2, "fatG": 8, "fiberG": 0 }
+  {
+    "name": "Bife de alcatra grelhado",
+    "category": "Pratos regionais",
+    "kcal": 241,
+    "proteinG": 31.9,
+    "carbsG": 0,
+    "fatG": 11.6,
+    "fiberG": 0
+  },
+  {
+    "name": "Bife de contra-filé grelhado",
+    "category": "Pratos regionais",
+    "kcal": 194,
+    "proteinG": 29.5,
+    "carbsG": 0,
+    "fatG": 7.6,
+    "fiberG": 0
+  },
+  {
+    "name": "Picadinho de carne bovina",
+    "category": "Pratos regionais",
+    "kcal": 153,
+    "proteinG": 15.5,
+    "carbsG": 4.5,
+    "fatG": 8,
+    "fiberG": 0.5
+  },
+  {
+    "name": "Feijão preto com calabresa",
+    "category": "Pratos regionais",
+    "kcal": 118,
+    "proteinG": 7.5,
+    "carbsG": 12.5,
+    "fatG": 4.5,
+    "fiberG": 6
+  },
+  {
+    "name": "Feijão carioca com bacon",
+    "category": "Pratos regionais",
+    "kcal": 110,
+    "proteinG": 6.8,
+    "carbsG": 12,
+    "fatG": 4,
+    "fiberG": 5.5
+  },
+  {
+    "name": "Feijão verde (de corda) cozido",
+    "category": "Pratos regionais",
+    "kcal": 78,
+    "proteinG": 5.1,
+    "carbsG": 13.5,
+    "fatG": 0.6,
+    "fiberG": 7.5
+  },
+  {
+    "name": "Linguiça calabresa frita",
+    "category": "Pratos regionais",
+    "kcal": 296,
+    "proteinG": 17.4,
+    "carbsG": 1.4,
+    "fatG": 24.5,
+    "fiberG": 0
+  },
+  {
+    "name": "Carne de sol grelhada",
+    "category": "Pratos regionais",
+    "kcal": 245,
+    "proteinG": 33,
+    "carbsG": 0,
+    "fatG": 12,
+    "fiberG": 0
+  },
+  {
+    "name": "Paçoca de carne de sol",
+    "category": "Pratos regionais",
+    "kcal": 380,
+    "proteinG": 24,
+    "carbsG": 30,
+    "fatG": 17,
+    "fiberG": 4
+  },
+  {
+    "name": "Arroz carreteiro",
+    "category": "Pratos regionais",
+    "kcal": 160,
+    "proteinG": 9,
+    "carbsG": 17,
+    "fatG": 6,
+    "fiberG": 0.8
+  },
+  {
+    "name": "Galinhada",
+    "category": "Pratos regionais",
+    "kcal": 128,
+    "proteinG": 9.5,
+    "carbsG": 14,
+    "fatG": 3.8,
+    "fiberG": 0.9
+  },
+  {
+    "name": "Moqueca de peixe",
+    "category": "Pratos regionais",
+    "kcal": 117,
+    "proteinG": 11,
+    "carbsG": 3.5,
+    "fatG": 6.8,
+    "fiberG": 0.6
+  },
+  {
+    "name": "Bobó de camarão",
+    "category": "Pratos regionais",
+    "kcal": 142,
+    "proteinG": 7.5,
+    "carbsG": 12,
+    "fatG": 7.5,
+    "fiberG": 1.2
+  },
+  {
+    "name": "Escondidinho de carne seca",
+    "category": "Pratos regionais",
+    "kcal": 176,
+    "proteinG": 9.5,
+    "carbsG": 14.5,
+    "fatG": 9,
+    "fiberG": 1
+  },
+  {
+    "name": "Rabada cozida",
+    "category": "Pratos regionais",
+    "kcal": 213,
+    "proteinG": 19,
+    "carbsG": 1.5,
+    "fatG": 14.5,
+    "fiberG": 0.2
+  },
+  {
+    "name": "Vaca atolada",
+    "category": "Pratos regionais",
+    "kcal": 165,
+    "proteinG": 12,
+    "carbsG": 12,
+    "fatG": 8,
+    "fiberG": 1
+  },
+  {
+    "name": "Buchada de bode",
+    "category": "Pratos regionais",
+    "kcal": 130,
+    "proteinG": 17,
+    "carbsG": 1,
+    "fatG": 6.5,
+    "fiberG": 0
+  },
+  {
+    "name": "Pato no tucupi",
+    "category": "Pratos regionais",
+    "kcal": 130,
+    "proteinG": 15,
+    "carbsG": 3,
+    "fatG": 6,
+    "fiberG": 0.3
+  },
+  {
+    "name": "Frango com quiabo",
+    "category": "Pratos regionais",
+    "kcal": 120,
+    "proteinG": 12,
+    "carbsG": 4,
+    "fatG": 6,
+    "fiberG": 1.2
+  },
+  {
+    "name": "Mungunzá doce",
+    "category": "Pratos regionais",
+    "kcal": 112,
+    "proteinG": 2.4,
+    "carbsG": 23.5,
+    "fatG": 1.2,
+    "fiberG": 0.7
+  },
+  {
+    "name": "Tapioca pronta (sem recheio)",
+    "category": "Pratos regionais",
+    "kcal": 240,
+    "proteinG": 0.2,
+    "carbsG": 59.4,
+    "fatG": 0.1,
+    "fiberG": 0.5
+  },
+  {
+    "name": "Cuscuz nordestino com manteiga",
+    "category": "Pratos regionais",
+    "kcal": 150,
+    "proteinG": 2.5,
+    "carbsG": 24,
+    "fatG": 4.8,
+    "fiberG": 1.5
+  },
+  {
+    "name": "Pirão de peixe",
+    "category": "Pratos regionais",
+    "kcal": 78,
+    "proteinG": 1.5,
+    "carbsG": 16,
+    "fatG": 0.5,
+    "fiberG": 0.4
+  },
+  {
+    "name": "Baião de dois com queijo coalho",
+    "category": "Pratos regionais",
+    "kcal": 158,
+    "proteinG": 7.8,
+    "carbsG": 18,
+    "fatG": 6,
+    "fiberG": 2.5
+  },
+  {
+    "name": "Farofa pronta com bacon",
+    "category": "Pratos regionais",
+    "kcal": 410,
+    "proteinG": 6,
+    "carbsG": 68,
+    "fatG": 12,
+    "fiberG": 5.5
+  },
+  {
+    "name": "Farofa simples (de mandioca)",
+    "category": "Pratos regionais",
+    "kcal": 410,
+    "proteinG": 1.6,
+    "carbsG": 87,
+    "fatG": 5,
+    "fiberG": 6.4
+  },
+  {
+    "name": "Farinha d'água",
+    "category": "Pratos regionais",
+    "kcal": 348,
+    "proteinG": 1,
+    "carbsG": 86,
+    "fatG": 0.4,
+    "fiberG": 6.5
+  },
+  {
+    "name": "Farinha ovinha",
+    "category": "Pratos regionais",
+    "kcal": 352,
+    "proteinG": 1.2,
+    "carbsG": 87,
+    "fatG": 0.5,
+    "fiberG": 6.2
+  },
+  {
+    "name": "Farinha de tapioca",
+    "category": "Pratos regionais",
+    "kcal": 350,
+    "proteinG": 0.2,
+    "carbsG": 88,
+    "fatG": 0.1,
+    "fiberG": 0.3
+  },
+  {
+    "name": "Pirarucu assado",
+    "category": "Pratos regionais",
+    "kcal": 122,
+    "proteinG": 24,
+    "carbsG": 0,
+    "fatG": 2.5,
+    "fiberG": 0
+  },
+  {
+    "name": "Pirarucu de casaca",
+    "category": "Pratos regionais",
+    "kcal": 180,
+    "proteinG": 12,
+    "carbsG": 15,
+    "fatG": 8,
+    "fiberG": 1
+  },
+  {
+    "name": "Tambaqui assado",
+    "category": "Pratos regionais",
+    "kcal": 190,
+    "proteinG": 22,
+    "carbsG": 0,
+    "fatG": 11,
+    "fiberG": 0
+  },
+  {
+    "name": "Filhote grelhado (peixe)",
+    "category": "Pratos regionais",
+    "kcal": 105,
+    "proteinG": 20,
+    "carbsG": 0,
+    "fatG": 2.5,
+    "fiberG": 0
+  },
+  {
+    "name": "Caldeirada de peixe",
+    "category": "Pratos regionais",
+    "kcal": 95,
+    "proteinG": 12,
+    "carbsG": 4,
+    "fatG": 3.5,
+    "fiberG": 0.5
+  },
+  {
+    "name": "Açaí com farinha",
+    "category": "Pratos regionais",
+    "kcal": 145,
+    "proteinG": 1.5,
+    "carbsG": 22,
+    "fatG": 5.5,
+    "fiberG": 3.8
+  },
+  {
+    "name": "Caruru (preparado)",
+    "category": "Pratos regionais",
+    "kcal": 115,
+    "proteinG": 5,
+    "carbsG": 9,
+    "fatG": 7,
+    "fiberG": 2.5
+  },
+  {
+    "name": "Arroz paraense (jambu e camarão)",
+    "category": "Pratos regionais",
+    "kcal": 155,
+    "proteinG": 7,
+    "carbsG": 20,
+    "fatG": 5.5,
+    "fiberG": 1
+  },
+  {
+    "name": "Charque acebolado",
+    "category": "Pratos regionais",
+    "kcal": 260,
+    "proteinG": 25,
+    "carbsG": 3,
+    "fatG": 16,
+    "fiberG": 0.3
+  },
+  {
+    "name": "Bolinho de piracuí",
+    "category": "Pratos regionais",
+    "kcal": 210,
+    "proteinG": 12,
+    "carbsG": 22,
+    "fatG": 8,
+    "fiberG": 0.8
+  },
+  {
+    "name": "Queijo coalho grelhado",
+    "category": "Pratos regionais",
+    "kcal": 307,
+    "proteinG": 22,
+    "carbsG": 3.5,
+    "fatG": 23,
+    "fiberG": 0
+  },
+  {
+    "name": "Tapioca com queijo",
+    "category": "Pratos regionais",
+    "kcal": 280,
+    "proteinG": 8,
+    "carbsG": 45,
+    "fatG": 7.5,
+    "fiberG": 0.5
+  },
+  {
+    "name": "Tapioca com coco",
+    "category": "Pratos regionais",
+    "kcal": 290,
+    "proteinG": 2,
+    "carbsG": 55,
+    "fatG": 6.5,
+    "fiberG": 1.5
+  },
+  {
+    "name": "Mingau de tapioca",
+    "category": "Pratos regionais",
+    "kcal": 95,
+    "proteinG": 2,
+    "carbsG": 20,
+    "fatG": 1,
+    "fiberG": 0.2
+  },
+  {
+    "name": "Mingau de milho",
+    "category": "Pratos regionais",
+    "kcal": 90,
+    "proteinG": 2.5,
+    "carbsG": 17,
+    "fatG": 1.5,
+    "fiberG": 0.5
+  },
+  {
+    "name": "Quibebe de jerimum",
+    "category": "Pratos regionais",
+    "kcal": 45,
+    "proteinG": 1.2,
+    "carbsG": 10,
+    "fatG": 0.4,
+    "fiberG": 1.6
+  },
+  {
+    "name": "Galinha à cabidela",
+    "category": "Pratos regionais",
+    "kcal": 140,
+    "proteinG": 15,
+    "carbsG": 4,
+    "fatG": 7,
+    "fiberG": 0.3
+  },
+  {
+    "name": "Mocotó cozido",
+    "category": "Pratos regionais",
+    "kcal": 150,
+    "proteinG": 18,
+    "carbsG": 2,
+    "fatG": 8,
+    "fiberG": 0
+  },
+  {
+    "name": "Goiabada",
+    "category": "Doces e sobremesas",
+    "kcal": 291,
+    "proteinG": 0.8,
+    "carbsG": 74.3,
+    "fatG": 0.3,
+    "fiberG": 1.6,
+    "referencePortion": "1 fatia (30 g)"
+  },
+  {
+    "name": "Bananada (banana em barra)",
+    "category": "Doces e sobremesas",
+    "kcal": 280,
+    "proteinG": 2.2,
+    "carbsG": 75.7,
+    "fatG": 0.1,
+    "fiberG": 3.8,
+    "referencePortion": "1 barra (30 g)"
+  },
+  {
+    "name": "Doce de leite",
+    "category": "Doces e sobremesas",
+    "kcal": 306,
+    "proteinG": 5.5,
+    "carbsG": 59.5,
+    "fatG": 6,
+    "fiberG": 0,
+    "referencePortion": "1 colher (20 g)"
+  },
+  {
+    "name": "Pudim de leite condensado",
+    "category": "Doces e sobremesas",
+    "kcal": 220,
+    "proteinG": 6,
+    "carbsG": 36.9,
+    "fatG": 5.4,
+    "fiberG": 0,
+    "referencePortion": "1 fatia (110 g)"
+  },
+  {
+    "name": "Brigadeiro",
+    "category": "Doces e sobremesas",
+    "kcal": 335,
+    "proteinG": 7.5,
+    "carbsG": 54.9,
+    "fatG": 10.1,
+    "fiberG": 0.2,
+    "referencePortion": "1 unidade (20 g)"
+  },
+  {
+    "name": "Beijinho",
+    "category": "Doces e sobremesas",
+    "kcal": 320,
+    "proteinG": 7.9,
+    "carbsG": 54.2,
+    "fatG": 8.7,
+    "fiberG": 0,
+    "referencePortion": "1 unidade (20 g)"
+  },
+  {
+    "name": "Mousse (chocolate, maracujá, cupuaçu)",
+    "category": "Doces e sobremesas",
+    "kcal": 332,
+    "proteinG": 5.1,
+    "carbsG": 32.2,
+    "fatG": 21.9,
+    "fiberG": 1.2,
+    "referencePortion": "1 taça (100 g)"
+  },
+  {
+    "name": "Torta doce (limão, maracujá, morango)",
+    "category": "Doces e sobremesas",
+    "kcal": 120,
+    "proteinG": 2.3,
+    "carbsG": 15.6,
+    "fatG": 5.4,
+    "fiberG": 0.5,
+    "referencePortion": "1 fatia (100 g)"
+  },
+  {
+    "name": "Pavê (qualquer sabor)",
+    "category": "Doces e sobremesas",
+    "kcal": 306,
+    "proteinG": 4.9,
+    "carbsG": 21.6,
+    "fatG": 22.2,
+    "fiberG": 0.4,
+    "referencePortion": "1 fatia (100 g)"
+  },
+  {
+    "name": "Manjar branco",
+    "category": "Doces e sobremesas",
+    "kcal": 285,
+    "proteinG": 8.2,
+    "carbsG": 40.1,
+    "fatG": 10.7,
+    "fiberG": 0.3,
+    "referencePortion": "1 fatia (100 g)"
+  },
+  {
+    "name": "Sorvete de massa (qualquer sabor)",
+    "category": "Doces e sobremesas",
+    "kcal": 206,
+    "proteinG": 3.6,
+    "carbsG": 25.1,
+    "fatG": 11,
+    "fiberG": 0.9,
+    "referencePortion": "1 bola (60 g)"
+  },
+  {
+    "name": "Bolo de cenoura",
+    "category": "Doces e sobremesas",
+    "kcal": 345,
+    "proteinG": 4.2,
+    "carbsG": 44.3,
+    "fatG": 17.3,
+    "fiberG": 1.6,
+    "referencePortion": "1 fatia (60 g)"
+  },
+  {
+    "name": "Bolo de chocolate",
+    "category": "Doces e sobremesas",
+    "kcal": 313,
+    "proteinG": 8.7,
+    "carbsG": 58.3,
+    "fatG": 6,
+    "fiberG": 1.8,
+    "referencePortion": "1 fatia (60 g)"
+  },
+  {
+    "name": "Bolo de banana",
+    "category": "Doces e sobremesas",
+    "kcal": 300,
+    "proteinG": 3.9,
+    "carbsG": 52.1,
+    "fatG": 9.1,
+    "fiberG": 1.7,
+    "referencePortion": "1 fatia (60 g)"
+  },
+  {
+    "name": "Bolo de laranja",
+    "category": "Doces e sobremesas",
+    "kcal": 361,
+    "proteinG": 4.8,
+    "carbsG": 58.3,
+    "fatG": 13.2,
+    "fiberG": 2.4,
+    "referencePortion": "1 fatia (60 g)"
+  },
+  {
+    "name": "Bolo simples (massa de trigo)",
+    "category": "Doces e sobremesas",
+    "kcal": 287,
+    "proteinG": 6.9,
+    "carbsG": 55.3,
+    "fatG": 4.2,
+    "fiberG": 0.7,
+    "referencePortion": "1 fatia (60 g)"
+  },
+  {
+    "name": "Sonho (doce de padaria)",
+    "category": "Doces e sobremesas",
+    "kcal": 379,
+    "proteinG": 6,
+    "carbsG": 48.1,
+    "fatG": 18.2,
+    "fiberG": 1.3,
+    "referencePortion": "1 unidade (80 g)"
+  },
+  {
+    "name": "Rosca doce",
+    "category": "Doces e sobremesas",
+    "kcal": 423,
+    "proteinG": 4.5,
+    "carbsG": 55.5,
+    "fatG": 20.6,
+    "fiberG": 1.1,
+    "referencePortion": "1 fatia (50 g)"
+  },
+  {
+    "name": "Pé de moleque",
+    "category": "Doces e sobremesas",
+    "kcal": 474,
+    "proteinG": 9.1,
+    "carbsG": 69.2,
+    "fatG": 17.9,
+    "fiberG": 2.4,
+    "referencePortion": "1 unidade (30 g)"
+  },
+  {
+    "name": "Pamonha",
+    "category": "Doces e sobremesas",
+    "kcal": 171,
+    "proteinG": 2.6,
+    "carbsG": 30.7,
+    "fatG": 4.8,
+    "fiberG": 2.4,
+    "referencePortion": "1 unidade (150 g)"
+  },
+  {
+    "name": "Geleia de frutas",
+    "category": "Doces e sobremesas",
+    "kcal": 278,
+    "proteinG": 0.4,
+    "carbsG": 68.9,
+    "fatG": 0.1,
+    "fiberG": 1.1,
+    "referencePortion": "1 colher (20 g)"
+  },
+  {
+    "name": "Refrigerante de cola (Coca-Cola, Pepsi)",
+    "category": "Bebidas",
+    "kcal": 37,
+    "proteinG": 0.1,
+    "carbsG": 9.5,
+    "fatG": 0,
+    "fiberG": 0,
+    "unit": "ml",
+    "referencePortion": "1 copo (200 ml)"
+  },
+  {
+    "name": "Refrigerante de cola zero (Coca-Cola Zero, Pepsi Black)",
+    "category": "Bebidas",
+    "kcal": 2,
+    "proteinG": 0.1,
+    "carbsG": 0.3,
+    "fatG": 0,
+    "fiberG": 0,
+    "unit": "ml",
+    "referencePortion": "1 copo (200 ml)"
+  },
+  {
+    "name": "Refrigerante zero ou diet (qualquer sabor)",
+    "category": "Bebidas",
+    "kcal": 2,
+    "proteinG": 0.1,
+    "carbsG": 0.3,
+    "fatG": 0,
+    "fiberG": 0,
+    "unit": "ml",
+    "referencePortion": "1 copo (200 ml)"
+  },
+  {
+    "name": "Refrigerante de uva (Fanta Uva, Grapette)",
+    "category": "Bebidas",
+    "kcal": 48,
+    "proteinG": 0,
+    "carbsG": 12.3,
+    "fatG": 0,
+    "fiberG": 0,
+    "unit": "ml",
+    "referencePortion": "1 copo (200 ml)"
+  },
+  {
+    "name": "Água com gás saborizada, sem açúcar",
+    "category": "Bebidas",
+    "kcal": 0,
+    "proteinG": 0,
+    "carbsG": 0,
+    "fatG": 0,
+    "fiberG": 0,
+    "unit": "ml",
+    "referencePortion": "1 copo (200 ml)"
+  },
+  {
+    "name": "Vinho (tinto ou branco)",
+    "category": "Bebidas",
+    "kcal": 85,
+    "proteinG": 0.1,
+    "carbsG": 2.6,
+    "fatG": 0,
+    "fiberG": 0,
+    "unit": "ml",
+    "referencePortion": "1 taça (150 ml)"
+  },
+  {
+    "name": "Cachaça",
+    "category": "Bebidas",
+    "kcal": 216,
+    "proteinG": 0,
+    "carbsG": 0,
+    "fatG": 0,
+    "fiberG": 0,
+    "unit": "ml",
+    "referencePortion": "1 dose (50 ml)"
+  },
+  {
+    "name": "Uísque, vodca ou gin (destilados)",
+    "category": "Bebidas",
+    "kcal": 230,
+    "proteinG": 0,
+    "carbsG": 0,
+    "fatG": 0,
+    "fiberG": 0,
+    "unit": "ml",
+    "referencePortion": "1 dose (50 ml)"
+  },
+  {
+    "name": "Licor (qualquer sabor)",
+    "category": "Bebidas",
+    "kcal": 283,
+    "proteinG": 0,
+    "carbsG": 33.6,
+    "fatG": 0,
+    "fiberG": 0,
+    "unit": "ml",
+    "referencePortion": "1 dose (50 ml)"
+  },
+  {
+    "name": "Caipirinha",
+    "category": "Bebidas",
+    "kcal": 144,
+    "proteinG": 0.1,
+    "carbsG": 37.9,
+    "fatG": 0.1,
+    "fiberG": 0.1,
+    "unit": "ml",
+    "referencePortion": "1 copo (120 ml)"
+  },
+  {
+    "name": "Cerveja light",
+    "category": "Bebidas",
+    "kcal": 29,
+    "proteinG": 0.2,
+    "carbsG": 1.6,
+    "fatG": 0,
+    "fiberG": 0,
+    "unit": "ml",
+    "referencePortion": "1 copo (200 ml)"
+  },
+  {
+    "name": "Suco de laranja (natural)",
+    "category": "Bebidas",
+    "kcal": 42,
+    "proteinG": 0.6,
+    "carbsG": 9.8,
+    "fatG": 0.1,
+    "fiberG": 0.3,
+    "unit": "ml",
+    "referencePortion": "1 copo (200 ml)"
+  },
+  {
+    "name": "Suco de maracujá",
+    "category": "Bebidas",
+    "kcal": 60,
+    "proteinG": 0.7,
+    "carbsG": 14.5,
+    "fatG": 0.2,
+    "fiberG": 0.2,
+    "unit": "ml",
+    "referencePortion": "1 copo (200 ml)"
+  },
+  {
+    "name": "Suco de acerola",
+    "category": "Bebidas",
+    "kcal": 23,
+    "proteinG": 0.4,
+    "carbsG": 4.8,
+    "fatG": 0.3,
+    "fiberG": 0.3,
+    "unit": "ml",
+    "referencePortion": "1 copo (200 ml)"
+  },
+  {
+    "name": "Suco de cupuaçu",
+    "category": "Bebidas",
+    "kcal": 25,
+    "proteinG": 0.6,
+    "carbsG": 5.2,
+    "fatG": 0.5,
+    "fiberG": 1.6,
+    "unit": "ml",
+    "referencePortion": "1 copo (200 ml)"
+  },
+  {
+    "name": "Suco de goiaba",
+    "category": "Bebidas",
+    "kcal": 62,
+    "proteinG": 0.4,
+    "carbsG": 15.6,
+    "fatG": 0.1,
+    "fiberG": 0.8,
+    "unit": "ml",
+    "referencePortion": "1 copo (200 ml)"
+  },
+  {
+    "name": "Suco de manga",
+    "category": "Bebidas",
+    "kcal": 51,
+    "proteinG": 0.1,
+    "carbsG": 13.1,
+    "fatG": 0.1,
+    "fiberG": 0.3,
+    "unit": "ml",
+    "referencePortion": "1 copo (200 ml)"
+  },
+  {
+    "name": "Suco de abacaxi",
+    "category": "Bebidas",
+    "kcal": 53,
+    "proteinG": 0.4,
+    "carbsG": 12.9,
+    "fatG": 0.1,
+    "fiberG": 0.2,
+    "unit": "ml",
+    "referencePortion": "1 copo (200 ml)"
+  },
+  {
+    "name": "Suco de caju (refresco)",
+    "category": "Bebidas",
+    "kcal": 47,
+    "proteinG": 0,
+    "carbsG": 11.9,
+    "fatG": 0,
+    "fiberG": 0.2,
+    "unit": "ml",
+    "referencePortion": "1 copo (200 ml)"
+  },
+  {
+    "name": "Cajuína",
+    "category": "Bebidas",
+    "kcal": 45,
+    "proteinG": 0.8,
+    "carbsG": 11.5,
+    "fatG": 0,
+    "fiberG": 1.5,
+    "unit": "ml",
+    "referencePortion": "1 copo (200 ml)"
+  },
+  {
+    "name": "Milk-shake",
+    "category": "Bebidas",
+    "kcal": 161,
+    "proteinG": 3.1,
+    "carbsG": 23.5,
+    "fatG": 6.4,
+    "fiberG": 0.8,
+    "unit": "ml",
+    "referencePortion": "1 copo (300 ml)"
+  },
+  {
+    "name": "Vitamina de banana",
+    "category": "Bebidas",
+    "kcal": 93,
+    "proteinG": 2.5,
+    "carbsG": 16.4,
+    "fatG": 2.3,
+    "fiberG": 0.6,
+    "unit": "ml",
+    "referencePortion": "1 copo (250 ml)"
+  },
+  {
+    "name": "Café com leite",
+    "category": "Bebidas",
+    "kcal": 31,
+    "proteinG": 1.7,
+    "carbsG": 2.6,
+    "fatG": 1.7,
+    "fiberG": 0.2,
+    "unit": "ml",
+    "referencePortion": "1 xícara (150 ml)"
+  },
+  {
+    "name": "Café expresso",
+    "category": "Bebidas",
+    "kcal": 2,
+    "proteinG": 0.1,
+    "carbsG": 0.8,
+    "fatG": 0,
+    "fiberG": 0.2,
+    "unit": "ml",
+    "referencePortion": "1 xícara (50 ml)"
+  },
+  {
+    "name": "Leite achocolatado (pronto)",
+    "category": "Bebidas",
+    "kcal": 83,
+    "proteinG": 3.2,
+    "carbsG": 10.4,
+    "fatG": 3.4,
+    "fiberG": 0.8,
+    "unit": "ml",
+    "referencePortion": "1 copo (200 ml)"
+  },
+  {
+    "name": "Refresco em pó preparado (Tang, Q-Suco)",
+    "category": "Bebidas",
+    "kcal": 15,
+    "proteinG": 0,
+    "carbsG": 3.9,
+    "fatG": 0,
+    "fiberG": 0,
+    "unit": "ml",
+    "referencePortion": "1 copo (200 ml)"
+  }
 ]

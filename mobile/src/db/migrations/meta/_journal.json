@@ -57,6 +57,13 @@
       "when": 1784352246323,
       "tag": "0007_aspiring_nomad",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1784429027047,
+      "tag": "0008_food_units",
+      "breakpoints": true
     }
   ]
 }

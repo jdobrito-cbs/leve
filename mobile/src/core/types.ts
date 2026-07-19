@@ -21,10 +21,14 @@ export interface WaterLog {
   loggedAt: string;
 }
 
+/** Unidade da porção: sólidos em gramas, líquidos em mililitros. */
+export type PortionUnit = 'g' | 'ml';
+
 export interface FoodLog {
   id: number;
   name: string;
   portionGrams: number | null;
+  portionUnit: PortionUnit;
   calories: number | null;
   proteinG: number | null;
   carbsG: number | null;
@@ -65,6 +69,7 @@ export interface FoodItem {
   name: string;
   category: string | null;
   referencePortion: string | null;
+  unit: PortionUnit;
   calories: number | null;
   proteinG: number | null;
   carbsG: number | null;

@@ -10,7 +10,14 @@ import {
   verifyPassword,
 } from './auth.js';
 import { ADMIN_PAGE_HTML } from './adminPage.js';
-import { buildHubBody, parseHubContent, type ScanResult } from './hub.js';
+import {
+  buildFoodInfoBody,
+  buildHubBody,
+  parseFoodInfoContent,
+  parseHubContent,
+  type FoodInfoResult,
+  type ScanResult,
+} from './hub.js';
 import {
   generatePartnerKey,
   hashPartnerKey,
@@ -33,25 +40,35 @@ const bodySchema = z.object({
   mimeType: z.string().regex(/^image\//).default('image/jpeg'),
 });
 
-export function makeHubCaller(config: HubConfig): CallHub {
-  return async (imageBase64, mimeType) => {
-    const res = await fetch(`${config.baseUrl.replace(/\/$/, '')}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        authorization: `Bearer ${config.apiKey}`,
-      },
-      body: JSON.stringify(buildHubBody(imageBase64, mimeType, config.model)),
-      signal: AbortSignal.timeout(30_000),
-    });
-    if (!res.ok) throw new Error(`upstream ${res.status}`);
-    const json = (await res.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-    };
-    const content = json.choices?.[0]?.message?.content;
-    if (!content) throw new Error('upstream sem conteúdo');
-    return content;
+async function chatCompletion(config: HubConfig, body: object, timeoutMs: number): Promise<string> {
+  const res = await fetch(`${config.baseUrl.replace(/\/$/, '')}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${config.apiKey}`,
+    },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+  if (!res.ok) throw new Error(`upstream ${res.status}`);
+  const json = (await res.json()) as {
+    choices?: Array<{ message?: { content?: string } }>;
   };
+  const content = json.choices?.[0]?.message?.content;
+  if (!content) throw new Error('upstream sem conteúdo');
+  return content;
+}
+
+export function makeHubCaller(config: HubConfig): CallHub {
+  return (imageBase64, mimeType) =>
+    chatCompletion(config, buildHubBody(imageBase64, mimeType, config.model), 30_000);
+}
+
+/** Consulta nutricional por nome (texto puro, sem imagem). */
+export type CallFoodHub = (name: string) => Promise<string>;
+
+export function makeFoodHubCaller(config: HubConfig): CallFoodHub {
+  return (name) => chatCompletion(config, buildFoodInfoBody(name, config.model), 20_000);
 }
 
 const registerSchema = z.object({
@@ -70,6 +87,8 @@ const deleteSchema = z.object({ password: z.string().min(1) });
 
 export interface ServerOptions {
   callHub: CallHub;
+  /** Consulta nutricional por nome; ausente = rota /food-info responde 503. */
+  callFoodHub?: CallFoodHub;
   appToken?: string;
   store?: Store;
   jwtSecret?: string;
@@ -282,6 +301,24 @@ export function buildServer(options: ServerOptions) {
       return result;
     } catch {
       return reply.code(502).send({ error: 'não foi possível analisar a imagem agora' });
+    }
+  });
+
+  const foodInfoBodySchema = z.object({ name: z.string().trim().min(2).max(120) });
+
+  app.post('/food-info', async (req, reply) => {
+    if (options.appToken && req.headers['x-leve-app'] !== options.appToken) {
+      return reply.code(401).send({ error: 'não autorizado' });
+    }
+    const parsed = foodInfoBodySchema.safeParse(req.body);
+    if (!parsed.success) return reply.code(400).send({ error: 'corpo inválido' });
+    if (!options.callFoodHub) return reply.code(503).send({ error: 'consulta indisponível' });
+    try {
+      const content = await options.callFoodHub(parsed.data.name);
+      const result: FoodInfoResult = parseFoodInfoContent(content);
+      return result;
+    } catch {
+      return reply.code(502).send({ error: 'não foi possível consultar agora' });
     }
   });
 

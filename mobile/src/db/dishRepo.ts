@@ -1,4 +1,5 @@
 import { asc, desc, eq } from 'drizzle-orm';
+import type { PortionUnit } from '@/core/types';
 import type { AppDb } from './client';
 import { dishItems, dishes } from './schema';
 
@@ -7,6 +8,7 @@ export interface DishItem {
   dishId: number;
   name: string;
   grams: number | null;
+  unit: PortionUnit;
   calories: number | null;
   proteinG: number | null;
   carbsG: number | null;

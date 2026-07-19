@@ -23,6 +23,7 @@ export const foodLogs = sqliteTable('food_logs', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
   portionGrams: real('portion_grams'),
+  portionUnit: text('portion_unit').notNull().default('g'), // 'g' | 'ml'
   calories: real('calories'),
   proteinG: real('protein_g'),
   carbsG: real('carbs_g'),
@@ -46,6 +47,7 @@ export const dishItems = sqliteTable('dish_items', {
   dishId: integer('dish_id').notNull(),
   name: text('name').notNull(),
   grams: real('grams'),
+  unit: text('unit').notNull().default('g'), // 'g' | 'ml'
   calories: real('calories'),
   proteinG: real('protein_g'),
   carbsG: real('carbs_g'),
@@ -83,6 +85,7 @@ export const foodItems = sqliteTable('food_items', {
   nameNormalized: text('name_normalized'),
   category: text('category'),
   referencePortion: text('reference_portion'),
+  unit: text('unit').notNull().default('g'), // 'g' (por 100 g) | 'ml' (por 100 ml)
   calories: real('calories'),
   proteinG: real('protein_g'),
   carbsG: real('carbs_g'),

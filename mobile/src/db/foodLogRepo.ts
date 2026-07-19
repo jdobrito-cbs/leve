@@ -1,12 +1,13 @@
 import { and, asc, eq, gte, lt, sum } from 'drizzle-orm';
 import { dayRangeUtc, lastNDays, localDayKey } from '@/core/datetime';
-import type { FoodLog, LogOrigin, MealPeriod } from '@/core/types';
+import type { FoodLog, LogOrigin, MealPeriod, PortionUnit } from '@/core/types';
 import type { AppDb } from './client';
 import { foodLogs } from './schema';
 
 export interface AddFoodLogInput {
   name: string;
   portionGrams?: number | null;
+  portionUnit?: PortionUnit;
   calories?: number | null;
   proteinG?: number | null;
   carbsG?: number | null;
@@ -21,6 +22,7 @@ export async function addFoodLog(db: AppDb, input: AddFoodLogInput): Promise<voi
   await db.insert(foodLogs).values({
     name: input.name,
     portionGrams: input.portionGrams ?? null,
+    portionUnit: input.portionUnit ?? 'g',
     calories: input.calories ?? null,
     proteinG: input.proteinG ?? null,
     carbsG: input.carbsG ?? null,
