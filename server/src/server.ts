@@ -1,4 +1,7 @@
+import { timingSafeEqual } from 'node:crypto';
 import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
+import rateLimit from '@fastify/rate-limit';
+import helmet from '@fastify/helmet';
 import { z } from 'zod';
 import {
   REFRESH_TTL_MS,
@@ -9,6 +12,17 @@ import {
   verifyAccessToken,
   verifyPassword,
 } from './auth.js';
+
+/** Comparação de segredos em tempo constante (evita timing attack). */
+function safeEqual(a: string, b: string): boolean {
+  const ba = Buffer.from(a);
+  const bb = Buffer.from(b);
+  return ba.length === bb.length && timingSafeEqual(ba, bb);
+}
+
+/** Hash-alvo fixo para gastar o mesmo tempo de verificação quando o e-mail não
+ *  existe — sem isto, o tempo de resposta revela quais e-mails têm conta. */
+const DUMMY_PASSWORD_HASH = hashPassword('leve-dummy-password-for-timing');
 import { ADMIN_PAGE_HTML } from './adminPage.js';
 import { LANDING_PAGE_HTML } from './landingPage.js';
 import {
@@ -101,10 +115,34 @@ export interface ServerOptions {
 const partnerCreateSchema = z.object({ label: z.string().trim().min(1).max(120) });
 const partnerValidateSchema = z.object({ key: z.string().min(4).max(40) });
 
-export function buildServer(options: ServerOptions) {
-  // Stateless no scan por privacidade: a imagem não é armazenada nem registrada em log.
-  const app = Fastify({ bodyLimit: 25 * 1024 * 1024, logger: false });
+export async function buildServer(options: ServerOptions) {
+  // Corpo pequeno por padrão (barra DoS de memória); só /scan-food e /backup
+  // sobem o limite por rota. Sem log de corpo por privacidade.
+  const app = Fastify({ bodyLimit: 64 * 1024, logger: false });
   const { store, jwtSecret } = options;
+
+  // Plugins registrados com await ANTES das rotas: o rate limit por rota depende
+  // do hook onRoute já estar instalado quando cada rota é adicionada.
+  // Cabeçalhos de segurança (noSniff, frameguard, HSTS, Referrer-Policy) + CSP.
+  // As páginas do painel e da landing são inline por design → 'unsafe-inline'.
+  await app.register(helmet, {
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:'],
+        connectSrc: ["'self'"],
+        baseUri: ["'self'"],
+        frameAncestors: ["'none'"],
+        objectSrc: ["'none'"],
+      },
+    },
+  });
+  // Sem CORS de navegador: a API é consumida pelos apps nativos (sem Origin) e
+  // pela landing/painel na mesma origem. Requisições cross-site são recusadas.
+  // Limite de taxa global (anti-abuso/força-bruta); rotas sensíveis apertam mais.
+  await app.register(rateLimit, { max: 120, timeWindow: '1 minute' });
 
   app.get('/health', async () => ({ ok: true, accounts: Boolean(store) }));
 
@@ -135,28 +173,39 @@ export function buildServer(options: ServerOptions) {
       return userId;
     };
 
-    app.post('/auth/register', async (req, reply) => {
-      const parsed = registerSchema.safeParse(req.body);
-      if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
-      const { email, password, consents } = parsed.data;
-      if (await store.findUserByEmail(email)) {
-        return reply.code(409).send({ error: 'e-mail já cadastrado' });
-      }
-      const user = await store.createUser(email, hashPassword(password));
-      await store.setConsent(user.id, 'terms', true);
-      await store.setConsent(user.id, 'backup', consents.backup);
-      return issueTokens(user.id);
-    });
+    app.post(
+      '/auth/register',
+      { config: { rateLimit: { max: 5, timeWindow: '1 minute' } } },
+      async (req, reply) => {
+        const parsed = registerSchema.safeParse(req.body);
+        if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
+        const { email, password, consents } = parsed.data;
+        if (await store.findUserByEmail(email)) {
+          return reply.code(409).send({ error: 'e-mail já cadastrado' });
+        }
+        const user = await store.createUser(email, hashPassword(password));
+        await store.setConsent(user.id, 'terms', true);
+        await store.setConsent(user.id, 'backup', consents.backup);
+        return issueTokens(user.id);
+      },
+    );
 
-    app.post('/auth/login', async (req, reply) => {
-      const parsed = loginSchema.safeParse(req.body);
-      if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
-      const user = await store.findUserByEmail(parsed.data.email);
-      if (!user || !verifyPassword(parsed.data.password, user.passwordHash)) {
-        return reply.code(401).send({ error: 'e-mail ou senha incorretos' });
-      }
-      return issueTokens(user.id);
-    });
+    app.post(
+      '/auth/login',
+      { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } },
+      async (req, reply) => {
+        const parsed = loginSchema.safeParse(req.body);
+        if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
+        const user = await store.findUserByEmail(parsed.data.email);
+        // Verifica sempre (contra hash real ou dummy) — mesmo custo de tempo com
+        // e sem conta, para não vazar quais e-mails existem por timing.
+        const ok = verifyPassword(parsed.data.password, user?.passwordHash ?? DUMMY_PASSWORD_HASH);
+        if (!user || !ok) {
+          return reply.code(401).send({ error: 'e-mail ou senha incorretos' });
+        }
+        return issueTokens(user.id);
+      },
+    );
 
     app.post('/auth/refresh', async (req, reply) => {
       const parsed = refreshSchema.safeParse(req.body);
@@ -198,7 +247,7 @@ export function buildServer(options: ServerOptions) {
       return { ok: true };
     });
 
-    app.put('/backup', async (req, reply) => {
+    app.put('/backup', { bodyLimit: 25 * 1024 * 1024 }, async (req, reply) => {
       const userId = await requireUser(req, reply);
       if (!userId) return;
       const parsed = backupSchema.safeParse(req.body);
@@ -234,20 +283,25 @@ export function buildServer(options: ServerOptions) {
   if (partnerStore) {
     // Validação pública: o app confere a chave no resgate e periodicamente
     // (revogação passa a valer na próxima verificação do aparelho).
-    app.post('/partner-keys/validate', async (req, reply) => {
-      const parsed = partnerValidateSchema.safeParse(req.body);
-      if (!parsed.success) return reply.code(400).send({ error: 'corpo inválido' });
-      if (!isPartnerKeyFormat(parsed.data.key)) return { valid: false };
-      const record = await partnerStore.findPartnerKeyByHash(hashPartnerKey(parsed.data.key));
-      if (!record || record.revokedAt) return { valid: false };
-      return { valid: true, label: record.label };
-    });
+    app.post(
+      '/partner-keys/validate',
+      { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } },
+      async (req, reply) => {
+        const parsed = partnerValidateSchema.safeParse(req.body);
+        if (!parsed.success) return reply.code(400).send({ error: 'corpo inválido' });
+        if (!isPartnerKeyFormat(parsed.data.key)) return { valid: false };
+        const record = await partnerStore.findPartnerKeyByHash(hashPartnerKey(parsed.data.key));
+        if (!record || record.revokedAt) return { valid: false };
+        return { valid: true, label: record.label };
+      },
+    );
 
     if (adminToken) {
       const requireAdmin = (req: FastifyRequest, reply: FastifyReply): boolean => {
         const header = req.headers.authorization ?? '';
         const token = header.startsWith('Bearer ') ? header.slice(7) : '';
-        if (token !== adminToken) {
+        // Comparação em tempo constante — o `!==` vazava o token por timing.
+        if (!token || !safeEqual(token, adminToken)) {
           reply.code(401).send({ error: 'não autorizado' });
           return false;
         }
@@ -300,38 +354,51 @@ export function buildServer(options: ServerOptions) {
     }
   }
 
-  app.post('/scan-food', async (req, reply) => {
-    if (options.appToken && req.headers['x-leve-app'] !== options.appToken) {
-      return reply.code(401).send({ error: 'não autorizado' });
-    }
-    const parsed = bodySchema.safeParse(req.body);
-    if (!parsed.success) return reply.code(400).send({ error: 'corpo inválido' });
-    try {
-      const content = await options.callHub(parsed.data.imageBase64, parsed.data.mimeType);
-      const result: ScanResult = parseHubContent(content);
-      return result;
-    } catch {
-      return reply.code(502).send({ error: 'não foi possível analisar a imagem agora' });
-    }
-  });
+  // Header do app é embutido no bundle público (EXPO_PUBLIC) → não é segredo
+  // real; serve só para barrar tráfego casual. A proteção efetiva de custo/DoS
+  // nas rotas de IA é o rate limit por rota abaixo. Comparação em tempo constante.
+  const appTokenOk = (req: FastifyRequest): boolean => {
+    if (!options.appToken) return true;
+    const sent = req.headers['x-leve-app'];
+    return typeof sent === 'string' && safeEqual(sent, options.appToken);
+  };
+
+  app.post(
+    '/scan-food',
+    { bodyLimit: 25 * 1024 * 1024, config: { rateLimit: { max: 20, timeWindow: '1 minute' } } },
+    async (req, reply) => {
+      if (!appTokenOk(req)) return reply.code(401).send({ error: 'não autorizado' });
+      const parsed = bodySchema.safeParse(req.body);
+      if (!parsed.success) return reply.code(400).send({ error: 'corpo inválido' });
+      try {
+        const content = await options.callHub(parsed.data.imageBase64, parsed.data.mimeType);
+        const result: ScanResult = parseHubContent(content);
+        return result;
+      } catch {
+        return reply.code(502).send({ error: 'não foi possível analisar a imagem agora' });
+      }
+    },
+  );
 
   const foodInfoBodySchema = z.object({ name: z.string().trim().min(2).max(120) });
 
-  app.post('/food-info', async (req, reply) => {
-    if (options.appToken && req.headers['x-leve-app'] !== options.appToken) {
-      return reply.code(401).send({ error: 'não autorizado' });
-    }
-    const parsed = foodInfoBodySchema.safeParse(req.body);
-    if (!parsed.success) return reply.code(400).send({ error: 'corpo inválido' });
-    if (!options.callFoodHub) return reply.code(503).send({ error: 'consulta indisponível' });
-    try {
-      const content = await options.callFoodHub(parsed.data.name);
-      const result: FoodInfoResult = parseFoodInfoContent(content);
-      return result;
-    } catch {
-      return reply.code(502).send({ error: 'não foi possível consultar agora' });
-    }
-  });
+  app.post(
+    '/food-info',
+    { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } },
+    async (req, reply) => {
+      if (!appTokenOk(req)) return reply.code(401).send({ error: 'não autorizado' });
+      const parsed = foodInfoBodySchema.safeParse(req.body);
+      if (!parsed.success) return reply.code(400).send({ error: 'corpo inválido' });
+      if (!options.callFoodHub) return reply.code(503).send({ error: 'consulta indisponível' });
+      try {
+        const content = await options.callFoodHub(parsed.data.name);
+        const result: FoodInfoResult = parseFoodInfoContent(content);
+        return result;
+      } catch {
+        return reply.code(502).send({ error: 'não foi possível consultar agora' });
+      }
+    },
+  );
 
   return app;
 }

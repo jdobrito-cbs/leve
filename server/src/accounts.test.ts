@@ -14,7 +14,7 @@ const CREDS = { email: 'jorge@exemplo.com', password: 'senha-forte-123' };
 
 describe('contas e backup E2E', () => {
   test('registro exige termos; login e /me funcionam', async () => {
-    const app = makeApp();
+    const app = await makeApp();
     const noTerms = await app.inject({
       method: 'POST',
       url: '/auth/register',
@@ -51,7 +51,7 @@ describe('contas e backup E2E', () => {
   });
 
   test('backup roundtrip e refresh com rotação', async () => {
-    const app = makeApp();
+    const app = await makeApp();
     const reg = await app.inject({
       method: 'POST',
       url: '/auth/register',
@@ -87,7 +87,7 @@ describe('contas e backup E2E', () => {
   });
 
   test('excluir conta exige senha e apaga tudo', async () => {
-    const app = makeApp();
+    const app = await makeApp();
     const reg = await app.inject({
       method: 'POST',
       url: '/auth/register',
@@ -117,7 +117,7 @@ describe('contas e backup E2E', () => {
   });
 
   test('sem store, rotas de conta não existem e health indica', async () => {
-    const app = buildServer({ callHub: async () => '{"foods":[]}' });
+    const app = await buildServer({ callHub: async () => '{"foods":[]}' });
     expect((await app.inject({ method: 'GET', url: '/health' })).json()).toEqual({
       ok: true,
       accounts: false,

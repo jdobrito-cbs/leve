@@ -33,7 +33,7 @@ describe('rotas de chaves de parceiro', () => {
     });
 
   it('cria, valida, revoga e nega a chave revogada', async () => {
-    const app = makeApp();
+    const app = await makeApp();
 
     const created = await app.inject({
       method: 'POST',
@@ -68,7 +68,7 @@ describe('rotas de chaves de parceiro', () => {
   });
 
   it('lista sem expor o hash e exige o código do painel', async () => {
-    const app = makeApp();
+    const app = await makeApp();
     await app.inject({
       method: 'POST',
       url: '/partner-keys',
@@ -87,7 +87,7 @@ describe('rotas de chaves de parceiro', () => {
   });
 
   it('chave desconhecida é inválida e o painel /admin responde HTML', async () => {
-    const app = makeApp();
+    const app = await makeApp();
     const unknown = await app.inject({
       method: 'POST',
       url: '/partner-keys/validate',

@@ -5,7 +5,7 @@ const IMG = 'a'.repeat(200);
 
 describe('POST /scan-food', () => {
   test('sucesso devolve foods normalizados', async () => {
-    const app = buildServer({
+    const app = await buildServer({
       callHub: async () => '{"foods":[{"name":"arroz","portionGrams":150,"confidence":0.9}]}',
     });
     const res = await app.inject({
@@ -18,7 +18,7 @@ describe('POST /scan-food', () => {
   });
 
   test('corpo inválido → 400; upstream falha → 502; token errado → 401', async () => {
-    const failing = buildServer({
+    const failing = await buildServer({
       callHub: async () => {
         throw new Error('boom');
       },
@@ -29,7 +29,7 @@ describe('POST /scan-food', () => {
         .statusCode,
     ).toBe(502);
 
-    const guarded = buildServer({ callHub: async () => '{"foods":[]}', appToken: 'segredo' });
+    const guarded = await buildServer({ callHub: async () => '{"foods":[]}', appToken: 'segredo' });
     expect(
       (await guarded.inject({ method: 'POST', url: '/scan-food', payload: { imageBase64: IMG } }))
         .statusCode,
@@ -47,7 +47,7 @@ describe('POST /scan-food', () => {
   });
 
   test('health', async () => {
-    const app = buildServer({ callHub: async () => '{"foods":[]}' });
+    const app = await buildServer({ callHub: async () => '{"foods":[]}' });
     expect((await app.inject({ method: 'GET', url: '/health' })).json()).toEqual({
       ok: true,
       accounts: false,
@@ -56,7 +56,7 @@ describe('POST /scan-food', () => {
 
   test('raiz serve a landing e /admin redireciona para /painel', async () => {
     const { MemoryStore } = await import('./store.js');
-    const app = buildServer({
+    const app = await buildServer({
       callHub: async () => '{"foods":[]}',
       partnerStore: new MemoryStore(),
       adminToken: 'segredo',
@@ -75,7 +75,7 @@ describe('POST /scan-food', () => {
 
 describe('POST /food-info', () => {
   test('sucesso devolve valores por 100 g/ml validados', async () => {
-    const app = buildServer({
+    const app = await buildServer({
       callHub: async () => '{"foods":[]}',
       callFoodHub: async () =>
         '{"found":true,"unit":"ml","kcalPer100":42,"proteinG":0,"carbsG":10.5,"fatG":0,"fiberG":null}',
@@ -98,7 +98,7 @@ describe('POST /food-info', () => {
   });
 
   test('nome curto → 400; sem callFoodHub → 503; upstream falha → 502', async () => {
-    const noHub = buildServer({ callHub: async () => '{"foods":[]}' });
+    const noHub = await buildServer({ callHub: async () => '{"foods":[]}' });
     expect(
       (await noHub.inject({ method: 'POST', url: '/food-info', payload: { name: 'x' } })).statusCode,
     ).toBe(400);
@@ -106,7 +106,7 @@ describe('POST /food-info', () => {
       (await noHub.inject({ method: 'POST', url: '/food-info', payload: { name: 'arroz' } }))
         .statusCode,
     ).toBe(503);
-    const failing = buildServer({
+    const failing = await buildServer({
       callHub: async () => '{"foods":[]}',
       callFoodHub: async () => {
         throw new Error('boom');

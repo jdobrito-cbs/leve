@@ -18,6 +18,17 @@ if (!HUB_BASE_URL || !HUB_API_KEY || !HUB_MODEL) {
   process.exit(1);
 }
 
+// Recusa segredos fracos: um JWT_SECRET/ADMIN_TOKEN curto é adivinhável e
+// comprometeria sessões e o painel. Melhor não subir do que subir inseguro.
+if (JWT_SECRET && JWT_SECRET.length < 32) {
+  console.error('JWT_SECRET muito curto: use pelo menos 32 caracteres aleatórios.');
+  process.exit(1);
+}
+if (ADMIN_TOKEN && ADMIN_TOKEN.length < 16) {
+  console.error('ADMIN_TOKEN muito curto: use pelo menos 16 caracteres aleatórios.');
+  process.exit(1);
+}
+
 async function main() {
   let store;
   let partnerStore;
@@ -34,11 +45,11 @@ async function main() {
     console.warn('contas/backup: desativados (defina DATABASE_URL e JWT_SECRET para ativar)');
   }
 
-  if (ADMIN_TOKEN) console.log('painel de parceiros: ATIVO em /admin');
+  if (ADMIN_TOKEN) console.log('painel de parceiros: ATIVO em /painel');
   else console.warn('painel de parceiros: desativado (defina ADMIN_TOKEN para ativar)');
 
   const hub = { baseUrl: HUB_BASE_URL!, apiKey: HUB_API_KEY!, model: HUB_MODEL! };
-  const app = buildServer({
+  const app = await buildServer({
     callHub: makeHubCaller(hub),
     callFoodHub: makeFoodHubCaller(hub),
     appToken: APP_TOKEN || undefined,

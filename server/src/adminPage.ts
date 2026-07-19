@@ -67,9 +67,18 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
   </div>
 
 <script>
+  // Escapa dados vindos do servidor antes de ir para innerHTML (anti-XSS):
+  // um rótulo de parceiro com HTML não pode executar no painel autenticado.
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
   const tokenInput = document.getElementById('token');
-  tokenInput.value = localStorage.getItem('leveAdminToken') || '';
-  tokenInput.addEventListener('change', () => localStorage.setItem('leveAdminToken', tokenInput.value));
+  // sessionStorage (não localStorage): o código de acesso não persiste após
+  // fechar o navegador — reduz o risco em máquina compartilhada.
+  tokenInput.value = sessionStorage.getItem('leveAdminToken') || '';
+  tokenInput.addEventListener('change', () => sessionStorage.setItem('leveAdminToken', tokenInput.value));
 
   function headers() {
     return { 'content-type': 'application/json', authorization: 'Bearer ' + tokenInput.value };
@@ -87,9 +96,9 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
       if (!res.ok) throw new Error('falha ao listar (' + res.status + ')');
       const keys = await res.json();
       const rows = keys.map(k =>
-        '<tr><td>' + k.label + '</td><td>…' + k.hint + '</td><td>' + fmtDate(k.createdAt) + '</td>' +
+        '<tr><td>' + esc(k.label) + '</td><td>…' + esc(k.hint) + '</td><td>' + esc(fmtDate(k.createdAt)) + '</td>' +
         '<td>' + (k.revokedAt ? '<span class="tag off">revogada</span>' : '<span class="tag on">ativa</span>') + '</td>' +
-        '<td>' + (k.revokedAt ? '' : '<button class="danger" onclick="revoke(\\'' + k.id + '\\')">Revogar</button>') + '</td></tr>'
+        '<td>' + (k.revokedAt ? '' : '<button class="danger" onclick="revoke(\\'' + esc(k.id) + '\\')">Revogar</button>') + '</td></tr>'
       ).join('');
       document.getElementById('rows').innerHTML =
         rows || '<tr><td colspan="5" style="color:#64748B">Nenhuma chave emitida ainda.</td></tr>';
@@ -108,8 +117,8 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
       if (!res.ok) throw new Error('falha ao gerar (' + res.status + ')');
       const created = await res.json();
       document.getElementById('created').innerHTML =
-        '<div class="newkey">' + created.key + '</div>' +
-        '<div class="hintnote">Chave de ' + created.label + ' — copie e envie agora; ela não será exibida de novo.</div>';
+        '<div class="newkey">' + esc(created.key) + '</div>' +
+        '<div class="hintnote">Chave de ' + esc(created.label) + ' — copie e envie agora; ela não será exibida de novo.</div>';
       document.getElementById('label').value = '';
       loadKeys();
     } catch (e) {
