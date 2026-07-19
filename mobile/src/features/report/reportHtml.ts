@@ -17,7 +17,6 @@ import type { BodyReport, CompositionRow, RangedValue, SeriesPoint } from './bod
  *  padrão dos relatórios de bioimpedância (Fitdays). */
 
 const BLUE = '#2563EB';
-const BAR_BLUE = '#1D4ED8'; // azul escuro das barras da análise geral
 const INK = '#0F172A';
 const MUTED = '#64748B';
 const LINE = '#E2E8F0';
@@ -85,25 +84,24 @@ function barHead(extraLabel: string): string {
     <td class="bextra">${extraLabel}</td></tr>`;
 }
 
-/** Cores das zonas da barra (baixo | padrão | alto), por semântica da métrica. */
-const TRACK_FAT_LIKE: [string, string, string] = [ZONE.thin, ZONE.ok, ZONE.bad];
-const TRACK_MUSCLE_LIKE: [string, string, string] = [ZONE.bad, ZONE.ok, ZONE.thin];
+/** Cores da barra de valor (baixo | padrão | alto), por semântica da métrica.
+ *  A cor é aplicada na própria barra conforme a zona do valor; o fundo fica cinza. */
+const BAR_FAT_LIKE: [string, string, string] = [ZONE.thin, ZONE.ok, ZONE.bad];
+const BAR_MUSCLE_LIKE: [string, string, string] = [ZONE.bad, ZONE.ok, ZONE.thin];
 
 function bar(
   label: string,
   r: RangedValue | null,
   unit: string,
   extra: string,
-  track: [string, string, string] = TRACK_FAT_LIKE,
+  colors: [string, string, string] = BAR_FAT_LIKE,
 ): string {
   if (!r) return '';
-  const segs = track
-    .map((c) => `<i class="bseg" style="background:${c}"></i>`)
-    .join('');
+  const color = r.value < r.min ? colors[0] : r.value <= r.max ? colors[1] : colors[2];
   return `<tr>
     <td class="blabel">${label}</td>
-    <td class="btrack"><div class="btrackbg"><div class="bsegs">${segs}</div>
-      <div class="bfill" style="width:${barPos(r)}%"><b>${fmt(r.value)}${unit}</b></div>
+    <td class="btrack"><div class="btrackbg">
+      <div class="bfill" style="background:${color};width:${barPos(r)}%"><b>${fmt(r.value)}${unit}</b></div>
       <i class="bdiv" style="left:33.3%"></i><i class="bdiv" style="left:66.6%"></i></div></td>
     <td class="bextra">${extra}</td>
   </tr>`;
@@ -272,10 +270,8 @@ export function reportHtml(r: BodyReport): string {
     .blabel { width: 86px; color: ${INK}; }
     .btrack { width: auto; }
     .btrackbg { position: relative; background: ${GRID}; border-radius: 5px; overflow: hidden; }
-    .bsegs { position: absolute; inset: 0; display: flex; opacity: 0.35; }
-    .bseg { flex: 1; }
     .bdiv { position: absolute; top: 2px; bottom: 2px; border-left: 1px dashed ${MUTED}; }
-    .bfill { position: relative; z-index: 1; background: ${BAR_BLUE}; border-radius: 5px; color: #fff;
+    .bfill { position: relative; z-index: 1; border-radius: 5px; color: #fff;
       font-size: 10px; text-align: right; padding: 3px 6px; white-space: nowrap; }
     .bextra { width: 82px; text-align: right; color: ${INK}; font-weight: 600; font-size: 11px; }
     tr.bhead .bextra { color: ${MUTED}; font-weight: 400; font-size: 10px; }
@@ -330,14 +326,14 @@ export function reportHtml(r: BodyReport): string {
       <h2>Análise geral</h2>
       <table class="bars">
         ${barHead('Ajustar sugestão')}
-        ${bar('Peso', r.weightRange, 'kg', fmt(r.weightAdjustKg), TRACK_FAT_LIKE)}
-        ${bar('Massa muscular', c.muscleKg.value !== null ? { value: c.muscleKg.value, min: c.muscleKg.min, max: c.muscleKg.max } : null, 'kg', fmt(r.muscleAdjustKg ?? 0), TRACK_MUSCLE_LIKE)}
-        ${bar('Massa gorda', c.fatKg.value !== null ? { value: c.fatKg.value, min: c.fatKg.min, max: c.fatKg.max } : null, 'kg', fmt(r.fatAdjustKg ?? 0), TRACK_FAT_LIKE)}
+        ${bar('Peso', r.weightRange, 'kg', fmt(r.weightAdjustKg), BAR_FAT_LIKE)}
+        ${bar('Massa muscular', c.muscleKg.value !== null ? { value: c.muscleKg.value, min: c.muscleKg.min, max: c.muscleKg.max } : null, 'kg', fmt(r.muscleAdjustKg ?? 0), BAR_MUSCLE_LIKE)}
+        ${bar('Massa gorda', c.fatKg.value !== null ? { value: c.fatKg.value, min: c.fatKg.min, max: c.fatKg.max } : null, 'kg', fmt(r.fatAdjustKg ?? 0), BAR_FAT_LIKE)}
       </table>
       <table class="bars" style="margin-top:10px">
         ${barHead('Intervalo padrão')}
-        ${bar('IMC', r.bmi, '', `${fmt(r.bmi.min)}–${fmt(r.bmi.max, 0)}`, TRACK_FAT_LIKE)}
-        ${bar('Taxa de gordura corporal', r.fatPct, '%', r.fatPct ? `${fmt(r.fatPct.min, 0)}–${fmt(r.fatPct.max, 0)}%` : '', TRACK_FAT_LIKE)}
+        ${bar('IMC', r.bmi, '', `${fmt(r.bmi.min)}–${fmt(r.bmi.max, 0)}`, BAR_FAT_LIKE)}
+        ${bar('Taxa de gordura corporal', r.fatPct, '%', r.fatPct ? `${fmt(r.fatPct.min, 0)}–${fmt(r.fatPct.max, 0)}%` : '', BAR_FAT_LIKE)}
       </table>
     </div>
   </div>
