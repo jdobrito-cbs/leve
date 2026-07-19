@@ -155,5 +155,9 @@ export function buildBodyFacts(report: BodyReport): Array<{ label: string; value
     { label: B.obesityLevel, value: report.obesityLevel },
   ];
   if (report.bodyType) facts.push({ label: B.bodyType, value: report.bodyType });
+  // Métrica manual: fica visível mesmo sem registro, apontando onde preencher.
+  if (report.indicators.bodyAge === null) {
+    facts.push({ label: B.metAge, value: B.notRecorded });
+  }
   return facts;
 }

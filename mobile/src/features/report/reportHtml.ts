@@ -29,13 +29,6 @@ const HIGH = '#DC2626';
 const fmt = (n: number, d = 1) =>
   n.toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
 
-/** Avaliação por cor: baixo (laranja), padrão (verde), alto (vermelho). */
-function statusOf(row: CompositionRow): { label: string; color: string } | null {
-  if (row.value === null) return null;
-  if (row.value < row.min) return { label: 'Baixo', color: LOW };
-  if (row.value > row.max) return { label: 'Alto', color: HIGH };
-  return { label: 'Padrão', color: OK };
-}
 
 /** Medidor compacto no estilo da balança: zonas de largura IGUAL e marcador
  *  na posição proporcional dentro da zona (mesma geometria do app). */
@@ -54,7 +47,8 @@ function compRow(
   zones: GaugeZone[] | null,
   unit = 'kg',
 ): string {
-  const st = statusOf(row);
+  // Selo com a semântica REAL da métrica (água alta = excelente, não erro).
+  const st = row.value !== null && zones ? zoneOf(row.value, zones) : null;
   const value =
     row.value === null
       ? `<span class="cmiss">—</span>`
@@ -91,13 +85,26 @@ function barHead(extraLabel: string): string {
     <td class="bextra">${extraLabel}</td></tr>`;
 }
 
-function bar(label: string, r: RangedValue | null, unit: string, extra: string): string {
+/** Cores das zonas da barra (baixo | padrão | alto), por semântica da métrica. */
+const TRACK_FAT_LIKE: [string, string, string] = [ZONE.thin, ZONE.ok, ZONE.bad];
+const TRACK_MUSCLE_LIKE: [string, string, string] = [ZONE.bad, ZONE.ok, ZONE.thin];
+
+function bar(
+  label: string,
+  r: RangedValue | null,
+  unit: string,
+  extra: string,
+  track: [string, string, string] = TRACK_FAT_LIKE,
+): string {
   if (!r) return '';
+  const segs = track
+    .map((c) => `<i class="bseg" style="background:${c}"></i>`)
+    .join('');
   return `<tr>
     <td class="blabel">${label}</td>
-    <td class="btrack"><div class="btrackbg">
+    <td class="btrack"><div class="btrackbg"><div class="bsegs">${segs}</div>
       <div class="bfill" style="width:${barPos(r)}%"><b>${fmt(r.value)}${unit}</b></div>
-      <i style="left:33.3%"></i><i style="left:66.6%"></i></div></td>
+      <i class="bdiv" style="left:33.3%"></i><i class="bdiv" style="left:66.6%"></i></div></td>
     <td class="bextra">${extra}</td>
   </tr>`;
 }
@@ -196,11 +203,13 @@ export function reportHtml(r: BodyReport): string {
   const gaugeRow = (label: string, valueStr: string, gauge: string) =>
     `<tr><td>${label}${gauge}</td><td class="ival">${valueStr}</td></tr>`;
   const visceralGauge =
-    ind.visceralFat !== null ? gaugeRow('Grau de gordura visceral', fmt(ind.visceralFat, 0), miniGauge(ind.visceralFat, visceralZones())) : '';
+    ind.visceralFat !== null
+      ? gaugeRow('Grau de gordura visceral', fmt(ind.visceralFat, 0), miniGauge(ind.visceralFat, visceralZones()))
+      : indicatorRow('Grau de gordura visceral', '—');
   const subcutGauge =
     ind.subcutaneousPct !== null
       ? gaugeRow('Gordura subcutânea', `${fmt(ind.subcutaneousPct)}%`, miniGauge(ind.subcutaneousPct, subcutaneousZones(sexKey)))
-      : '';
+      : indicatorRow('Gordura subcutânea', '—');
   const bmrGauge = gaugeRow(
     'Taxa metabólica basal',
     `${fmt(ind.bmrKcal, 0)} kcal`,
@@ -212,18 +221,20 @@ export function reportHtml(r: BodyReport): string {
   const bodyAgeGauge =
     ind.bodyAge !== null && r.age !== null
       ? gaugeRow(
-          'Idade do corpo',
+          'Idade metabólica',
           fmt(ind.bodyAge, 0),
           miniGauge(ind.bodyAge, [
             { to: r.age, label: 'Excelente', color: ZONE.good },
             { to: null, label: 'Alto', color: ZONE.warn },
           ]),
         )
-      : '';
+      : ind.bodyAge !== null
+        ? indicatorRow('Idade metabólica', fmt(ind.bodyAge, 0))
+        : indicatorRow('Idade metabólica', '—');
   const whrGauge =
     ind.whr !== null
       ? gaugeRow('WHR (cintura-quadril)', fmt(ind.whr, 2), miniGauge(ind.whr, whrZones(sexKey)))
-      : '';
+      : indicatorRow('WHR (cintura-quadril)', '—');
   // Linhas de saúde/hidratação divididas em duas colunas para caber no A4.
   const vitalRows = [
     indicatorRow('Frequência cardíaca em repouso', v.restingHr !== null ? `${fmt(v.restingHr, 0)} bpm` : null),
@@ -273,8 +284,10 @@ export function reportHtml(r: BodyReport): string {
     .zones span { flex: 1; text-align: center; }
     .blabel { width: 86px; color: ${INK}; }
     .btrack { width: auto; }
-    .btrackbg { position: relative; background: ${GRID}; border-radius: 5px; }
-    .btrackbg > i { position: absolute; top: 2px; bottom: 2px; border-left: 1px dashed ${MUTED}; }
+    .btrackbg { position: relative; background: ${GRID}; border-radius: 5px; overflow: hidden; }
+    .bsegs { position: absolute; inset: 0; display: flex; opacity: 0.35; }
+    .bseg { flex: 1; }
+    .bdiv { position: absolute; top: 2px; bottom: 2px; border-left: 1px dashed ${MUTED}; }
     .bfill { position: relative; z-index: 1; background: ${BAR_BLUE}; border-radius: 5px; color: #fff;
       font-size: 10px; text-align: right; padding: 3px 6px; white-space: nowrap; }
     .bextra { width: 82px; text-align: right; color: ${INK}; font-weight: 600; font-size: 11px; }
@@ -330,14 +343,14 @@ export function reportHtml(r: BodyReport): string {
       <h2>Análise geral</h2>
       <table class="bars">
         ${barHead('Ajustar sugestão')}
-        ${bar('Peso', r.weightRange, 'kg', fmt(r.weightAdjustKg))}
-        ${bar('Massa muscular', c.muscleKg.value !== null ? { value: c.muscleKg.value, min: c.muscleKg.min, max: c.muscleKg.max } : null, 'kg', fmt(r.muscleAdjustKg ?? 0))}
-        ${bar('Massa gorda', c.fatKg.value !== null ? { value: c.fatKg.value, min: c.fatKg.min, max: c.fatKg.max } : null, 'kg', fmt(r.fatAdjustKg ?? 0))}
+        ${bar('Peso', r.weightRange, 'kg', fmt(r.weightAdjustKg), TRACK_FAT_LIKE)}
+        ${bar('Massa muscular', c.muscleKg.value !== null ? { value: c.muscleKg.value, min: c.muscleKg.min, max: c.muscleKg.max } : null, 'kg', fmt(r.muscleAdjustKg ?? 0), TRACK_MUSCLE_LIKE)}
+        ${bar('Massa gorda', c.fatKg.value !== null ? { value: c.fatKg.value, min: c.fatKg.min, max: c.fatKg.max } : null, 'kg', fmt(r.fatAdjustKg ?? 0), TRACK_FAT_LIKE)}
       </table>
       <table class="bars" style="margin-top:10px">
         ${barHead('Intervalo padrão')}
-        ${bar('IMC', r.bmi, '', `${fmt(r.bmi.min)}–${fmt(r.bmi.max, 0)}`)}
-        ${bar('Taxa de gordura corporal', r.fatPct, '%', r.fatPct ? `${fmt(r.fatPct.min, 0)}–${fmt(r.fatPct.max, 0)}%` : '')}
+        ${bar('IMC', r.bmi, '', `${fmt(r.bmi.min)}–${fmt(r.bmi.max, 0)}`, TRACK_FAT_LIKE)}
+        ${bar('Taxa de gordura corporal', r.fatPct, '%', r.fatPct ? `${fmt(r.fatPct.min, 0)}–${fmt(r.fatPct.max, 0)}%` : '', TRACK_FAT_LIKE)}
       </table>
     </div>
   </div>
@@ -359,7 +372,6 @@ export function reportHtml(r: BodyReport): string {
         ${indicatorRow('SMI', ind.smi !== null ? `${fmt(ind.smi)} kg/m²` : null)}
         ${whrGauge}
         ${bodyAgeGauge}
-        ${ind.bodyAge !== null && r.age === null ? indicatorRow('Idade do corpo', fmt(ind.bodyAge, 0)) : ''}
         ${indicatorRow('Peso corporal ideal', `${fmt(r.idealWeightKg)} kg`)}
         ${indicatorRow('Nível de obesidade', r.obesityLevel)}
         ${indicatorRow('Tipo de corpo', r.bodyType)}

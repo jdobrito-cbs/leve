@@ -13,13 +13,27 @@ import {
   Screen,
   SegmentedChips,
 } from '@/design/components';
-import { zoneOf, type GaugeSpec } from '@/features/body/bodyBands';
+import {
+  breathingZones,
+  respiratoryZones,
+  restingHrZones,
+  sleepEfficiencyZones,
+  sleepZones,
+  spo2Zones,
+  waistZones,
+  zoneOf,
+  type GaugeSpec,
+  type GaugeZone,
+  type Sex,
+} from '@/features/body/bodyBands';
 import { buildBodyFacts, buildBodyGauges } from '@/features/body/bodyGauges';
 import { buildBodyReport } from '@/features/report/bodyReport';
+import { MANUAL_BODY_METRICS } from '@/core/metrics';
+import { getProfile } from '@/db/profileRepo';
 import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
-import { metricSeries, type MetricRow } from '@/db/metricsRepo';
+import { type MetricRow } from '@/db/metricsRepo';
 import type { InjectionSite } from '@/features/dose/rotation';
 import { estimateRelativeCurve } from '@/features/pk/pharmacokinetics';
 import { useProgressData } from '@/features/progress/useProgressData';
@@ -40,22 +54,6 @@ function weekdayLabel(dayKey: string): string {
 }
 
 const fmtMg = (n: number) => n.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
-
-/** Média por dia — importações de saúde trazem milhares de amostras e o
- *  gráfico com todas elas trava a tela. */
-function dailyAverages(rows: MetricRow[]): { value: number }[] {
-  const byDay = new Map<string, { sum: number; n: number }>();
-  for (const r of rows) {
-    const day = r.loggedAt.slice(0, 10);
-    const agg = byDay.get(day) ?? { sum: 0, n: 0 };
-    agg.sum += r.value;
-    agg.n += 1;
-    byDay.set(day, agg);
-  }
-  return [...byDay.entries()]
-    .sort(([a], [b]) => (a < b ? -1 : 1))
-    .map(([, { sum, n }]) => ({ value: sum / n }));
-}
 
 /** Dados corporais no estilo da balança: valor + medidor de faixas por item. */
 function BodyDataSection() {
@@ -124,19 +122,44 @@ function BodyDataSection() {
   );
 }
 
+/** Faixas-padrão por métrica de saúde (as corporais já vivem em Dados corporais). */
+function vitalZonesFor(type: MetricType, sex: Sex): GaugeZone[] | null {
+  switch (type) {
+    case 'sleep_hours':
+      return sleepZones();
+    case 'sleep_efficiency_pct':
+      return sleepEfficiencyZones();
+    case 'heart_rate_resting':
+    case 'heart_rate_avg':
+      return restingHrZones();
+    case 'spo2':
+      return spo2Zones();
+    case 'respiratory_rate':
+      return respiratoryZones();
+    case 'breathing_disturbances':
+      return breathingZones();
+    case 'waist_cm':
+      return waistZones(sex);
+    default:
+      return null;
+  }
+}
+
 function BodyHealthSection({ metrics }: { metrics: MetricRow[] }) {
-  const { colors } = useTheme();
-  const [selected, setSelected] = useState<MetricType | null>(null);
-  const [series, setSeries] = useState<{ value: number }[]>([]);
+  const [sex, setSex] = useState<Sex>('masculino');
 
   useEffect(() => {
-    if (!selected) return;
-    const since = new Date();
-    since.setDate(since.getDate() - 90);
-    metricSeries(db, selected, since).then((rows) => setSeries(dailyAverages(rows)));
-  }, [selected]);
+    getProfile(db)
+      .then((p) => setSex(p?.sex === 'feminino' ? 'feminino' : 'masculino'))
+      .catch(() => undefined);
+  }, []);
 
-  if (metrics.length === 0) {
+  // Corporais ficam no box Dados corporais; aqui, os sinais de saúde.
+  const rows = metrics
+    .map((m) => ({ metric: m, zones: vitalZonesFor(m.type, sex) }))
+    .filter((r) => r.zones !== null || !MANUAL_BODY_METRICS.includes(r.metric.type));
+
+  if (rows.length === 0) {
     return (
       <Card style={{ gap: spacing.md }}>
         <AppText variant="title">{strings.progress.bodySection}</AppText>
@@ -146,44 +169,38 @@ function BodyHealthSection({ metrics }: { metrics: MetricRow[] }) {
   }
 
   return (
-    <Card style={{ gap: spacing.md }}>
+    <Card style={{ gap: spacing.lg }}>
       <AppText variant="title">{strings.progress.bodySection}</AppText>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md }}>
-        {metrics.map((m) => (
-          <View key={m.type} style={{ flexBasis: '45%', flexGrow: 1 }}>
-            <AppText variant="caption" muted>
-              {strings.metrics[m.type]}
-            </AppText>
-            <AppText style={{ fontFamily: fonts.semibold }}>
-              {m.value.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}{' '}
-              {METRIC_DEFS[m.type].unit}
-            </AppText>
+      {rows.map(({ metric, zones }) => {
+        const digits = metric.type === 'breathing_disturbances' ? 1 : 0;
+        const valueLabel = `${metric.value.toLocaleString('pt-BR', {
+          maximumFractionDigits: 1,
+        })} ${METRIC_DEFS[metric.type].unit}`.trim();
+        if (!zones) {
+          return (
+            <View
+              key={metric.type}
+              style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm }}
+            >
+              <AppText style={{ flex: 1 }}>{strings.metrics[metric.type]}</AppText>
+              <AppText style={{ fontFamily: fonts.bold, fontSize: 16 }}>{valueLabel}</AppText>
+            </View>
+          );
+        }
+        const zone = zoneOf(metric.value, zones);
+        return (
+          <View key={metric.type} style={{ gap: 2 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm }}>
+              <AppText style={{ flex: 1 }}>{strings.metrics[metric.type]}</AppText>
+              <AppText variant="caption" style={{ color: zone.color, fontFamily: fonts.semibold }}>
+                {zone.label}
+              </AppText>
+              <AppText style={{ fontFamily: fonts.bold, fontSize: 18 }}>{valueLabel}</AppText>
+            </View>
+            <RangeGauge value={metric.value} zones={zones} digits={digits} />
           </View>
-        ))}
-      </View>
-      <SegmentedChips
-        options={metrics.map((m) => ({ value: m.type, label: strings.metrics[m.type] }))}
-        value={selected}
-        onChange={setSelected}
-      />
-      {selected && series.length > 1 ? (
-        <FitChart>{(fitWidth) => (<LineChart width={fitWidth}
-          data={series}
-          color={colors.primary}
-          thickness={3}
-          height={100}
-          hideDataPoints
-          hideAxesAndRules
-          hideYAxisText
-          adjustToWidth
-curved
-disableScroll
-/>)}</FitChart>
-      ) : selected ? (
-        <AppText variant="caption" muted>
-          {strings.progress.empty}
-        </AppText>
-      ) : null}
+        );
+      })}
     </Card>
   );
 }

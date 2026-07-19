@@ -377,6 +377,7 @@ export const strings = {
     backup: 'Backup',
   },
   gauge: {
+    veryLow: 'Muito baixo',
     low: 'Baixo',
     thin: 'Fino',
     standard: 'Padrão',
@@ -422,6 +423,7 @@ export const strings = {
     idealWeight: 'Peso corporal ideal',
     obesityLevel: 'Nível de obesidade',
     bodyType: 'Tipo de corpo',
+    notRecorded: '— (registre em Registrar → corpo)',
   },
   metrics: {
     sleep_hours: 'Sono',

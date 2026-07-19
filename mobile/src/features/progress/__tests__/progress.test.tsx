@@ -33,6 +33,7 @@ const mockData = {
   ],
   metrics: [
     { id: 1, type: 'body_fat_pct', value: 31.4, unit: '%', origin: 'healthconnect', loggedAt: '2026-07-01T08:00:00.000Z' },
+    { id: 2, type: 'heart_rate_resting', value: 62, unit: 'bpm', origin: 'healthconnect', loggedAt: '2026-07-01T08:00:00.000Z' },
   ],
   refresh: jest.fn(),
 };
@@ -50,7 +51,10 @@ test('mostra seções e histórico de doses', async () => {
   getByText(strings.progress.pkDisclaimer);
   getByText(/nível relativo/);
   getByText(strings.progress.bodySection);
-  expect(getAllByText(/Gordura corporal/).length).toBeGreaterThanOrEqual(1);
+  // Corpo e saúde agora traz réguas dos sinais de saúde (corporais ficam
+  // no box Dados corporais); FC de repouso 62 bpm cai na faixa Padrão.
+  expect(getAllByText(/FC em repouso/).length).toBeGreaterThanOrEqual(1);
+  expect(getAllByText(/62 bpm/).length).toBeGreaterThanOrEqual(1);
   getByText(strings.progress.weightSection);
   getByText(strings.progress.waterSection);
   getByText(strings.progress.kcalSection);

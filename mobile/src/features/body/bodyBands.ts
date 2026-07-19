@@ -94,13 +94,13 @@ export function fatPctZones(sex: Sex): GaugeZone[] {
   ];
 }
 
-/** Gordura subcutânea (%): faixas usuais de bioimpedância. */
+/** Gordura subcutânea (%): faixas usuais de bioimpedância. Baixo é bom. */
 export function subcutaneousZones(sex: Sex): GaugeZone[] {
   const [a, b] = sex === 'feminino' ? [18.5, 26.7] : [8.6, 16.7];
   return [
-    { to: a, label: L.low, color: ZONE.low },
+    { to: a, label: L.low, color: ZONE.thin },
     { to: b, label: L.standard, color: ZONE.ok },
-    { to: null, label: L.high, color: ZONE.warn },
+    { to: null, label: L.high, color: ZONE.bad },
   ];
 }
 
@@ -116,25 +116,32 @@ export function visceralZones(): GaugeZone[] {
 /** IMC (CDC): abaixo | saudável | sobrepeso | obesidade. */
 export function bmiZones(): GaugeZone[] {
   return [
-    { to: 18.5, label: L.low, color: ZONE.low },
+    { to: 18.5, label: L.low, color: ZONE.thin },
     { to: 25, label: L.standard, color: ZONE.ok },
     { to: 30, label: L.high, color: ZONE.warn },
     { to: null, label: L.obesity, color: ZONE.bad },
   ];
 }
 
-/** Três zonas em torno da faixa padrão (kg): baixo | padrão | topo. */
+/** Três zonas em torno da faixa padrão (kg).
+ *  top 'excellent' (água/proteína/óssea/muscular/esquelético): faltar é ruim
+ *  (baixo vermelho) e sobrar é ótimo (verde escuro). top 'high' (peso):
+ *  baixo verde escuro, padrão verde, alto vermelho. */
 export function bandZones(
   band: { min: number; max: number },
   top: 'high' | 'excellent',
 ): GaugeZone[] {
-  return [
-    { to: band.min, label: L.low, color: ZONE.low },
-    { to: band.max, label: L.standard, color: ZONE.ok },
-    top === 'high'
-      ? { to: null, label: L.high, color: ZONE.bad }
-      : { to: null, label: L.excellent, color: ZONE.good },
-  ];
+  return top === 'high'
+    ? [
+        { to: band.min, label: L.low, color: ZONE.thin },
+        { to: band.max, label: L.standard, color: ZONE.ok },
+        { to: null, label: L.high, color: ZONE.bad },
+      ]
+    : [
+        { to: band.min, label: L.low, color: ZONE.bad },
+        { to: band.max, label: L.standard, color: ZONE.ok },
+        { to: null, label: L.excellent, color: ZONE.good },
+      ];
 }
 
 /** Quatro zonas da massa gorda em kg: fino | padrão | alto | muito alto. */
@@ -195,6 +202,69 @@ export function gaugeMarkerFraction(value: number, zones: GaugeZone[]): number {
     f = b > a ? (value - a) / (b - a) : 0.5;
   }
   return (k + Math.min(Math.max(f, 0), 1)) / n;
+}
+
+/**
+ * Faixas-padrão dos sinais de saúde (box "Corpo e saúde" do Progresso).
+ * Referências clínicas usuais: sono 7–9 h (National Sleep Foundation),
+ * eficiência ≥85%, FC repouso 60–100 bpm (AHA), SpO₂ ≥95%, respiração
+ * 12–20 rpm, distúrbios respiratórios <5/h (escala de apneia), cintura
+ * OMS (94/102 cm masc; 80/88 fem).
+ */
+export function sleepZones(): GaugeZone[] {
+  return [
+    { to: 7, label: L.low, color: ZONE.bad },
+    { to: 9, label: L.standard, color: ZONE.ok },
+    { to: null, label: L.high, color: ZONE.warn },
+  ];
+}
+
+export function sleepEfficiencyZones(): GaugeZone[] {
+  return [
+    { to: 85, label: L.low, color: ZONE.warn },
+    { to: null, label: L.standard, color: ZONE.ok },
+  ];
+}
+
+export function restingHrZones(): GaugeZone[] {
+  return [
+    { to: 60, label: L.low, color: ZONE.low },
+    { to: 100, label: L.standard, color: ZONE.ok },
+    { to: null, label: L.high, color: ZONE.bad },
+  ];
+}
+
+export function spo2Zones(): GaugeZone[] {
+  return [
+    { to: 90, label: L.veryLow, color: ZONE.bad },
+    { to: 95, label: L.low, color: ZONE.warn },
+    { to: null, label: L.standard, color: ZONE.ok },
+  ];
+}
+
+export function respiratoryZones(): GaugeZone[] {
+  return [
+    { to: 12, label: L.low, color: ZONE.low },
+    { to: 20, label: L.standard, color: ZONE.ok },
+    { to: null, label: L.high, color: ZONE.bad },
+  ];
+}
+
+export function breathingZones(): GaugeZone[] {
+  return [
+    { to: 5, label: L.standard, color: ZONE.ok },
+    { to: 15, label: L.high, color: ZONE.warn },
+    { to: null, label: L.veryHigh, color: ZONE.bad },
+  ];
+}
+
+export function waistZones(sex: Sex): GaugeZone[] {
+  const [a, b] = sex === 'feminino' ? [80, 88] : [94, 102];
+  return [
+    { to: a, label: L.standard, color: ZONE.ok },
+    { to: b, label: L.high, color: ZONE.warn },
+    { to: null, label: L.veryHigh, color: ZONE.bad },
+  ];
 }
 
 /** Posições (0..1) das fronteiras numéricas na régua de zonas iguais. */
