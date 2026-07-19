@@ -655,6 +655,69 @@ const ptBR = {
       'No navegador, seus dados só podem ser usados por uma aba de cada vez. ' +
       'Feche as outras abas do Leve e toque em tentar novamente.',
   },
+  reportPdf: {
+    title: 'Relatório de análise de composição corporal',
+    name: 'Nome',
+    sex: 'Sexo',
+    sexMale: 'Masculino',
+    sexFemale: 'Feminino',
+    age: 'Idade',
+    height: 'Altura',
+    generatedAt: 'Gerado em',
+    compTitle: 'Análise da composição corporal ({unit})',
+    weight: 'Peso',
+    water: 'Água corporal',
+    protein: 'Massa proteica',
+    fatMass: 'Massa gorda',
+    bone: 'Massa óssea',
+    muscle: 'Massa muscular',
+    skeletal: 'Músculo esquelético',
+    generalTitle: 'Análise geral',
+    zoneLow: 'Baixo',
+    zoneStandard: 'Padrão',
+    zoneHigh: 'Alto',
+    adjustHint: 'Ajustar sugestão',
+    standardRange: 'Intervalo padrão',
+    bmi: 'IMC',
+    fatRate: 'Taxa de gordura corporal',
+    historyTitle: 'História',
+    othersTitle: 'Outros indicadores',
+    visceral: 'Grau de gordura visceral',
+    bmr: 'Taxa metabólica basal',
+    ffm: 'Peso corporal livre de gordura',
+    subcutaneous: 'Gordura subcutânea',
+    smi: 'SMI',
+    whr: 'WHR (cintura-quadril)',
+    idealWeight: 'Peso corporal ideal',
+    obesityLevel: 'Nível de obesidade',
+    bodyType: 'Tipo de corpo',
+    healthTitle: 'Saúde e hidratação',
+    restingHr: 'Frequência cardíaca em repouso',
+    avgHr: 'Frequência cardíaca média',
+    spo2: 'Oxigênio no sangue (SpO₂)',
+    respRate: 'Frequência respiratória',
+    sleep: 'Sono (última noite)',
+    sleepQuality: 'Qualidade do sono (eficiência)',
+    breathing: 'Distúrbios respiratórios no sono',
+    waterToday: 'Água ingerida hoje',
+    waterAvg: 'Água por dia (média 7 dias)',
+    scoreTitle: 'Pontuação e sugestão',
+    points: 'pontos',
+    footer:
+      'Gerado pelo Leve a partir dos seus registros. Faixas de referência padrão de bioimpedância.',
+    footerEstimated:
+      'Água corporal, massa proteica, massa óssea, massa muscular e músculo esquelético estimados a partir do peso e da gordura corporal (decomposição padrão de bioimpedância) quando a balança não os informa.',
+    sugFatHigh:
+      'O percentual de gordura corporal está acima da faixa de referência. Priorize vegetais, grãos e proteínas de qualidade e combine com exercícios aeróbicos regulares.',
+    sugMuscleLow:
+      'A massa muscular está abaixo da faixa: exercícios de força ajudam a preservá-la.',
+    sugVisceralHigh:
+      'O grau de gordura visceral está elevado — atividade aeróbica regular tende a reduzi-lo.',
+    sugAllGood:
+      'Seus indicadores estão dentro das faixas de referência. Continue com os bons hábitos.',
+    sugDisclaimer:
+      'Relatório informativo gerado pelos seus registros — não substitui avaliação médica.',
+  },
   language: {
     sectionTitle: 'Idioma e unidades',
     languageLabel: 'Idioma do app',
@@ -666,7 +729,7 @@ const ptBR = {
     unitsMetric: 'Métrico (kg, cm, ml)',
     unitsImperial: 'Imperial (lb, ft/in, fl oz)',
     reportNote:
-      'O relatório em PDF e os documentos legais permanecem em português nesta versão.',
+      'Relatório em PDF acompanha o idioma. Documentos legais traduzidos são cortesia — em divergência, prevalece a versão em português (Brasil).',
   },
 } as const;
 

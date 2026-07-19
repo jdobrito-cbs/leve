@@ -11,6 +11,7 @@ import { latestMetric, metricSeries } from '@/db/metricsRepo';
 import { getProfile } from '@/db/profileRepo';
 import { waterDailyTotals, waterTotalForDay } from '@/db/waterRepo';
 import { listWeights, weightsSince } from '@/db/weightRepo';
+import { strings } from '@/i18n/pt-BR';
 
 /**
  * Relatório de composição corporal montado com os dados registrados no app
@@ -156,22 +157,21 @@ export function scoreOf(input: ScoreInput): number {
 }
 
 function suggestionsOf(input: ScoreInput): string[] {
+  const R = strings.reportPdf; // idioma ativo — o relatório sai traduzido
   const s: string[] = [];
   if (input.fatPct && input.fatPct.value > input.fatPct.max) {
-    s.push(
-      'O percentual de gordura corporal está acima da faixa de referência. Priorize vegetais, grãos e proteínas de qualidade e combine com exercícios aeróbicos regulares.',
-    );
+    s.push(R.sugFatHigh);
   }
   if (input.muscle && input.muscle.value < input.muscle.min) {
-    s.push('A massa muscular está abaixo da faixa: exercícios de força ajudam a preservá-la.');
+    s.push(R.sugMuscleLow);
   }
   if (input.visceral !== null && input.visceral > 9) {
-    s.push('O grau de gordura visceral está elevado — atividade aeróbica regular tende a reduzi-lo.');
+    s.push(R.sugVisceralHigh);
   }
   if (s.length === 0) {
-    s.push('Seus indicadores estão dentro das faixas de referência. Continue com os bons hábitos.');
+    s.push(R.sugAllGood);
   }
-  s.push('Relatório informativo gerado pelos seus registros — não substitui avaliação médica.');
+  s.push(R.sugDisclaimer);
   return s;
 }
 

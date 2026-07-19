@@ -11,10 +11,14 @@ import {
   type GaugeZone,
   type Sex,
 } from '@/features/body/bodyBands';
+import { formatHeight, formatVolume, kgToDisplay, weightUnit } from '@/core/units';
+import { getActiveLanguage, numberLocale } from '@/i18n/engine';
+import { strings } from '@/i18n/pt-BR';
 import type { BodyReport, CompositionRow, RangedValue, SeriesPoint } from './bodyReport';
 
 /** Documento A4 do relatório corporal (HTML → PDF via expo-print), fiel ao
- *  padrão dos relatórios de bioimpedância (Fitdays). */
+ *  padrão dos relatórios de bioimpedância (Fitdays). Textos seguem o idioma
+ *  ativo (strings.reportPdf) e pesos/volumes seguem o sistema de medidas. */
 
 const BLUE = '#2563EB';
 const INK = '#0F172A';
@@ -26,7 +30,27 @@ const OK = '#16A34A';
 const HIGH = '#DC2626';
 
 const fmt = (n: number, d = 1) =>
-  n.toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
+  n.toLocaleString(numberLocale(), { minimumFractionDigits: d, maximumFractionDigits: d });
+
+// ——— Conversões de exibição (o relatório calcula em kg; imperial mostra lb) ———
+
+const r1 = (n: number) => Math.round(kgToDisplay(n) * 10) / 10;
+
+function convRow(row: CompositionRow): CompositionRow {
+  return { ...row, value: row.value === null ? null : r1(row.value), min: r1(row.min), max: r1(row.max) };
+}
+
+function convRanged(r: RangedValue | null): RangedValue | null {
+  return r === null ? null : { value: r1(r.value), min: r1(r.min), max: r1(r.max) };
+}
+
+function convZones(zones: GaugeZone[]): GaugeZone[] {
+  return zones.map((z) => ({ ...z, to: z.to === null ? null : r1(z.to) }));
+}
+
+function convSeries(points: SeriesPoint[]): SeriesPoint[] {
+  return points.map((p) => ({ ...p, value: r1(p.value) }));
+}
 
 
 /** Medidor compacto no estilo da balança: zonas de largura IGUAL e marcador
@@ -79,8 +103,9 @@ function barPos(r: RangedValue): number {
 }
 
 function barHead(extraLabel: string): string {
+  const R = strings.reportPdf;
   return `<tr class="bhead"><td></td>
-    <td><div class="zones"><span>Baixo</span><span>Padrão</span><span>Alto</span></div></td>
+    <td><div class="zones"><span>${R.zoneLow}</span><span>${R.zoneStandard}</span><span>${R.zoneHigh}</span></div></td>
     <td class="bextra">${extraLabel}</td></tr>`;
 }
 
@@ -108,6 +133,7 @@ function bar(
 }
 
 function donut(report: BodyReport): string {
+  // Proporções em kg (adimensionais); o número central sai na unidade de exibição.
   const w = report.weightKg;
   const c = report.composition;
   let parts = [
@@ -137,8 +163,8 @@ function donut(report: BodyReport): string {
     .join('');
   return `<svg width="140" height="140" viewBox="0 0 140 140">
     <circle cx="70" cy="70" r="${r}" fill="none" stroke="${LINE}" stroke-width="16"/>${segs}
-    <text x="70" y="66" text-anchor="middle" font-size="24" font-weight="700" fill="${INK}">${fmt(w)}</text>
-    <text x="70" y="86" text-anchor="middle" font-size="11" fill="${MUTED}">Peso</text>
+    <text x="70" y="66" text-anchor="middle" font-size="24" font-weight="700" fill="${INK}">${fmt(kgToDisplay(w))}</text>
+    <text x="70" y="86" text-anchor="middle" font-size="11" fill="${MUTED}">${strings.reportPdf.weight}</text>
   </svg>`;
 }
 
@@ -190,10 +216,12 @@ function indicatorRow(label: string, value: string | null): string {
 }
 
 export function reportHtml(r: BodyReport): string {
+  const R = strings.reportPdf;
+  const wU = weightUnit();
   const c = r.composition;
-  const sexLabel = r.sex === 'feminino' ? 'Feminino' : 'Masculino';
+  const sexLabel = r.sex === 'feminino' ? R.sexFemale : R.sexMale;
   const dt = r.generatedAt;
-  const when = `${String(dt.getDate()).padStart(2, '0')}/${String(dt.getMonth() + 1).padStart(2, '0')}/${dt.getFullYear()} ${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`;
+  const when = `${dt.toLocaleDateString(numberLocale())} ${dt.toLocaleTimeString(numberLocale(), { hour: '2-digit', minute: '2-digit' })}`;
   const ind = r.indicators;
   const v = r.vitals;
   const sexKey: Sex = r.sex;
@@ -202,40 +230,40 @@ export function reportHtml(r: BodyReport): string {
     `<tr><td>${label}${gauge}</td><td class="ival">${valueStr}</td></tr>`;
   const visceralGauge =
     ind.visceralFat !== null
-      ? gaugeRow('Grau de gordura visceral', fmt(ind.visceralFat, 0), miniGauge(ind.visceralFat, visceralZones()))
-      : indicatorRow('Grau de gordura visceral', '—');
+      ? gaugeRow(R.visceral, fmt(ind.visceralFat, 0), miniGauge(ind.visceralFat, visceralZones()))
+      : indicatorRow(R.visceral, '—');
   const subcutGauge =
     ind.subcutaneousPct !== null
-      ? gaugeRow('Gordura subcutânea', `${fmt(ind.subcutaneousPct)}%`, miniGauge(ind.subcutaneousPct, subcutaneousZones(sexKey)))
-      : indicatorRow('Gordura subcutânea', '—');
+      ? gaugeRow(R.subcutaneous, `${fmt(ind.subcutaneousPct)}%`, miniGauge(ind.subcutaneousPct, subcutaneousZones(sexKey)))
+      : indicatorRow(R.subcutaneous, '—');
   const bmrGauge = gaugeRow(
-    'Taxa metabólica basal',
+    R.bmr,
     `${fmt(ind.bmrKcal, 0)} kcal`,
     miniGauge(ind.bmrKcal, [
-      { to: ind.bmrKcal, label: 'Baixo', color: ZONE.low },
-      { to: null, label: 'Padrão', color: ZONE.ok },
+      { to: ind.bmrKcal, label: R.zoneLow, color: ZONE.low },
+      { to: null, label: R.zoneStandard, color: ZONE.ok },
     ]),
   );
   const whrGauge =
     ind.whr !== null
-      ? gaugeRow('WHR (cintura-quadril)', fmt(ind.whr, 2), miniGauge(ind.whr, whrZones(sexKey)))
-      : indicatorRow('WHR (cintura-quadril)', '—');
+      ? gaugeRow(R.whr, fmt(ind.whr, 2), miniGauge(ind.whr, whrZones(sexKey)))
+      : indicatorRow(R.whr, '—');
   // Linhas de saúde/hidratação divididas em duas colunas para caber no A4.
   const vitalRows = [
-    indicatorRow('Frequência cardíaca em repouso', v.restingHr !== null ? `${fmt(v.restingHr, 0)} bpm` : null),
-    indicatorRow('Frequência cardíaca média', v.avgHr !== null ? `${fmt(v.avgHr, 0)} bpm` : null),
-    indicatorRow('Oxigênio no sangue (SpO₂)', v.spo2 !== null ? `${fmt(v.spo2, 0)}%` : null),
-    indicatorRow('Frequência respiratória', v.respiratoryRate !== null ? `${fmt(v.respiratoryRate, 0)} rpm` : null),
-    indicatorRow('Sono (última noite)', v.sleepHours !== null ? `${fmt(v.sleepHours)} h` : null),
-    indicatorRow('Qualidade do sono (eficiência)', v.sleepEfficiencyPct !== null ? `${fmt(v.sleepEfficiencyPct, 0)}%` : null),
-    indicatorRow('Distúrbios respiratórios no sono', v.breathingDisturbances !== null ? `${fmt(v.breathingDisturbances)}/h` : null),
-    indicatorRow('Água ingerida hoje', `${v.waterTodayMl.toLocaleString('pt-BR')} ml`),
-    indicatorRow('Água por dia (média 7 dias)', v.waterAvg7dMl !== null ? `${v.waterAvg7dMl.toLocaleString('pt-BR')} ml` : null),
+    indicatorRow(R.restingHr, v.restingHr !== null ? `${fmt(v.restingHr, 0)} bpm` : null),
+    indicatorRow(R.avgHr, v.avgHr !== null ? `${fmt(v.avgHr, 0)} bpm` : null),
+    indicatorRow(R.spo2, v.spo2 !== null ? `${fmt(v.spo2, 0)}%` : null),
+    indicatorRow(R.respRate, v.respiratoryRate !== null ? `${fmt(v.respiratoryRate, 0)} rpm` : null),
+    indicatorRow(R.sleep, v.sleepHours !== null ? `${fmt(v.sleepHours)} h` : null),
+    indicatorRow(R.sleepQuality, v.sleepEfficiencyPct !== null ? `${fmt(v.sleepEfficiencyPct, 0)}%` : null),
+    indicatorRow(R.breathing, v.breathingDisturbances !== null ? `${fmt(v.breathingDisturbances)}/h` : null),
+    indicatorRow(R.waterToday, formatVolume(v.waterTodayMl)),
+    indicatorRow(R.waterAvg, v.waterAvg7dMl !== null ? formatVolume(v.waterAvg7dMl) : null),
   ].filter((row) => row !== '');
   const vitalsA = vitalRows.slice(0, Math.ceil(vitalRows.length / 2));
   const vitalsB = vitalRows.slice(Math.ceil(vitalRows.length / 2));
 
-  return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"/>
+  return `<!DOCTYPE html><html lang="${getActiveLanguage()}"><head><meta charset="utf-8"/>
   <style>
     /* Sem isto o WebKit apaga fundos coloridos ao imprimir — as barras somem. */
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, Roboto, 'Segoe UI', sans-serif;
@@ -299,79 +327,79 @@ export function reportHtml(r: BodyReport): string {
         <path d="M5 21h14"/>
       </g>
     </svg>
-    <h1><b>Leve</b> · Relatório de análise de composição corporal</h1>
+    <h1><b>Leve</b> · ${R.title}</h1>
   </div>
   <div class="meta">
-    <span>Nome: <b>${r.name}</b></span><span>Sexo: ${sexLabel}</span>
-    <span>Idade: ${r.age ?? '—'}</span><span>Altura: ${Math.round(r.heightCm)} cm</span>
-    <span>Gerado em: ${when}</span>
+    <span>${R.name}: <b>${r.name}</b></span><span>${R.sex}: ${sexLabel}</span>
+    <span>${R.age}: ${r.age ?? '—'}</span><span>${R.height}: ${formatHeight(r.heightCm)}</span>
+    <span>${R.generatedAt}: ${when}</span>
   </div>
 
   <div class="grid">
     <div class="col">
-      <h2>Análise da composição corporal (kg)</h2>
+      <h2>${R.compTitle.replace('{unit}', wU)}</h2>
       <div class="comp">
         ${donut(r)}
         <div style="flex:1">
-          ${compRow('Água corporal', '#60A5FA', c.waterKg, bandZones(componentBandKg(sexKey, r.heightCm, 'water'), 'excellent'))}
-          ${compRow('Massa proteica', '#4ADE80', c.proteinKg, bandZones(componentBandKg(sexKey, r.heightCm, 'protein'), 'excellent'))}
-          ${compRow('Massa gorda', '#FACC15', c.fatKg, fatMassZones(sexKey, r.heightCm))}
-          ${compRow('Massa óssea', '#2DD4BF', c.boneKg, bandZones(componentBandKg(sexKey, r.heightCm, 'bone'), 'excellent'))}
-          ${compRow('Massa muscular', '#A78BFA', c.muscleKg, bandZones(componentBandKg(sexKey, r.heightCm, 'muscle'), 'excellent'))}
-          ${compRow('Músculo esquelético', '#A3E635', c.skeletalKg, bandZones(componentBandKg(sexKey, r.heightCm, 'skeletal'), 'excellent'))}
+          ${compRow(R.water, '#60A5FA', convRow(c.waterKg), convZones(bandZones(componentBandKg(sexKey, r.heightCm, 'water'), 'excellent')), wU)}
+          ${compRow(R.protein, '#4ADE80', convRow(c.proteinKg), convZones(bandZones(componentBandKg(sexKey, r.heightCm, 'protein'), 'excellent')), wU)}
+          ${compRow(R.fatMass, '#FACC15', convRow(c.fatKg), convZones(fatMassZones(sexKey, r.heightCm)), wU)}
+          ${compRow(R.bone, '#2DD4BF', convRow(c.boneKg), convZones(bandZones(componentBandKg(sexKey, r.heightCm, 'bone'), 'excellent')), wU)}
+          ${compRow(R.muscle, '#A78BFA', convRow(c.muscleKg), convZones(bandZones(componentBandKg(sexKey, r.heightCm, 'muscle'), 'excellent')), wU)}
+          ${compRow(R.skeletal, '#A3E635', convRow(c.skeletalKg), convZones(bandZones(componentBandKg(sexKey, r.heightCm, 'skeletal'), 'excellent')), wU)}
         </div>
       </div>
     </div>
     <div class="col">
-      <h2>Análise geral</h2>
+      <h2>${R.generalTitle}</h2>
       <table class="bars">
-        ${barHead('Ajustar sugestão')}
-        ${bar('Peso', r.weightRange, 'kg', fmt(r.weightAdjustKg), BAR_FAT_LIKE)}
-        ${bar('Massa muscular', c.muscleKg.value !== null ? { value: c.muscleKg.value, min: c.muscleKg.min, max: c.muscleKg.max } : null, 'kg', fmt(r.muscleAdjustKg ?? 0), BAR_MUSCLE_LIKE)}
-        ${bar('Massa gorda', c.fatKg.value !== null ? { value: c.fatKg.value, min: c.fatKg.min, max: c.fatKg.max } : null, 'kg', fmt(r.fatAdjustKg ?? 0), BAR_FAT_LIKE)}
+        ${barHead(R.adjustHint)}
+        ${bar(R.weight, convRanged(r.weightRange), wU, fmt(kgToDisplay(r.weightAdjustKg)), BAR_FAT_LIKE)}
+        ${bar(R.muscle, convRanged(c.muscleKg.value !== null ? { value: c.muscleKg.value, min: c.muscleKg.min, max: c.muscleKg.max } : null), wU, fmt(kgToDisplay(r.muscleAdjustKg ?? 0)), BAR_MUSCLE_LIKE)}
+        ${bar(R.fatMass, convRanged(c.fatKg.value !== null ? { value: c.fatKg.value, min: c.fatKg.min, max: c.fatKg.max } : null), wU, fmt(kgToDisplay(r.fatAdjustKg ?? 0)), BAR_FAT_LIKE)}
       </table>
       <table class="bars" style="margin-top:10px">
-        ${barHead('Intervalo padrão')}
-        ${bar('IMC', r.bmi, '', `${fmt(r.bmi.min)}–${fmt(r.bmi.max, 0)}`, BAR_FAT_LIKE)}
-        ${bar('Taxa de gordura corporal', r.fatPct, '%', r.fatPct ? `${fmt(r.fatPct.min, 0)}–${fmt(r.fatPct.max, 0)}%` : '', BAR_FAT_LIKE)}
+        ${barHead(R.standardRange)}
+        ${bar(R.bmi, r.bmi, '', `${fmt(r.bmi.min)}–${fmt(r.bmi.max, 0)}`, BAR_FAT_LIKE)}
+        ${bar(R.fatRate, r.fatPct, '%', r.fatPct ? `${fmt(r.fatPct.min, 0)}–${fmt(r.fatPct.max, 0)}%` : '', BAR_FAT_LIKE)}
       </table>
     </div>
   </div>
 
   <div class="grid" style="margin-top:4px">
     <div class="col">
-      <h2>História</h2>
-      ${chart('Peso', 'kg', r.history.weight)}
-      ${chart('Massa muscular', 'kg', r.history.muscle)}
-      ${chart('Taxa de gordura corporal', '%', r.history.fatPct)}
+      <h2>${R.historyTitle}</h2>
+      ${chart(R.weight, wU, convSeries(r.history.weight))}
+      ${chart(R.muscle, wU, convSeries(r.history.muscle))}
+      ${chart(R.fatRate, '%', r.history.fatPct)}
     </div>
     <div class="col">
-      <h2>Outros indicadores</h2>
+      <h2>${R.othersTitle}</h2>
       <table class="ind">
         ${visceralGauge}
         ${bmrGauge}
-        ${indicatorRow('Peso corporal livre de gordura', ind.fatFreeMassKg !== null ? `${fmt(ind.fatFreeMassKg)} kg` : null)}
+        ${indicatorRow(R.ffm, ind.fatFreeMassKg !== null ? `${fmt(kgToDisplay(ind.fatFreeMassKg))} ${wU}` : null)}
         ${subcutGauge}
-        ${indicatorRow('SMI', ind.smi !== null ? `${fmt(ind.smi)} kg/m²` : null)}
+        ${indicatorRow(R.smi, ind.smi !== null ? `${fmt(ind.smi)} kg/m²` : null)}
         ${whrGauge}
-        ${indicatorRow('Peso corporal ideal', `${fmt(r.idealWeightKg)} kg`)}
-        ${indicatorRow('Nível de obesidade', r.obesityLevel)}
-        ${indicatorRow('Tipo de corpo', r.bodyType)}
+        ${indicatorRow(R.idealWeight, `${fmt(kgToDisplay(r.idealWeightKg))} ${wU}`)}
+        ${indicatorRow(R.obesityLevel, r.obesityLevel)}
+        ${indicatorRow(R.bodyType, r.bodyType)}
       </table>
     </div>
   </div>
 
-  <h2>Saúde e hidratação</h2>
+  <h2>${R.healthTitle}</h2>
   <div class="grid">
     <div class="col"><table class="ind">${vitalsA.join('')}</table></div>
     <div class="col">${vitalsB.length > 0 ? `<table class="ind">${vitalsB.join('')}</table>` : ''}</div>
   </div>
 
-  <h2>Pontuação e sugestão</h2>
+  <h2>${R.scoreTitle}</h2>
   <div class="scorebox">
-    <div class="score">${r.score}<small> pontos</small></div>
+    <div class="score">${r.score}<small> ${R.points}</small></div>
     <div class="sug">${r.suggestions.join(' ')}</div>
   </div>
-  <div class="footer">Gerado pelo Leve a partir dos seus registros. Faixas de referência padrão de bioimpedância.${r.compositionEstimated ? ' Água corporal, massa proteica, massa óssea, massa muscular e músculo esquelético estimados a partir do peso e da gordura corporal (decomposição padrão de bioimpedância) quando a balança não os informa.' : ''}</div>
+  <div class="footer">${R.footer}${r.compositionEstimated ? ` ${R.footerEstimated}` : ''}</div>
   </body></html>`;
 }
