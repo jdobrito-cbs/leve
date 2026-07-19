@@ -95,7 +95,7 @@ describe('rotas de chaves de parceiro', () => {
     });
     expect(unknown.json()).toEqual({ valid: false });
 
-    const page = await app.inject({ method: 'GET', url: '/admin' });
+    const page = await app.inject({ method: 'GET', url: '/painel' });
     expect(page.statusCode).toBe(200);
     expect(page.headers['content-type']).toContain('text/html');
     expect(page.body).toContain('Painel de parceiros');

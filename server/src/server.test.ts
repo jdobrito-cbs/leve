@@ -53,6 +53,24 @@ describe('POST /scan-food', () => {
       accounts: false,
     });
   });
+
+  test('raiz serve a landing e /admin redireciona para /painel', async () => {
+    const { MemoryStore } = await import('./store.js');
+    const app = buildServer({
+      callHub: async () => '{"foods":[]}',
+      partnerStore: new MemoryStore(),
+      adminToken: 'segredo',
+    });
+    const home = await app.inject({ method: 'GET', url: '/' });
+    expect(home.statusCode).toBe(200);
+    expect(home.body).toContain('Leve');
+    expect(home.body).toContain('não substitui');
+    const painel = await app.inject({ method: 'GET', url: '/painel' });
+    expect(painel.statusCode).toBe(200);
+    const old = await app.inject({ method: 'GET', url: '/admin' });
+    expect(old.statusCode).toBe(302);
+    expect(old.headers.location).toBe('/painel');
+  });
 });
 
 describe('POST /food-info', () => {

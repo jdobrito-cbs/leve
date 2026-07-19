@@ -2,7 +2,7 @@
 
 Serviço que mantém a chave de IA **fora do app** e emite/revoga as chaves premium de parceiros. Stateless no scan: fotos não são armazenadas nem logadas.
 
-**Domínio oficial (produção): https://www.levemobile.com.br** — o mesmo endereço serve o painel de parceiros (`/admin`), os serviços de IA (`/scan-food`, `/food-info`) e, futuramente, o site do Leve na raiz.
+**Domínio oficial (produção): https://www.levemobile.com.br** — a raiz `/` serve a **landing do produto** (o que o Leve faz, para os usuários); o painel de parceiros fica em **`/painel`** (o `/admin` antigo redireciona); e os serviços de IA respondem em `/scan-food` e `/food-info`.
 
 ## Rodar (desenvolvimento)
 
@@ -14,7 +14,7 @@ npm run dev
 ```
 
 - Saúde: `http://localhost:3333/health`
-- **Painel de parceiros: `http://localhost:3333/admin`** (produção: `https://www.levemobile.com.br/admin`) — informe o ADMIN_TOKEN, gere chaves com o nome do parceiro e revogue quando quiser. O código completo aparece só na criação.
+- **Painel de parceiros: `http://localhost:3333/painel`** (produção: `https://www.levemobile.com.br/painel`) — informe o ADMIN_TOKEN, gere chaves com o nome do parceiro e revogue quando quiser. O código completo aparece só na criação.
 - Sem banco de dados, as chaves ficam em `./data/partner-keys.json`. Com `DATABASE_URL` + `JWT_SECRET` (PostgreSQL), contas/backup ligam e as chaves migram para o banco (`npx prisma migrate deploy`).
 
 Produção com Docker: `docker compose up -d --build`

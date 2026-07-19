@@ -10,6 +10,7 @@ import {
   verifyPassword,
 } from './auth.js';
 import { ADMIN_PAGE_HTML } from './adminPage.js';
+import { LANDING_PAGE_HTML } from './landingPage.js';
 import {
   buildFoodInfoBody,
   buildHubBody,
@@ -92,7 +93,7 @@ export interface ServerOptions {
   appToken?: string;
   store?: Store;
   jwtSecret?: string;
-  /** Chaves de parceiro geridas pelo dono (painel /admin). */
+  /** Chaves de parceiro geridas pelo dono (painel /painel). */
   partnerStore?: PartnerKeyStore;
   adminToken?: string;
 }
@@ -106,6 +107,11 @@ export function buildServer(options: ServerOptions) {
   const { store, jwtSecret } = options;
 
   app.get('/health', async () => ({ ok: true, accounts: Boolean(store) }));
+
+  // Raiz do domínio: landing do produto para quem chega pelo site.
+  app.get('/', async (_req, reply) => {
+    return reply.type('text/html; charset=utf-8').send(LANDING_PAGE_HTML);
+  });
 
   if (store && jwtSecret) {
     const issueTokens = async (userId: string) => {
@@ -248,8 +254,13 @@ export function buildServer(options: ServerOptions) {
         return true;
       };
 
-      app.get('/admin', async (_req, reply) => {
+      // Painel do dono em /painel (a raiz do domínio é a landing do produto).
+      app.get('/painel', async (_req, reply) => {
         return reply.type('text/html; charset=utf-8').send(ADMIN_PAGE_HTML);
+      });
+      // Endereço antigo continua funcionando para quem tem o link salvo.
+      app.get('/admin', async (_req, reply) => {
+        return reply.redirect('/painel');
       });
 
       app.get('/partner-keys', async (req, reply) => {
