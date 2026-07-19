@@ -27,20 +27,21 @@ import { GYM_EXERCISES, GymExerciseKey, estimateKcal } from '@/features/gym/exer
 import { isLocked } from '@/features/premium/gates';
 import { usePremium } from '@/features/premium/usePremium';
 import { strings } from '@/i18n/pt-BR';
+import { displayToKg, formatWeight, kgToDisplay, weightUnit } from '@/core/units';
 
 const ALL_KEYS = Object.keys(GYM_EXERCISES) as GymExerciseKey[];
-const STRENGTH_OPTIONS = ALL_KEYS.filter((k) => GYM_EXERCISES[k].kind === 'forca').map((value) => ({
+const strengthOptions = () => ALL_KEYS.filter((k) => GYM_EXERCISES[k].kind === 'forca').map((value) => ({
   value,
   label: strings.gym.exercises[value],
 }));
-const CARDIO_OPTIONS = ALL_KEYS.filter((k) => GYM_EXERCISES[k].kind === 'cardio').map((value) => ({
+const cardioOptions = () => ALL_KEYS.filter((k) => GYM_EXERCISES[k].kind === 'cardio').map((value) => ({
   value,
   label: strings.gym.exercises[value],
 }));
 
 function detailLabel(log: GymLog): string {
   if (log.kind === 'cardio') return `${log.minutes ?? 0} ${strings.gym.minShort}`;
-  const weight = log.weightKg ? ` · ${log.weightKg.toLocaleString('pt-BR')} kg` : '';
+  const weight = log.weightKg ? ` · ${formatWeight(log.weightKg, 0)}` : '';
   return `${log.sets}${strings.gym.setsShort}${log.reps}${weight}`;
 }
 
@@ -61,7 +62,9 @@ export function GymScreen() {
   const at = parseDateTimeBR(dateStr, timeStr);
 
   const kind = GYM_EXERCISES[exercise].kind;
-  const weightKg = parseDecimalBR(weightStr);
+  // Campo digita na unidade de exibição (kg ou lb); cálculo e banco usam kg.
+  const enteredWeight = parseDecimalBR(weightStr);
+  const weightKg = enteredWeight !== null ? Math.round(displayToKg(enteredWeight) * 10) / 10 : null;
   const sets = parseDecimalBR(setsStr);
   const reps = parseDecimalBR(repsStr);
   const minutes = parseDecimalBR(minutesStr);
@@ -129,7 +132,7 @@ export function GymScreen() {
           {strings.gym.exerciseLabel} — {strings.gym.strengthGroup}
         </AppText>
         <SegmentedChips
-          options={STRENGTH_OPTIONS}
+          options={strengthOptions()}
           value={exercise}
           onChange={(v) => {
             setSaved(false);
@@ -140,7 +143,7 @@ export function GymScreen() {
           {strings.gym.exerciseLabel} — {strings.gym.cardioGroup}
         </AppText>
         <SegmentedChips
-          options={CARDIO_OPTIONS}
+          options={cardioOptions()}
           value={exercise}
           onChange={(v) => {
             setSaved(false);
@@ -159,14 +162,14 @@ export function GymScreen() {
                 setSaved(false);
                 setWeightStr(v);
               }}
-              suffix="kg"
+              suffix={weightUnit()}
               placeholder="0"
               min={0}
-              max={300}
+              max={Math.round(kgToDisplay(300))}
               step={0.5}
               majorEvery={10}
               labelEvery={20}
-              fallback={20}
+              fallback={Math.round(kgToDisplay(20))}
             />
             <NumberField
               label={strings.gym.setsLabel}

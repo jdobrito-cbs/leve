@@ -32,6 +32,7 @@ import { useTheme } from '@/design/useTheme';
 import { estimateRelativeCurve } from '@/features/pk/pharmacokinetics';
 import { useTodaySummary } from '@/features/today/useTodaySummary';
 import { strings } from '@/i18n/pt-BR';
+import { formatVolume, formatWeight, mlToDisplay, volumeUnit } from '@/core/units';
 
 const fmt = (n: number, digits = 0) =>
   n.toLocaleString('pt-BR', { maximumFractionDigits: digits });
@@ -211,16 +212,16 @@ export function TodayScreen() {
                 <View>
                   <WaterRing progress={progress} size={148}>
                     <AppText style={{ fontFamily: fonts.bold, fontSize: 34, color: colors.text }}>
-                      {fmt(summary.waterMl)}
+                      {fmt(Math.round(mlToDisplay(summary.waterMl)))}
                     </AppText>
                     <AppText variant="caption" muted>
-                      {strings.today.waterRing}
+                      {strings.today.waterRing.replace('ml', volumeUnit())}
                     </AppText>
                   </WaterRing>
                   <OverflowDrips active={progress > 1} />
                 </View>
                 <AppText variant="caption" muted>
-                  {fmt(summary.waterGoalMl)} ml {strings.today.ofGoal}
+                  {formatVolume(summary.waterGoalMl)} {strings.today.ofGoal}
                 </AppText>
               </View>
             </Card>
@@ -283,12 +284,12 @@ export function TodayScreen() {
           >
             <AppText style={{ fontFamily: fonts.bold, fontSize: 34, lineHeight: 40 }}>
               {summary.lastWeightKg !== null
-                ? `${fmt(summary.lastWeightKg, 1)} kg`
+                ? formatWeight(summary.lastWeightKg)
                 : strings.today.noWeight}
             </AppText>
             {summary.goalWeightKg !== null ? (
               <AppText variant="caption" muted>
-                {strings.today.goalLabel}: {fmt(summary.goalWeightKg, 1)} kg
+                {strings.today.goalLabel}: {formatWeight(summary.goalWeightKg)}
               </AppText>
             ) : null}
           </View>

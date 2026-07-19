@@ -10,12 +10,11 @@ import { addWater, waterTotalForDay } from '@/db/waterRepo';
 import { setMascotEvent } from '@/features/today/mascotSignal';
 import { getEffectiveWaterGoal } from '@/features/water/waterGoal';
 import { strings } from '@/i18n/pt-BR';
+import { displayToMl, formatVolume, volumeUnit } from '@/core/units';
 
-const QUICK = [
-  { label: strings.water.quick200, amount: 200 },
-  { label: strings.water.quick300, amount: 300 },
-  { label: strings.water.quick500, amount: 500 },
-];
+// Copos de 200/300/500 ml; no sistema imperial o rótulo mostra fl oz.
+const quickOptions = () =>
+  [200, 300, 500].map((amount) => ({ amount, label: `+ ${formatVolume(amount)}` }));
 
 export function WaterScreen() {
   const { colors } = useTheme();
@@ -49,7 +48,7 @@ export function WaterScreen() {
       <AppText variant="display">{strings.water.title}</AppText>
       <Card style={{ gap: spacing.sm }}>
         <AppText variant="title">
-          {strings.water.todayTotal}: {totalMl.toLocaleString('pt-BR')} ml
+          {strings.water.todayTotal}: {formatVolume(totalMl)}
         </AppText>
         <View
           style={{
@@ -69,7 +68,7 @@ export function WaterScreen() {
           />
         </View>
         <AppText variant="caption" muted>
-          {goalMl.toLocaleString('pt-BR')} ml {strings.today.ofGoal}
+          {formatVolume(goalMl)} {strings.today.ofGoal}
         </AppText>
         {totalMl >= goalMl ? (
           <AppText variant="caption" style={{ color: colors.success }}>
@@ -78,7 +77,7 @@ export function WaterScreen() {
         ) : null}
       </Card>
       <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-        {QUICK.map((q) => (
+        {quickOptions().map((q) => (
           <View key={q.amount} style={{ flex: 1 }}>
             <Button label={q.label} onPress={() => add(q.amount)} />
           </View>
@@ -89,12 +88,12 @@ export function WaterScreen() {
           label={strings.water.customLabel}
           value={custom}
           onChangeText={setCustom}
-          suffix="ml"
+          suffix={volumeUnit()}
           placeholder="0"
         />
         <Button
           label={strings.water.addCustom}
-          onPress={() => customMl && add(customMl)}
+          onPress={() => customMl && add(Math.round(displayToMl(customMl)))}
           disabled={!customMl || customMl <= 0}
         />
       </Card>

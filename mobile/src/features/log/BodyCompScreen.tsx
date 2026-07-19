@@ -28,6 +28,33 @@ import {
   listManualMetrics,
 } from '@/db/metricsRepo';
 import { strings } from '@/i18n/pt-BR';
+import {
+  cmToDisplay,
+  displayToCm,
+  displayToKg,
+  kgToDisplay,
+  lengthUnit,
+  weightUnit,
+} from '@/core/units';
+
+/** Conversões por unidade da métrica (kg/cm) — demais unidades ficam como são. */
+function displayUnitOf(unit: string): string {
+  if (unit === 'kg') return weightUnit();
+  if (unit === 'cm') return lengthUnit();
+  return unit;
+}
+
+function toCanonical(unit: string, v: number): number {
+  if (unit === 'kg') return Math.round(displayToKg(v) * 10) / 10;
+  if (unit === 'cm') return Math.round(displayToCm(v) * 10) / 10;
+  return v;
+}
+
+function toShown(unit: string, v: number): number {
+  if (unit === 'kg') return Math.round(kgToDisplay(v) * 10) / 10;
+  if (unit === 'cm') return Math.round(cmToDisplay(v) * 10) / 10;
+  return v;
+}
 
 export function BodyCompScreen() {
   const { colors } = useTheme();
@@ -47,7 +74,7 @@ export function BodyCompScreen() {
     const p: Partial<Record<MetricType, string>> = {};
     for (const type of MANUAL_BODY_METRICS) {
       const last = map.get(type);
-      if (last) p[type] = String(last.value);
+      if (last) p[type] = String(toShown(METRIC_DEFS[type].unit, last.value));
     }
     setPlaceholders(p);
     setList(rows);
@@ -65,7 +92,9 @@ export function BodyCompScreen() {
   async function save() {
     if (!at) return;
     for (const type of filled) {
-      await addMetric(db, type, parseDecimalBR(values[type] ?? '')!, at);
+      // Digitado na unidade de exibição (kg/lb, cm/in); o banco guarda métrico.
+      const typed = parseDecimalBR(values[type] ?? '')!;
+      await addMetric(db, type, toCanonical(METRIC_DEFS[type].unit, typed), at);
     }
     setValues({});
     setSaved(true);
@@ -88,7 +117,7 @@ export function BodyCompScreen() {
               setSaved(false);
               setValues((prev) => ({ ...prev, [type]: v }));
             }}
-            suffix={METRIC_DEFS[type].unit}
+            suffix={displayUnitOf(METRIC_DEFS[type].unit)}
             placeholder={placeholders[type] ?? '0,0'}
           />
         ))}
@@ -117,7 +146,9 @@ export function BodyCompScreen() {
               key={m.id}
               title={strings.metrics[m.type]}
               subtitle={formatDateTimeLabel(m.loggedAt)}
-              right={`${m.value.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} ${m.unit}`}
+              right={`${toShown(m.unit, m.value).toLocaleString('pt-BR', {
+                maximumFractionDigits: 1,
+              })} ${displayUnitOf(m.unit)}`}
               onDelete={async () => {
                 await deleteMetric(db, m.id);
                 await load();

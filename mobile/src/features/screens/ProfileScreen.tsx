@@ -1,6 +1,6 @@
 ﻿import { router } from 'expo-router';
 import * as Sharing from 'expo-sharing';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Platform, View } from 'react-native';
 
 import { ageFromIsoDate, brDateToIso } from '@/core/datetime';
@@ -17,6 +17,7 @@ import {
   DateField,
   DisclaimerBanner,
   Input,
+  ListRow,
   NumberField,
   RulerField,
   Screen,
@@ -29,6 +30,29 @@ import { isLocked } from '@/features/premium/gates';
 import { usePremium } from '@/features/premium/usePremium';
 import { useProfileForm } from '@/features/profile/useProfileForm';
 import { strings } from '@/i18n/pt-BR';
+import { getSetting } from '@/db/settingsRepo';
+import {
+  LANGUAGES,
+  resolveAutoLanguage,
+  resolveAutoMeasurement,
+  setActiveLanguage,
+  type LanguageCode,
+} from '@/i18n/engine';
+import {
+  displayToCm,
+  displayToKg,
+  displayToMl,
+  cmToDisplay,
+  mlToDisplay,
+  formatVolume,
+  kgToDisplay,
+  lengthUnit,
+  setUnitSystem,
+  volumeUnit,
+  weightUnit,
+  type UnitSystem,
+} from '@/core/units';
+import { parseDecimalBR } from '@/core/text';
 
 function HealthSection() {
   const { colors } = useTheme();
@@ -124,6 +148,44 @@ export function ProfileScreen() {
   const birthIso = brDateToIso(form.birthDateStr);
   const age = birthIso ? ageFromIsoDate(birthIso) : null;
   const [reportMsg, setReportMsg] = useState<string | null>(null);
+  const [langSel, setLangSel] = useState<'auto' | LanguageCode>('auto');
+  const [unitSel, setUnitSel] = useState<'auto' | UnitSystem>('auto');
+  const [langChanged, setLangChanged] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
+
+  useEffect(() => {
+    getSetting<'auto' | LanguageCode>(db, 'language')
+      .then((v) => setLangSel(v ?? 'auto'))
+      .catch(() => undefined);
+    getSetting<'auto' | UnitSystem>(db, 'unitSystem')
+      .then((v) => setUnitSel(v ?? 'auto'))
+      .catch(() => undefined);
+  }, []);
+
+  async function pickLanguage(code: 'auto' | LanguageCode) {
+    setLangSel(code);
+    setLangChanged(true);
+    setLangOpen(false);
+    await setSetting(db, 'language', code).catch(() => undefined);
+    setActiveLanguage(code === 'auto' ? resolveAutoLanguage() : code);
+  }
+
+  async function pickUnits(v: 'auto' | UnitSystem) {
+    setUnitSel(v);
+    await setSetting(db, 'unitSystem', v).catch(() => undefined);
+    setUnitSystem(v === 'auto' ? resolveAutoMeasurement() : v);
+  }
+
+  // Campos digitam na unidade de exibição; o formulário guarda métrico.
+  const conv = (s: string, f: (n: number) => number, digits: number) => {
+    const n = parseDecimalBR(s);
+    if (n === null) return s;
+    const p = 10 ** digits;
+    return String(Math.round(f(n) * p) / p);
+  };
+  const heightShown = conv(form.heightStr, cmToDisplay, 0);
+  const goalWeightShown = conv(form.goalWeightStr, kgToDisplay, 1);
+  const waterGoalShown = conv(form.waterGoalStr, mlToDisplay, 0);
   const [reportBusy, setReportBusy] = useState(false);
 
   async function generateReport() {
@@ -196,26 +258,26 @@ export function ProfileScreen() {
         ) : null}
         <RulerField
           label={strings.profile.heightLabel}
-          value={form.heightStr}
-          onChangeText={(v) => setField('heightStr', v)}
-          suffix="cm"
-          min={100}
-          max={230}
+          value={heightShown}
+          onChangeText={(v) => setField('heightStr', conv(v, displayToCm, 0))}
+          suffix={lengthUnit()}
+          min={Math.round(cmToDisplay(100))}
+          max={Math.round(cmToDisplay(230))}
           step={1}
           majorEvery={5}
           labelEvery={10}
           decimals={0}
-          fallback={170}
+          fallback={Math.round(cmToDisplay(170))}
         />
         <RulerField
           label={strings.profile.goalWeightLabel}
-          value={form.goalWeightStr}
-          onChangeText={(v) => setField('goalWeightStr', v)}
-          suffix="kg"
-          min={30}
-          max={250}
+          value={goalWeightShown}
+          onChangeText={(v) => setField('goalWeightStr', conv(v, displayToKg, 1))}
+          suffix={weightUnit()}
+          min={Math.round(kgToDisplay(30))}
+          max={Math.round(kgToDisplay(250))}
           step={0.1}
-          fallback={80}
+          fallback={Math.round(kgToDisplay(80))}
         />
         <NumberField
           label={strings.dose.intervalLabel}
@@ -230,7 +292,7 @@ export function ProfileScreen() {
             <AppText>{strings.profile.waterGoalAuto}</AppText>
             {form.waterGoalAuto && autoGoalMl !== null ? (
               <AppText variant="caption" muted>
-                ≈ {autoGoalMl.toLocaleString('pt-BR')} ml
+                ≈ {formatVolume(autoGoalMl)}
               </AppText>
             ) : null}
           </View>
@@ -245,8 +307,9 @@ export function ProfileScreen() {
         {!form.waterGoalAuto ? (
           <NumberField
             label={strings.profile.waterGoalLabel}
-            value={form.waterGoalStr}
-            onChangeText={(v) => setField('waterGoalStr', v)}            suffix="ml"
+            value={waterGoalShown}
+            onChangeText={(v) => setField('waterGoalStr', conv(v, displayToMl, 0))}
+            suffix={volumeUnit()}
           />
         ) : null}
         <RulerField
@@ -399,6 +462,59 @@ export function ProfileScreen() {
             {strings.profile.permissionDenied}
           </AppText>
         ) : null}
+      </Card>
+
+      <Card style={{ gap: spacing.sm }}>
+        <AppText variant="title">{strings.language.sectionTitle}</AppText>
+        <AppText variant="caption" muted>
+          {strings.language.languageLabel}
+        </AppText>
+        <ListRow
+          title={
+            langSel === 'auto'
+              ? strings.language.auto
+              : (LANGUAGES.find((l) => l.code === langSel)?.label ?? strings.language.auto)
+          }
+          right={langOpen ? '▲' : '▼'}
+          onPress={() => setLangOpen((v) => !v)}
+        />
+        {langOpen ? (
+          <>
+            <ListRow
+              title={strings.language.auto}
+              right={langSel === 'auto' ? '✓' : undefined}
+              onPress={() => pickLanguage('auto')}
+            />
+            {LANGUAGES.map((l) => (
+              <ListRow
+                key={l.code}
+                title={l.label}
+                right={langSel === l.code ? '✓' : undefined}
+                onPress={() => pickLanguage(l.code)}
+              />
+            ))}
+          </>
+        ) : null}
+        {langChanged ? (
+          <AppText variant="caption" muted>
+            {strings.language.restartHint}
+          </AppText>
+        ) : null}
+        <AppText variant="caption" muted>
+          {strings.language.unitsLabel}
+        </AppText>
+        <SegmentedChips
+          options={[
+            { value: 'auto', label: strings.language.unitsAuto },
+            { value: 'metric', label: strings.language.unitsMetric },
+            { value: 'imperial', label: strings.language.unitsImperial },
+          ]}
+          value={unitSel}
+          onChange={pickUnits}
+        />
+        <AppText variant="caption" muted>
+          {strings.language.reportNote}
+        </AppText>
       </Card>
 
       <Card style={{ gap: spacing.md }}>

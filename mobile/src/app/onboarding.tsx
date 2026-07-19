@@ -22,6 +22,14 @@ import { db } from '@/db/client';
 import { getProfile, updateProfile } from '@/db/profileRepo';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { estimateCalorieGoal } from '@/features/profile/calorieGoal';
+import {
+  cmToDisplay,
+  displayToCm,
+  displayToKg,
+  kgToDisplay,
+  lengthUnit,
+  weightUnit,
+} from '@/core/units';
 import { setSexSignal } from '@/features/profile/sexSignal';
 import type { SexOption } from '@/features/profile/useProfileForm';
 import {
@@ -59,6 +67,13 @@ function ProfileStep() {
   const age = birthIso ? ageFromIsoDate(birthIso) : null;
   const heightCm = parseDecimalBR(heightStr);
   const goalWeightKg = parseDecimalBR(goalWeightStr);
+  // Campos digitam na unidade de exibição (cm/in, kg/lb); o estado guarda métrico.
+  const conv = (s: string, f: (n: number) => number, digits: number) => {
+    const n = parseDecimalBR(s);
+    if (n === null) return s;
+    const p = 10 ** digits;
+    return String(Math.round(f(n) * p) / p);
+  };
   // Meta de calorias automática: manter o peso-meta (ajustável no Perfil).
   const calorieGoal =
     sex !== null && age !== null && heightCm && goalWeightKg
@@ -114,24 +129,24 @@ function ProfileStep() {
       />
       <RulerField
         label={strings.profile.heightLabel}
-        value={heightStr}
-        onChangeText={setHeightStr}
-        suffix="cm"
-        min={100}
-        max={230}
+        value={conv(heightStr, cmToDisplay, 0)}
+        onChangeText={(v) => setHeightStr(conv(v, displayToCm, 0))}
+        suffix={lengthUnit()}
+        min={Math.round(cmToDisplay(100))}
+        max={Math.round(cmToDisplay(230))}
         step={1}
         majorEvery={5}
-        fallback={170}
+        fallback={Math.round(cmToDisplay(170))}
       />
       <RulerField
         label={strings.profile.goalWeightLabel}
-        value={goalWeightStr}
-        onChangeText={setGoalWeightStr}
-        suffix="kg"
-        min={30}
-        max={250}
+        value={conv(goalWeightStr, kgToDisplay, 1)}
+        onChangeText={(v) => setGoalWeightStr(conv(v, displayToKg, 1))}
+        suffix={weightUnit()}
+        min={Math.round(kgToDisplay(30))}
+        max={Math.round(kgToDisplay(250))}
         step={0.1}
-        fallback={80}
+        fallback={Math.round(kgToDisplay(80))}
       />
       {calorieGoal !== null ? (
         <>

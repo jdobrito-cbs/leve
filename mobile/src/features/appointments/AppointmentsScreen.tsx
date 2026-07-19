@@ -37,7 +37,7 @@ import {
 
 type SpecialtyKey = keyof typeof strings.appointments.specialties;
 
-const SPECIALTY_OPTIONS = (
+const specialtyOptions = () => (
   Object.keys(strings.appointments.specialties) as SpecialtyKey[]
 ).map((value) => ({ value, label: strings.appointments.specialties[value] }));
 
@@ -151,7 +151,7 @@ export function AppointmentsScreen() {
           {strings.appointments.specialtyLabel}
         </AppText>
         <SegmentedChips
-          options={SPECIALTY_OPTIONS}
+          options={specialtyOptions()}
           value={specialty}
           onChange={(v) => {
             setSaved(false);

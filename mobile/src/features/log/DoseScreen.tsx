@@ -34,12 +34,12 @@ import { scheduleDoseReminder } from '@/services/reminders/reminders';
 
 type MedKey = keyof typeof strings.dose.medications;
 
-const MED_OPTIONS = (Object.keys(strings.dose.medications) as MedKey[]).map((value) => ({
+const medOptions = () => (Object.keys(strings.dose.medications) as MedKey[]).map((value) => ({
   value,
   label: strings.dose.medications[value],
 }));
 
-const ROUTE_OPTIONS = (Object.keys(strings.dose.routes) as DoseRoute[]).map((value) => ({
+const routeOptions = () => (Object.keys(strings.dose.routes) as DoseRoute[]).map((value) => ({
   value,
   label: strings.dose.routes[value],
 }));
@@ -130,7 +130,7 @@ export function DoseScreen() {
         <AppText variant="caption" muted>
           {strings.dose.medicationLabel}
         </AppText>
-        <SegmentedChips options={MED_OPTIONS} value={medication} onChange={setMedication} />
+        <SegmentedChips options={medOptions()} value={medication} onChange={setMedication} />
         {medication === 'outra' ? (
           <Input
             label={strings.dose.customMedicationLabel}
@@ -157,7 +157,7 @@ export function DoseScreen() {
         <AppText variant="caption" muted>
           {strings.dose.routeLabel}
         </AppText>
-        <SegmentedChips options={ROUTE_OPTIONS} value={route} onChange={setRoute} />
+        <SegmentedChips options={routeOptions()} value={route} onChange={setRoute} />
       </Card>
       {route === 'injecao' ? (
         <Card style={{ gap: spacing.md }}>

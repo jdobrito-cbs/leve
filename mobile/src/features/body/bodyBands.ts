@@ -10,7 +10,7 @@ import { strings } from '@/i18n/pt-BR';
 
 export type Sex = 'masculino' | 'feminino';
 
-const L = strings.gauge;
+const L = () => strings.gauge;
 
 export interface GaugeZone {
   /** Limite superior da zona (null = aberta até o fim da régua). */
@@ -87,10 +87,10 @@ export function componentBandKg(
 export function fatPctZones(sex: Sex): GaugeZone[] {
   const [a, b, c] = sex === 'feminino' ? [18, 28, 33] : [10, 20, 25];
   return [
-    { to: a, label: L.thin, color: ZONE.thin },
-    { to: b, label: L.standard, color: ZONE.ok },
-    { to: c, label: L.high, color: ZONE.warn },
-    { to: null, label: L.veryHigh, color: ZONE.bad },
+    { to: a, label: L().thin, color: ZONE.thin },
+    { to: b, label: L().standard, color: ZONE.ok },
+    { to: c, label: L().high, color: ZONE.warn },
+    { to: null, label: L().veryHigh, color: ZONE.bad },
   ];
 }
 
@@ -98,28 +98,28 @@ export function fatPctZones(sex: Sex): GaugeZone[] {
 export function subcutaneousZones(sex: Sex): GaugeZone[] {
   const [a, b] = sex === 'feminino' ? [18.5, 26.7] : [8.6, 16.7];
   return [
-    { to: a, label: L.low, color: ZONE.thin },
-    { to: b, label: L.standard, color: ZONE.ok },
-    { to: null, label: L.high, color: ZONE.bad },
+    { to: a, label: L().low, color: ZONE.thin },
+    { to: b, label: L().standard, color: ZONE.ok },
+    { to: null, label: L().high, color: ZONE.bad },
   ];
 }
 
 /** Gordura visceral (grau): 1–9 padrão · 10–14 alto · 15+ muito alto. */
 export function visceralZones(): GaugeZone[] {
   return [
-    { to: 9.5, label: L.standard, color: ZONE.ok },
-    { to: 14.5, label: L.high, color: ZONE.warn },
-    { to: null, label: L.veryHigh, color: ZONE.bad },
+    { to: 9.5, label: L().standard, color: ZONE.ok },
+    { to: 14.5, label: L().high, color: ZONE.warn },
+    { to: null, label: L().veryHigh, color: ZONE.bad },
   ];
 }
 
 /** IMC (CDC): abaixo | saudável | sobrepeso | obesidade. */
 export function bmiZones(): GaugeZone[] {
   return [
-    { to: 18.5, label: L.low, color: ZONE.thin },
-    { to: 25, label: L.standard, color: ZONE.ok },
-    { to: 30, label: L.high, color: ZONE.warn },
-    { to: null, label: L.obesity, color: ZONE.bad },
+    { to: 18.5, label: L().low, color: ZONE.thin },
+    { to: 25, label: L().standard, color: ZONE.ok },
+    { to: 30, label: L().high, color: ZONE.warn },
+    { to: null, label: L().obesity, color: ZONE.bad },
   ];
 }
 
@@ -133,14 +133,14 @@ export function bandZones(
 ): GaugeZone[] {
   return top === 'high'
     ? [
-        { to: band.min, label: L.low, color: ZONE.thin },
-        { to: band.max, label: L.standard, color: ZONE.ok },
-        { to: null, label: L.high, color: ZONE.bad },
+        { to: band.min, label: L().low, color: ZONE.thin },
+        { to: band.max, label: L().standard, color: ZONE.ok },
+        { to: null, label: L().high, color: ZONE.bad },
       ]
     : [
-        { to: band.min, label: L.low, color: ZONE.bad },
-        { to: band.max, label: L.standard, color: ZONE.ok },
-        { to: null, label: L.excellent, color: ZONE.good },
+        { to: band.min, label: L().low, color: ZONE.bad },
+        { to: band.max, label: L().standard, color: ZONE.ok },
+        { to: null, label: L().excellent, color: ZONE.good },
       ];
 }
 
@@ -150,10 +150,10 @@ export function fatMassZones(sex: Sex, heightCm: number): GaugeZone[] {
   const ideal = idealWeightBounds(heightCm);
   const high = r1(band.max + 0.06 * ideal.max);
   return [
-    { to: band.min, label: L.thin, color: ZONE.thin },
-    { to: band.max, label: L.standard, color: ZONE.ok },
-    { to: high, label: L.high, color: ZONE.warn },
-    { to: null, label: L.veryHigh, color: ZONE.bad },
+    { to: band.min, label: L().thin, color: ZONE.thin },
+    { to: band.max, label: L().standard, color: ZONE.ok },
+    { to: high, label: L().high, color: ZONE.warn },
+    { to: null, label: L().veryHigh, color: ZONE.bad },
   ];
 }
 
@@ -213,57 +213,57 @@ export function gaugeMarkerFraction(value: number, zones: GaugeZone[]): number {
  */
 export function sleepZones(): GaugeZone[] {
   return [
-    { to: 7, label: L.low, color: ZONE.bad },
-    { to: 9, label: L.standard, color: ZONE.ok },
-    { to: null, label: L.high, color: ZONE.warn },
+    { to: 7, label: L().low, color: ZONE.bad },
+    { to: 9, label: L().standard, color: ZONE.ok },
+    { to: null, label: L().high, color: ZONE.warn },
   ];
 }
 
 export function sleepEfficiencyZones(): GaugeZone[] {
   return [
-    { to: 85, label: L.low, color: ZONE.warn },
-    { to: null, label: L.standard, color: ZONE.ok },
+    { to: 85, label: L().low, color: ZONE.warn },
+    { to: null, label: L().standard, color: ZONE.ok },
   ];
 }
 
 export function restingHrZones(): GaugeZone[] {
   return [
-    { to: 60, label: L.low, color: ZONE.low },
-    { to: 100, label: L.standard, color: ZONE.ok },
-    { to: null, label: L.high, color: ZONE.bad },
+    { to: 60, label: L().low, color: ZONE.low },
+    { to: 100, label: L().standard, color: ZONE.ok },
+    { to: null, label: L().high, color: ZONE.bad },
   ];
 }
 
 export function spo2Zones(): GaugeZone[] {
   return [
-    { to: 90, label: L.veryLow, color: ZONE.bad },
-    { to: 95, label: L.low, color: ZONE.warn },
-    { to: null, label: L.standard, color: ZONE.ok },
+    { to: 90, label: L().veryLow, color: ZONE.bad },
+    { to: 95, label: L().low, color: ZONE.warn },
+    { to: null, label: L().standard, color: ZONE.ok },
   ];
 }
 
 export function respiratoryZones(): GaugeZone[] {
   return [
-    { to: 12, label: L.low, color: ZONE.low },
-    { to: 20, label: L.standard, color: ZONE.ok },
-    { to: null, label: L.high, color: ZONE.bad },
+    { to: 12, label: L().low, color: ZONE.low },
+    { to: 20, label: L().standard, color: ZONE.ok },
+    { to: null, label: L().high, color: ZONE.bad },
   ];
 }
 
 export function breathingZones(): GaugeZone[] {
   return [
-    { to: 5, label: L.standard, color: ZONE.ok },
-    { to: 15, label: L.high, color: ZONE.warn },
-    { to: null, label: L.veryHigh, color: ZONE.bad },
+    { to: 5, label: L().standard, color: ZONE.ok },
+    { to: 15, label: L().high, color: ZONE.warn },
+    { to: null, label: L().veryHigh, color: ZONE.bad },
   ];
 }
 
 export function waistZones(sex: Sex): GaugeZone[] {
   const [a, b] = sex === 'feminino' ? [80, 88] : [94, 102];
   return [
-    { to: a, label: L.standard, color: ZONE.ok },
-    { to: b, label: L.high, color: ZONE.warn },
-    { to: null, label: L.veryHigh, color: ZONE.bad },
+    { to: a, label: L().standard, color: ZONE.ok },
+    { to: b, label: L().high, color: ZONE.warn },
+    { to: null, label: L().veryHigh, color: ZONE.bad },
   ];
 }
 
@@ -279,10 +279,10 @@ export function gaugeBoundaryFractions(zones: GaugeZone[]): number[] {
 export function whrZones(sex: Sex): GaugeZone[] {
   const [a, b, c] = sex === 'feminino' ? [0.75, 0.8, 0.85] : [0.85, 0.9, 0.95];
   return [
-    { to: a, label: L.excellent, color: ZONE.good },
-    { to: b, label: L.standard, color: ZONE.ok },
-    { to: c, label: L.high, color: ZONE.warn },
-    { to: null, label: L.veryHigh, color: ZONE.bad },
+    { to: a, label: L().excellent, color: ZONE.good },
+    { to: b, label: L().standard, color: ZONE.ok },
+    { to: c, label: L().high, color: ZONE.warn },
+    { to: null, label: L().veryHigh, color: ZONE.bad },
   ];
 }
 
@@ -315,9 +315,9 @@ export function bodyTypeLabel(
   const fatZone = zoneOf(fatPct, fatPctZones(sex)).label;
   const muscular =
     muscleKg !== null && muscleKg > componentBandKg(sex, heightCm, 'muscle').max;
-  if (fatZone === L.veryHigh) return bmi >= 30 ? T.obese : T.overFat;
-  if (fatZone === L.high) return bmi >= 25 ? T.overFat : T.hiddenFat;
-  if (fatZone === L.thin) {
+  if (fatZone === L().veryHigh) return bmi >= 30 ? T.obese : T.overFat;
+  if (fatZone === L().high) return bmi >= 25 ? T.overFat : T.hiddenFat;
+  if (fatZone === L().thin) {
     if (bmi < 18.5) return T.slim;
     return muscular ? T.athletic : T.standard;
   }

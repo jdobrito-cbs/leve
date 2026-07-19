@@ -19,7 +19,7 @@ import { strings } from '@/i18n/pt-BR';
 
 type FlowKey = keyof typeof strings.cycle.flows;
 
-const FLOW_OPTIONS = (Object.keys(strings.cycle.flows) as FlowKey[]).map((value) => ({
+const flowOptions = () => (Object.keys(strings.cycle.flows) as FlowKey[]).map((value) => ({
   value,
   label: strings.cycle.flows[value],
 }));
@@ -78,7 +78,7 @@ export function CycleScreen() {
               {strings.cycle.flowLabel}
             </AppText>
             <SegmentedChips
-              options={FLOW_OPTIONS}
+              options={flowOptions()}
               value={(open.flow as FlowKey | null) ?? null}
               onChange={async (flow) => {
                 await setFlow(db, flow);

@@ -15,7 +15,7 @@ import { strings } from '@/i18n/pt-BR';
 
 type KindKey = keyof typeof strings.symptom.kinds;
 
-const KIND_OPTIONS = (Object.keys(strings.symptom.kinds) as KindKey[]).map((value) => ({
+const kindOptions = () => (Object.keys(strings.symptom.kinds) as KindKey[]).map((value) => ({
   value,
   label: strings.symptom.kinds[value],
 }));
@@ -53,7 +53,7 @@ export function SymptomScreen() {
         <AppText variant="caption" muted>
           {strings.symptom.kindLabel}
         </AppText>
-        <SegmentedChips options={KIND_OPTIONS} value={kind} onChange={setKind} />
+        <SegmentedChips options={kindOptions()} value={kind} onChange={setKind} />
         <AppText variant="caption" muted>
           {strings.symptom.intensityLabel}
         </AppText>

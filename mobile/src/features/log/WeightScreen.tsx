@@ -18,6 +18,7 @@ import { db } from '@/db/client';
 import { addWeight, deleteWeight, listWeights } from '@/db/weightRepo';
 import { setMascotEvent } from '@/features/today/mascotSignal';
 import { strings } from '@/i18n/pt-BR';
+import { displayToKg, formatWeight, kgToDisplay, weightUnit } from '@/core/units';
 
 export function WeightScreen() {
   const { colors } = useTheme();
@@ -35,7 +36,9 @@ export function WeightScreen() {
     load();
   }, [load]);
 
-  const kg = parseDecimalBR(value);
+  // O campo digita na unidade de exibição (kg ou lb); o banco guarda kg.
+  const entered = parseDecimalBR(value);
+  const kg = entered !== null ? displayToKg(entered) : null;
   const at = parseDateTimeBR(dateStr, timeStr);
   const last = list[0] ?? null;
   const diff = last && kg !== null ? kg - last.weightKg : null;
@@ -63,9 +66,7 @@ export function WeightScreen() {
           <AppText variant="caption" muted>
             {strings.weight.lastLabel}
           </AppText>
-          <AppText variant="title">
-            {last.weightKg.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} kg
-          </AppText>
+          <AppText variant="title">{formatWeight(last.weightKg)}</AppText>
           <AppText variant="caption" muted>
             {formatDateTimeLabel(last.loggedAt)}
           </AppText>
@@ -79,12 +80,12 @@ export function WeightScreen() {
             setSaved(false);
             setValue(v);
           }}
-          suffix="kg"
+          suffix={weightUnit()}
           placeholder="0,0"
-          min={30}
-          max={250}
+          min={Math.round(kgToDisplay(30))}
+          max={Math.round(kgToDisplay(250))}
           step={0.1}
-          fallback={last?.weightKg ?? 80}
+          fallback={Math.round(kgToDisplay(last?.weightKg ?? 80) * 10) / 10}
         />
         <DateTimeField
           dateValue={dateStr}
@@ -95,8 +96,7 @@ export function WeightScreen() {
         {diff !== null ? (
           <AppText variant="caption" muted>
             {diff >= 0 ? '+' : '−'}
-            {Math.abs(diff).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} kg{' '}
-            {strings.weight.diffLabel}
+            {formatWeight(Math.abs(diff))} {strings.weight.diffLabel}
           </AppText>
         ) : null}
         <Button label={strings.weight.save} onPress={save} disabled={kg === null || kg <= 0 || !at} />
@@ -112,7 +112,7 @@ export function WeightScreen() {
           {list.map((w) => (
             <ListRow
               key={w.id}
-              title={`${w.weightKg.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} kg`}
+              title={formatWeight(w.weightKg)}
               subtitle={formatDateTimeLabel(w.loggedAt)}
               onDelete={() => remove(w.id)}
             />

@@ -23,6 +23,13 @@ import { checkMovementIfDue } from '@/services/activity/movementCheck';
 import { registerHealthBackgroundTask } from '@/services/activity/backgroundTasks';
 import { attachReminderMascotListeners } from '@/services/reminders/reminders';
 import { strings } from '@/i18n/pt-BR';
+import {
+  resolveAutoLanguage,
+  resolveAutoMeasurement,
+  setActiveLanguage,
+  type LanguageCode,
+} from '@/i18n/engine';
+import { setUnitSystem, type UnitSystem } from '@/core/units';
 
 // No Expo Go alguns módulos nativos não existem — não pode derrubar o app.
 try {
@@ -87,6 +94,11 @@ export default function RootLayout() {
         // Preferência de tema salva no Perfil vale desde a abertura.
         const themeMode = await getSetting<ThemeMode>(db, 'themeMode').catch(() => null);
         if (themeMode) setThemeSignal(themeMode);
+        // Idioma e unidades ANTES do primeiro render: 'auto' segue o aparelho.
+        const language = await getSetting<LanguageCode | 'auto'>(db, 'language').catch(() => null);
+        setActiveLanguage(language && language !== 'auto' ? language : resolveAutoLanguage());
+        const units = await getSetting<UnitSystem | 'auto'>(db, 'unitSystem').catch(() => null);
+        setUnitSystem(units && units !== 'auto' ? units : resolveAutoMeasurement());
         console.log('[leve] inicialização concluída');
         setReady(true);
         // Busca automática da saúde na abertura (Premium; throttle de 1 h).

@@ -1,4 +1,6 @@
-export const strings = {
+import { makeStringsProxy, registerDefaultCatalog } from './engine';
+
+const ptBR = {
   appName: 'Leve',
   tagline: 'Seu diário de saúde',
   disclaimer: {
@@ -653,4 +655,30 @@ export const strings = {
       'No navegador, seus dados só podem ser usados por uma aba de cada vez. ' +
       'Feche as outras abas do Leve e toque em tentar novamente.',
   },
+  language: {
+    sectionTitle: 'Idioma e unidades',
+    languageLabel: 'Idioma do app',
+    auto: 'Automático (idioma do aparelho)',
+    restartHint:
+      'A troca vale para as telas imediatamente; reinicie o app para aplicar em tudo (obrigatório para árabe e hebraico).',
+    unitsLabel: 'Unidades de medida',
+    unitsAuto: 'Automático (região do aparelho)',
+    unitsMetric: 'Métrico (kg, cm, ml)',
+    unitsImperial: 'Imperial (lb, ft/in, fl oz)',
+    reportNote:
+      'O relatório em PDF e os documentos legais permanecem em português nesta versão.',
+  },
 } as const;
+
+/** Esqueleto do catálogo com valores alargados para string — os outros idiomas
+ *  declaram `const strings: Strings` e o compilador cobra TODAS as chaves. */
+type DeepStrings<T> = {
+  [K in keyof T]: T[K] extends string ? string : DeepStrings<T[K]>;
+};
+export type Strings = DeepStrings<typeof ptBR>;
+
+registerDefaultCatalog(ptBR as Strings);
+
+/** Proxy vivo: cada leitura busca o idioma ativo — os imports existentes
+ *  (`import { strings } from '@/i18n/pt-BR'`) continuam funcionando. */
+export const strings: Strings = makeStringsProxy(ptBR as Strings);

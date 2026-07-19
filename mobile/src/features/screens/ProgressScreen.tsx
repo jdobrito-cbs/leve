@@ -38,6 +38,7 @@ import type { InjectionSite } from '@/features/dose/rotation';
 import { estimateRelativeCurve } from '@/features/pk/pharmacokinetics';
 import { useProgressData } from '@/features/progress/useProgressData';
 import { strings } from '@/i18n/pt-BR';
+import { cmToDisplay, formatWeight, getUnitSystem, kgToDisplay } from '@/core/units';
 
 type RangeKey = '30' | '90' | '120' | 'all';
 
@@ -54,6 +55,21 @@ function weekdayLabel(dayKey: string): string {
 }
 
 const fmtMg = (n: number) => n.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+
+/** Converte medidor de kg/cm para lb/in quando o sistema é imperial (só exibição). */
+function toDisplayGauge<T extends { unit: string; value: number | null; zones: GaugeZone[] }>(
+  g: T,
+): T {
+  if (getUnitSystem() !== 'imperial' || (g.unit !== 'kg' && g.unit !== 'cm')) return g;
+  const f = g.unit === 'kg' ? kgToDisplay : cmToDisplay;
+  const r1 = (n: number) => Math.round(f(n) * 10) / 10;
+  return {
+    ...g,
+    unit: g.unit === 'kg' ? 'lb' : 'in',
+    value: g.value === null ? null : r1(g.value),
+    zones: g.zones.map((z) => ({ ...z, to: z.to === null ? null : r1(z.to) })),
+  };
+}
 
 /** Dados corporais no estilo da balança: valor + medidor de faixas por item. */
 function BodyDataSection() {
@@ -90,7 +106,8 @@ function BodyDataSection() {
   return (
     <Card style={{ gap: spacing.lg }}>
       <AppText variant="title">{strings.bodyData.section}</AppText>
-      {gauges.map((g) => {
+      {gauges.map((g0) => {
+        const g = toDisplayGauge(g0);
         const zone = zoneOf(g.value as number, g.zones);
         return (
           <View key={g.key} style={{ gap: 2 }}>
@@ -171,11 +188,19 @@ function BodyHealthSection({ metrics }: { metrics: MetricRow[] }) {
   return (
     <Card style={{ gap: spacing.lg }}>
       <AppText variant="title">{strings.progress.bodySection}</AppText>
-      {rows.map(({ metric, zones }) => {
+      {rows.map(({ metric, zones: zones0 }) => {
         const digits = metric.type === 'breathing_disturbances' ? 1 : 0;
-        const valueLabel = `${metric.value.toLocaleString('pt-BR', {
+        // Cintura/quadril em cm viram polegadas no sistema imperial.
+        const disp = toDisplayGauge({
+          unit: METRIC_DEFS[metric.type].unit,
+          value: metric.value,
+          zones: zones0 ?? [],
+        });
+        const zones = zones0 ? disp.zones : null;
+        const shownValue = disp.value ?? metric.value;
+        const valueLabel = `${shownValue.toLocaleString('pt-BR', {
           maximumFractionDigits: 1,
-        })} ${METRIC_DEFS[metric.type].unit}`.trim();
+        })} ${disp.unit}`.trim();
         if (!zones) {
           return (
             <View
@@ -187,7 +212,7 @@ function BodyHealthSection({ metrics }: { metrics: MetricRow[] }) {
             </View>
           );
         }
-        const zone = zoneOf(metric.value, zones);
+        const zone = zoneOf(shownValue, zones);
         return (
           <View key={metric.type} style={{ gap: 2 }}>
             <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm }}>
@@ -197,7 +222,7 @@ function BodyHealthSection({ metrics }: { metrics: MetricRow[] }) {
               </AppText>
               <AppText style={{ fontFamily: fonts.bold, fontSize: 18 }}>{valueLabel}</AppText>
             </View>
-            <RangeGauge value={metric.value} zones={zones} digits={digits} />
+            <RangeGauge value={shownValue} zones={zones} digits={digits} />
           </View>
         );
       })}
@@ -223,7 +248,8 @@ export function ProgressScreen() {
       const last = filtered.length - 1;
       filtered = filtered.filter((_, i) => i % step === 0 || i === last);
     }
-    return filtered.map((w) => ({ value: w.weightKg }));
+    // Gráfico na unidade de exibição (kg ou lb).
+    return filtered.map((w) => ({ value: Math.round(kgToDisplay(w.weightKg) * 10) / 10 }));
   }, [weights, range]);
 
   // Escala na faixa real dos pesos (eixo a partir de 0 achata a linha).
@@ -314,10 +340,7 @@ disableScroll
           <AppText variant="title">{strings.progress.weightSection}</AppText>
           {weights.length > 0 ? (
             <AppText style={{ fontFamily: fonts.bold, fontSize: 30, lineHeight: 36 }}>
-              {weights[weights.length - 1].weightKg.toLocaleString('pt-BR', {
-                maximumFractionDigits: 1,
-              })}{' '}
-              kg
+              {formatWeight(weights[weights.length - 1].weightKg)}
             </AppText>
           ) : null}
         </View>

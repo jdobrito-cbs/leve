@@ -56,10 +56,11 @@ function modeOptions(scanLocked: boolean) {
 
 const PERIOD_ORDER: MealPeriod[] = ['cafe', 'almoco', 'lanche', 'jantar', 'ceia'];
 
-const PERIOD_OPTIONS = PERIOD_ORDER.map((value) => ({
-  value,
-  label: strings.meal.periods[value],
-}));
+const periodOptions = () =>
+  PERIOD_ORDER.map((value) => ({
+    value,
+    label: strings.meal.periods[value],
+  }));
 
 /** Sugere o período da refeição a partir da hora do registro. */
 export function suggestPeriod(hour: number): MealPeriod {
@@ -349,7 +350,7 @@ export function MealScreen() {
           {strings.meal.periodLabel}
         </AppText>
         <SegmentedChips
-          options={PERIOD_OPTIONS}
+          options={periodOptions()}
           value={period}
           onChange={(v) => {
             setPeriodTouched(true);
