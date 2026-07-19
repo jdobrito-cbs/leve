@@ -15,7 +15,6 @@ export { RangeGauge } from './RangeGauge';
 export { RulerField } from './RulerField';
 export { ValueRuler } from './ValueRuler';
 export { DateTimeField } from './DateTimeField';
-export { HeroHeader } from './HeroHeader';
 export { SegmentedChips } from './SegmentedChips';
 export { NumberField } from './NumberField';
 export { ListRow } from './ListRow';

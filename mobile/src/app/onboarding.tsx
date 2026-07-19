@@ -1,7 +1,10 @@
 import { router } from 'expo-router';
 import { Check, CloudUpload } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ageFromIsoDate, brDateToIso, isoDateToBR } from '@/core/datetime';
 import { parseDecimalBR } from '@/core/text';
 import {
@@ -9,8 +12,7 @@ import {
   Button,
   Card,
   DateField,
-  DisclaimerBanner,
-  HeroHeader,
+  DisclaimerBanner,
   IconChip,
   Input,
   ListRow,
@@ -300,9 +302,23 @@ export default function Onboarding() {
     }
   }
 
+  // Mesmo padrão visual da Home nova: azul sólido até o fim do cabeçalho e
+  // degradê fixo até a cor do tema; os boxes entram em cascata (FadeInDown).
+  const insets = useSafeAreaInsets();
+  const { height: winH } = useWindowDimensions();
+  const blueEnd = Math.min(0.85, (insets.top + 128) / winH);
+  const fadeEnd = Math.min(1, blueEnd + 0.4);
+
   return (
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <LinearGradient
+        pointerEvents="none"
+        colors={[colors.heroStart, colors.heroStart, colors.background, colors.background]}
+        locations={[0, blueEnd, fadeEnd, 1]}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      />
     <ScrollView
-      style={{ flex: 1, backgroundColor: colors.background }}
+      style={{ flex: 1 }}
       contentContainerStyle={{ paddingBottom: spacing.xl * 2 }}
       keyboardDismissMode="on-drag"
       keyboardShouldPersistTaps="handled"
@@ -310,7 +326,14 @@ export default function Onboarding() {
       // altura, meta de peso e o botão Concluir somem atrás do teclado.
       automaticallyAdjustKeyboardInsets
     >
-      <HeroHeader>
+      {/* Cabeçalho sem box, texto direto sobre o azul — igual à Home. */}
+      <View
+        style={{
+          paddingTop: insets.top + spacing.md,
+          paddingHorizontal: spacing.md + spacing.xs,
+          gap: spacing.xs,
+        }}
+      >
         <AppText variant="caption" style={{ color: colors.onHero, opacity: 0.85 }}>
           {strings.appName} — {strings.tagline}
         </AppText>
@@ -320,8 +343,9 @@ export default function Onboarding() {
         <AppText style={{ color: colors.onHero, opacity: 0.9 }}>
           {strings.onboarding.welcomeBody}
         </AppText>
-      </HeroHeader>
-      <View style={{ padding: spacing.md, gap: spacing.md, marginTop: -spacing.lg, zIndex: 1 }}>
+      </View>
+      <View style={{ padding: spacing.md, gap: spacing.md }}>
+        <Animated.View key={step} entering={FadeInDown.duration(420)}>
         {step === 'language' ? (
           <LanguageStep onDone={() => setStep('consent')} />
         ) : step === 'consent' ? (
@@ -363,7 +387,9 @@ export default function Onboarding() {
         ) : (
           <ProfileStep />
         )}
+        </Animated.View>
       </View>
     </ScrollView>
+    </View>
   );
 }
