@@ -90,7 +90,7 @@ export function attachReminderMascotListeners(handlers: {
 /** Reagenda os lembretes DAILY de todos os remédios ativos (apoio de memória). */
 export async function applyMedicationReminders(
   enabled: boolean,
-  meds: Array<{ id: number; name: string; doseText: string | null; times: string[] }>,
+  meds: { id: number; name: string; doseText: string | null; times: string[] }[],
 ): Promise<void> {
   await safely(async () => {
     for (let i = 0; i < MAX_MED_SLOTS; i++) {
@@ -185,7 +185,7 @@ const APPT_OFFSETS_H = [3, 2, 1];
 /** Reagenda os avisos de todas as consultas futuras: no dia (08:00) e 3h/2h/1h antes. */
 export async function applyAppointmentReminders(
   enabled: boolean,
-  appts: Array<{ id: number; place: string; specialty: string; scheduledAt: string }>,
+  appts: { id: number; place: string; specialty: string; scheduledAt: string }[],
 ): Promise<void> {
   await safely(async () => {
     for (let i = 0; i < MAX_APPT_SLOTS; i++) {

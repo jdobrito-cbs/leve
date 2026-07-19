@@ -1,8 +1,8 @@
-﻿import { useFocusEffect } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { BarChart, LineChart } from 'react-native-gifted-charts';
-import { METRIC_DEFS, MetricType } from '@/core/metrics';
+import { METRIC_DEFS, MetricType , MANUAL_BODY_METRICS } from '@/core/metrics';
 import {
   AppText,
   Card,
@@ -28,7 +28,7 @@ import {
 } from '@/features/body/bodyBands';
 import { buildBodyFacts, buildBodyGauges } from '@/features/body/bodyGauges';
 import { buildBodyReport } from '@/features/report/bodyReport';
-import { MANUAL_BODY_METRICS } from '@/core/metrics';
+
 import { getProfile } from '@/db/profileRepo';
 import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
@@ -74,7 +74,7 @@ function toDisplayGauge<T extends { unit: string; value: number | null; zones: G
 /** Dados corporais no estilo da balança: valor + medidor de faixas por item. */
 function BodyDataSection() {
   const [gauges, setGauges] = useState<GaugeSpec[] | null>(null);
-  const [facts, setFacts] = useState<Array<{ label: string; value: string }>>([]);
+  const [facts, setFacts] = useState<{ label: string; value: string }[]>([]);
 
   useFocusEffect(
     useCallback(() => {

@@ -133,8 +133,8 @@ export function buildBodyGauges(report: BodyReport): GaugeSpec[] {
 }
 
 /** Linhas de texto do box (sem medidor): peso ideal, nível de obesidade, tipo. */
-export function buildBodyFacts(report: BodyReport): Array<{ label: string; value: string }> {
-  const facts: Array<{ label: string; value: string }> = [
+export function buildBodyFacts(report: BodyReport): { label: string; value: string }[] {
+  const facts: { label: string; value: string }[] = [
     { label: B().idealWeight, value: formatWeight(report.idealWeightKg) },
     { label: B().obesityLevel, value: report.obesityLevel },
   ];

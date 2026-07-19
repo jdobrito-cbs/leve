@@ -1,8 +1,3 @@
-const mockAlert = jest.fn();
-jest.mock('@/services/reminders/reminders', () => ({
-  sendMovementAlert: (...a: unknown[]) => mockAlert(...a),
-}));
-
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
@@ -10,6 +5,11 @@ import * as schema from '@/db/schema';
 import { getSetting, setSetting } from '@/db/settingsRepo';
 import type { HealthProvider } from '@/services/health/HealthProvider';
 import { checkMovementIfDue } from '../movementCheck';
+
+const mockAlert = jest.fn();
+jest.mock('@/services/reminders/reminders', () => ({
+  sendMovementAlert: (...a: unknown[]) => mockAlert(...a),
+}));
 
 function makeDb() {
   const sqlite = new Database(':memory:');

@@ -1,5 +1,8 @@
 import { render } from '@testing-library/react-native';
 
+import { strings } from '@/i18n/pt-BR';
+import { AccountScreen } from '../AccountScreen';
+
 jest.mock('expo-router', () => ({ router: { back: jest.fn(), push: jest.fn() } }));
 jest.mock('@/services/api/client', () => ({
   isAccountConfigured: () => true,
@@ -23,9 +26,6 @@ let mockEmail: string | null = null;
 jest.mock('@/features/account/useAccount', () => ({
   useAccount: () => ({ ...mockBaseAccount, email: mockEmail }),
 }));
-
-import { strings } from '@/i18n/pt-BR';
-import { AccountScreen } from '../AccountScreen';
 
 test('deslogado mostra formulário com consentimentos', async () => {
   mockEmail = null;

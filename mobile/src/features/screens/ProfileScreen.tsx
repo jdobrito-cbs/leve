@@ -1,11 +1,11 @@
-﻿import { router } from 'expo-router';
+import { router } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useEffect, useState } from 'react';
 import { Platform, View } from 'react-native';
 
 import { ageFromIsoDate, brDateToIso } from '@/core/datetime';
 import { db } from '@/db/client';
-import { setSetting } from '@/db/settingsRepo';
+import { setSetting , getSetting } from '@/db/settingsRepo';
 import { setThemeSignal } from '@/design/themeSignal';
 import { buildBodyReport } from '@/features/report/bodyReport';
 import { reportHtml } from '@/features/report/reportHtml';
@@ -30,7 +30,7 @@ import { isLocked } from '@/features/premium/gates';
 import { usePremium } from '@/features/premium/usePremium';
 import { useProfileForm } from '@/features/profile/useProfileForm';
 import { strings } from '@/i18n/pt-BR';
-import { getSetting } from '@/db/settingsRepo';
+
 import {
   LANGUAGES,
   resolveAutoLanguage,
@@ -50,9 +50,9 @@ import {
   setUnitSystem,
   volumeUnit,
   weightUnit,
+  convertDisplayInput,
   type UnitSystem,
 } from '@/core/units';
-import { parseDecimalBR } from '@/core/text';
 
 function HealthSection() {
   const { colors } = useTheme();
@@ -177,12 +177,7 @@ export function ProfileScreen() {
   }
 
   // Campos digitam na unidade de exibição; o formulário guarda métrico.
-  const conv = (s: string, f: (n: number) => number, digits: number) => {
-    const n = parseDecimalBR(s);
-    if (n === null) return s;
-    const p = 10 ** digits;
-    return String(Math.round(f(n) * p) / p);
-  };
+  const conv = convertDisplayInput;
   const heightShown = conv(form.heightStr, cmToDisplay, 0);
   const goalWeightShown = conv(form.goalWeightStr, kgToDisplay, 1);
   const waterGoalShown = conv(form.waterGoalStr, mlToDisplay, 0);
@@ -241,7 +236,7 @@ export function ProfileScreen() {
           {strings.profile.sexLabel}
         </AppText>
         <SegmentedChips
-          options={(Object.keys(strings.profile.sexes) as Array<keyof typeof strings.profile.sexes>).map(
+          options={(Object.keys(strings.profile.sexes) as (keyof typeof strings.profile.sexes)[]).map(
             (value) => ({ value, label: strings.profile.sexes[value] }),
           )}
           value={form.sex}

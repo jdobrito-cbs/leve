@@ -1,5 +1,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 
+import { useOnboarding } from '../useOnboarding';
+
 jest.mock('@/db/client', () => ({ db: {} }));
 const mockGetProfile = jest.fn();
 const mockAcceptDisclaimer = jest.fn();
@@ -7,8 +9,6 @@ jest.mock('@/db/profileRepo', () => ({
   getProfile: (...a: unknown[]) => mockGetProfile(...a),
   acceptDisclaimer: (...a: unknown[]) => mockAcceptDisclaimer(...a),
 }));
-
-import { useOnboarding } from '../useOnboarding';
 
 test('sem perfil → não aceito; accept() persiste e atualiza', async () => {
   mockGetProfile.mockResolvedValue(null);

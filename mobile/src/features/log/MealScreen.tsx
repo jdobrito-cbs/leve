@@ -86,7 +86,7 @@ function refPortionShortcut(item: FoodItem): { label: string; value: number } | 
   return { label: item.referencePortion!, value };
 }
 
-const UNIT_OPTIONS: Array<{ value: PortionUnit; label: string }> = [
+const UNIT_OPTIONS: { value: PortionUnit; label: string }[] = [
   { value: 'g', label: 'g' },
   { value: 'ml', label: 'ml' },
 ];

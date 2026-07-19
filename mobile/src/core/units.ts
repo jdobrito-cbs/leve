@@ -6,6 +6,7 @@
  * aparelho (EUA → imperial; resto do mundo → métrico).
  */
 import { numberLocale } from '@/i18n/engine';
+import { parseDecimalBR } from './text';
 
 export type UnitSystem = 'metric' | 'imperial';
 
@@ -14,22 +15,26 @@ const CM_PER_IN = 2.54;
 const ML_PER_FLOZ = 29.5735295625;
 
 let active: UnitSystem = 'metric';
-const listeners = new Set<() => void>();
 
 export function setUnitSystem(system: UnitSystem): void {
   active = system;
-  listeners.forEach((l) => l());
 }
 
 export function getUnitSystem(): UnitSystem {
   return active;
 }
 
-export function subscribeUnits(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
+/** Campos de formulário digitam na unidade de exibição e o app guarda métrico:
+ *  converte a string digitada aplicando f (ida ou volta) com casas fixas. */
+export function convertDisplayInput(
+  s: string,
+  f: (n: number) => number,
+  digits: number,
+): string {
+  const n = parseDecimalBR(s);
+  if (n === null) return s;
+  const p = 10 ** digits;
+  return String(Math.round(f(n) * p) / p);
 }
 
 const fmt = (v: number, digits: number) =>
@@ -77,10 +82,6 @@ export function formatHeight(cm: number): string {
   const ft = Math.floor(totalIn / 12);
   const inches = totalIn % 12;
   return `${ft}'${inches}"`;
-}
-
-export function ftInToCm(ft: number, inches: number): number {
-  return (ft * 12 + inches) * CM_PER_IN;
 }
 
 export function cmToFtIn(cm: number): { ft: number; inches: number } {

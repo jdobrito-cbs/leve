@@ -1,3 +1,6 @@
+import type { MetricSample } from '@/core/metrics';
+import { localDayKey } from '@/core/datetime';
+
 export interface WeightSample {
   kg: number;
   takenAt: Date;
@@ -15,7 +18,24 @@ export interface SleepNight {
   end: Date;
 }
 
-import type { MetricSample } from '@/core/metrics';
+/** Agrega trechos de sono em noites (chave = dia em que a noite terminou);
+ *  sonecas com menos de 3h no total ficam de fora. Compartilhado iOS/Android. */
+export function aggregateSleepNights(spans: SleepNight[]): SleepNight[] {
+  const nights = new Map<string, { start: Date; end: Date; totalMs: number }>();
+  for (const { start, end } of spans) {
+    const ms = end.getTime() - start.getTime();
+    if (!(ms > 0)) continue;
+    const key = localDayKey(end);
+    const night = nights.get(key) ?? { start, end, totalMs: 0 };
+    if (start < night.start) night.start = start;
+    if (end > night.end) night.end = end;
+    night.totalMs += ms;
+    nights.set(key, night);
+  }
+  return [...nights.values()]
+    .filter((n) => n.totalMs >= 3 * 36e5)
+    .map(({ start, end }) => ({ start, end }));
+}
 
 export interface HealthProvider {
   isAvailable(): Promise<boolean>;

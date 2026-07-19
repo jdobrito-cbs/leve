@@ -15,12 +15,6 @@ export interface Profile {
   birthDate: string | null; // 'YYYY-MM-DD'
 }
 
-export interface WaterLog {
-  id: number;
-  amountMl: number;
-  loggedAt: string;
-}
-
 /** Unidade da porção: sólidos em gramas, líquidos em mililitros. */
 export type PortionUnit = 'g' | 'ml';
 

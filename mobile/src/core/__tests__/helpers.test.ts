@@ -9,6 +9,7 @@ import {
   localDayKey,
   parseDateTimeBR,
 } from '../datetime';
+import { normalizeText, parseDecimalBR } from '../text';
 
 test('nascimento: conversões BR↔ISO e idade completa', () => {
   expect(brDateToIso('01/03/1990')).toBe('1990-03-01');
@@ -31,7 +32,6 @@ test('parseDateTimeBR aceita data/hora válidas e rejeita inválidas', () => {
   expect(parseDateTimeBR('07-07-2026', '10:00')).toBeNull();
   expect(parseDateTimeBR('07/07/2026', '25:00')).toBeNull();
 });
-import { normalizeText, parseDecimalBR } from '../text';
 
 test('dayRangeUtc cobre o dia local inteiro', () => {
   const d = new Date(2026, 6, 7, 15, 30);

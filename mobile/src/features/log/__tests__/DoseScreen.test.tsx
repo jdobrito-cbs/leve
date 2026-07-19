@@ -1,5 +1,8 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 
+import { strings } from '@/i18n/pt-BR';
+import { DoseScreen } from '../DoseScreen';
+
 jest.mock('@/db/client', () => ({ db: {} }));
 jest.mock('expo-router', () => ({ router: { back: jest.fn(), push: jest.fn() } }));
 const mockAddDose = jest.fn();
@@ -21,9 +24,6 @@ jest.mock('@/db/profileRepo', () => ({
   getProfile: (...a: unknown[]) => mockGetProfile(...a),
 }));
 jest.mock('@/services/reminders/reminders', () => ({ scheduleDoseReminder: jest.fn() }));
-
-import { strings } from '@/i18n/pt-BR';
-import { DoseScreen } from '../DoseScreen';
 
 test('medicação atual do Perfil vem pré-selecionada no registro', async () => {
   mockGetProfile.mockResolvedValueOnce({ medication: 'Tirzepatida (Mounjaro)' });

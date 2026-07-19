@@ -1,5 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react-native';
 
+import { useTodaySummary } from '../useTodaySummary';
+
 jest.mock('@/db/client', () => ({ db: {} }));
 jest.mock('expo-router', () => ({
   useFocusEffect: (cb: () => void) => {
@@ -82,8 +84,6 @@ jest.mock('@/db/profileRepo', () => ({
     goalWeightKg: 85,
   }),
 }));
-
-import { useTodaySummary } from '../useTodaySummary';
 
 test('agrega os dados do dia', async () => {
   const { result } = await renderHook(() => useTodaySummary());

@@ -3,7 +3,7 @@ import { strings } from '@/i18n/pt-BR';
 import type { FoodRecognition, VisionProvider } from './VisionProvider';
 
 interface ScanResponse {
-  foods?: Array<{ name: string; portionGrams: number | null; confidence: number }>;
+  foods?: { name: string; portionGrams: number | null; confidence: number }[];
 }
 
 /** Envia a foto ao servidor do Leve (que guarda a chave do AI Hub). Opt-in por foto. */

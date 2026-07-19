@@ -1,12 +1,3 @@
-const mockSchedule = jest.fn();
-const mockCancel = jest.fn();
-jest.mock('expo-notifications', () => ({
-  scheduleNotificationAsync: (...a: unknown[]) => mockSchedule(...a),
-  cancelScheduledNotificationAsync: (...a: unknown[]) => mockCancel(...a),
-  requestPermissionsAsync: jest.fn().mockResolvedValue({ granted: true }),
-  SchedulableTriggerInputTypes: { DATE: 'date', DAILY: 'daily' },
-}));
-
 import {
   applyAppointmentReminders,
   applyMedicationReminders,
@@ -15,6 +6,15 @@ import {
   applyWaterReminders,
   scheduleDoseReminder,
 } from '../reminders';
+
+const mockSchedule = jest.fn();
+const mockCancel = jest.fn();
+jest.mock('expo-notifications', () => ({
+  scheduleNotificationAsync: (...a: unknown[]) => mockSchedule(...a),
+  cancelScheduledNotificationAsync: (...a: unknown[]) => mockCancel(...a),
+  requestPermissionsAsync: jest.fn().mockResolvedValue({ granted: true }),
+  SchedulableTriggerInputTypes: { DATE: 'date', DAILY: 'daily' },
+}));
 
 beforeEach(() => {
   mockSchedule.mockClear();

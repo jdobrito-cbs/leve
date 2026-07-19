@@ -24,6 +24,7 @@ import { getProfile, updateProfile } from '@/db/profileRepo';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { estimateCalorieGoal } from '@/features/profile/calorieGoal';
 import {
+  convertDisplayInput,
   cmToDisplay,
   displayToCm,
   displayToKg,
@@ -76,12 +77,7 @@ function ProfileStep() {
   const heightCm = parseDecimalBR(heightStr);
   const goalWeightKg = parseDecimalBR(goalWeightStr);
   // Campos digitam na unidade de exibição (cm/in, kg/lb); o estado guarda métrico.
-  const conv = (s: string, f: (n: number) => number, digits: number) => {
-    const n = parseDecimalBR(s);
-    if (n === null) return s;
-    const p = 10 ** digits;
-    return String(Math.round(f(n) * p) / p);
-  };
+  const conv = convertDisplayInput;
   // Meta de calorias automática: manter o peso-meta (ajustável no Perfil).
   const calorieGoal =
     sex !== null && age !== null && heightCm && goalWeightKg
@@ -125,7 +121,7 @@ function ProfileStep() {
       </AppText>
       <SegmentedChips
         options={(
-          Object.keys(strings.profile.sexes) as Array<keyof typeof strings.profile.sexes>
+          Object.keys(strings.profile.sexes) as (keyof typeof strings.profile.sexes)[]
         ).map((value) => ({ value, label: strings.profile.sexes[value] }))}
         value={sex}
         onChange={(v) => setSex(v as SexOption)}

@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   formatDateBR,
   formatDateTimeLabel,
@@ -61,13 +61,26 @@ export function AppointmentsScreen() {
   const [timeStr, setTimeStr] = useState(formatTimeHM(new Date()));
   const at = parseDateTimeBR(dateStr, timeStr);
 
+  // "Agora" nasce na carga da lista — render puro (React Compiler).
+  const [nowTs, setNowTs] = useState(0);
+
   const load = useCallback(async () => {
     setList(await listAppointments(db));
+    setNowTs(Date.now());
   }, []);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  // (Hook antes do return condicional — regra dos hooks.)
+  const { upcoming, past } = useMemo(
+    () => ({
+      upcoming: list.filter((a) => new Date(a.scheduledAt).getTime() >= nowTs),
+      past: list.filter((a) => new Date(a.scheduledAt).getTime() < nowTs).reverse(),
+    }),
+    [list, nowTs],
+  );
 
   if (isLocked('appointments', premium)) {
     return (
@@ -120,10 +133,6 @@ export function AppointmentsScreen() {
     await rescheduleReminders();
     await load();
   }
-
-  const now = Date.now();
-  const upcoming = list.filter((a) => new Date(a.scheduledAt).getTime() >= now);
-  const past = list.filter((a) => new Date(a.scheduledAt).getTime() < now).reverse();
 
   const row = (a: Appointment) => (
     <ListRow

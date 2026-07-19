@@ -1,5 +1,8 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 
+
+import { WaterScreen } from '../WaterScreen';
+
 jest.mock('@/db/client', () => ({ db: {} }));
 jest.mock('expo-router', () => ({ router: { back: jest.fn(), push: jest.fn() } }));
 const mockAddWater = jest.fn();
@@ -12,14 +15,12 @@ jest.mock('@/features/water/waterGoal', () => ({
   getEffectiveWaterGoal: jest.fn().mockResolvedValue({ goalMl: 2000, auto: true }),
 }));
 
-import { strings } from '@/i18n/pt-BR';
-import { WaterScreen } from '../WaterScreen';
-
 test('botão rápido registra 200 ml', async () => {
   mockTotal.mockResolvedValue(500);
   mockAddWater.mockResolvedValue(undefined);
   const { getByText } = await render(<WaterScreen />);
-  await waitFor(() => getByText(strings.water.quick200));
-  await fireEvent.press(getByText(strings.water.quick200));
+  // Rótulo montado por formatVolume (métrico nos testes): "+ 200 ml".
+  await waitFor(() => getByText('+ 200 ml'));
+  await fireEvent.press(getByText('+ 200 ml'));
   await waitFor(() => expect(mockAddWater).toHaveBeenCalledWith({}, 200, expect.any(Date)));
 });

@@ -1,5 +1,8 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 
+import { strings } from '@/i18n/pt-BR';
+import { GymScreen } from '../GymScreen';
+
 jest.mock('@/db/client', () => ({ db: {} }));
 const mockAdd = jest.fn();
 const mockList = jest.fn();
@@ -32,9 +35,6 @@ jest.mock('@/features/premium/usePremium', () => ({
     refresh: jest.fn(),
   }),
 }));
-
-import { strings } from '@/i18n/pt-BR';
-import { GymScreen } from '../GymScreen';
 
 beforeEach(() => {
   jest.clearAllMocks();

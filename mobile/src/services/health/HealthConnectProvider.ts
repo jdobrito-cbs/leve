@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import { localDayKey } from '@/core/datetime';
 import type { MetricSample, MetricType } from '@/core/metrics';
-import type { HealthProvider, SleepNight, StepsSample, WeightSample } from './HealthProvider';
+import { aggregateSleepNights, type HealthProvider, type SleepNight, type StepsSample, type WeightSample } from './HealthProvider';
 
 interface WeightRecord {
   weight?: { inKilograms?: number | null } | null;
@@ -16,7 +16,7 @@ interface StepsRecord {
 interface HealthConnectModule {
   initialize(): Promise<boolean>;
   requestPermission(
-    permissions: Array<{ accessType: 'read'; recordType: string }>,
+    permissions: { accessType: 'read'; recordType: string }[],
   ): Promise<unknown[]>;
   readRecords(
     recordType: string,
@@ -147,23 +147,11 @@ export class HealthConnectProvider implements HealthProvider {
           endTime: new Date().toISOString(),
         },
       });
-      const nights = new Map<string, { start: Date; end: Date; totalMs: number }>();
-      for (const r of records as Array<{ startTime?: string; endTime?: string }>) {
-        if (!r.startTime || !r.endTime) continue;
-        const start = new Date(r.startTime);
-        const end = new Date(r.endTime);
-        const ms = end.getTime() - start.getTime();
-        if (!(ms > 0)) continue;
-        const key = localDayKey(end);
-        const night = nights.get(key) ?? { start, end, totalMs: 0 };
-        if (start < night.start) night.start = start;
-        if (end > night.end) night.end = end;
-        night.totalMs += ms;
-        nights.set(key, night);
-      }
-      return [...nights.values()]
-        .filter((n) => n.totalMs >= 3 * 36e5)
-        .map(({ start, end }) => ({ start, end }));
+      return aggregateSleepNights(
+        (records as { startTime?: string; endTime?: string }[])
+          .filter((r) => r.startTime && r.endTime)
+          .map((r) => ({ start: new Date(r.startTime!), end: new Date(r.endTime!) })),
+      );
     } catch {
       return [];
     }
@@ -207,7 +195,7 @@ export class HealthConnectProvider implements HealthProvider {
       const sessionMs = end.getTime() - start.getTime();
       // Estágios (quando o relógio registra): 2/4/5/6 = dormindo, 1/7 = acordado.
       const stages =
-        (r.stages as Array<{ startTime?: string; endTime?: string; stage?: number }> | undefined) ??
+        (r.stages as { startTime?: string; endTime?: string; stage?: number }[] | undefined) ??
         [];
       let asleepMs = 0;
       let awakeMs = 0;
@@ -233,7 +221,7 @@ export class HealthConnectProvider implements HealthProvider {
       push('heart_rate_resting', num(r.beatsPerMinute), when(r));
     }
     for (const r of await read('HeartRate')) {
-      const s = (r.samples as Array<{ beatsPerMinute?: unknown }> | undefined) ?? [];
+      const s = (r.samples as { beatsPerMinute?: unknown }[] | undefined) ?? [];
       const values = s.map((x) => num(x.beatsPerMinute)).filter((v): v is number => v !== null);
       if (values.length) {
         push(

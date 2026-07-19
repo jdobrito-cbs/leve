@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import { localDayKey } from '@/core/datetime';
 import type { MetricSample, MetricType } from '@/core/metrics';
-import type { HealthProvider, SleepNight, StepsSample, WeightSample } from './HealthProvider';
+import { aggregateSleepNights, type HealthProvider, type SleepNight, type StepsSample, type WeightSample } from './HealthProvider';
 
 interface QuantitySample {
   quantity?: number | null;
@@ -50,7 +50,7 @@ const STEP_COUNT = 'HKQuantityTypeIdentifierStepCount';
 const SLEEP = 'HKCategoryTypeIdentifierSleepAnalysis';
 
 /** Identificadores HealthKit → métrica do Leve (iOS não testável neste ambiente; adapter defensivo). */
-const HK_METRICS: Array<{ id: string; type: MetricType; unit?: string }> = [
+const HK_METRICS: { id: string; type: MetricType; unit?: string }[] = [
   { id: 'HKQuantityTypeIdentifierWaistCircumference', type: 'waist_cm', unit: 'cm' },
   { id: 'HKQuantityTypeIdentifierBodyFatPercentage', type: 'body_fat_pct' },
   { id: 'HKQuantityTypeIdentifierLeanBodyMass', type: 'lean_mass_kg' },
@@ -240,8 +240,7 @@ export class HealthKitProvider implements HealthProvider {
     }
   }
 
-  /** Noites de sono (deitar → acordar) para estimar horários típicos.
-   *  Sonecas curtas ficam de fora: só conta noite com 3h+ registradas. */
+  /** Noites de sono (deitar → acordar) para estimar horários típicos. */
   async readSleepNights(since: Date): Promise<SleepNight[]> {
     if (!this.mod?.queryCategorySamples) return [];
     try {
@@ -251,23 +250,11 @@ export class HealthKitProvider implements HealthProvider {
           limit: 0,
         })) as CategorySample[] | { samples?: CategorySample[] },
       ) as CategorySample[];
-      const nights = new Map<string, { start: Date; end: Date; totalMs: number }>();
-      for (const s of rows) {
-        if (!s.startDate || !s.endDate) continue;
-        const start = new Date(s.startDate);
-        const end = new Date(s.endDate);
-        const ms = end.getTime() - start.getTime();
-        if (!(ms > 0)) continue;
-        const key = localDayKey(end);
-        const night = nights.get(key) ?? { start, end, totalMs: 0 };
-        if (start < night.start) night.start = start;
-        if (end > night.end) night.end = end;
-        night.totalMs += ms;
-        nights.set(key, night);
-      }
-      return [...nights.values()]
-        .filter((n) => n.totalMs >= 3 * 36e5)
-        .map(({ start, end }) => ({ start, end }));
+      return aggregateSleepNights(
+        rows
+          .filter((s) => s.startDate && s.endDate)
+          .map((s) => ({ start: new Date(s.startDate!), end: new Date(s.endDate!) })),
+      );
     } catch {
       return [];
     }

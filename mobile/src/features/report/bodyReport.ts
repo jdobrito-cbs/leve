@@ -103,7 +103,7 @@ function withValue(row: CompositionRow): RangedValue | null {
 }
 
 /** Média por dia — importações trazem várias amostras diárias e o gráfico vira rabisco. */
-function dailyAverages(rows: Array<{ loggedAt: string; value: number }>): SeriesPoint[] {
+function dailyAverages(rows: { loggedAt: string; value: number }[]): SeriesPoint[] {
   const byDay = new Map<string, { sum: number; n: number }>();
   for (const r of rows) {
     const day = r.loggedAt.slice(0, 10);

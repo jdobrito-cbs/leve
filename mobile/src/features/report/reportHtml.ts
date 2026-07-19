@@ -25,9 +25,6 @@ const INK = '#0F172A';
 const MUTED = '#64748B';
 const LINE = '#E2E8F0';
 const GRID = '#EEF2F7';
-const LOW = '#F59E0B';
-const OK = '#16A34A';
-const HIGH = '#DC2626';
 
 const fmt = (n: number, d = 1) =>
   n.toLocaleString(numberLocale(), { minimumFractionDigits: d, maximumFractionDigits: d });

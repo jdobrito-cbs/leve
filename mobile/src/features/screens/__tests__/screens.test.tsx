@@ -1,5 +1,10 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { strings } from '@/i18n/pt-BR';
+import { LogHubScreen } from '../LogHubScreen';
+import { ProfileScreen } from '../ProfileScreen';
+import { ProgressScreen } from '../ProgressScreen';
+import { TodayScreen } from '../TodayScreen';
 
 jest.mock('expo-router', () => ({
   router: { push: jest.fn(), back: jest.fn(), replace: jest.fn() },
@@ -84,6 +89,7 @@ jest.mock('@/features/today/useTodaySummary', () => ({
     ],
     goalWeightKg: 85,
     nextDoseAt: '2026-07-14T12:00:00.000Z',
+    daysToNextDose: 3,
     lastDoseLabel: 'semaglutida · 0.5 mg',
     doseIntervalDays: 7,
     doses: [
@@ -149,11 +155,6 @@ jest.mock('@/features/health/useHealthConnection', () => ({
     lastImported: null,
   }),
 }));
-import { strings } from '@/i18n/pt-BR';
-import { LogHubScreen } from '../LogHubScreen';
-import { ProfileScreen } from '../ProfileScreen';
-import { ProgressScreen } from '../ProgressScreen';
-import { TodayScreen } from '../TodayScreen';
 
 const initialMetrics = {
   frame: { x: 0, y: 0, width: 390, height: 844 },

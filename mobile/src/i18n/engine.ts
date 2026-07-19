@@ -22,7 +22,7 @@ export type LanguageCode =
   | 'hi';
 
 /** Rótulos no próprio idioma — padrão de seletor de idiomas. */
-export const LANGUAGES: Array<{ code: LanguageCode; label: string }> = [
+export const LANGUAGES: { code: LanguageCode; label: string }[] = [
   { code: 'pt-BR', label: 'Português (Brasil)' },
   { code: 'pt-PT', label: 'Português (Portugal)' },
   { code: 'en-US', label: 'English (US)' },
@@ -70,7 +70,6 @@ export function numberLocale(code: LanguageCode = activeCode): string {
 let defaultCatalog: Record<string, unknown> | null = null;
 let activeCatalog: Record<string, unknown> | null = null;
 let activeCode: LanguageCode = 'pt-BR';
-const listeners = new Set<() => void>();
 
 export function registerDefaultCatalog(catalog: object): void {
   defaultCatalog = catalog as Record<string, unknown>;
@@ -125,18 +124,10 @@ export function setActiveLanguage(code: LanguageCode): void {
   activeCatalog = catalogFor(code) ?? defaultCatalog;
   activeCode = code;
   applyRtl(code);
-  listeners.forEach((l) => l());
 }
 
 export function getActiveLanguage(): LanguageCode {
   return activeCode;
-}
-
-export function subscribeLanguage(listener: () => void): () => void {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
 }
 
 export function isRtlLanguage(code: LanguageCode = activeCode): boolean {

@@ -7,11 +7,11 @@ import { addWeight, latestWeight } from '@/db/weightRepo';
 import { setSetting, getSetting } from '@/db/settingsRepo';
 import { updateProfile, getProfile } from '@/db/profileRepo';
 import { exportAllData, importAllData, wipeAllData } from '../exportData';
+import { decryptBackup, deriveBackupKey, encryptBackup } from '../crypto';
 
 jest.mock('expo-crypto', () => ({
   getRandomBytes: (n: number) => new Uint8Array(n).fill(7),
 }));
-import { decryptBackup, deriveBackupKey, encryptBackup } from '../crypto';
 
 function makeDb() {
   const sqlite = new Database(':memory:');

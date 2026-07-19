@@ -1,5 +1,8 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 
+import { strings } from '@/i18n/pt-BR';
+import { MealScreen, suggestPeriod } from '../MealScreen';
+
 jest.mock('@/db/client', () => ({ db: {} }));
 jest.mock('expo-router', () => ({ router: { back: jest.fn(), push: jest.fn() } }));
 const mockSearch = jest.fn();
@@ -44,9 +47,6 @@ jest.mock('expo-image-picker', () => ({
   requestCameraPermissionsAsync: jest.fn().mockResolvedValue({ granted: true }),
   launchCameraAsync: jest.fn(),
 }));
-
-import { strings } from '@/i18n/pt-BR';
-import { MealScreen, suggestPeriod } from '../MealScreen';
 
 const FEIJAO = {
   id: 1,

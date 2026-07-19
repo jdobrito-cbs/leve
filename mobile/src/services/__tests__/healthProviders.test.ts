@@ -1,12 +1,12 @@
+import { readRecords } from 'react-native-health-connect';
+import { HealthConnectProvider } from '../health/HealthConnectProvider';
+import { getHealthProvider } from '../health/HealthProvider';
+
 jest.mock('react-native-health-connect', () => ({
   initialize: jest.fn().mockResolvedValue(true),
   requestPermission: jest.fn().mockResolvedValue([{ recordType: 'Weight' }]),
   readRecords: jest.fn(),
 }));
-
-import { readRecords } from 'react-native-health-connect';
-import { HealthConnectProvider } from '../health/HealthConnectProvider';
-import { getHealthProvider } from '../health/HealthProvider';
 
 const mockReadRecords = readRecords as jest.Mock;
 

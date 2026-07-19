@@ -1,5 +1,8 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 
+import { strings } from '@/i18n/pt-BR';
+import { SymptomScreen } from '../SymptomScreen';
+
 jest.mock('@/db/client', () => ({ db: {} }));
 jest.mock('expo-router', () => ({ router: { back: jest.fn(), push: jest.fn() } }));
 const mockAddSymptom = jest.fn();
@@ -10,9 +13,6 @@ jest.mock('@/db/symptomRepo', () => ({
   listSymptoms: (...a: unknown[]) => mockList(...a),
   deleteSymptom: (...a: unknown[]) => mockDelete(...a),
 }));
-
-import { strings } from '@/i18n/pt-BR';
-import { SymptomScreen } from '../SymptomScreen';
 
 test('seleciona sintoma + intensidade e salva', async () => {
   mockList.mockResolvedValue([]);

@@ -6,7 +6,7 @@ import {
   formatTimeHM,
   parseDateTimeBR,
 } from '@/core/datetime';
-import { parseDecimalBR } from '@/core/text';
+import { parseDecimalBR , normalizeText } from '@/core/text';
 import type { DoseLog, DoseRoute } from '@/core/types';
 import {
   AppText,
@@ -22,7 +22,7 @@ import {
 } from '@/design/components';
 import { spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
-import { normalizeText } from '@/core/text';
+
 import { db } from '@/db/client';
 import { addDose, deleteDose, lastInjectionSite, listDoses } from '@/db/doseRepo';
 import { getProfile } from '@/db/profileRepo';

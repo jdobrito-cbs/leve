@@ -46,7 +46,7 @@ async function insertChunked(db: AppDb, rows: ReturnType<typeof toRows>): Promis
 const SEED_PATCH_VERSION = 1;
 
 /** Correções de dados da base TACO — fonte: IBGE/POF 2008-2009 (itens que vieram zerados). */
-const TACO_FIXES: Array<{ name: string; kcal: number; p: number; c: number; g: number; f: number }> = [
+const TACO_FIXES: { name: string; kcal: number; p: number; c: number; g: number; f: number }[] = [
   { name: 'Leite, de vaca, integral', kcal: 60, p: 3.2, c: 4.5, g: 3.3, f: 0 },
   { name: 'Leite, de vaca, desnatado, UHT', kcal: 34, p: 3.4, c: 5.0, g: 0.1, f: 0 },
   { name: 'Iogurte, sabor abacaxi', kcal: 99, p: 3.5, c: 14.6, g: 3.5, f: 0 },
@@ -67,7 +67,7 @@ async function applySeedPatches(db: AppDb): Promise<void> {
   // Renormaliza os nomes com a regra nova (sem pontuação) para a busca por palavras.
   const all = (await db
     .select({ id: foodItems.id, name: foodItems.name })
-    .from(foodItems)) as Array<{ id: number; name: string }>;
+    .from(foodItems)) as { id: number; name: string }[];
   for (const row of all) {
     await db
       .update(foodItems)

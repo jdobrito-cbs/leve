@@ -1,5 +1,9 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 
+import { strings } from '@/i18n/pt-BR';
+import { isLocked } from '../gates';
+import { PremiumScreen } from '../PremiumScreen';
+
 jest.mock('@/db/client', () => ({ db: {} }));
 const mockStore: Record<string, unknown> = {};
 jest.mock('@/db/settingsRepo', () => ({
@@ -22,10 +26,6 @@ const mockVerify = jest.fn();
 jest.mock('@/features/premium/licenseKey', () => ({
   verifyLicenseKey: (...a: unknown[]) => mockVerify(...a),
 }));
-
-import { strings } from '@/i18n/pt-BR';
-import { isLocked } from '../gates';
-import { PremiumScreen } from '../PremiumScreen';
 
 beforeEach(() => {
   for (const k of Object.keys(mockStore)) delete mockStore[k];

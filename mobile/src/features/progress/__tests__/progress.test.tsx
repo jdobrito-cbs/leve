@@ -1,5 +1,8 @@
 import { render } from '@testing-library/react-native';
 
+import { strings } from '@/i18n/pt-BR';
+import { ProgressScreen } from '@/features/screens/ProgressScreen';
+
 jest.mock('expo-router', () => ({
   router: { push: jest.fn(), back: jest.fn() },
   useFocusEffect: (cb: () => void | (() => void)) => {
@@ -40,9 +43,6 @@ const mockData = {
 jest.mock('@/db/client', () => ({ db: {} }));
 jest.mock('@/db/metricsRepo', () => ({ metricSeries: jest.fn().mockResolvedValue([]) }));
 jest.mock('../useProgressData', () => ({ useProgressData: () => mockData }));
-
-import { strings } from '@/i18n/pt-BR';
-import { ProgressScreen } from '@/features/screens/ProgressScreen';
 
 test('mostra seções e histórico de doses', async () => {
   const rendered = await render(<ProgressScreen />);

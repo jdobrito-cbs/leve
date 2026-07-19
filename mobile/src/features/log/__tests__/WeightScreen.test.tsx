@@ -1,5 +1,8 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 
+import { strings } from '@/i18n/pt-BR';
+import { WeightScreen } from '../WeightScreen';
+
 jest.mock('@/db/client', () => ({ db: {} }));
 jest.mock('expo-router', () => ({ router: { back: jest.fn(), push: jest.fn() } }));
 const mockAddWeight = jest.fn();
@@ -10,9 +13,6 @@ jest.mock('@/db/weightRepo', () => ({
   listWeights: (...a: unknown[]) => mockList(...a),
   deleteWeight: (...a: unknown[]) => mockDelete(...a),
 }));
-
-import { strings } from '@/i18n/pt-BR';
-import { WeightScreen } from '../WeightScreen';
 
 test('mostra histórico, salva novo valor com vírgula e apaga registro', async () => {
   mockList.mockResolvedValue([

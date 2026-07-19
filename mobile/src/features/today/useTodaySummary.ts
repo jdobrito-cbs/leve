@@ -45,6 +45,8 @@ export interface TodaySummary {
   weightSeries: WeightLog[];
   goalWeightKg: number | null;
   nextDoseAt: string | null;
+  /** Dias até a próxima dose, calculado na atualização (render puro). */
+  daysToNextDose: number | null;
   lastDoseLabel: string | null;
   doseIntervalDays: number | null;
   doses: DoseLog[];
@@ -81,6 +83,7 @@ export function useTodaySummary(): TodaySummary {
   const [weightSeries, setWeightSeries] = useState<WeightLog[]>([]);
   const [goalWeightKg, setGoalWeightKg] = useState<number | null>(null);
   const [nextDoseAt, setNextDoseAt] = useState<string | null>(null);
+  const [daysToNextDose, setDaysToNextDose] = useState<number | null>(null);
   const [lastDoseLabel, setLastDoseLabel] = useState<string | null>(null);
   const [doseIntervalDays, setDoseIntervalDays] = useState<number | null>(null);
   const [doses, setDoses] = useState<DoseLog[]>([]);
@@ -128,6 +131,11 @@ export function useTodaySummary(): TodaySummary {
       first && !recentAsc.some((w) => w.id === first.id) ? [first, ...recentAsc] : recentAsc,
     );
     setNextDoseAt(dose?.nextDoseAt ?? null);
+    setDaysToNextDose(
+      dose?.nextDoseAt
+        ? Math.max(0, Math.ceil((new Date(dose.nextDoseAt).getTime() - now.getTime()) / 86400000))
+        : null,
+    );
     setLastDoseLabel(dose ? `${dose.medication} · ${dose.doseMg} mg` : null);
     setDoses(doseList);
     setSymptomsCount(symptoms.length);
@@ -213,6 +221,7 @@ export function useTodaySummary(): TodaySummary {
     weightSeries,
     goalWeightKg,
     nextDoseAt,
+    daysToNextDose,
     lastDoseLabel,
     doseIntervalDays,
     doses,

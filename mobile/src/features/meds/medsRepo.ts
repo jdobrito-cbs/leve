@@ -70,12 +70,12 @@ export async function todayIntakes(db: AppDb, day: Date): Promise<TodayIntake[]>
   const existing = (await db
     .select()
     .from(medIntakes)
-    .where(gte(medIntakes.scheduledFor, `${dayKey} 00:00`))) as Array<{
+    .where(gte(medIntakes.scheduledFor, `${dayKey} 00:00`))) as {
     id: number;
     medicationId: number;
     scheduledFor: string;
     takenAt: string | null;
-  }>;
+  }[];
   const have = new Set(existing.map((i) => `${i.medicationId}|${i.scheduledFor}`));
 
   for (const med of meds) {
@@ -90,12 +90,12 @@ export async function todayIntakes(db: AppDb, day: Date): Promise<TodayIntake[]>
   const rows = (await db
     .select()
     .from(medIntakes)
-    .where(and(gte(medIntakes.scheduledFor, `${dayKey} 00:00`)))) as Array<{
+    .where(and(gte(medIntakes.scheduledFor, `${dayKey} 00:00`)))) as {
     id: number;
     medicationId: number;
     scheduledFor: string;
     takenAt: string | null;
-  }>;
+  }[];
   const byId = new Map(meds.map((m) => [m.id, m]));
   return rows
     .filter((r) => r.scheduledFor.startsWith(dayKey) && byId.has(r.medicationId))
@@ -123,6 +123,6 @@ export async function adherence(db: AppDb, days: number, today: Date): Promise<{
     .select({ takenAt: medIntakes.takenAt })
     .from(medIntakes)
     .where(gte(medIntakes.scheduledFor, sinceKey))
-    .orderBy(desc(medIntakes.scheduledFor))) as Array<{ takenAt: string | null }>;
+    .orderBy(desc(medIntakes.scheduledFor))) as { takenAt: string | null }[];
   return { taken: rows.filter((r) => r.takenAt).length, total: rows.length };
 }

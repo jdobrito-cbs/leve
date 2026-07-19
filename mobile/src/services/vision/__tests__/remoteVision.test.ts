@@ -1,10 +1,10 @@
+import { strings } from '@/i18n/pt-BR';
+import { RemoteVisionProvider } from '../RemoteVisionProvider';
+
 jest.mock('expo-file-system/legacy', () => ({
   readAsStringAsync: jest.fn().mockResolvedValue('base64-da-foto'),
   EncodingType: { Base64: 'base64' },
 }));
-
-import { strings } from '@/i18n/pt-BR';
-import { RemoteVisionProvider } from '../RemoteVisionProvider';
 
 const mockFetch = jest.fn();
 global.fetch = mockFetch as never;

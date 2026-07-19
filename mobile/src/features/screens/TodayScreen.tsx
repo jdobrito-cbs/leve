@@ -131,9 +131,7 @@ export function TodayScreen() {
   const fadeEnd = Math.min(1, blueEnd + 0.4);
   const progress = summary.waterGoalMl > 0 ? summary.waterMl / summary.waterGoalMl : 0;
   const pk = useMemo(() => estimateRelativeCurve(summary.doses), [summary.doses]);
-  const daysToNextDose = summary.nextDoseAt
-    ? Math.max(0, Math.ceil((new Date(summary.nextDoseAt).getTime() - Date.now()) / 86400000))
-    : null;
+  const daysToNextDose = summary.daysToNextDose;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
