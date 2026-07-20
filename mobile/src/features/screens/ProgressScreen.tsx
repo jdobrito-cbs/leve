@@ -38,11 +38,14 @@ import type { InjectionSite } from '@/features/dose/rotation';
 import { estimateRelativeCurve } from '@/features/pk/pharmacokinetics';
 import { useProgressData } from '@/features/progress/useProgressData';
 import { strings } from '@/i18n/pt-BR';
+import { numberLocale } from '@/i18n/engine';
 import { cmToDisplay, formatWeight, getUnitSystem, kgToDisplay } from '@/core/units';
 
 type RangeKey = '30' | '90' | '120' | 'all';
 
-const RANGE_OPTIONS = [
+// Função (não constante de módulo): rótulos relidos a cada render para a
+// troca de idioma valer na hora, sem reabrir o app.
+const rangeOptions = () => [
   { value: '30' as RangeKey, label: strings.progress.range30 },
   { value: '90' as RangeKey, label: strings.progress.range90 },
   { value: '120' as RangeKey, label: strings.progress.range120 },
@@ -51,7 +54,9 @@ const RANGE_OPTIONS = [
 
 function weekdayLabel(dayKey: string): string {
   const [y, m, d] = dayKey.split('-').map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString('pt-BR', { weekday: 'short' }).slice(0, 3);
+  return new Date(y, m - 1, d)
+    .toLocaleDateString(numberLocale(), { weekday: 'short' })
+    .slice(0, 3);
 }
 
 const fmtMg = (n: number) => n.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
@@ -344,7 +349,7 @@ disableScroll
             </AppText>
           ) : null}
         </View>
-        <SegmentedChips options={RANGE_OPTIONS} value={range} onChange={setRange} />
+        <SegmentedChips options={rangeOptions()} value={range} onChange={setRange} />
         {weightData.length > 1 && weightBounds ? (
           <FitChart>{(fitWidth) => (<LineChart width={fitWidth - 72}
             data={weightData}

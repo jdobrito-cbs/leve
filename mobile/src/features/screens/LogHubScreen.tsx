@@ -25,7 +25,9 @@ interface HubItem {
   route: string;
 }
 
-const baseItems: HubItem[] = [
+// Função (não constante de módulo): os rótulos precisam ser relidos a cada
+// render para a troca de idioma valer na hora, sem reabrir o app.
+const baseItems = (): HubItem[] => [
   { Anim: WaterGlassIcon, label: strings.log.water, route: '/log/agua' },
   { Anim: UtensilsCrossIcon, label: strings.log.meal, route: '/log/refeicao' },
   { Anim: SyringeInjectIcon, label: strings.log.dose, route: '/log/dose' },
@@ -46,8 +48,8 @@ export function LogHubScreen() {
   }, []);
 
   const items = showCycle
-    ? [...baseItems, { Anim: CycleHeartIcon, label: strings.log.cycle, route: '/log/ciclo' }]
-    : baseItems;
+    ? [...baseItems(), { Anim: CycleHeartIcon, label: strings.log.cycle, route: '/log/ciclo' }]
+    : baseItems();
 
   return (
     <Screen>
