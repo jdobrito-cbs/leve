@@ -130,6 +130,37 @@ test('scan: foto → candidato → casa com TACO → prato → salva com origin 
   );
 });
 
+test('scan: sem base TACO, usa a nutrição da IA e calcula as calorias da porção', async () => {
+  mockSearch.mockResolvedValue([]); // graviola regional não está no banco
+  mockRecognize.mockResolvedValue({
+    label: 'suco de graviola',
+    confidence: 0.85,
+    candidates: [
+      { label: 'suco de graviola', confidence: 0.85, portionGrams: 200, unit: 'ml', kcalPer100: 62 },
+    ],
+  });
+  const { getByText, getByDisplayValue } = await render(<MealScreen />);
+  await fireEvent.press(getByText(strings.meal.scanTab));
+  await fireEvent.press(getByText(strings.meal.scanGallery));
+  await waitFor(() => getByText('suco de graviola'));
+  await fireEvent.press(getByText('suco de graviola'));
+  await waitFor(() => getByDisplayValue('200')); // porção estimada, modo busca
+  await fireEvent.press(getByText(strings.meal.addToPlate));
+  await waitFor(() => getByText(strings.meal.plateSection));
+  await fireEvent.press(getByText(strings.meal.addToMeal));
+  await waitFor(() =>
+    expect(mockAddFood).toHaveBeenCalledWith(
+      {},
+      expect.objectContaining({
+        name: 'suco de graviola',
+        portionGrams: 200,
+        calories: 124, // 62/100 × 200 ml
+        origin: 'scan',
+      }),
+    ),
+  );
+});
+
 test('modo manual: peso digitado + base TACO calculam as calorias', async () => {
   mockSearch.mockResolvedValue([FEIJAO]);
   const { getByText, getByPlaceholderText } = await render(<MealScreen />);

@@ -7,6 +7,14 @@ export const foodsSchema = z.object({
         name: z.string().min(1),
         portionGrams: z.number().positive().nullable().catch(null),
         confidence: z.number().min(0).max(1).catch(0.5),
+        // Nutrição estimada na MESMA chamada de visão (por 100 g/ml), para o app
+        // já mostrar as calorias com o peso, sem uma segunda consulta.
+        unit: z.enum(['g', 'ml']).catch('g'),
+        kcalPer100: z.number().min(0).max(900).nullable().catch(null),
+        proteinG: z.number().min(0).max(100).nullable().catch(null),
+        carbsG: z.number().min(0).max(100).nullable().catch(null),
+        fatG: z.number().min(0).max(100).nullable().catch(null),
+        fiberG: z.number().min(0).max(60).nullable().catch(null),
       }),
     )
     .max(10),
@@ -14,12 +22,14 @@ export const foodsSchema = z.object({
 
 export type ScanResult = z.infer<typeof foodsSchema>;
 
-const SYSTEM_PROMPT = `Você identifica alimentos em fotos de refeições para um diário alimentar brasileiro.
+const SYSTEM_PROMPT = `Você identifica alimentos em fotos de refeições para um diário alimentar brasileiro e estima a nutrição de cada um.
 Responda SOMENTE com JSON válido no formato:
-{"foods":[{"name":"nome do alimento em português","portionGrams":123,"confidence":0.9}]}
+{"foods":[{"name":"arroz branco cozido","portionGrams":150,"confidence":0.9,"unit":"g","kcalPer100":128,"proteinG":2.5,"carbsG":28,"fatG":0.2,"fiberG":1.6}]}
 - Até 5 alimentos, o mais provável primeiro; nomes simples (ex.: "arroz branco cozido").
 - portionGrams: estimativa da porção visível em gramas (número) ou null.
 - confidence: número de 0 a 1.
+- unit: "g" para sólidos, "ml" para líquidos.
+- kcalPer100, proteinG, carbsG, fatG, fiberG: valores POR 100 g/ml de tabelas brasileiras (TACO/TBCA) ou rótulos; NÃO invente, campo desconhecido = null.
 - Se não houver comida na foto, responda {"foods":[]}.`;
 
 /** Corpo de requisição no formato OpenAI-compatível (chat/completions com imagem). */
@@ -27,7 +37,7 @@ export function buildHubBody(imageBase64: string, mimeType: string, model: strin
   return {
     model,
     response_format: { type: 'json_object' },
-    max_tokens: 500,
+    max_tokens: 800,
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
       {

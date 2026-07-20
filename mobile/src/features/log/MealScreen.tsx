@@ -78,6 +78,30 @@ function scaled(per100: number | null | undefined, portion: number): number | nu
     : Math.round(((per100 * portion) / 100) * 10) / 10;
 }
 
+/** Calorias do candidato do scan para a porção estimada (kcal/100 × peso). */
+function candidateKcal(c: FoodCandidate): number | null {
+  if (c.kcalPer100 == null || c.portionGrams == null) return null;
+  return scaled(c.kcalPer100, c.portionGrams);
+}
+
+/** Nutrição vinda da IA vira uma base local (sintética) para o mesmo fluxo do
+ *  alimento escolhido — evita uma segunda consulta quando não há match na TACO. */
+function candidateToFoodItem(c: FoodCandidate): FoodItem {
+  return {
+    id: -1,
+    name: c.label,
+    category: null,
+    referencePortion: null,
+    unit: c.unit ?? 'g',
+    calories: c.kcalPer100 ?? null,
+    proteinG: c.proteinG ?? null,
+    carbsG: c.carbsG ?? null,
+    fatG: c.fatG ?? null,
+    fiberG: c.fiberG ?? null,
+    source: 'taco',
+  };
+}
+
 /** Extrai a porção de referência ("1 fatia (60 g)") para o atalho de preenchimento. */
 function refPortionShortcut(item: FoodItem): { label: string; value: number } | null {
   const m = item.referencePortion?.match(/\((\d+(?:[.,]\d+)?)\s*(g|ml)\)/);
@@ -326,14 +350,21 @@ export function MealScreen() {
 
   async function chooseCandidate(candidate: FoodCandidate) {
     setFromScan(true);
+    const portionText = String(Math.round(candidate.portionGrams ?? 100));
     const matches = await searchFoods(db, candidate.label);
     if (matches.length > 0) {
+      // Base TACO é mais precisa: prefere o banco quando o alimento existe.
       setSelected(matches[0]);
-      setPortionStr(String(Math.round(candidate.portionGrams ?? 100)));
+      setPortionStr(portionText);
+      setMode('search');
+    } else if (candidate.kcalPer100 != null) {
+      // Sem match no banco, mas a IA já trouxe a nutrição: usa direto, sem 2ª consulta.
+      setSelected(candidateToFoodItem(candidate));
+      setPortionStr(portionText);
       setMode('search');
     } else {
       setManualName(candidate.label);
-      setManualWeightStr(String(Math.round(candidate.portionGrams ?? 100)));
+      setManualWeightStr(portionText);
       setMode('manual');
     }
   }
@@ -477,15 +508,24 @@ export function MealScreen() {
           {scanCandidates.length > 0 ? (
             <View>
               <AppText variant="title">{strings.meal.scanPick}</AppText>
-              {scanCandidates.map((c) => (
-                <ListRow
-                  key={c.label}
-                  title={c.label}
-                  subtitle={c.portionGrams ? `≈ ${Math.round(c.portionGrams)} g` : undefined}
-                  right={`${Math.round(c.confidence * 100)}% ${strings.meal.scanConfidence}`}
-                  onPress={() => chooseCandidate(c)}
-                />
-              ))}
+              {scanCandidates.map((c) => {
+                const kcal = candidateKcal(c);
+                const subtitle = [
+                  c.portionGrams ? `≈ ${Math.round(c.portionGrams)} ${c.unit ?? 'g'}` : null,
+                  kcal != null ? `~${Math.round(kcal)} kcal` : null,
+                ]
+                  .filter(Boolean)
+                  .join(' · ');
+                return (
+                  <ListRow
+                    key={c.label}
+                    title={c.label}
+                    subtitle={subtitle || undefined}
+                    right={`${Math.round(c.confidence * 100)}% ${strings.meal.scanConfidence}`}
+                    onPress={() => chooseCandidate(c)}
+                  />
+                );
+              })}
             </View>
           ) : null}
         </Card>

@@ -2,6 +2,13 @@ export interface FoodCandidate {
   label: string;
   confidence: number; // 0..1
   portionGrams?: number | null;
+  // Nutrição estimada pela IA na mesma análise da foto (por 100 g/ml).
+  unit?: 'g' | 'ml';
+  kcalPer100?: number | null;
+  proteinG?: number | null;
+  carbsG?: number | null;
+  fatG?: number | null;
+  fiberG?: number | null;
 }
 
 export interface FoodRecognition {

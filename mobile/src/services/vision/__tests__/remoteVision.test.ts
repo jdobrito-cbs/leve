@@ -31,6 +31,20 @@ test('mapeia resposta do servidor para FoodRecognition', async () => {
   expect(mockFetch.mock.calls[0][0]).toBe('https://levemobile.com.br/scan-food');
 });
 
+test('repassa a nutrição estimada da foto para o candidato', async () => {
+  mockFetch.mockResolvedValue({
+    ok: true,
+    json: async () => ({
+      foods: [
+        { name: 'arroz', portionGrams: 150, confidence: 0.9, unit: 'g', kcalPer100: 128, proteinG: 2.5 },
+      ],
+    }),
+  });
+  const provider = new RemoteVisionProvider('https://levemobile.com.br/scan-food');
+  const { candidates } = await provider.recognizeFood('file://foto.jpg');
+  expect(candidates[0]).toMatchObject({ kcalPer100: 128, proteinG: 2.5, unit: 'g' });
+});
+
 test('erro do servidor e foto sem comida lançam mensagens neutras', async () => {
   mockFetch.mockResolvedValue({ ok: false, status: 502 });
   const provider = new RemoteVisionProvider('https://levemobile.com.br/scan-food');

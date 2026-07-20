@@ -3,7 +3,17 @@ import { strings } from '@/i18n/pt-BR';
 import type { FoodRecognition, VisionProvider } from './VisionProvider';
 
 interface ScanResponse {
-  foods?: { name: string; portionGrams: number | null; confidence: number }[];
+  foods?: {
+    name: string;
+    portionGrams: number | null;
+    confidence: number;
+    unit?: 'g' | 'ml';
+    kcalPer100?: number | null;
+    proteinG?: number | null;
+    carbsG?: number | null;
+    fatG?: number | null;
+    fiberG?: number | null;
+  }[];
 }
 
 /** Envia a foto ao servidor do Leve (que guarda a chave do AI Hub). Opt-in por foto. */
@@ -38,6 +48,12 @@ export class RemoteVisionProvider implements VisionProvider {
         label: f.name,
         confidence: f.confidence,
         portionGrams: f.portionGrams,
+        unit: f.unit,
+        kcalPer100: f.kcalPer100,
+        proteinG: f.proteinG,
+        carbsG: f.carbsG,
+        fatG: f.fatG,
+        fiberG: f.fiberG,
       })),
     };
   }

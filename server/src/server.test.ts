@@ -14,7 +14,44 @@ describe('POST /scan-food', () => {
       payload: { imageBase64: IMG },
     });
     expect(res.statusCode).toBe(200);
-    expect(res.json()).toEqual({ foods: [{ name: 'arroz', portionGrams: 150, confidence: 0.9 }] });
+    // Campos de nutrição ausentes viram null (unit assume "g"): o app tolera.
+    expect(res.json()).toEqual({
+      foods: [
+        {
+          name: 'arroz',
+          portionGrams: 150,
+          confidence: 0.9,
+          unit: 'g',
+          kcalPer100: null,
+          proteinG: null,
+          carbsG: null,
+          fatG: null,
+          fiberG: null,
+        },
+      ],
+    });
+  });
+
+  test('devolve a nutrição estimada quando o modelo a fornece', async () => {
+    const app = await buildServer({
+      callHub: async () =>
+        '{"foods":[{"name":"arroz","portionGrams":150,"confidence":0.9,"unit":"g","kcalPer100":128,"proteinG":2.5,"carbsG":28,"fatG":0.2,"fiberG":1.6}]}',
+    });
+    const res = await app.inject({
+      method: 'POST',
+      url: '/scan-food',
+      payload: { imageBase64: IMG },
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.json().foods[0]).toMatchObject({
+      name: 'arroz',
+      unit: 'g',
+      kcalPer100: 128,
+      proteinG: 2.5,
+      carbsG: 28,
+      fatG: 0.2,
+      fiberG: 1.6,
+    });
   });
 
   test('corpo inválido → 400; upstream falha → 422; token errado → 401', async () => {
