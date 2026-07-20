@@ -31,6 +31,7 @@ export class FilePartnerKeyStore implements PartnerKeyStore {
     keyHash: string,
     hint: string,
     keyEnc: string | null = null,
+    expiresAt: string | null = null,
   ): Promise<PartnerKeyRecord> {
     const all = this.load();
     const record: PartnerKeyRecord = {
@@ -43,6 +44,7 @@ export class FilePartnerKeyStore implements PartnerKeyStore {
       boundDeviceId: null,
       boundAt: null,
       keyEnc,
+      expiresAt,
     };
     all.push(record);
     this.save(all);
@@ -62,6 +64,7 @@ export class FilePartnerKeyStore implements PartnerKeyStore {
       boundDeviceId: found.boundDeviceId ?? null,
       boundAt: found.boundAt ?? null,
       keyEnc: found.keyEnc ?? null,
+      expiresAt: found.expiresAt ?? null,
     };
   }
 

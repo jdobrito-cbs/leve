@@ -123,6 +123,58 @@ describe('rotas de chaves de parceiro', () => {
     expect(gone.statusCode).toBe(410);
   });
 
+  it('chave com validade de 1 ano nasce datada e funciona; vencida é recusada', async () => {
+    const store = new MemoryStore();
+    const app = await buildServer({
+      callHub: async () => '{"foods":[]}',
+      partnerStore: store,
+      adminToken: 'segredo-do-painel',
+    });
+
+    const created = await app.inject({
+      method: 'POST',
+      url: '/partner-keys',
+      headers: adminHeaders,
+      payload: { label: 'Clínica Anual', validity: 'year' },
+    });
+    const body = created.json() as { key: string; expiresAt: string };
+    const days = (new Date(body.expiresAt).getTime() - Date.now()) / 86_400_000;
+    expect(days).toBeGreaterThan(364);
+    expect(days).toBeLessThan(366);
+
+    const ok = await app.inject({
+      method: 'POST',
+      url: '/partner-keys/validate',
+      payload: { key: body.key },
+    });
+    expect(ok.json()).toEqual({ valid: true, label: 'Clínica Anual' });
+
+    // Vencida (criada direto no store com data no passado) → recusada.
+    const oldKey = generatePartnerKey();
+    await store.createPartnerKey(
+      'Parceiro Vencido',
+      hashPartnerKey(oldKey),
+      partnerKeyHint(oldKey),
+      null,
+      new Date(Date.now() - 86_400_000).toISOString(),
+    );
+    const expired = await app.inject({
+      method: 'POST',
+      url: '/partner-keys/validate',
+      payload: { key: oldKey },
+    });
+    expect(expired.json()).toEqual({ valid: false, reason: 'expired' });
+
+    // Sem validade continua atemporal.
+    const forever = await app.inject({
+      method: 'POST',
+      url: '/partner-keys',
+      headers: adminHeaders,
+      payload: { label: 'Sem Prazo' },
+    });
+    expect((forever.json() as { expiresAt: string | null }).expiresAt).toBeNull();
+  });
+
   it('exclui da lista só depois de revogar (limpeza do painel)', async () => {
     const app = await makeApp();
     const created = await app.inject({

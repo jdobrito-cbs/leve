@@ -57,6 +57,7 @@ model PartnerKey {
   boundDeviceId String?
   boundAt       DateTime?
   keyEnc        String?
+  expiresAt     DateTime?
 }
 
 model AdminUser {

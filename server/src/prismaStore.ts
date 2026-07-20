@@ -25,6 +25,7 @@ export class PrismaStore implements Store, PartnerKeyStore, AdminStore {
     boundDeviceId: string | null;
     boundAt: Date | null;
     keyEnc: string | null;
+    expiresAt: Date | null;
   }): PartnerKeyRecord {
     return {
       id: k.id,
@@ -36,6 +37,7 @@ export class PrismaStore implements Store, PartnerKeyStore, AdminStore {
       boundDeviceId: k.boundDeviceId,
       boundAt: k.boundAt ? k.boundAt.toISOString() : null,
       keyEnc: k.keyEnc,
+      expiresAt: k.expiresAt ? k.expiresAt.toISOString() : null,
     };
   }
 
@@ -44,8 +46,11 @@ export class PrismaStore implements Store, PartnerKeyStore, AdminStore {
     keyHash: string,
     hint: string,
     keyEnc: string | null = null,
+    expiresAt: string | null = null,
   ): Promise<PartnerKeyRecord> {
-    const k = await this.prisma.partnerKey.create({ data: { label, keyHash, hint, keyEnc } });
+    const k = await this.prisma.partnerKey.create({
+      data: { label, keyHash, hint, keyEnc, expiresAt: expiresAt ? new Date(expiresAt) : null },
+    });
     return this.toPartnerRecord(k);
   }
   async listPartnerKeys(): Promise<PartnerKeyRecord[]> {

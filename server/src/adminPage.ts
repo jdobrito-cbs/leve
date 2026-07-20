@@ -45,10 +45,10 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
   p.lead{color:var(--muted);font-size:14px;margin:6px 0 22px;max-width:64ch}
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:16px}
   label{font-size:12px;color:var(--muted);font-weight:600;display:block;margin-bottom:6px}
-  input{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:11px;font-size:15px;
+  input,select{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:11px;font-size:15px;
     background:var(--bg2);color:var(--ink);transition:border-color .2s}
   input::placeholder{color:var(--faint)}
-  input:focus{outline:none;border-color:var(--blue)}
+  input:focus,select:focus{outline:none;border-color:var(--blue)}
   .field{margin-bottom:12px}
   .btn{background:var(--blue);color:#fff;border:0;border-radius:11px;padding:11px 18px;font-size:14px;
     font-weight:700;cursor:pointer;transition:transform .15s,box-shadow .2s;white-space:nowrap}
@@ -233,9 +233,16 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
           <button class="btn ghost mini" id="k-reload">Atualizar</button>
         </div>
         <div class="row">
-          <div>
+          <div style="flex:2">
             <label for="k-label">Nome do parceiro</label>
             <input id="k-label" placeholder="ex.: Dra. Ana — nutricionista"/>
+          </div>
+          <div>
+            <label for="k-validity">Validade</label>
+            <select id="k-validity">
+              <option value="none">Sem validade</option>
+              <option value="year">1 ano</option>
+            </select>
           </div>
           <button class="btn" id="k-create">Gerar chave</button>
         </div>
@@ -243,8 +250,8 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
         <div id="k-err" class="err"></div>
         <div class="divider"></div>
         <div class="tblwrap"><table>
-          <thead><tr><th>Parceiro</th><th>Final</th><th>Criada</th><th>Situação</th><th>Aparelho</th><th></th></tr></thead>
-          <tbody id="k-rows"><tr><td colspan="6" class="empty">Carregando…</td></tr></tbody>
+          <thead><tr><th>Parceiro</th><th>Final</th><th>Criada</th><th>Validade</th><th>Situação</th><th>Aparelho</th><th></th></tr></thead>
+          <tbody id="k-rows"><tr><td colspan="7" class="empty">Carregando…</td></tr></tbody>
         </table></div>
       </div>
 
@@ -410,9 +417,12 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
   function loadKeys(){
     $('k-err').textContent='';
     api('/partner-keys').then(function(r){
-      if(!r.ok){$('k-rows').innerHTML='<tr><td colspan="6" class="empty">sessão expirada</td></tr>';return;}
+      if(!r.ok){$('k-rows').innerHTML='<tr><td colspan="7" class="empty">sessão expirada</td></tr>';return;}
       var rows=(r.json||[]).map(function(k){
-        var sit=k.revokedAt?'<span class="badge off">revogada</span>':'<span class="badge on">ativa</span>';
+        var expired=!k.revokedAt&&k.expiresAt&&new Date(k.expiresAt).getTime()<Date.now();
+        var sit=k.revokedAt?'<span class="badge off">revogada</span>'
+          :(expired?'<span class="badge off">expirada</span>':'<span class="badge on">ativa</span>');
+        var val=k.expiresAt?new Date(k.expiresAt).toLocaleDateString('pt-BR'):'—';
         var dev=k.revokedAt?'—':(k.bound?'<span class="badge bound">vinculada</span>':'<span class="badge free">livre</span>');
         var act='';
         if(!k.revokedAt){
@@ -423,9 +433,9 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
           act+='<button class="btn danger" data-act="del" data-id="'+esc(k.id)+'">Excluir</button>';
         }
         return '<tr><td>'+esc(k.label)+'</td><td class="mono">…'+esc(k.hint)+'</td><td class="mono">'+esc(fmt(k.createdAt))+
-          '</td><td>'+sit+'</td><td>'+dev+'</td><td><div class="actions">'+act+'</div></td></tr>';
+          '</td><td class="mono">'+esc(val)+'</td><td>'+sit+'</td><td>'+dev+'</td><td><div class="actions">'+act+'</div></td></tr>';
       }).join('');
-      $('k-rows').innerHTML=rows||'<tr><td colspan="6" class="empty">Nenhuma chave emitida ainda.</td></tr>';
+      $('k-rows').innerHTML=rows||'<tr><td colspan="7" class="empty">Nenhuma chave emitida ainda.</td></tr>';
     });
   }
   $('k-reload').addEventListener('click',loadKeys);
@@ -433,9 +443,10 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
     $('k-err').textContent='';$('k-new').innerHTML='';
     var label=$('k-label').value.trim();
     if(!label){$('k-err').textContent='informe o nome do parceiro';return;}
-    api('/partner-keys','POST',{label:label}).then(function(r){
+    api('/partner-keys','POST',{label:label,validity:$('k-validity').value}).then(function(r){
       if(!r.ok){$('k-err').textContent=(r.json&&r.json.error)||'não foi possível gerar';return;}
-      $('k-new').innerHTML='<div class="newkey">'+esc(r.json.key)+'</div><div class="hintnote">Chave de '+esc(r.json.label)+' — copie e envie agora; ela não será exibida de novo.</div>';
+      var validade=r.json.expiresAt?('válida até '+new Date(r.json.expiresAt).toLocaleDateString('pt-BR')):'sem validade';
+      $('k-new').innerHTML='<div class="newkey">'+esc(r.json.key)+'</div><div class="hintnote">Chave de '+esc(r.json.label)+' ('+esc(validade)+') — use o botão Ver para reexibir depois.</div>';
       $('k-label').value='';loadKeys();
     });
   });

@@ -547,6 +547,7 @@ export const strings: Strings = {
     keyInvalid: 'Chave inválida. Verifique se copiou a chave completa.',
     keyOffline: 'Sem ligação ao servidor para validar a chave. Tente novamente com internet.',
     keyInUse: 'Esta chave já está a ser usada noutro aparelho. Peça para desvincular no painel ou use o aparelho original.',
+    keyExpired: 'Esta chave expirou. Peça uma nova a quem a emitiu.',
     activeTitle: 'Premium ativo',
     activePlans: {
       monthly: 'Subscrição mensal ativa',

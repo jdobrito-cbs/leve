@@ -146,7 +146,11 @@ export interface ServerOptions {
   trustProxy?: boolean;
 }
 
-const partnerCreateSchema = z.object({ label: z.string().trim().min(1).max(120) });
+const partnerCreateSchema = z.object({
+  label: z.string().trim().min(1).max(120),
+  // Validade da chave: sem prazo (padrão) ou 1 ano a partir da emissão.
+  validity: z.enum(['none', 'year']).default('none'),
+});
 const partnerValidateSchema = z.object({
   key: z.string().min(4).max(40),
   // Id do aparelho (gerado no app) para a trava de 1 dispositivo; opcional para
@@ -734,6 +738,9 @@ export async function buildServer(options: ServerOptions) {
         if (!isPartnerKeyFormat(parsed.data.key)) return { valid: false };
         const record = await partnerStore.findPartnerKeyByHash(hashPartnerKey(parsed.data.key));
         if (!record || record.revokedAt) return { valid: false };
+        if (record.expiresAt && new Date(record.expiresAt).getTime() < Date.now()) {
+          return { valid: false, reason: 'expired' };
+        }
         const deviceId = parsed.data.deviceId;
         if (deviceId) {
           if (!record.boundDeviceId) {
@@ -763,16 +770,19 @@ export async function buildServer(options: ServerOptions) {
         if (!(await requireAdmin(req, reply))) return;
         const keys = await partnerStore.listPartnerKeys();
         // Nunca devolve o hash, a cifra nem o id do aparelho — só exibição.
-        return keys.map(({ id, label, hint, createdAt, revokedAt, boundDeviceId, boundAt, keyEnc }) => ({
-          id,
-          label,
-          hint,
-          createdAt,
-          revokedAt,
-          bound: Boolean(boundDeviceId),
-          boundAt,
-          canReveal: Boolean(keyEnc) && !revokedAt,
-        }));
+        return keys.map(
+          ({ id, label, hint, createdAt, revokedAt, boundDeviceId, boundAt, keyEnc, expiresAt }) => ({
+            id,
+            label,
+            hint,
+            createdAt,
+            revokedAt,
+            bound: Boolean(boundDeviceId),
+            boundAt,
+            canReveal: Boolean(keyEnc) && !revokedAt,
+            expiresAt: expiresAt ?? null,
+          }),
+        );
       });
 
       app.post('/partner-keys', async (req, reply) => {
@@ -780,14 +790,25 @@ export async function buildServer(options: ServerOptions) {
         const parsed = partnerCreateSchema.safeParse(req.body);
         if (!parsed.success) return reply.code(400).send({ error: 'informe o nome do parceiro' });
         const key = generatePartnerKey();
+        const expiresAt =
+          parsed.data.validity === 'year'
+            ? new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString()
+            : null;
         const record = await partnerStore.createPartnerKey(
           parsed.data.label,
           hashPartnerKey(key),
           partnerKeyHint(key),
           // Cifrada em repouso: o painel pode reexibir a chave sob demanda.
           encryptSecret(key, encKey),
+          expiresAt,
         );
-        return { id: record.id, label: record.label, key, createdAt: record.createdAt };
+        return {
+          id: record.id,
+          label: record.label,
+          key,
+          createdAt: record.createdAt,
+          expiresAt: record.expiresAt,
+        };
       });
 
       // Reexibe o código completo (o hash não volta; a cifra é decifrada aqui).

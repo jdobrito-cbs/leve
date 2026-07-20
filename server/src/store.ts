@@ -28,6 +28,8 @@ export interface PartnerKeyRecord {
   /** Chave completa cifrada (AES-GCM, chave derivada do ADMIN_TOKEN) — permite
    *  o dono rever o código no painel. null em registros antigos. */
   keyEnc: string | null;
+  /** Fim da validade (ISO); null = sem validade. Vencida → validação recusa. */
+  expiresAt: string | null;
 }
 
 /** Armazenamento das chaves de parceiro emitidas pelo servidor. */
@@ -37,6 +39,7 @@ export interface PartnerKeyStore {
     keyHash: string,
     hint: string,
     keyEnc?: string | null,
+    expiresAt?: string | null,
   ): Promise<PartnerKeyRecord>;
   listPartnerKeys(): Promise<PartnerKeyRecord[]>;
   findPartnerKeyByHash(keyHash: string): Promise<PartnerKeyRecord | null>;
@@ -120,6 +123,7 @@ export class MemoryStore implements Store, PartnerKeyStore, AdminStore {
     keyHash: string,
     hint: string,
     keyEnc: string | null = null,
+    expiresAt: string | null = null,
   ): Promise<PartnerKeyRecord> {
     const record: PartnerKeyRecord = {
       id: `pk${++this.pkSeq}`,
@@ -131,6 +135,7 @@ export class MemoryStore implements Store, PartnerKeyStore, AdminStore {
       boundDeviceId: null,
       boundAt: null,
       keyEnc,
+      expiresAt,
     };
     this.partnerKeys.set(record.id, record);
     return record;

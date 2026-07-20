@@ -547,6 +547,7 @@ export const strings: Strings = {
     keyInvalid: '密钥无效。请确认已完整复制。',
     keyOffline: '无法连接服务器验证密钥。请联网后重试。',
     keyInUse: '此密钥已在其他设备上使用。请申请解绑或使用原设备。',
+    keyExpired: '此密钥已过期。请向发放者索取新密钥。',
     activeTitle: 'Premium 已激活',
     activePlans: {
       monthly: '月度订阅生效中',

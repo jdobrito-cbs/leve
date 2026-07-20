@@ -103,7 +103,9 @@ export function PremiumScreen() {
           setKeyError(
             result.reason === 'bound_elsewhere'
               ? strings.premium.keyInUse
-              : strings.premium.keyInvalid,
+              : result.reason === 'expired'
+                ? strings.premium.keyExpired
+                : strings.premium.keyInvalid,
           );
           return;
         }

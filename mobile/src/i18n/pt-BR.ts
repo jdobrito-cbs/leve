@@ -547,6 +547,7 @@ const ptBR = {
     keyInvalid: 'Chave inválida. Confira se copiou a chave completa.',
     keyOffline: 'Sem conexão com o servidor para validar a chave. Tente novamente com internet.',
     keyInUse: 'Esta chave já está sendo usada em outro aparelho. Peça para desvincular no painel ou use o aparelho original.',
+    keyExpired: 'Esta chave expirou. Peça uma nova a quem emitiu.',
     activeTitle: 'Premium ativo',
     activePlans: {
       monthly: 'Assinatura mensal ativa',

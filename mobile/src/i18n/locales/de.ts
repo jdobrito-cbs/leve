@@ -547,6 +547,7 @@ export const strings: Strings = {
     keyInvalid: 'Ungültiger Schlüssel. Prüfen Sie, ob Sie ihn vollständig kopiert haben.',
     keyOffline: 'Keine Verbindung zum Server, um den Schlüssel zu prüfen. Versuchen Sie es mit Internetverbindung erneut.',
     keyInUse: 'Dieser Schlüssel wird bereits auf einem anderen Gerät verwendet. Bitten Sie um Entkopplung oder verwenden Sie das ursprüngliche Gerät.',
+    keyExpired: 'Dieser Schlüssel ist abgelaufen. Bitten Sie den Aussteller um einen neuen.',
     activeTitle: 'Premium aktiv',
     activePlans: {
       monthly: 'Monatsabo aktiv',
