@@ -15,9 +15,13 @@ const {
   TRUST_PROXY,
 } = process.env;
 
-if (!HUB_BASE_URL || !HUB_API_KEY || !HUB_MODEL) {
-  console.error('Defina HUB_BASE_URL, HUB_API_KEY e HUB_MODEL (ver .env.example).');
-  process.exit(1);
+// Sem a chave de IA o servidor sobe mesmo assim (site, painel e chaves de
+// parceiro funcionam); scan e busca nutricional respondem erro até configurar.
+const hubConfigured = Boolean(HUB_BASE_URL && HUB_API_KEY && HUB_MODEL);
+if (!hubConfigured) {
+  console.warn(
+    'IA de comida: DESATIVADA — defina HUB_BASE_URL, HUB_API_KEY e HUB_MODEL no .env (ver .env.example).',
+  );
 }
 
 // Recusa segredos fracos: um JWT_SECRET/ADMIN_TOKEN curto é adivinhável e
@@ -54,10 +58,16 @@ async function main() {
   if (ADMIN_TOKEN) console.log('painel do dono: ATIVO em /painel (login + 2FA)');
   else console.warn('painel do dono: desativado (defina ADMIN_TOKEN para ativar)');
 
-  const hub = { baseUrl: HUB_BASE_URL!, apiKey: HUB_API_KEY!, model: HUB_MODEL! };
+  const hub = hubConfigured
+    ? { baseUrl: HUB_BASE_URL!, apiKey: HUB_API_KEY!, model: HUB_MODEL! }
+    : null;
   const app = await buildServer({
-    callHub: makeHubCaller(hub),
-    callFoodHub: makeFoodHubCaller(hub),
+    callHub: hub
+      ? makeHubCaller(hub)
+      : async () => {
+          throw new Error('IA não configurada');
+        },
+    callFoodHub: hub ? makeFoodHubCaller(hub) : undefined,
     appToken: APP_TOKEN || undefined,
     store,
     jwtSecret: JWT_SECRET || undefined,

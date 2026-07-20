@@ -118,10 +118,8 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
       </button>
     </header>
 
-    <!-- Carregando -->
     <div id="s-loading" class="center muted" style="padding:60px 0">Carregando…</div>
 
-    <!-- Cadastro do master (primeiro acesso) -->
     <div id="s-setup" class="hidden narrow" style="margin:0 auto">
       <h1><b>Primeiro acesso</b></h1>
       <p class="lead">Crie o administrador principal (master). Isto só aparece uma vez.</p>
@@ -143,7 +141,6 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
       </div>
     </div>
 
-    <!-- Login -->
     <div id="s-login" class="hidden narrow" style="margin:0 auto">
       <h1><b>Entrar</b> no painel</h1>
       <p class="lead">Acesso restrito ao dono e administradores.</p>
@@ -173,7 +170,6 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
       </div>
     </div>
 
-    <!-- Configurar 2FA -->
     <div id="s-enroll" class="hidden narrow" style="margin:0 auto">
       <h1><b>Ativar</b> verificação em duas etapas</h1>
       <p class="lead">Obrigatória para todos. Você vai precisar de um app autenticador (Google Authenticator, Authy, etc.).</p>
@@ -196,7 +192,6 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
       </div>
     </div>
 
-    <!-- Códigos de backup (uma vez) -->
     <div id="s-backup" class="hidden narrow" style="margin:0 auto">
       <h1><b>Guarde</b> seus códigos de backup</h1>
       <p class="lead">Use um destes se perder o app autenticador. Cada código funciona uma vez. Eles não serão mostrados de novo.</p>
@@ -206,7 +201,6 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
       </div>
     </div>
 
-    <!-- Painel principal -->
     <div id="s-dash" class="hidden">
       <h1><b>Painel</b> de parceiros</h1>
 
@@ -272,7 +266,6 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
   </div>
 
 <script>
-  // Tema: padrão escuro; respeita a escolha salva.
   (function(){
     var root=document.documentElement, saved=null;
     try{saved=localStorage.getItem('leve-theme')}catch(e){}
@@ -288,13 +281,11 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
     });
   })();
 
-  // Escapa dados do servidor antes de ir para innerHTML (anti-XSS).
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function $(id){return document.getElementById(id);}
   function fmt(iso){var d=new Date(iso);return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
 
-  // Chama a API com o cookie de sessão (mesma origem).
   function api(path,method,body){
     return fetch(path,{method:method||'GET',credentials:'same-origin',
       headers:{'content-type':'application/json'},
@@ -307,7 +298,6 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
   function show(id){SCREENS.forEach(function(s){$(s).classList.toggle('hidden',s!==id);});
     $('who').classList.toggle('hidden',id!=='s-dash');}
 
-  // ---- boot: decide a tela conforme o estado do servidor ----
   function boot(){
     show('s-loading');
     api('/admin/setup-state').then(function(r){
@@ -320,7 +310,6 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
     }).catch(function(){show('s-login');});
   }
 
-  // ---- cadastro do master ----
   $('su-go').addEventListener('click',function(){
     $('su-err').textContent='';
     var token=$('su-token').value.trim(),user=$('su-user').value.trim(),pass=$('su-pass').value;
@@ -331,7 +320,6 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
     });
   });
 
-  // ---- login ----
   var usingBackup=false;
   $('li-toggleBackup').addEventListener('click',function(){
     usingBackup=!usingBackup;
@@ -356,7 +344,6 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
     $(id).addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
   });
 
-  // ---- configurar 2FA ----
   function startEnroll(){
     show('s-enroll');
     api('/admin/2fa/setup','POST').then(function(r){
@@ -382,7 +369,6 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
   $('en-code').addEventListener('keydown',function(e){if(e.key==='Enter')doConfirm();});
   $('bk-go').addEventListener('click',function(){boot();});
 
-  // ---- painel ----
   var me=null;
   function openDash(info){
     me=info;show('s-dash');
@@ -393,7 +379,6 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
     loadKeys();loadAdmins();
   }
 
-  // chaves de parceiro
   function loadKeys(){
     $('k-err').textContent='';
     api('/partner-keys').then(function(r){
@@ -435,7 +420,6 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
     }
   });
 
-  // administradores
   function loadAdmins(){
     $('a-err').textContent='';
     api('/admin/list').then(function(r){
@@ -445,7 +429,6 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
         var role=a.role==='master'?'<span class="badge master">master</span>':'<span class="badge admin">admin</span>';
         var tfa=a.totpEnabled?'<span class="badge on">ativo</span>':'<span class="badge off">pendente</span>';
         var act='';
-        // Redefinir senha: master em qualquer um; admin comum só em outro admin comum.
         var canPw=!a.isSelf && (isMaster || a.role!=='master');
         if(canPw)act+='<button class="btn ghost mini" data-act="pw" data-id="'+esc(a.id)+'" data-name="'+esc(a.username)+'">Redefinir senha</button>';
         if(isMaster && !a.isSelf){
@@ -489,7 +472,6 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
     }
   });
 
-  // trocar a própria senha
   $('pw-toggle').addEventListener('click',function(){$('pw-form').classList.toggle('hidden');});
   $('pw-go').addEventListener('click',function(){
     $('pw-msg').className='err';$('pw-msg').textContent='';
@@ -503,7 +485,6 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
     });
   });
 
-  // sair
   $('logout').addEventListener('click',function(){api('/admin/logout','POST').then(function(){boot();});});
 
   boot();

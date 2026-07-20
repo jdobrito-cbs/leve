@@ -1,2 +1,5 @@
 node_modules
 *.ips
+server/deploy/
+server/dist/
+server/data/

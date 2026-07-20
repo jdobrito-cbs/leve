@@ -20,6 +20,8 @@ npm run dev
 
 Produção com Docker: `docker compose up -d --build`
 
+Produção no painel (WSRTA): `node scripts/build-install-zip.mjs` gera `deploy/leve-server.zip` (com `app.md` na raiz e `setup.sh`, que monta o `.env` com segredos únicos e mostra o ADMIN_TOKEN no log da instalação). O mesmo zip serve para instalar e atualizar — o `.env` do servidor é preservado nas atualizações.
+
 Painel e validação atendem apps iOS e Android igualmente (chamadas HTTP padrão). Em produção, publique o servidor com **HTTPS** no domínio acima (apontar o DNS de `www.levemobile.com.br` para a hospedagem e emitir o certificado — Let's Encrypt/Caddy/Nginx ou o proxy da própria hospedagem) — os dois sistemas bloqueiam `http://` simples em apps das lojas; no teste local o endereço `http://SEU-IP:3333` funciona nos builds de desenvolvimento.
 
 ## API
