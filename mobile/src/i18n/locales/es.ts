@@ -197,6 +197,13 @@ export const strings: Strings = {
     title: 'Registrar comida',
     searchTab: 'Buscar (TACO)',
     manualTab: 'Manual',
+    describe: {
+      tab: 'Describir',
+      hint: 'Escribe lo que comiste. Ej.: "2 huevos fritos, arroz y un vaso de zumo de naranja"',
+      button: 'Interpretar',
+      loading: 'Interpretando…',
+      failed: 'No se pudo interpretar ahora',
+    },
     searchPlaceholder: 'Ej.: arroz, frijoles, pollo…',
     noResults: 'No se encontró ningún alimento',
     manualFallback: 'Añadir manualmente',

@@ -108,3 +108,27 @@ export function buildFoodInfoBody(name: string, model: string) {
 export function parseFoodInfoContent(content: string): FoodInfoResult {
   return foodInfoSchema.parse(JSON.parse(extractJson(content)));
 }
+
+// ——— Interpretação de refeição descrita em texto (mesma saída do scan) ———
+
+const DESCRIBE_PROMPT = `Você interpreta o que uma pessoa escreveu que comeu, para um diário alimentar brasileiro, e estima a nutrição de cada item.
+Responda SOMENTE com JSON válido no formato:
+{"foods":[{"name":"ovo frito","portionGrams":100,"confidence":0.9,"unit":"g","kcalPer100":196,"proteinG":13.6,"carbsG":1.2,"fatG":15,"fiberG":0}]}
+- Um item por alimento citado; nomes simples (ex.: "arroz branco cozido").
+- portionGrams: converta as quantidades citadas ("2 ovos", "um copo") em gramas/ml; sem quantidade, use a porção típica.
+- unit: "g" para sólidos, "ml" para líquidos.
+- kcalPer100, proteinG, carbsG, fatG, fiberG: valores POR 100 g/ml de tabelas brasileiras (TACO/TBCA) ou rótulos; NÃO invente, campo desconhecido = null.
+- confidence: número de 0 a 1. Se não houver comida no texto, responda {"foods":[]}.`;
+
+/** Corpo OpenAI-compatível para interpretar a refeição descrita (texto puro). */
+export function buildDescribeBody(text: string, model: string) {
+  return {
+    model,
+    response_format: { type: 'json_object' },
+    max_tokens: 800,
+    messages: [
+      { role: 'system', content: DESCRIBE_PROMPT },
+      { role: 'user', content: `Comi: ${text}` },
+    ],
+  };
+}

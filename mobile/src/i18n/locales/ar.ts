@@ -196,6 +196,13 @@ export const strings: Strings = {
     title: 'تسجيل وجبة',
     searchTab: 'بحث (TACO)',
     manualTab: 'يدوي',
+    describe: {
+      tab: 'وصف',
+      hint: 'اكتب ما أكلته. مثلاً: "بيضتان مقليتان وأرز وكوب عصير برتقال"',
+      button: 'تفسير',
+      loading: 'جارٍ التفسير…',
+      failed: 'تعذّر التفسير الآن',
+    },
     searchPlaceholder: 'مثال: أرز، فاصولياء، دجاج…',
     noResults: 'لم يُعثر على أي طعام',
     manualFallback: 'إضافة يدويًا',

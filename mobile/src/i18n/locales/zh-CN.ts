@@ -197,6 +197,13 @@ export const strings: Strings = {
     title: '记录餐食',
     searchTab: '搜索（TACO）',
     manualTab: '手动',
+    describe: {
+      tab: '描述',
+      hint: '写下你吃了什么。例如"2个煎蛋、米饭和一杯橙汁"',
+      button: '解析',
+      loading: '解析中…',
+      failed: '暂时无法解析',
+    },
     searchPlaceholder: '例如：米饭、豆类、鸡肉…',
     noResults: '未找到相关食物',
     manualFallback: '手动添加',

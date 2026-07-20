@@ -31,6 +31,11 @@ jest.mock('@/services/vision/VisionProvider', () => ({
   isScanConfigured: () => true,
   getVisionProvider: () => ({ recognizeFood: (...a: unknown[]) => mockRecognize(...a) }),
 }));
+const mockDescribe = jest.fn();
+jest.mock('@/services/nutrition/describeMeal', () => ({
+  isDescribeConfigured: () => true,
+  describeMeal: (...a: unknown[]) => mockDescribe(...a),
+}));
 let mockPremium = true;
 jest.mock('@/features/premium/usePremium', () => ({
   usePremium: () => ({
@@ -155,6 +160,34 @@ test('scan: sem base TACO, usa a nutrição da IA e calcula as calorias da porç
         name: 'suco de graviola',
         portionGrams: 200,
         calories: 124, // 62/100 × 200 ml
+        origin: 'scan',
+      }),
+    ),
+  );
+});
+
+test('descrever: texto → IA → candidato com porção editável → prato', async () => {
+  mockSearch.mockResolvedValue([]); // não está na TACO
+  mockDescribe.mockResolvedValue([
+    { label: 'ovo frito', confidence: 0.9, portionGrams: 100, unit: 'g', kcalPer100: 196, fiberG: 0 },
+  ]);
+  const { getByText, getByPlaceholderText, getByDisplayValue } = await render(<MealScreen />);
+  await fireEvent.press(getByText(strings.meal.describe.tab));
+  await fireEvent.changeText(getByPlaceholderText(strings.meal.describe.hint), '2 ovos fritos');
+  await fireEvent.press(getByText(strings.meal.describe.button));
+  await waitFor(() => getByText('ovo frito'));
+  await fireEvent.press(getByText('ovo frito'));
+  await waitFor(() => getByDisplayValue('100')); // porção editável antes do OK
+  await fireEvent.press(getByText(strings.meal.addToPlate));
+  await waitFor(() => getByText(strings.meal.plateSection));
+  await fireEvent.press(getByText(strings.meal.addToMeal));
+  await waitFor(() =>
+    expect(mockAddFood).toHaveBeenCalledWith(
+      {},
+      expect.objectContaining({
+        name: 'ovo frito',
+        portionGrams: 100,
+        calories: 196,
         origin: 'scan',
       }),
     ),

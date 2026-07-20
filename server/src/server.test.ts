@@ -163,3 +163,52 @@ describe('POST /food-info', () => {
     ).toBe(422);
   });
 });
+
+describe('POST /describe-food', () => {
+  test('interpreta o texto e devolve alimentos com nutrição (mesma saída do scan)', async () => {
+    const app = await buildServer({
+      callHub: async () => '{"foods":[]}',
+      callDescribeHub: async () =>
+        '{"foods":[{"name":"ovo frito","portionGrams":100,"confidence":0.9,"unit":"g","kcalPer100":196,"proteinG":13.6,"carbsG":1.2,"fatG":15,"fiberG":0}]}',
+    });
+    const res = await app.inject({
+      method: 'POST',
+      url: '/describe-food',
+      payload: { text: '2 ovos fritos' },
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.json().foods[0]).toMatchObject({ name: 'ovo frito', kcalPer100: 196, unit: 'g' });
+  });
+
+  test('texto curto → 400; sem callDescribeHub → 503; upstream falha → 422', async () => {
+    const noHub = await buildServer({ callHub: async () => '{"foods":[]}' });
+    expect(
+      (await noHub.inject({ method: 'POST', url: '/describe-food', payload: { text: 'x' } }))
+        .statusCode,
+    ).toBe(400);
+    expect(
+      (
+        await noHub.inject({
+          method: 'POST',
+          url: '/describe-food',
+          payload: { text: 'arroz e feijão' },
+        })
+      ).statusCode,
+    ).toBe(503);
+    const failing = await buildServer({
+      callHub: async () => '{"foods":[]}',
+      callDescribeHub: async () => {
+        throw new Error('boom');
+      },
+    });
+    expect(
+      (
+        await failing.inject({
+          method: 'POST',
+          url: '/describe-food',
+          payload: { text: 'arroz e feijão' },
+        })
+      ).statusCode,
+    ).toBe(422);
+  });
+});

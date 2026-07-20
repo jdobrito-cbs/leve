@@ -197,6 +197,13 @@ export const strings: Strings = {
     title: 'Mahlzeit erfassen',
     searchTab: 'Suchen (TACO)',
     manualTab: 'Manuell',
+    describe: {
+      tab: 'Beschreiben',
+      hint: 'Schreibe, was du gegessen hast. Z. B. „2 Spiegeleier, Reis und ein Glas Orangensaft“',
+      button: 'Auswerten',
+      loading: 'Wird ausgewertet…',
+      failed: 'Konnte gerade nicht ausgewertet werden',
+    },
     searchPlaceholder: 'Z. B. Reis, Bohnen, Hähnchen…',
     noResults: 'Kein Lebensmittel gefunden',
     manualFallback: 'Manuell hinzufügen',

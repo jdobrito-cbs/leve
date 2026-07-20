@@ -28,6 +28,7 @@ import { LANDING_PAGE_HTML } from './landingPage.js';
 import { APPLE_ICON_PNG, FAVICON_PNG } from './siteAssets.js';
 import { MEDICAL_PAGE_HTML, PRIVACY_PAGE_HTML, TERMS_PAGE_HTML } from './legalPages.js';
 import {
+  buildDescribeBody,
   buildFoodInfoBody,
   buildHubBody,
   parseFoodInfoContent,
@@ -152,6 +153,13 @@ export function makeFoodHubCaller(config: HubConfig): CallFoodHub {
   return (name) => chatCompletion(config, buildFoodInfoBody(name, config.model), 20_000);
 }
 
+/** Interpreta uma refeição descrita em texto e devolve alimentos (mesma saída do scan). */
+export type CallDescribeHub = (text: string) => Promise<string>;
+
+export function makeDescribeHubCaller(config: HubConfig): CallDescribeHub {
+  return (text) => chatCompletion(config, buildDescribeBody(text, config.model), 25_000);
+}
+
 const registerSchema = z.object({
   email: z.string().email().toLowerCase(),
   password: z.string().min(8).max(200),
@@ -170,6 +178,8 @@ export interface ServerOptions {
   callHub: CallHub;
   /** Consulta nutricional por nome; ausente = rota /food-info responde 503. */
   callFoodHub?: CallFoodHub;
+  /** Interpreta refeição descrita em texto; ausente = rota /describe-food responde 503. */
+  callDescribeHub?: CallDescribeHub;
   appToken?: string;
   store?: Store;
   jwtSecret?: string;
@@ -956,6 +966,32 @@ export async function buildServer(options: ServerOptions) {
         return reply
           .code(422)
           .send({ error: 'não foi possível consultar agora', reason: aiFailReason(msg) });
+      }
+    },
+  );
+
+  const describeBodySchema = z.object({ text: z.string().trim().min(3).max(500) });
+
+  app.post(
+    '/describe-food',
+    { config: { rateLimit: { max: 20, timeWindow: '1 minute' } } },
+    async (req, reply) => {
+      if (!appTokenOk(req)) return reply.code(401).send({ error: 'não autorizado' });
+      const parsed = describeBodySchema.safeParse(req.body);
+      if (!parsed.success) return reply.code(400).send({ error: 'corpo inválido' });
+      if (!options.callDescribeHub)
+        return reply.code(503).send({ error: 'interpretação indisponível' });
+      try {
+        const content = await options.callDescribeHub(parsed.data.text);
+        const result: ScanResult = parseHubContent(content);
+        return result;
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.warn('[describe-food] falha:', msg);
+        // 422 (não 5xx): o Cloudflare troca 5xx e o motivo se perde; 4xx passa.
+        return reply
+          .code(422)
+          .send({ error: 'não foi possível interpretar agora', reason: aiFailReason(msg) });
       }
     },
   );

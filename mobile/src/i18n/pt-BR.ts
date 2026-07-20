@@ -197,6 +197,13 @@ const ptBR = {
     title: 'Registrar refeição',
     searchTab: 'Buscar (TACO)',
     manualTab: 'Manual',
+    describe: {
+      tab: 'Descrever',
+      hint: 'Escreva o que você comeu. Ex.: "2 ovos fritos, arroz e um copo de suco de laranja"',
+      button: 'Interpretar',
+      loading: 'Interpretando…',
+      failed: 'Não foi possível interpretar agora',
+    },
     searchPlaceholder: 'Ex.: arroz, feijão, frango…',
     noResults: 'Nenhum alimento encontrado',
     manualFallback: 'Adicionar manualmente',

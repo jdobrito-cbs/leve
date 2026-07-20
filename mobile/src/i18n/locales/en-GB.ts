@@ -197,6 +197,13 @@ export const strings: Strings = {
     title: 'Log meal',
     searchTab: 'Search (TACO)',
     manualTab: 'Manual',
+    describe: {
+      tab: 'Describe',
+      hint: 'Write what you ate. E.g. "2 fried eggs, rice and a glass of orange juice"',
+      button: 'Interpret',
+      loading: 'Interpreting…',
+      failed: 'Couldn\'t interpret right now',
+    },
     searchPlaceholder: 'E.g. rice, beans, chicken…',
     noResults: 'No food found',
     manualFallback: 'Add manually',

@@ -197,6 +197,13 @@ export const strings: Strings = {
     title: 'भोजन दर्ज करें',
     searchTab: 'खोजें (TACO)',
     manualTab: 'मैनुअल',
+    describe: {
+      tab: 'वर्णन',
+      hint: 'आपने क्या खाया लिखें। जैसे "2 तले अंडे, चावल और एक गिलास संतरे का रस"',
+      button: 'व्याख्या करें',
+      loading: 'व्याख्या हो रही है…',
+      failed: 'अभी व्याख्या नहीं हो सकी',
+    },
     searchPlaceholder: 'जैसे: चावल, दाल, चिकन…',
     noResults: 'कोई खाद्य पदार्थ नहीं मिला',
     manualFallback: 'मैनुअल रूप से जोड़ें',

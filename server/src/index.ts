@@ -1,6 +1,6 @@
 import { FileAdminStore } from './fileAdminStore.js';
 import { FilePartnerKeyStore } from './filePartnerKeyStore.js';
-import { buildServer, makeFoodHubCaller, makeHubCaller } from './server.js';
+import { buildServer, makeDescribeHubCaller, makeFoodHubCaller, makeHubCaller } from './server.js';
 
 const {
   HUB_BASE_URL,
@@ -68,6 +68,7 @@ async function main() {
           throw new Error('IA não configurada');
         },
     callFoodHub: hub ? makeFoodHubCaller(hub) : undefined,
+    callDescribeHub: hub ? makeDescribeHubCaller(hub) : undefined,
     appToken: APP_TOKEN || undefined,
     store,
     jwtSecret: JWT_SECRET || undefined,

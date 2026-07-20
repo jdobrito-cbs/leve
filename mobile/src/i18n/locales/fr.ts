@@ -197,6 +197,13 @@ export const strings: Strings = {
     title: 'Enregistrer un repas',
     searchTab: 'Rechercher (TACO)',
     manualTab: 'Manuel',
+    describe: {
+      tab: 'Décrire',
+      hint: 'Écrivez ce que vous avez mangé. Ex. : « 2 œufs au plat, du riz et un verre de jus d’orange »',
+      button: 'Interpréter',
+      loading: 'Interprétation…',
+      failed: 'Impossible d’interpréter pour le moment',
+    },
     searchPlaceholder: 'Ex. : riz, haricots, poulet…',
     noResults: 'Aucun aliment trouvé',
     manualFallback: 'Ajouter manuellement',

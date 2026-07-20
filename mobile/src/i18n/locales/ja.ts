@@ -197,6 +197,13 @@ export const strings: Strings = {
     title: '食事を記録',
     searchTab: '検索（TACO）',
     manualTab: '手入力',
+    describe: {
+      tab: '記述',
+      hint: '食べたものを書いてください。例：目玉焼き2個、ごはん、オレンジジュース1杯',
+      button: '解析',
+      loading: '解析中…',
+      failed: '今は解析できませんでした',
+    },
     searchPlaceholder: '例：ごはん、豆、鶏肉…',
     noResults: '食品が見つかりませんでした',
     manualFallback: '手入力で追加',

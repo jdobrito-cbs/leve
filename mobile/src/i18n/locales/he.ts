@@ -197,6 +197,13 @@ export const strings: Strings = {
     title: 'רישום ארוחה',
     searchTab: 'חיפוש (TACO)',
     manualTab: 'ידני',
+    describe: {
+      tab: 'תיאור',
+      hint: 'כתוב מה אכלת. לדוגמה: "2 ביצי עין, אורז וכוס מיץ תפוזים"',
+      button: 'פענוח',
+      loading: 'מפענח…',
+      failed: 'לא ניתן לפענח כרגע',
+    },
     searchPlaceholder: 'לדוגמה: אורז, שעועית, עוף…',
     noResults: 'לא נמצא מזון מתאים',
     manualFallback: 'הוספה ידנית',

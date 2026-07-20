@@ -6,6 +6,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { formatDateBR, formatTimeHM, localDayKey, parseDateTimeBR } from '@/core/datetime';
 import { parseDecimalBR } from '@/core/text';
 import type { FoodItem, FoodLog, LogOrigin, MealPeriod, PortionUnit } from '@/core/types';
+import { describeMeal, isDescribeConfigured } from '@/services/nutrition/describeMeal';
 import { lookupFoodInfo } from '@/services/nutrition/foodInfo';
 import type { FoodCandidate } from '@/services/vision/VisionProvider';
 import { getVisionProvider, isScanConfigured } from '@/services/vision/VisionProvider';
@@ -32,25 +33,23 @@ import { addFoodLog, deleteFoodLog, foodForDay } from '@/db/foodLogRepo';
 import { strings } from '@/i18n/pt-BR';
 import { Utensils } from 'lucide-react-native';
 
-type Mode = 'search' | 'manual' | 'scan';
+type Mode = 'search' | 'manual' | 'scan' | 'describe';
 
 interface PlateItem extends DishItemInput {
   origin: LogOrigin;
 }
 
 function modeOptions(scanLocked: boolean) {
+  const aiLabel = (label: string) =>
+    scanLocked ? `${label} · ${strings.premium.lockedTag}` : label;
   return [
     { value: 'search' as Mode, label: strings.meal.searchTab },
     { value: 'manual' as Mode, label: strings.meal.manualTab },
+    ...(isDescribeConfigured()
+      ? [{ value: 'describe' as Mode, label: aiLabel(strings.meal.describe.tab) }]
+      : []),
     ...(isScanConfigured()
-      ? [
-          {
-            value: 'scan' as Mode,
-            label: scanLocked
-              ? `${strings.meal.scanTab} · ${strings.premium.lockedTag}`
-              : strings.meal.scanTab,
-          },
-        ]
+      ? [{ value: 'scan' as Mode, label: aiLabel(strings.meal.scanTab) }]
       : []),
   ];
 }
@@ -144,6 +143,8 @@ export function MealScreen() {
   const [scanError, setScanError] = useState<string | null>(null);
   const [scanCandidates, setScanCandidates] = useState<FoodCandidate[]>([]);
   const [fromScan, setFromScan] = useState(false);
+  const [describeText, setDescribeText] = useState('');
+  const [describing, setDescribing] = useState(false);
   const [plate, setPlate] = useState<PlateItem[]>([]);
   const [dishName, setDishName] = useState('');
   const [plateSaved, setPlateSaved] = useState(false);
@@ -375,6 +376,51 @@ export function MealScreen() {
     }
   }
 
+  // Texto livre do que a pessoa comeu → IA → mesmos candidatos do scan (a porção
+  // fica editável ao escolher, então dá para ajustar a quantidade antes do OK).
+  async function interpretMeal() {
+    setScanError(null);
+    setScanCandidates([]);
+    setDescribing(true);
+    try {
+      const cands = await describeMeal(describeText);
+      if (cands.length === 0) setScanError(strings.meal.describe.failed);
+      else setScanCandidates(cands);
+    } catch {
+      setScanError(strings.meal.describe.failed);
+    } finally {
+      setDescribing(false);
+    }
+  }
+
+  /** Lista de candidatos (foto ou texto) — cada um leva à porção editável. */
+  function candidatesList() {
+    if (scanCandidates.length === 0) return null;
+    return (
+      <View>
+        <AppText variant="title">{strings.meal.scanPick}</AppText>
+        {scanCandidates.map((c) => {
+          const kcal = candidateKcal(c);
+          const subtitle = [
+            c.portionGrams ? `≈ ${Math.round(c.portionGrams)} ${c.unit ?? 'g'}` : null,
+            kcal != null ? `~${Math.round(kcal)} kcal` : null,
+          ]
+            .filter(Boolean)
+            .join(' · ');
+          return (
+            <ListRow
+              key={c.label}
+              title={c.label}
+              subtitle={subtitle || undefined}
+              right={`${Math.round(c.confidence * 100)}% ${strings.meal.scanConfidence}`}
+              onPress={() => chooseCandidate(c)}
+            />
+          );
+        })}
+      </View>
+    );
+  }
+
   const dayGroups = useMemo(() => {
     const keys: (MealPeriod | 'none')[] = [...PERIOD_ORDER, 'none'];
     return keys
@@ -415,7 +461,7 @@ export function MealScreen() {
         options={modeOptions(scanLocked)}
         value={mode}
         onChange={(v) => {
-          if (v === 'scan' && scanLocked) {
+          if ((v === 'scan' || v === 'describe') && scanLocked) {
             router.push('/assinatura' as never);
             return;
           }
@@ -514,29 +560,36 @@ export function MealScreen() {
               {scanError}
             </AppText>
           ) : null}
-          {scanCandidates.length > 0 ? (
-            <View>
-              <AppText variant="title">{strings.meal.scanPick}</AppText>
-              {scanCandidates.map((c) => {
-                const kcal = candidateKcal(c);
-                const subtitle = [
-                  c.portionGrams ? `≈ ${Math.round(c.portionGrams)} ${c.unit ?? 'g'}` : null,
-                  kcal != null ? `~${Math.round(kcal)} kcal` : null,
-                ]
-                  .filter(Boolean)
-                  .join(' · ');
-                return (
-                  <ListRow
-                    key={c.label}
-                    title={c.label}
-                    subtitle={subtitle || undefined}
-                    right={`${Math.round(c.confidence * 100)}% ${strings.meal.scanConfidence}`}
-                    onPress={() => chooseCandidate(c)}
-                  />
-                );
-              })}
+          {candidatesList()}
+        </Card>
+      ) : mode === 'describe' ? (
+        <Card style={{ gap: spacing.md }}>
+          <Input
+            label={strings.meal.describe.tab}
+            value={describeText}
+            onChangeText={setDescribeText}
+            placeholder={strings.meal.describe.hint}
+            multiline
+            numberOfLines={3}
+            textAlignVertical="top"
+          />
+          <Button
+            label={strings.meal.describe.button}
+            onPress={interpretMeal}
+            disabled={describeText.trim().length < 3 || describing}
+          />
+          {describing ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+              <ActivityIndicator />
+              <AppText muted>{strings.meal.describe.loading}</AppText>
             </View>
           ) : null}
+          {scanError ? (
+            <AppText variant="caption" muted>
+              {scanError}
+            </AppText>
+          ) : null}
+          {candidatesList()}
         </Card>
       ) : (
         <Card style={{ gap: spacing.md }}>

@@ -197,6 +197,13 @@ export const strings: Strings = {
     title: 'Registar refeição',
     searchTab: 'Pesquisar (TACO)',
     manualTab: 'Manual',
+    describe: {
+      tab: 'Descrever',
+      hint: 'Escreva o que comeu. Ex.: "2 ovos estrelados, arroz e um copo de sumo de laranja"',
+      button: 'Interpretar',
+      loading: 'A interpretar…',
+      failed: 'Não foi possível interpretar agora',
+    },
     searchPlaceholder: 'Ex.: arroz, feijão, frango…',
     noResults: 'Nenhum alimento encontrado',
     manualFallback: 'Adicionar manualmente',
