@@ -14,7 +14,7 @@ npm run dev
 ```
 
 - Saúde: `http://localhost:3333/health`
-- **Painel do dono: `http://localhost:3333/painel`** (produção: `https://www.levemobile.com.br/painel`) — login com usuário e senha + **2FA obrigatório** (app autenticador). No **primeiro acesso**, cadastre o administrador master informando o ADMIN_TOKEN do servidor; depois é possível cadastrar outros administradores, gerar/revogar chaves de parceiro e desvincular a chave do aparelho. O código da chave aparece só na criação.
+- **Painel do dono: `http://localhost:3333/painel`** (produção: `https://levemobile.com.br/painel`) — login com **e-mail** e senha + **2FA obrigatório** (app autenticador). No **primeiro acesso**, cadastre o administrador master informando o ADMIN_TOKEN do servidor; depois é possível cadastrar outros administradores, gerar/revogar chaves de parceiro e desvincular a chave do aparelho. O código da chave aparece só na criação.
 - As sessões e o segredo do 2FA derivam do **ADMIN_TOKEN**: girá-lo encerra as sessões e exige reconfigurar o 2FA. Ele é também a chave-mestra de recuperação (`POST /admin/recover`) e libera o cadastro inicial.
 - Sem banco de dados, as chaves ficam em `./data/partner-keys.json` e os administradores em `./data/admins.json`. Com `DATABASE_URL` + `JWT_SECRET` (PostgreSQL), contas/backup ligam e tudo vai para o banco — aplique o schema com `npx prisma db push` após atualizar.
 

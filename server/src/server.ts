@@ -153,27 +153,23 @@ const partnerValidateSchema = z.object({
   deviceId: z.string().trim().min(8).max(200).optional(),
 });
 
-// Painel: usuário legível, senha forte o suficiente para hash scrypt.
-const adminUsernameSchema = z
-  .string()
-  .trim()
-  .min(3)
-  .max(40)
-  .regex(/^[a-zA-Z0-9._-]+$/, 'use letras, números, ponto, hífen ou sublinhado');
+// Painel: o acesso é por e-mail (normalizado p/ minúsculas) + senha forte.
+// Internamente o campo continua se chamando `username` (guarda o e-mail).
+const adminEmailSchema = z.string().trim().toLowerCase().email().max(80);
 const adminPasswordSchema = z.string().min(8).max(200);
 const adminSetupSchema = z.object({
   adminToken: z.string().min(1),
-  username: adminUsernameSchema,
+  email: adminEmailSchema,
   password: adminPasswordSchema,
 });
 const adminLoginSchema = z.object({
-  username: z.string().min(1).max(40),
+  email: z.string().trim().toLowerCase().min(3).max(80),
   password: z.string().min(1).max(200),
   code: z.string().trim().max(9).optional(),
   backupCode: z.string().trim().max(20).optional(),
 });
 const adminConfirm2faSchema = z.object({ code: z.string().trim().min(6).max(7) });
-const adminCreateSchema = z.object({ username: adminUsernameSchema, password: adminPasswordSchema });
+const adminCreateSchema = z.object({ email: adminEmailSchema, password: adminPasswordSchema });
 const adminOwnPasswordSchema = z.object({
   currentPassword: z.string().min(1).max(200),
   newPassword: adminPasswordSchema,
@@ -457,7 +453,7 @@ export async function buildServer(options: ServerOptions) {
           return reply.code(401).send({ error: 'código do servidor incorreto' });
         }
         const master = await adminStore.createAdmin({
-          username: parsed.data.username,
+          username: parsed.data.email,
           role: 'master',
           passwordHash: hashPassword(parsed.data.password),
           totpSecretEnc: null,
@@ -478,15 +474,15 @@ export async function buildServer(options: ServerOptions) {
       async (req, reply) => {
         const parsed = adminLoginSchema.safeParse(req.body);
         if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
-        const admin = await adminStore.findAdminByUsername(parsed.data.username);
+        const admin = await adminStore.findAdminByUsername(parsed.data.email);
         if (admin?.lockedUntil && new Date(admin.lockedUntil).getTime() > Date.now()) {
           return reply.code(429).send({ error: 'muitas tentativas; tente mais tarde' });
         }
-        // Verifica sempre (hash real ou dummy) para não vazar usuários por timing.
+        // Verifica sempre (hash real ou dummy) para não vazar e-mails por timing.
         const pwOk = verifyPassword(parsed.data.password, admin?.passwordHash ?? DUMMY_PASSWORD_HASH);
         if (!admin || !pwOk) {
           if (admin) await registerFailure(admin);
-          return reply.code(401).send({ error: 'usuário ou senha incorretos' });
+          return reply.code(401).send({ error: 'e-mail ou senha incorretos' });
         }
         if (!admin.totpEnabled) {
           // Senha certa, mas 2FA ainda não configurado → sessão de configuração.
@@ -530,7 +526,7 @@ export async function buildServer(options: ServerOptions) {
       if (!sess) return reply.code(401).send({ error: 'não autenticado' });
       return {
         id: sess.admin.id,
-        username: sess.admin.username,
+        email: sess.admin.username,
         role: sess.admin.role,
         totpEnabled: sess.admin.totpEnabled,
         needEnroll: sess.scope === 'enroll' || !sess.admin.totpEnabled,
@@ -585,7 +581,7 @@ export async function buildServer(options: ServerOptions) {
       const admins = await adminStore.listAdmins();
       return admins.map((a) => ({
         id: a.id,
-        username: a.username,
+        email: a.username,
         role: a.role,
         totpEnabled: a.totpEnabled,
         createdAt: a.createdAt,
@@ -600,11 +596,11 @@ export async function buildServer(options: ServerOptions) {
       if (!canCreateAdmin(sess.admin)) return reply.code(403).send({ error: 'só o master cadastra' });
       const parsed = adminCreateSchema.safeParse(req.body);
       if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
-      if (await adminStore.findAdminByUsername(parsed.data.username)) {
-        return reply.code(409).send({ error: 'usuário já existe' });
+      if (await adminStore.findAdminByUsername(parsed.data.email)) {
+        return reply.code(409).send({ error: 'e-mail já cadastrado' });
       }
       const created = await adminStore.createAdmin({
-        username: parsed.data.username,
+        username: parsed.data.email,
         role: 'admin',
         passwordHash: hashPassword(parsed.data.password),
         totpSecretEnc: null,

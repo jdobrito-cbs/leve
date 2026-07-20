@@ -19,11 +19,11 @@ function cookieOf(res: { cookies: Array<{ name: string; value: string }> }): str
 }
 
 // Cria o master e configura o 2FA; devolve o cookie com sessão completa.
-async function bootstrapMaster(app: FastifyInstance, username = 'jorge') {
+async function bootstrapMaster(app: FastifyInstance, email = 'jorge@leve.app') {
   const setup = await app.inject({
     method: 'POST',
     url: '/admin/setup',
-    payload: { adminToken: ADMIN_TOKEN, username, password: 'senha-super-forte' },
+    payload: { adminToken: ADMIN_TOKEN, email, password: 'senha-super-forte' },
   });
   let cookie = cookieOf(setup);
   const s = await app.inject({ method: 'POST', url: '/admin/2fa/setup', headers: { cookie } });
@@ -39,17 +39,17 @@ async function bootstrapMaster(app: FastifyInstance, username = 'jorge') {
 }
 
 // Cria um admin comum (pelo master) e configura o 2FA dele.
-async function addAdmin(app: FastifyInstance, masterCookie: string, username: string) {
+async function addAdmin(app: FastifyInstance, masterCookie: string, email: string) {
   await app.inject({
     method: 'POST',
     url: '/admin',
     headers: { cookie: masterCookie },
-    payload: { username, password: 'senha-do-admin-1' },
+    payload: { email, password: 'senha-do-admin-1' },
   });
   const li = await app.inject({
     method: 'POST',
     url: '/admin/login',
-    payload: { username, password: 'senha-do-admin-1' },
+    payload: { email, password: 'senha-do-admin-1' },
   });
   let cookie = cookieOf(li);
   const s = await app.inject({ method: 'POST', url: '/admin/2fa/setup', headers: { cookie } });
@@ -63,10 +63,10 @@ async function addAdmin(app: FastifyInstance, masterCookie: string, username: st
   return { cookie: cookieOf(confirm), secret };
 }
 
-async function idOf(app: FastifyInstance, cookie: string, username: string) {
+async function idOf(app: FastifyInstance, cookie: string, email: string) {
   const list = await app.inject({ method: 'GET', url: '/admin/list', headers: { cookie } });
-  const found = (list.json() as Array<{ id: string; username: string }>).find(
-    (a) => a.username === username,
+  const found = (list.json() as Array<{ id: string; email: string }>).find(
+    (a) => a.email === email,
   );
   return found?.id ?? '';
 }
@@ -84,7 +84,7 @@ describe('cookie de sessão: Secure acompanha o protocolo', () => {
     const setup = await app.inject({
       method: 'POST',
       url: '/admin/setup',
-      payload: { adminToken: ADMIN_TOKEN, username: 'jorge', password: 'senha-super-forte' },
+      payload: { adminToken: ADMIN_TOKEN, email: 'jorge@leve.app', password: 'senha-super-forte' },
     });
     // inject simula http puro → sem Secure (senão o navegador descarta).
     const raw = String(setup.headers['set-cookie']);
@@ -95,7 +95,7 @@ describe('cookie de sessão: Secure acompanha o protocolo', () => {
       method: 'POST',
       url: '/admin/login',
       headers: { 'x-forwarded-proto': 'https' },
-      payload: { username: 'jorge', password: 'senha-super-forte' },
+      payload: { email: 'jorge@leve.app', password: 'senha-super-forte' },
     });
     expect(String(login.headers['set-cookie'])).toContain('Secure');
   });
@@ -109,7 +109,7 @@ describe('POST sem corpo com cabeçalho JSON (como o navegador envia)', () => {
     const fresh = await app.inject({
       method: 'POST',
       url: '/admin/setup',
-      payload: { adminToken: ADMIN_TOKEN, username: 'outro', password: 'senha-super-forte' },
+      payload: { adminToken: ADMIN_TOKEN, email: 'outro@leve.app', password: 'senha-super-forte' },
     });
     expect(fresh.statusCode).toBe(409); // painel já configurado (sanidade)
 
@@ -131,7 +131,7 @@ describe('POST sem corpo com cabeçalho JSON (como o navegador envia)', () => {
     const master2 = await app2.inject({
       method: 'POST',
       url: '/admin/setup',
-      payload: { adminToken: ADMIN_TOKEN, username: 'jorge', password: 'senha-super-forte' },
+      payload: { adminToken: ADMIN_TOKEN, email: 'jorge@leve.app', password: 'senha-super-forte' },
     });
     const c2 = cookieOf(master2);
     const enroll = await app2.inject({
@@ -171,14 +171,14 @@ describe('cadastro inicial e 2FA', () => {
     const wrong = await app.inject({
       method: 'POST',
       url: '/admin/setup',
-      payload: { adminToken: 'errado', username: 'jorge', password: 'senha-super-forte' },
+      payload: { adminToken: 'errado', email: 'jorge@leve.app', password: 'senha-super-forte' },
     });
     expect(wrong.statusCode).toBe(401);
     await bootstrapMaster(app);
     const again = await app.inject({
       method: 'POST',
       url: '/admin/setup',
-      payload: { adminToken: ADMIN_TOKEN, username: 'outro', password: 'senha-super-forte' },
+      payload: { adminToken: ADMIN_TOKEN, email: 'outro@leve.app', password: 'senha-super-forte' },
     });
     expect(again.statusCode).toBe(409);
   });
@@ -204,7 +204,7 @@ describe('login com 2FA', () => {
     const noCode = await app.inject({
       method: 'POST',
       url: '/admin/login',
-      payload: { username: 'jorge', password: 'senha-super-forte' },
+      payload: { email: 'jorge@leve.app', password: 'senha-super-forte' },
     });
     expect(noCode.statusCode).toBe(401);
     expect(noCode.json().need2fa).toBe(true);
@@ -212,14 +212,14 @@ describe('login com 2FA', () => {
     const badCode = await app.inject({
       method: 'POST',
       url: '/admin/login',
-      payload: { username: 'jorge', password: 'senha-super-forte', code: '000000' },
+      payload: { email: 'jorge@leve.app', password: 'senha-super-forte', code: '000000' },
     });
     expect(badCode.statusCode).toBe(401);
 
     const ok = await app.inject({
       method: 'POST',
       url: '/admin/login',
-      payload: { username: 'jorge', password: 'senha-super-forte', code: totpAt(secret, Date.now()) },
+      payload: { email: 'jorge@leve.app', password: 'senha-super-forte', code: totpAt(secret, Date.now()) },
     });
     expect(ok.statusCode).toBe(200);
     expect(cookieOf(ok)).toContain('leve_admin=');
@@ -232,7 +232,7 @@ describe('login com 2FA', () => {
       const r = await app.inject({
         method: 'POST',
         url: '/admin/login',
-        payload: { username: 'jorge', password: 'errada', code: '000000' },
+        payload: { email: 'jorge@leve.app', password: 'errada', code: '000000' },
       });
       expect(r.statusCode).toBe(401);
     }
@@ -240,7 +240,7 @@ describe('login com 2FA', () => {
     const locked = await app.inject({
       method: 'POST',
       url: '/admin/login',
-      payload: { username: 'jorge', password: 'senha-super-forte', code: totpAt(secret, Date.now()) },
+      payload: { email: 'jorge@leve.app', password: 'senha-super-forte', code: totpAt(secret, Date.now()) },
     });
     expect(locked.statusCode).toBe(429);
   });
@@ -251,13 +251,13 @@ describe('login com 2FA', () => {
     const first = await app.inject({
       method: 'POST',
       url: '/admin/login',
-      payload: { username: 'jorge', password: 'senha-super-forte', backupCode: backupCodes[0] },
+      payload: { email: 'jorge@leve.app', password: 'senha-super-forte', backupCode: backupCodes[0] },
     });
     expect(first.statusCode).toBe(200);
     const reuse = await app.inject({
       method: 'POST',
       url: '/admin/login',
-      payload: { username: 'jorge', password: 'senha-super-forte', backupCode: backupCodes[0] },
+      payload: { email: 'jorge@leve.app', password: 'senha-super-forte', backupCode: backupCodes[0] },
     });
     expect(reuse.statusCode).toBe(401);
   });
@@ -267,16 +267,16 @@ describe('matriz de permissões', () => {
   it('master cria/exclui e reseta; admin comum não', async () => {
     const app = await makeApp();
     const master = await bootstrapMaster(app);
-    const admin = await addAdmin(app, master.cookie, 'ana');
-    const adminId = await idOf(app, master.cookie, 'ana');
-    const masterId = await idOf(app, master.cookie, 'jorge');
+    const admin = await addAdmin(app, master.cookie, 'ana@leve.app');
+    const adminId = await idOf(app, master.cookie, 'ana@leve.app');
+    const masterId = await idOf(app, master.cookie, 'jorge@leve.app');
 
     // admin comum não cadastra nem exclui
     const create = await app.inject({
       method: 'POST',
       url: '/admin',
       headers: { cookie: admin.cookie },
-      payload: { username: 'novo', password: 'senha-do-admin-1' },
+      payload: { email: 'novo@leve.app', password: 'senha-do-admin-1' },
     });
     expect(create.statusCode).toBe(403);
     const del = await app.inject({
@@ -315,9 +315,9 @@ describe('matriz de permissões', () => {
   it('admin comum redefine a senha de outro admin comum', async () => {
     const app = await makeApp();
     const master = await bootstrapMaster(app);
-    const ana = await addAdmin(app, master.cookie, 'ana');
-    const bia = await addAdmin(app, master.cookie, 'bia');
-    const biaId = await idOf(app, master.cookie, 'bia');
+    const ana = await addAdmin(app, master.cookie, 'ana@leve.app');
+    const bia = await addAdmin(app, master.cookie, 'bia@leve.app');
+    const biaId = await idOf(app, master.cookie, 'bia@leve.app');
 
     const reset = await app.inject({
       method: 'POST',
@@ -332,7 +332,7 @@ describe('matriz de permissões', () => {
       method: 'POST',
       url: '/admin/login',
       payload: {
-        username: 'bia',
+        email: 'bia@leve.app',
         password: 'senha-nova-da-bia-1',
         code: totpAt(bia.secret, Date.now()),
       },
@@ -436,7 +436,7 @@ describe('recuperação (chave-mestra)', () => {
     const login = await app.inject({
       method: 'POST',
       url: '/admin/login',
-      payload: { username: 'jorge', password: 'nova-senha-de-recuperacao' },
+      payload: { email: 'jorge@leve.app', password: 'nova-senha-de-recuperacao' },
     });
     expect(login.statusCode).toBe(200);
     expect(login.json().needEnroll).toBe(true);

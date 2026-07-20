@@ -129,8 +129,8 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
           <input id="su-token" type="password" autocomplete="off" placeholder="o código do .env do servidor"/>
         </div>
         <div class="field">
-          <label for="su-user">Usuário</label>
-          <input id="su-user" autocomplete="username" placeholder="ex.: jorge"/>
+          <label for="su-user">E-mail</label>
+          <input id="su-user" type="email" autocomplete="username" inputmode="email" placeholder="voce@exemplo.com"/>
         </div>
         <div class="field">
           <label for="su-pass">Senha (mínimo 8 caracteres)</label>
@@ -146,8 +146,8 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
       <p class="lead">Acesso restrito ao dono e administradores.</p>
       <div class="card">
         <div class="field">
-          <label for="li-user">Usuário</label>
-          <input id="li-user" autocomplete="username" placeholder="usuário"/>
+          <label for="li-user">E-mail</label>
+          <input id="li-user" type="email" autocomplete="username" inputmode="email" placeholder="seu e-mail"/>
         </div>
         <div class="field">
           <label for="li-pass">Senha</label>
@@ -247,7 +247,7 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
         </div>
         <div id="a-createWrap" class="hidden">
           <div class="row">
-            <div><label for="a-user">Usuário</label><input id="a-user" placeholder="usuário do novo admin"/></div>
+            <div><label for="a-user">E-mail</label><input id="a-user" type="email" inputmode="email" placeholder="e-mail do novo admin"/></div>
             <div><label for="a-pass">Senha inicial</label><input id="a-pass" type="password" placeholder="mínimo 8"/></div>
             <button class="btn" id="a-create">Cadastrar</button>
           </div>
@@ -316,7 +316,7 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
     $('su-err').textContent='';
     var token=$('su-token').value.trim(),user=$('su-user').value.trim(),pass=$('su-pass').value;
     if(!token||!user||!pass){$('su-err').textContent='preencha todos os campos';return;}
-    api('/admin/setup','POST',{adminToken:token,username:user,password:pass}).then(function(r){
+    api('/admin/setup','POST',{adminToken:token,email:user,password:pass}).then(function(r){
       if(!r.ok){$('su-err').textContent=(r.json&&r.json.error)||'não foi possível criar';return;}
       startEnroll();
     });
@@ -331,10 +331,10 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
   });
   function doLogin(){
     $('li-err').textContent='';
-    var body={username:$('li-user').value.trim(),password:$('li-pass').value};
+    var body={email:$('li-user').value.trim(),password:$('li-pass').value};
     if(usingBackup){var b=$('li-backup').value.trim();if(b)body.backupCode=b;}
     else{var c=$('li-code').value.trim();if(c)body.code=c;}
-    if(!body.username||!body.password){$('li-err').textContent='informe usuário e senha';return;}
+    if(!body.email||!body.password){$('li-err').textContent='informe e-mail e senha';return;}
     api('/admin/login','POST',body).then(function(r){
       if(r.json&&r.json.needEnroll){startEnroll();return;}
       if(!r.ok){$('li-err').textContent=(r.json&&r.json.error)||'não foi possível entrar';return;}
@@ -379,8 +379,8 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
   var me=null;
   function openDash(info){
     me=info;show('s-dash');
-    $('whoName').textContent=info.username;
-    $('dash-me').textContent='Conectado como '+info.username;
+    $('whoName').textContent=info.email;
+    $('dash-me').textContent='Conectado como '+info.email;
     $('dash-role').innerHTML=info.role==='master'?'<span class="badge master">master</span>':'<span class="badge admin">admin</span>';
     $('a-createWrap').classList.toggle('hidden',info.role!=='master');
     loadKeys();loadAdmins();
@@ -437,12 +437,12 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
         var tfa=a.totpEnabled?'<span class="badge on">ativo</span>':'<span class="badge off">pendente</span>';
         var act='';
         var canPw=!a.isSelf && (isMaster || a.role!=='master');
-        if(canPw)act+='<button class="btn ghost mini" data-act="pw" data-id="'+esc(a.id)+'" data-name="'+esc(a.username)+'">Redefinir senha</button>';
+        if(canPw)act+='<button class="btn ghost mini" data-act="pw" data-id="'+esc(a.id)+'" data-name="'+esc(a.email)+'">Redefinir senha</button>';
         if(isMaster && !a.isSelf){
-          if(a.totpEnabled)act+='<button class="btn ghost mini" data-act="r2fa" data-id="'+esc(a.id)+'" data-name="'+esc(a.username)+'">Resetar 2FA</button>';
-          if(a.role!=='master')act+='<button class="btn danger" data-act="del" data-id="'+esc(a.id)+'" data-name="'+esc(a.username)+'">Excluir</button>';
+          if(a.totpEnabled)act+='<button class="btn ghost mini" data-act="r2fa" data-id="'+esc(a.id)+'" data-name="'+esc(a.email)+'">Resetar 2FA</button>';
+          if(a.role!=='master')act+='<button class="btn danger" data-act="del" data-id="'+esc(a.id)+'" data-name="'+esc(a.email)+'">Excluir</button>';
         }
-        return '<tr><td>'+esc(a.username)+(a.isSelf?' <span class="faint">(você)</span>':'')+'</td><td>'+role+'</td><td>'+tfa+
+        return '<tr><td>'+esc(a.email)+(a.isSelf?' <span class="faint">(você)</span>':'')+'</td><td>'+role+'</td><td>'+tfa+
           '</td><td class="mono">'+esc(fmt(a.createdAt))+'</td><td><div class="actions">'+(act||'<span class="faint">—</span>')+'</div></td></tr>';
       }).join('');
       $('a-rows').innerHTML=rows||'<tr><td colspan="5" class="empty">Nenhum administrador.</td></tr>';
@@ -452,8 +452,8 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
   $('a-create').addEventListener('click',function(){
     $('a-err').textContent='';
     var u=$('a-user').value.trim(),p=$('a-pass').value;
-    if(!u||!p){$('a-err').textContent='informe usuário e senha';return;}
-    api('/admin','POST',{username:u,password:p}).then(function(r){
+    if(!u||!p){$('a-err').textContent='informe e-mail e senha';return;}
+    api('/admin','POST',{email:u,password:p}).then(function(r){
       if(!r.ok){$('a-err').textContent=(r.json&&r.json.error)||'não foi possível cadastrar';return;}
       $('a-user').value='';$('a-pass').value='';loadAdmins();
     });

@@ -43,6 +43,7 @@ export type AdminRole = 'master' | 'admin';
 
 export interface AdminRecord {
   id: string;
+  /** E-mail de acesso do administrador (nome de campo mantido do formato original). */
   username: string;
   role: AdminRole;
   passwordHash: string;
