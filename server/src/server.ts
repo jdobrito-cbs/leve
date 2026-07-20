@@ -918,8 +918,10 @@ export async function buildServer(options: ServerOptions) {
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         console.warn('[scan-food] falha:', msg);
+        // 422 (não 502): o Cloudflare troca respostas 5xx pela própria página de
+        // erro e o motivo se perde; 4xx passa com o corpo JSON até o cliente.
         return reply
-          .code(502)
+          .code(422)
           .send({ error: 'não foi possível analisar a imagem agora', reason: aiFailReason(msg) });
       }
     },
@@ -942,8 +944,9 @@ export async function buildServer(options: ServerOptions) {
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         console.warn('[food-info] falha:', msg);
+        // 422 em vez de 502: o Cloudflare substitui 5xx e o motivo se perde.
         return reply
-          .code(502)
+          .code(422)
           .send({ error: 'não foi possível consultar agora', reason: aiFailReason(msg) });
       }
     },

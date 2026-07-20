@@ -17,17 +17,18 @@ describe('POST /scan-food', () => {
     expect(res.json()).toEqual({ foods: [{ name: 'arroz', portionGrams: 150, confidence: 0.9 }] });
   });
 
-  test('corpo inválido → 400; upstream falha → 502; token errado → 401', async () => {
+  test('corpo inválido → 400; upstream falha → 422; token errado → 401', async () => {
     const failing = await buildServer({
       callHub: async () => {
         throw new Error('boom');
       },
     });
     expect((await failing.inject({ method: 'POST', url: '/scan-food', payload: {} })).statusCode).toBe(400);
+    // 422 (não 502): o Cloudflare substitui 5xx e o motivo do erro se perde.
     expect(
       (await failing.inject({ method: 'POST', url: '/scan-food', payload: { imageBase64: IMG } }))
         .statusCode,
-    ).toBe(502);
+    ).toBe(422);
 
     const guarded = await buildServer({ callHub: async () => '{"foods":[]}', appToken: 'segredo' });
     expect(
@@ -104,7 +105,7 @@ describe('POST /food-info', () => {
     });
   });
 
-  test('nome curto → 400; sem callFoodHub → 503; upstream falha → 502', async () => {
+  test('nome curto → 400; sem callFoodHub → 503; upstream falha → 422', async () => {
     const noHub = await buildServer({ callHub: async () => '{"foods":[]}' });
     expect(
       (await noHub.inject({ method: 'POST', url: '/food-info', payload: { name: 'x' } })).statusCode,
@@ -122,6 +123,6 @@ describe('POST /food-info', () => {
     expect(
       (await failing.inject({ method: 'POST', url: '/food-info', payload: { name: 'arroz' } }))
         .statusCode,
-    ).toBe(502);
+    ).toBe(422);
   });
 });
