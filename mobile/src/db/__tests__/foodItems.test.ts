@@ -96,3 +96,14 @@ test('frutas regionais e seus sucos entram no seed', async () => {
   expect(sucoGraviola?.calories).toBe(52);
   expect((await searchFoods(db, 'suco de cajá'))[0]?.unit).toBe('ml');
 });
+
+test('besteiras (guloseimas e salgadinhos) entram no seed', async () => {
+  const db = makeDb() as never;
+  await seedFoodItemsIfEmpty(db);
+  expect((await searchFoods(db, 'chiclete')).length).toBeGreaterThan(0);
+  expect((await searchFoods(db, 'pirulito')).map((f) => f.name)).toContain('Pirulito');
+  expect((await searchFoods(db, 'bombom')).length).toBeGreaterThan(0);
+  expect((await searchFoods(db, 'chocolate ao leite'))[0]?.calories).toBe(535);
+  const chips = (await searchFoods(db, 'batata chips'))[0];
+  expect(chips?.referencePortion).toBe('1 pacote (50 g)');
+});

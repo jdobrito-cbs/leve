@@ -1225,5 +1225,225 @@
     "fiberG": 1,
     "unit": "ml",
     "referencePortion": "1 copo (200 ml)"
+  },
+  {
+    "name": "Chiclete (goma de mascar)",
+    "category": "Doces e sobremesas",
+    "kcal": 290,
+    "proteinG": 0,
+    "carbsG": 72,
+    "fatG": 0,
+    "fiberG": 0,
+    "referencePortion": "1 unidade (3 g)"
+  },
+  {
+    "name": "Bombom de chocolate",
+    "category": "Doces e sobremesas",
+    "kcal": 480,
+    "proteinG": 5,
+    "carbsG": 62,
+    "fatG": 24,
+    "fiberG": 2,
+    "referencePortion": "1 unidade (15 g)"
+  },
+  {
+    "name": "Bombom recheado (Sonho de Valsa, Ouro Branco)",
+    "category": "Doces e sobremesas",
+    "kcal": 505,
+    "proteinG": 6,
+    "carbsG": 58,
+    "fatG": 28,
+    "fiberG": 1.5,
+    "referencePortion": "1 unidade (20 g)"
+  },
+  {
+    "name": "Chocolate ao leite",
+    "category": "Doces e sobremesas",
+    "kcal": 535,
+    "proteinG": 7.7,
+    "carbsG": 59,
+    "fatG": 30,
+    "fiberG": 2.4,
+    "referencePortion": "1 barra (25 g)"
+  },
+  {
+    "name": "Chocolate meio amargo",
+    "category": "Doces e sobremesas",
+    "kcal": 500,
+    "proteinG": 6,
+    "carbsG": 46,
+    "fatG": 31,
+    "fiberG": 7,
+    "referencePortion": "1 barra (25 g)"
+  },
+  {
+    "name": "Chocolate branco",
+    "category": "Doces e sobremesas",
+    "kcal": 539,
+    "proteinG": 6,
+    "carbsG": 59,
+    "fatG": 32,
+    "fiberG": 0.2,
+    "referencePortion": "1 barra (25 g)"
+  },
+  {
+    "name": "Chocolate recheado (Chokito, Prestígio)",
+    "category": "Doces e sobremesas",
+    "kcal": 460,
+    "proteinG": 4,
+    "carbsG": 62,
+    "fatG": 22,
+    "fiberG": 1.5,
+    "referencePortion": "1 unidade (30 g)"
+  },
+  {
+    "name": "Pirulito",
+    "category": "Doces e sobremesas",
+    "kcal": 390,
+    "proteinG": 0,
+    "carbsG": 98,
+    "fatG": 0,
+    "fiberG": 0,
+    "referencePortion": "1 unidade (10 g)"
+  },
+  {
+    "name": "Bala dura (sabores)",
+    "category": "Doces e sobremesas",
+    "kcal": 385,
+    "proteinG": 0,
+    "carbsG": 97,
+    "fatG": 0,
+    "fiberG": 0,
+    "referencePortion": "1 unidade (5 g)"
+  },
+  {
+    "name": "Bala de goma (jujuba)",
+    "category": "Doces e sobremesas",
+    "kcal": 330,
+    "proteinG": 4,
+    "carbsG": 78,
+    "fatG": 0,
+    "fiberG": 0,
+    "referencePortion": "1 unidade (5 g)"
+  },
+  {
+    "name": "Bala de caramelo",
+    "category": "Doces e sobremesas",
+    "kcal": 400,
+    "proteinG": 2,
+    "carbsG": 77,
+    "fatG": 9,
+    "fiberG": 0,
+    "referencePortion": "1 unidade (8 g)"
+  },
+  {
+    "name": "Marshmallow",
+    "category": "Doces e sobremesas",
+    "kcal": 318,
+    "proteinG": 1.8,
+    "carbsG": 81,
+    "fatG": 0.2,
+    "fiberG": 0,
+    "referencePortion": "1 unidade (7 g)"
+  },
+  {
+    "name": "Paçoca (doce de amendoim)",
+    "category": "Doces e sobremesas",
+    "kcal": 485,
+    "proteinG": 14,
+    "carbsG": 52,
+    "fatG": 25,
+    "fiberG": 5,
+    "referencePortion": "1 unidade (20 g)"
+  },
+  {
+    "name": "Cocada",
+    "category": "Doces e sobremesas",
+    "kcal": 430,
+    "proteinG": 3,
+    "carbsG": 60,
+    "fatG": 20,
+    "fiberG": 4,
+    "referencePortion": "1 unidade (30 g)"
+  },
+  {
+    "name": "Wafer recheado",
+    "category": "Doces e sobremesas",
+    "kcal": 505,
+    "proteinG": 5.5,
+    "carbsG": 65,
+    "fatG": 25,
+    "fiberG": 1.5,
+    "referencePortion": "3 unidades (30 g)"
+  },
+  {
+    "name": "Biscoito recheado",
+    "category": "Doces e sobremesas",
+    "kcal": 470,
+    "proteinG": 6,
+    "carbsG": 68,
+    "fatG": 20,
+    "fiberG": 2,
+    "referencePortion": "3 unidades (30 g)"
+  },
+  {
+    "name": "Barra de cereal",
+    "category": "Doces e sobremesas",
+    "kcal": 380,
+    "proteinG": 6,
+    "carbsG": 70,
+    "fatG": 8,
+    "fiberG": 5,
+    "referencePortion": "1 unidade (25 g)"
+  },
+  {
+    "name": "Pipoca doce",
+    "category": "Doces e sobremesas",
+    "kcal": 400,
+    "proteinG": 5,
+    "carbsG": 78,
+    "fatG": 9,
+    "fiberG": 8,
+    "referencePortion": "1 porção (30 g)"
+  },
+  {
+    "name": "Gelatina pronta",
+    "category": "Doces e sobremesas",
+    "kcal": 60,
+    "proteinG": 1.2,
+    "carbsG": 14,
+    "fatG": 0,
+    "fiberG": 0,
+    "referencePortion": "1 porção (100 g)"
+  },
+  {
+    "name": "Salgadinho de milho (Cheetos, Fandangos)",
+    "category": "Salgados e petiscos",
+    "kcal": 500,
+    "proteinG": 6,
+    "carbsG": 60,
+    "fatG": 26,
+    "fiberG": 1.5,
+    "referencePortion": "1 pacote (50 g)"
+  },
+  {
+    "name": "Batata chips (de pacote)",
+    "category": "Salgados e petiscos",
+    "kcal": 540,
+    "proteinG": 6,
+    "carbsG": 53,
+    "fatG": 34,
+    "fiberG": 4,
+    "referencePortion": "1 pacote (50 g)"
+  },
+  {
+    "name": "Amendoim japonês",
+    "category": "Salgados e petiscos",
+    "kcal": 450,
+    "proteinG": 16,
+    "carbsG": 50,
+    "fatG": 20,
+    "fiberG": 4,
+    "referencePortion": "1 punhado (30 g)"
   }
 ]
