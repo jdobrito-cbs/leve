@@ -118,18 +118,22 @@ async function chatCompletion(config: HubConfig, body: object, timeoutMs: number
   throw new Error(lastErr);
 }
 
-/** Motivo curto e seguro (sem segredos) para devolver ao cliente no erro 502. */
+/** Motivo curto e seguro (sem segredos) para devolver ao cliente no erro. */
 function aiFailReason(msg: string): string {
   const up = msg.match(/^upstream (\d+)/);
   if (up) {
-    if (up[1] === '429') return 'limite de uso da IA (tente em instantes)';
+    if (up[1] === '429') return 'limite de uso da IA (aguarde um pouco)';
     if (up[1] === '401' || up[1] === '403') return 'chave da IA inválida';
     if (up[1] === '400') return 'a IA recusou a imagem';
     return `IA indisponível (${up[1]})`;
   }
-  if (/sem conteúdo|JSON|resposta/i.test(msg)) return 'resposta inválida da IA';
-  if (/timeout|abort/i.test(msg)) return 'a IA demorou demais';
-  return 'falha na IA';
+  if (/timed?\s*out|abort/i.test(msg)) return 'a IA demorou demais (tempo esgotado)';
+  if (/fetch failed|ENOTFOUND|ECONNREFUSED|EAI_AGAIN|network|socket|certificate|TLS/i.test(msg))
+    return 'o servidor não conseguiu se conectar à IA';
+  if (/sem conteúdo/i.test(msg)) return 'a IA respondeu vazio';
+  if (/JSON|sem JSON|Unexpected token/i.test(msg)) return 'a IA respondeu fora do formato';
+  // Sem correspondência: devolve um trecho do erro real (sem segredos) p/ diagnóstico.
+  return 'IA — ' + msg.replace(/[\r\n]+/g, ' ').slice(0, 100);
 }
 
 export function makeHubCaller(config: HubConfig): CallHub {
