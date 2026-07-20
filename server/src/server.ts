@@ -120,12 +120,16 @@ async function chatCompletion(config: HubConfig, body: object, timeoutMs: number
 
 /** Motivo curto e seguro (sem segredos) para devolver ao cliente no erro. */
 function aiFailReason(msg: string): string {
-  const up = msg.match(/^upstream (\d+)/);
+  const up = msg.match(/^upstream (\d+): ?([\s\S]*)/);
   if (up) {
-    if (up[1] === '429') return 'limite de uso da IA (aguarde um pouco)';
-    if (up[1] === '401' || up[1] === '403') return 'chave da IA inválida';
-    if (up[1] === '400') return 'a IA recusou a imagem';
-    return `IA indisponível (${up[1]})`;
+    const status = up[1];
+    // Detalhe do provedor (modelo/endereço/imagem) — sem a chave. Ajuda o diagnóstico.
+    const detail = (up[2] || '').replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
+    if (status === '429') return 'limite de uso da IA (aguarde um pouco)';
+    if (status === '401' || status === '403') return 'chave da IA inválida';
+    if (status === '400') return 'a IA recusou a imagem' + (detail ? ' — ' + detail : '');
+    if (status === '404') return 'modelo/endereço não encontrado' + (detail ? ' — ' + detail : '');
+    return `IA indisponível (${status})` + (detail ? ' — ' + detail : '');
   }
   if (/timed?\s*out|abort/i.test(msg)) return 'a IA demorou demais (tempo esgotado)';
   if (/fetch failed|ENOTFOUND|ECONNREFUSED|EAI_AGAIN|network|socket|certificate|TLS/i.test(msg))
