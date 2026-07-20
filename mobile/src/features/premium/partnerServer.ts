@@ -18,6 +18,16 @@ export function isServerPartnerKey(key: string): boolean {
   return /^LEVE-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(key.trim().toUpperCase());
 }
 
+/** Formata o que o usuário digita para o padrão LEVE-XXXX-XXXX-XXXX: sempre em
+ *  maiúsculas, com o prefixo e os separadores já incluídos. Campo vazio → "LEVE-". */
+export function formatPartnerKeyInput(raw: string): string {
+  let code = raw.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (code.startsWith('LEVE')) code = code.slice(4); // evita duplicar o prefixo
+  code = code.slice(0, 12); // XXXX XXXX XXXX
+  const groups = code.match(/.{1,4}/g) ?? [];
+  return groups.length ? 'LEVE-' + groups.join('-') : 'LEVE-';
+}
+
 export interface PartnerValidation {
   valid: boolean;
   label?: string;

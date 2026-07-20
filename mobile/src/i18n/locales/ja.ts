@@ -481,7 +481,8 @@ export const strings: Strings = {
     connect: '連携する',
     connected: '連携済み',
     disconnect: '連携を解除',
-    importNow: '今すぐデータを取り込む',
+    importNow: '同期',
+    manageAccess: '設定でアクセスを管理',
     importedSuffix: '件のデータを取り込みました',
     unavailable:
       'この端末では利用できません — 開発ビルド（dev build）のアプリと Health Connect / Appleヘルスケアが必要です。',

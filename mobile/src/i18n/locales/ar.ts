@@ -482,7 +482,8 @@ export const strings: Strings = {
     connect: 'ربط',
     connected: 'متصل',
     disconnect: 'إلغاء الربط',
-    importNow: 'استيراد البيانات الآن',
+    importNow: 'مزامنة',
+    manageAccess: 'إدارة الوصول في الإعدادات',
     importedSuffix: 'سجلًا مستوردًا',
     unavailable:
       'غير متاح على هذا الجهاز — يتطلب نسخة التطوير (dev build) وHealth Connect/صحة Apple.',

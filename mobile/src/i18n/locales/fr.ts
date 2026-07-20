@@ -481,7 +481,8 @@ export const strings: Strings = {
     connect: 'Connecter',
     connected: 'Connecté',
     disconnect: 'Déconnecter',
-    importNow: 'Importer les données maintenant',
+    importNow: 'Synchroniser',
+    manageAccess: 'Gérer l’accès dans les Réglages',
     importedSuffix: 'données importées',
     unavailable:
       'Indisponible sur cet appareil — nécessite l\'app de développement (dev build) et Health Connect/Apple Santé.',

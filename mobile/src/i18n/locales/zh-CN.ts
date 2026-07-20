@@ -481,7 +481,8 @@ export const strings: Strings = {
     connect: '连接',
     connected: '已连接',
     disconnect: '断开连接',
-    importNow: '立即导入数据',
+    importNow: '同步',
+    manageAccess: '在设置中管理访问',
     importedSuffix: '条数据已导入',
     unavailable:
       '此设备上不可用——需要开发构建版应用（dev build）以及 Health Connect/Apple 健康。',

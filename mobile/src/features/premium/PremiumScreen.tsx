@@ -18,7 +18,12 @@ import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
 import { setEntitlement } from '@/features/premium/entitlement';
 import { verifyLicenseKey } from '@/features/premium/licenseKey';
-import { getDeviceId, isServerPartnerKey, validatePartnerKey } from '@/features/premium/partnerServer';
+import {
+  formatPartnerKeyInput,
+  getDeviceId,
+  isServerPartnerKey,
+  validatePartnerKey,
+} from '@/features/premium/partnerServer';
 import { usePremium } from '@/features/premium/usePremium';
 import {
   PaidPlan,
@@ -262,7 +267,7 @@ export function PremiumScreen() {
           label={strings.premium.redeem}
           variant="secondary"
           onPress={() => {
-            setKeyStr('');
+            setKeyStr('LEVE-');
             setKeyError(null);
             setKeyOpen(true);
           }}
@@ -277,10 +282,10 @@ export function PremiumScreen() {
           value={keyStr}
           onChangeText={(v) => {
             setKeyError(null);
-            setKeyStr(v);
+            setKeyStr(formatPartnerKeyInput(v));
           }}
           placeholder={strings.premium.keyPlaceholder}
-          autoCapitalize="none"
+          autoCapitalize="characters"
           autoCorrect={false}
           autoFocus
         />

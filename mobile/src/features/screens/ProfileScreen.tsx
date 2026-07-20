@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useEffect, useState } from 'react';
-import { I18nManager, Platform, View } from 'react-native';
+import { I18nManager, Linking, Platform, View } from 'react-native';
 
 import { ageFromIsoDate, brDateToIso } from '@/core/datetime';
 import { db } from '@/db/client';
@@ -69,6 +69,13 @@ function HealthSection() {
     if (!granted) setConnectDenied(true);
   }
 
+  // O sistema (Apple Saúde/Health Connect) gere as permissões: o app não pode
+  // reabrir o pedido nem revogar sozinho. Este atalho leva o usuário aos ajustes
+  // para conceder (após recusar sem querer) ou revogar o acesso.
+  function openHealthSettings() {
+    Linking.openSettings().catch(() => undefined);
+  }
+
   if (isLocked('healthSync', premium)) {
     return (
       <Card style={{ gap: spacing.md }}>
@@ -126,6 +133,13 @@ function HealthSection() {
           ) : null}
         </>
       )}
+      {health.available ? (
+        <Button
+          label={strings.health.manageAccess}
+          variant="secondary"
+          onPress={openHealthSettings}
+        />
+      ) : null}
       <AppText variant="caption" muted>
         {strings.health.privacyNote}
       </AppText>

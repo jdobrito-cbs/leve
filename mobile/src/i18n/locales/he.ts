@@ -481,7 +481,8 @@ export const strings: Strings = {
     connect: 'לחבר',
     connected: 'מחובר',
     disconnect: 'לנתק',
-    importNow: 'לייבא נתונים עכשיו',
+    importNow: 'סנכרון',
+    manageAccess: 'ניהול הגישה בהגדרות',
     importedSuffix: 'נתונים יובאו',
     unavailable:
       'לא זמין במכשיר זה — נדרשת גרסת הפיתוח של האפליקציה (dev build) יחד עם Health Connect או בריאות Apple.',

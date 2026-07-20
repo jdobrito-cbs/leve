@@ -481,7 +481,8 @@ const ptBR = {
     connect: 'Conectar',
     connected: 'Conectado',
     disconnect: 'Desconectar',
-    importNow: 'Importar dados agora',
+    importNow: 'Sincronizar',
+    manageAccess: 'Gerenciar acesso nos ajustes',
     importedSuffix: 'dados importados',
     unavailable:
       'Indisponível neste aparelho — requer o app de desenvolvimento (dev build) e o Health Connect/Apple Saúde.',

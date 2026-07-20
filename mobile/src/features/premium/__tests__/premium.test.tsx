@@ -1,6 +1,7 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 
 import { strings } from '@/i18n/pt-BR';
+import { validatePartnerKey } from '@/features/premium/partnerServer';
 import { isLocked } from '../gates';
 import { PremiumScreen } from '../PremiumScreen';
 
@@ -26,10 +27,20 @@ const mockVerify = jest.fn();
 jest.mock('@/features/premium/licenseKey', () => ({
   verifyLicenseKey: (...a: unknown[]) => mockVerify(...a),
 }));
+// Mantém formatPartnerKeyInput/isServerPartnerKey reais; só a validação online
+// (rede) e o id do aparelho são simulados.
+jest.mock('@/features/premium/partnerServer', () => ({
+  ...jest.requireActual('@/features/premium/partnerServer'),
+  validatePartnerKey: jest.fn(),
+  getDeviceId: jest.fn().mockResolvedValue('dev-test'),
+}));
+const mockValidate = validatePartnerKey as jest.Mock;
 
 beforeEach(() => {
   for (const k of Object.keys(mockStore)) delete mockStore[k];
   mockVerify.mockReset();
+  mockValidate.mockReset();
+  mockValidate.mockResolvedValue(null); // padrão: sem servidor
 });
 
 test('bloqueios configurados: scan e saúde exigem premium; o resto é livre', () => {
@@ -49,16 +60,25 @@ test('modal da chave: inválida mostra erro dentro do modal', async () => {
   await waitFor(() => getByText(strings.premium.keyInvalid));
 });
 
-test('chave válida no modal ativa o desbloqueio definitivo de parceiro', async () => {
-  mockVerify.mockReturnValue('a1b2c3');
+test('chave de parceiro válida ativa o desbloqueio de parceiro', async () => {
+  // O campo formata para LEVE-XXXX-XXXX-XXXX, então o fluxo é o do servidor.
+  mockValidate.mockResolvedValue({ valid: true, label: 'Dra. Ana' });
   const { getByText, getByPlaceholderText } = await render(<PremiumScreen />);
   await fireEvent.press(getByText(strings.premium.redeem));
   await fireEvent.changeText(
     getByPlaceholderText(strings.premium.keyPlaceholder),
-    'LEVE-chave-de-teste',
+    'LEVE-7K4M-9QXP-2ATH',
   );
   await fireEvent.press(getByText(strings.common.confirm));
   await waitFor(() => getByText(strings.premium.activeTitle));
   getByText(strings.premium.activePlans.partner);
-  expect(mockStore.entitlement).toMatchObject({ plan: 'partner', licenseId: 'a1b2c3' });
+  expect(mockStore.entitlement).toMatchObject({ plan: 'partner', licenseId: 'Dra. Ana' });
+});
+
+test('o campo do código já formata para LEVE-XXXX-XXXX-XXXX', async () => {
+  const { getByText, getByPlaceholderText } = await render(<PremiumScreen />);
+  await fireEvent.press(getByText(strings.premium.redeem));
+  const input = getByPlaceholderText(strings.premium.keyPlaceholder);
+  await fireEvent.changeText(input, 'leve7k4m9qxp2ath');
+  expect(input.props.value).toBe('LEVE-7K4M-9QXP-2ATH');
 });
