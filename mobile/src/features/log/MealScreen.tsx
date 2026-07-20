@@ -1,4 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
+import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
@@ -306,7 +307,15 @@ export function MealScreen() {
     setScanning(true);
     setScanCandidates([]);
     try {
-      const result = await getVisionProvider().recognizeFood(picked.assets[0].uri);
+      // Foto de câmera vem com vários MB; o modelo não precisa de mais que
+      // ~1280 px. Reduz upload, dados móveis e latência; se falhar, envia a
+      // original mesmo.
+      const small = await manipulateAsync(
+        picked.assets[0].uri,
+        [{ resize: { width: 1280 } }],
+        { compress: 0.7, format: SaveFormat.JPEG },
+      ).catch(() => null);
+      const result = await getVisionProvider().recognizeFood(small?.uri ?? picked.assets[0].uri);
       setScanCandidates(result.candidates);
     } catch (e) {
       setScanError(e instanceof Error ? e.message : strings.meal.scanFailed);

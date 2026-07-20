@@ -1,4 +1,8 @@
 jest.mock('react-native-reanimated', () => require('react-native-reanimated/mock'));
+jest.mock('expo-image-manipulator', () => ({
+  manipulateAsync: jest.fn(async (uri) => ({ uri })),
+  SaveFormat: { JPEG: 'jpeg' },
+}));
 jest.mock('@react-native-community/datetimepicker', () => {
   const mockReact = require('react');
   const MockPicker = (props) => mockReact.createElement('DateTimePicker', props);
