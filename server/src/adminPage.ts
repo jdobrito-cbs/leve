@@ -262,7 +262,7 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
       </div>
     </div>
 
-    <footer>Área restrita · www.levemobile.com.br/painel</footer>
+    <footer>Área restrita · levemobile.com.br/painel</footer>
   </div>
 
 <script>

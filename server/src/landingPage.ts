@@ -365,7 +365,7 @@ export const LANDING_PAGE_HTML = `<!DOCTYPE html>
     <a href="/aviso-medico">Aviso médico</a>
     <a href="mailto:jdobrito@gmail.com">Contato</a>
   </div>
-  <div>© 2026 Jorge Brito e Jorge Manoel Reis Brito · www.levemobile.com.br</div>
+  <div>© 2026 Jorge Brito e Jorge Manoel Reis Brito · levemobile.com.br</div>
   <p class="disc">O Leve é uma ferramenta de registro e organização e não substitui consulta, diagnóstico ou tratamento por profissionais de saúde. Valores nutricionais e de composição corporal são estimativas informativas. Em emergência, procure atendimento imediatamente (no Brasil, SAMU 192).</p>
 </div></footer>
 

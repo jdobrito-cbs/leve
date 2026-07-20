@@ -35,7 +35,7 @@ function AppLogo({ size = 96 }: { size?: number }) {
 }
 
 /** Domínio oficial do Leve — site, painel de parceiros e serviços de IA. */
-const SITE_URL = 'https://www.levemobile.com.br';
+const SITE_URL = 'https://levemobile.com.br';
 
 export function AboutScreen() {
   const version = Constants.expoConfig?.version ?? '1.0';
@@ -58,7 +58,7 @@ export function AboutScreen() {
           onPress={() => WebBrowser.openBrowserAsync(SITE_URL).catch(() => undefined)}
         />
         <AppText variant="caption" muted style={{ textAlign: 'center' }}>
-          www.levemobile.com.br
+          levemobile.com.br
         </AppText>
         <Button
           label={strings.about.privacyPolicy}

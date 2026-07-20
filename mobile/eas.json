@@ -7,7 +7,7 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_LEVE_SERVER_URL": "https://www.levemobile.com.br",
+        "EXPO_PUBLIC_LEVE_SERVER_URL": "https://levemobile.com.br",
         "EXPO_PUBLIC_REVENUECAT_IOS_KEY": "appl_SjARvxiSyJMapzWLBoGSVWDxqzA"
       }
     },
@@ -17,14 +17,14 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_LEVE_SERVER_URL": "https://www.levemobile.com.br",
+        "EXPO_PUBLIC_LEVE_SERVER_URL": "https://levemobile.com.br",
         "EXPO_PUBLIC_REVENUECAT_IOS_KEY": "appl_SjARvxiSyJMapzWLBoGSVWDxqzA"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_LEVE_SERVER_URL": "https://www.levemobile.com.br",
+        "EXPO_PUBLIC_LEVE_SERVER_URL": "https://levemobile.com.br",
         "EXPO_PUBLIC_REVENUECAT_IOS_KEY": "appl_SjARvxiSyJMapzWLBoGSVWDxqzA"
       }
     }
