@@ -69,18 +69,21 @@ fi
 
 npm prune --omit=dev --no-audit --no-fund
 
+# Mostra o codigo do painel em TODA execucao (instalacao e atualizacao) —
+# se o painel reexecutar os passos, o codigo continua visivel no log.
+TOKEN_ATUAL="$(grep '^ADMIN_TOKEN=' .env | cut -d= -f2- || true)"
 echo ""
 echo "==============================================================="
 echo " Leve pronto."
-if [ "$GENERATED" = "1" ]; then
-  echo ""
-  echo " GUARDE AGORA o codigo do painel (ADMIN_TOKEN):"
-  echo ""
-  echo "   ${ADMIN_TOKEN}"
-  echo ""
-  echo " Ele e pedido UMA vez para criar o administrador master em"
-  echo "   https://${DOMAIN:-seu-dominio}/painel"
-  echo " e e a chave-mestra de recuperacao (tambem fica no .env)."
+echo ""
+echo " Codigo do painel (ADMIN_TOKEN) — guarde com cuidado:"
+echo ""
+echo "   ${TOKEN_ATUAL:-"(nao encontrado no .env)"}"
+echo ""
+echo " Ele e pedido UMA vez para criar o administrador master em"
+echo "   https://${DOMAIN:-seu-dominio}/painel"
+echo " e e a chave-mestra de recuperacao (tambem fica no .env)."
+if ! grep -q '^HUB_API_KEY=..' .env; then
   echo ""
   echo " IA de comida: cole a sua chave em HUB_API_KEY no .env e reinicie."
 fi

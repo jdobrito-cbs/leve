@@ -71,6 +71,36 @@ async function idOf(app: FastifyInstance, cookie: string, username: string) {
   return found?.id ?? '';
 }
 
+describe('cookie de sessão: Secure acompanha o protocolo', () => {
+  it('sem HTTPS o cookie sai sem Secure; com proxy HTTPS sai com Secure', async () => {
+    const store = new MemoryStore();
+    const app = await buildServer({
+      callHub: hub,
+      partnerStore: store,
+      adminStore: store,
+      adminToken: ADMIN_TOKEN,
+      trustProxy: true,
+    });
+    const setup = await app.inject({
+      method: 'POST',
+      url: '/admin/setup',
+      payload: { adminToken: ADMIN_TOKEN, username: 'jorge', password: 'senha-super-forte' },
+    });
+    // inject simula http puro → sem Secure (senão o navegador descarta).
+    const raw = String(setup.headers['set-cookie']);
+    expect(raw).toContain('leve_admin=');
+    expect(raw).not.toContain('Secure');
+
+    const login = await app.inject({
+      method: 'POST',
+      url: '/admin/login',
+      headers: { 'x-forwarded-proto': 'https' },
+      payload: { username: 'jorge', password: 'senha-super-forte' },
+    });
+    expect(String(login.headers['set-cookie'])).toContain('Secure');
+  });
+});
+
 describe('cadastro inicial e 2FA', () => {
   it('setup-state indica cadastro só até existir o master', async () => {
     const app = await makeApp();

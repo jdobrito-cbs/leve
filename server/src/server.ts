@@ -396,9 +396,21 @@ export async function buildServer(options: ServerOptions) {
     }
   };
 
-  const setSession = (reply: FastifyReply, admin: AdminRecord, scope: AdminScope): void => {
+  const setSession = (
+    req: FastifyRequest,
+    reply: FastifyReply,
+    admin: AdminRecord,
+    scope: AdminScope,
+  ): void => {
     const ttl = scope === 'full' ? FULL_TTL_SEC : ENROLL_TTL_SEC;
-    reply.header('set-cookie', serializeSessionCookie(signAdminSession(admin, scope, adminSecret, ttl), ttl));
+    // Secure só quando o acesso veio por HTTPS (com TRUST_PROXY, o protocolo é
+    // o do visitante). Em http simples (teste por IP), o navegador descartaria
+    // um cookie Secure e o login não se sustentaria.
+    const secure = req.protocol === 'https';
+    reply.header(
+      'set-cookie',
+      serializeSessionCookie(signAdminSession(admin, scope, adminSecret, ttl), ttl, secure),
+    );
   };
 
   // Painel (HTML) servido sempre que há ADMIN_TOKEN; as ações exigem sessão.
@@ -441,7 +453,7 @@ export async function buildServer(options: ServerOptions) {
           failedAttempts: 0,
           lockedUntil: null,
         });
-        setSession(reply, master, 'enroll'); // segue direto para configurar o 2FA
+        setSession(req, reply, master, 'enroll'); // segue direto para configurar o 2FA
         return { ok: true, needEnroll: true };
       },
     );
@@ -465,7 +477,7 @@ export async function buildServer(options: ServerOptions) {
         if (!admin.totpEnabled) {
           // Senha certa, mas 2FA ainda não configurado → sessão de configuração.
           await adminStore.updateAdmin(admin.id, { failedAttempts: 0, lockedUntil: null });
-          setSession(reply, admin, 'enroll');
+          setSession(req, reply, admin, 'enroll');
           return { ok: true, needEnroll: true };
         }
         // 2FA obrigatório: aceita o código do app OU um código de backup.
@@ -489,7 +501,7 @@ export async function buildServer(options: ServerOptions) {
           return reply.code(401).send({ error: 'código de verificação incorreto', need2fa: true });
         }
         await adminStore.updateAdmin(admin.id, { failedAttempts: 0, lockedUntil: null });
-        setSession(reply, admin, 'full');
+        setSession(req, reply, admin, 'full');
         return { ok: true };
       },
     );
@@ -519,7 +531,14 @@ export async function buildServer(options: ServerOptions) {
       const secret = generateTotpSecret();
       await adminStore.updateAdmin(sess.admin.id, { totpSecretEnc: encryptSecret(secret, encKey) });
       const url = otpauthUrl(secret, sess.admin.username);
-      return { secret, otpauthUrl: url, qr: qrDataUrl(url) };
+      // QR é conveniência: se falhar por qualquer motivo, a chave manual segue.
+      let qr: string | null = null;
+      try {
+        qr = qrDataUrl(url);
+      } catch {
+        qr = null;
+      }
+      return { secret, otpauthUrl: url, qr };
     });
 
     // Confirma o 2FA com um código válido e devolve os códigos de backup (uma vez).
@@ -542,7 +561,7 @@ export async function buildServer(options: ServerOptions) {
         failedAttempts: 0,
         lockedUntil: null,
       });
-      if (updated) setSession(reply, updated, 'full');
+      if (updated) setSession(req, reply, updated, 'full');
       return { ok: true, backupCodes: codes };
     });
 
@@ -597,7 +616,7 @@ export async function buildServer(options: ServerOptions) {
         passwordHash: hashPassword(parsed.data.newPassword),
         tokenVersion: sess.admin.tokenVersion + 1,
       });
-      if (updated) setSession(reply, updated, 'full'); // renova o cookie (segue logado)
+      if (updated) setSession(req, reply, updated, 'full'); // renova o cookie (segue logado)
       return { ok: true };
     });
 

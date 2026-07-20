@@ -211,19 +211,23 @@ export function verifyAdminSession(token: string, secret: string): AdminSession 
   }
 }
 
-export function serializeSessionCookie(value: string, maxAgeSec: number): string {
-  return [
+/** `secure` acompanha o protocolo do acesso: em HTTPS o cookie leva `Secure`
+ *  (não viaja em texto claro); em http simples (teste por IP/porta) o atributo
+ *  é omitido — senão o navegador descarta o cookie e o login não se sustenta. */
+export function serializeSessionCookie(value: string, maxAgeSec: number, secure = true): string {
+  const parts = [
     `${ADMIN_COOKIE}=${value}`,
     'Path=/',
     'HttpOnly',
-    'Secure',
     'SameSite=Strict',
     `Max-Age=${maxAgeSec}`,
-  ].join('; ');
+  ];
+  if (secure) parts.splice(2, 0, 'Secure');
+  return parts.join('; ');
 }
 
 export function clearSessionCookie(): string {
-  return `${ADMIN_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`;
+  return `${ADMIN_COOKIE}=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0`;
 }
 
 export function readSessionCookie(cookieHeader: string | undefined): string | null {

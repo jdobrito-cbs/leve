@@ -291,6 +291,8 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
       headers:{'content-type':'application/json'},
       body:body?JSON.stringify(body):undefined}).then(function(r){
         return r.text().then(function(t){var j=null;try{j=t?JSON.parse(t):null;}catch(e){}return {status:r.status,ok:r.ok,json:j};});
+      }).catch(function(){
+        return {status:0,ok:false,json:{error:'sem conexão com o servidor'}};
       });
   }
 
@@ -347,7 +349,12 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
   function startEnroll(){
     show('s-enroll');
     api('/admin/2fa/setup','POST').then(function(r){
-      if(!r.ok){$('en-err').textContent=(r.json&&r.json.error)||'erro ao iniciar';return;}
+      if(!r.ok){
+        var msg=(r.json&&r.json.error)||'erro ao iniciar';
+        $('en-err').textContent=msg;
+        $('en-secret').textContent='erro: '+msg;
+        return;
+      }
       $('en-secret').textContent=(r.json.secret||'').replace(/(.{4})/g,'$1 ').trim();
       if(r.json.qr)$('en-qr').src=r.json.qr;
       $('en-link').setAttribute('href',r.json.otpauthUrl||'#');
