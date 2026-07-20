@@ -81,3 +81,18 @@ test('bebidas ficam em ml e as marcas comuns são encontradas', async () => {
   const cerveja = (await searchFoods(db, 'cerveja')).find((f) => f.name.startsWith('Cerveja, pilsen'));
   expect(cerveja?.unit).toBe('ml');
 });
+
+test('frutas regionais e seus sucos entram no seed', async () => {
+  const db = makeDb() as never;
+  await seedFoodItemsIfEmpty(db);
+  // Frutas nomeadas pelo usuário e outras amazônicas/nordestinas.
+  expect((await searchFoods(db, 'graviola')).map((f) => f.name)).toContain('Graviola');
+  expect((await searchFoods(db, 'taperebá')).length).toBeGreaterThan(0); // cajá
+  expect((await searchFoods(db, 'seriguela')).length).toBeGreaterThan(0);
+  expect((await searchFoods(db, 'umbu')).length).toBeGreaterThan(0);
+  // Sucos regionais ficam em ml.
+  const sucoGraviola = (await searchFoods(db, 'suco de graviola'))[0];
+  expect(sucoGraviola?.unit).toBe('ml');
+  expect(sucoGraviola?.calories).toBe(52);
+  expect((await searchFoods(db, 'suco de cajá'))[0]?.unit).toBe('ml');
+});
