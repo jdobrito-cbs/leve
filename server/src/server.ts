@@ -195,6 +195,14 @@ export async function buildServer(options: ServerOptions) {
   });
   const { store, jwtSecret } = options;
 
+  // Erros lançados (banco fora de sincronia, bugs) não podem vazar detalhes
+  // internos na resposta: 5xx sai genérico; 4xx (rate limit, corpo grande,
+  // JSON inválido) mantém a mensagem própria.
+  app.setErrorHandler((err: Error & { statusCode?: number }, _req, reply) => {
+    const status = err.statusCode ?? 500;
+    reply.code(status).send({ error: status >= 500 ? 'erro interno' : err.message });
+  });
+
   // POST sem corpo com content-type application/json não pode virar 400:
   // navegadores enviam o cabeçalho por padrão e várias rotas do painel
   // (2FA, revogar, sair) não têm corpo. Vazio → undefined; inválido → 400.

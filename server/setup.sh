@@ -47,6 +47,13 @@ else
   echo "== Atualizacao: .env existente preservado =="
 fi
 
+# O painel injeta DATABASE_URL na instalacao; se a atualizacao rodar sem ela,
+# recupera do .env preservado — as migracoes do banco dependem disso.
+if [ -z "${DATABASE_URL:-}" ] && [ -f .env ]; then
+  DATABASE_URL="$(grep '^DATABASE_URL=' .env | cut -d= -f2- || true)"
+  export DATABASE_URL
+fi
+
 set_env PORT "${PORT:-3333}"
 set_env TRUST_PROXY "1"
 if [ -n "${DATABASE_URL:-}" ]; then

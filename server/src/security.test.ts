@@ -49,6 +49,23 @@ describe('endurecimento de segurança', () => {
     expect(sawTooMany).toBe(true);
   });
 
+  test('erro interno responde genérico, sem vazar detalhes do banco', async () => {
+    const store = new MemoryStore();
+    // Simula o banco fora de sincronia: a consulta lança um erro interno.
+    store.findPartnerKeyByHash = async () => {
+      throw new Error('coluna secreta X não existe na tabela Y');
+    };
+    const app = await buildServer({ callHub: hub, partnerStore: store });
+    const res = await app.inject({
+      method: 'POST',
+      url: '/partner-keys/validate',
+      payload: { key: 'LEVE-AAAA-BBBB-CCCC' },
+    });
+    expect(res.statusCode).toBe(500);
+    expect(res.json()).toEqual({ error: 'erro interno' });
+    expect(res.body).not.toContain('coluna secreta');
+  });
+
   test('token de admin errado é recusado; certo é aceito (comparação constante)', async () => {
     const app = await buildServer({
       callHub: hub,
