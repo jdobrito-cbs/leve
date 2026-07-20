@@ -1,7 +1,17 @@
 import { strings } from '@/i18n/pt-BR';
-import { LANGUAGES, setActiveLanguage } from '@/i18n/engine';
+import { getActiveLanguage, LANGUAGES, setActiveLanguage, subscribeLanguage } from '@/i18n/engine';
 
 afterEach(() => setActiveLanguage('pt-BR'));
+
+test('trocar o idioma notifica assinantes (o app re-renderiza na hora)', () => {
+  const seen: string[] = [];
+  const off = subscribeLanguage(() => seen.push(getActiveLanguage()));
+  setActiveLanguage('en-US');
+  expect(seen).toEqual(['en-US']);
+  off();
+  setActiveLanguage('fr');
+  expect(seen).toEqual(['en-US']); // cancelado: não recebe mais
+});
 
 test('trocar o idioma muda as strings pelo proxy e voltar restaura', () => {
   const pt = strings.profile.save;

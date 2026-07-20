@@ -696,7 +696,7 @@ export const strings: Strings = {
     languageLabel: 'App-Sprache',
     auto: 'Automatisch (Gerätesprache)',
     restartHint:
-      'Der Wechsel gilt sofort für die Bildschirme; starten Sie die App neu, um ihn überall anzuwenden (für Arabisch und Hebräisch erforderlich).',
+      'Um den Wechsel der Bildschirmrichtung (Arabisch/Hebräisch) abzuschließen, schließen und öffnen Sie die App erneut.',
     unitsLabel: 'Maßeinheiten',
     unitsAuto: 'Automatisch (Geräteregion)',
     unitsMetric: 'Metrisch (kg, cm, ml)',

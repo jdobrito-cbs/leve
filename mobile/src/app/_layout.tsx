@@ -6,7 +6,14 @@ import {
 } from '@expo-google-fonts/manrope';
 import * as Notifications from 'expo-notifications';
 import { Stack } from 'expo-router';
-import { Component, PropsWithChildren, useCallback, useEffect, useState } from 'react';
+import {
+  Component,
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AppText, Button, Screen } from '@/design/components';
@@ -24,12 +31,14 @@ import { registerHealthBackgroundTask } from '@/services/activity/backgroundTask
 import { attachReminderMascotListeners } from '@/services/reminders/reminders';
 import { strings } from '@/i18n/pt-BR';
 import {
+  getActiveLanguage,
   resolveAutoLanguage,
   resolveAutoMeasurement,
   setActiveLanguage,
+  subscribeLanguage,
   type LanguageCode,
 } from '@/i18n/engine';
-import { setUnitSystem, type UnitSystem } from '@/core/units';
+import { getUnitSystem, setUnitSystem, subscribeUnits, type UnitSystem } from '@/core/units';
 
 // No Expo Go alguns módulos nativos não existem — não pode derrubar o app.
 try {
@@ -70,6 +79,11 @@ export default function RootLayout() {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [stage, setStage] = useState<string>(strings.common.bootDb);
+  // Idioma/unidades ativos: trocar no Perfil (ou onboarding) remonta a árvore
+  // de navegação via `key` — todas as telas renascem já no idioma novo, sem
+  // precisar fechar e reabrir o app.
+  const lang = useSyncExternalStore(subscribeLanguage, getActiveLanguage, getActiveLanguage);
+  const units = useSyncExternalStore(subscribeUnits, getUnitSystem, getUnitSystem);
   const [fontsLoaded, fontError] = useFonts({
     Manrope_400Regular,
     Manrope_600SemiBold,
@@ -159,7 +173,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <RootErrorBoundary>
-        <Stack screenOptions={{ headerShown: false }} />
+        <Stack key={`${lang}-${units}`} screenOptions={{ headerShown: false }} />
       </RootErrorBoundary>
     </GestureHandlerRootView>
   );

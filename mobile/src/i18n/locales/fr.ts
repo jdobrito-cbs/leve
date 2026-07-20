@@ -696,7 +696,7 @@ export const strings: Strings = {
     languageLabel: 'Langue de l\'app',
     auto: 'Automatique (langue de l\'appareil)',
     restartHint:
-      'Le changement s\'applique immédiatement aux écrans ; redémarrez l\'app pour l\'appliquer partout (obligatoire pour l\'arabe et l\'hébreu).',
+      'Pour terminer le changement de sens de l\'écran (arabe/hébreu), fermez et rouvrez l\'app.',
     unitsLabel: 'Unités de mesure',
     unitsAuto: 'Automatique (région de l\'appareil)',
     unitsMetric: 'Métrique (kg, cm, ml)',

@@ -16,8 +16,20 @@ const ML_PER_FLOZ = 29.5735295625;
 
 let active: UnitSystem = 'metric';
 
+// Assinantes da troca de sistema: o layout raiz re-renderiza o app na hora
+// (sem isto, telas já montadas manteriam kg/lb antigos até reabrir o app).
+const unitListeners = new Set<() => void>();
+
+export function subscribeUnits(listener: () => void): () => void {
+  unitListeners.add(listener);
+  return () => {
+    unitListeners.delete(listener);
+  };
+}
+
 export function setUnitSystem(system: UnitSystem): void {
   active = system;
+  unitListeners.forEach((l) => l());
 }
 
 export function getUnitSystem(): UnitSystem {

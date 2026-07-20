@@ -696,7 +696,7 @@ export const strings: Strings = {
     languageLabel: '应用语言',
     auto: '自动（跟随设备语言）',
     restartHint:
-      '切换后各界面立即生效；重启应用以完全应用（阿拉伯语和希伯来语必须重启）。',
+      '要完成屏幕方向切换（阿拉伯语/希伯来语），请关闭并重新打开应用。',
     unitsLabel: '计量单位',
     unitsAuto: '自动（跟随设备区域）',
     unitsMetric: '公制（kg、cm、ml）',

@@ -696,7 +696,7 @@ export const strings: Strings = {
     languageLabel: 'アプリの言語',
     auto: '自動（端末の言語）',
     restartHint:
-      '変更はすぐに画面へ反映されます。すべてに適用するにはアプリを再起動してください（アラビア語とヘブライ語では必須です）。',
+      '画面の表示方向の切り替え（アラビア語・ヘブライ語）を完了するには、アプリを閉じて開き直してください。',
     unitsLabel: '単位',
     unitsAuto: '自動（端末の地域）',
     unitsMetric: 'メートル法（kg、cm、ml）',

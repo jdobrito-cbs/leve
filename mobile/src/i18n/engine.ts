@@ -71,6 +71,18 @@ let defaultCatalog: Record<string, unknown> | null = null;
 let activeCatalog: Record<string, unknown> | null = null;
 let activeCode: LanguageCode = 'pt-BR';
 
+// Assinantes da troca de idioma: o layout raiz usa isto para re-renderizar o
+// app inteiro na hora (sem isto, telas já montadas ficariam no idioma antigo
+// até reabrir o app). Mesmo padrão do themeSignal.
+const languageListeners = new Set<() => void>();
+
+export function subscribeLanguage(listener: () => void): () => void {
+  languageListeners.add(listener);
+  return () => {
+    languageListeners.delete(listener);
+  };
+}
+
 export function registerDefaultCatalog(catalog: object): void {
   defaultCatalog = catalog as Record<string, unknown>;
   if (!activeCatalog) activeCatalog = defaultCatalog;
@@ -124,6 +136,7 @@ export function setActiveLanguage(code: LanguageCode): void {
   activeCatalog = catalogFor(code) ?? defaultCatalog;
   activeCode = code;
   applyRtl(code);
+  languageListeners.forEach((l) => l());
 }
 
 export function getActiveLanguage(): LanguageCode {

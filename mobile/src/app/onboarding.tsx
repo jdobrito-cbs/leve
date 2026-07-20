@@ -12,7 +12,7 @@ import {
   Button,
   Card,
   DateField,
-  DisclaimerBanner,
+  DisclaimerBanner,
   IconChip,
   Input,
   ListRow,
@@ -46,8 +46,8 @@ import {
 import { strings } from '@/i18n/pt-BR';
 import { setSetting } from '@/db/settingsRepo';
 import {
+  getActiveLanguage,
   LANGUAGES,
-  resolveAutoLanguage,
   setActiveLanguage,
   type LanguageCode,
 } from '@/i18n/engine';
@@ -177,7 +177,9 @@ function ProfileStep() {
 /** Primeira coisa na primeira abertura: escolher o idioma. O da região do
  *  aparelho vem pré-selecionado e a tela muda de idioma ao tocar na opção. */
 function LanguageStep({ onDone }: { onDone: () => void }) {
-  const [selected, setSelected] = useState<LanguageCode>(resolveAutoLanguage());
+  // Idioma ativo (não o do aparelho): tocar numa opção remonta a árvore e a
+  // seleção precisa renascer apontando para o idioma recém-escolhido.
+  const [selected, setSelected] = useState<LanguageCode>(getActiveLanguage());
 
   function pick(code: LanguageCode) {
     setSelected(code);

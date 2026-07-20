@@ -5,14 +5,26 @@ import {
   formatHeight,
   formatVolume,
   formatWeight,
+  getUnitSystem,
   kgToDisplay,
   mlToDisplay,
   setUnitSystem,
+  subscribeUnits,
   volumeUnit,
   weightUnit,
 } from '../units';
 
 afterEach(() => setUnitSystem('metric'));
+
+test('trocar o sistema de medidas notifica assinantes (o app re-renderiza)', () => {
+  const seen: string[] = [];
+  const off = subscribeUnits(() => seen.push(getUnitSystem()));
+  setUnitSystem('imperial');
+  expect(seen).toEqual(['imperial']);
+  off();
+  setUnitSystem('metric');
+  expect(seen).toEqual(['imperial']); // cancelado: não recebe mais
+});
 
 test('métrico é identidade', () => {
   setUnitSystem('metric');

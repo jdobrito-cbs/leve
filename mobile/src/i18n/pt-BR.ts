@@ -696,7 +696,7 @@ const ptBR = {
     languageLabel: 'Idioma do app',
     auto: 'Automático (idioma do aparelho)',
     restartHint:
-      'A troca vale para as telas imediatamente; reinicie o app para aplicar em tudo (obrigatório para árabe e hebraico).',
+      'Para concluir a mudança da direção da tela (árabe/hebraico), feche e abra o app.',
     unitsLabel: 'Unidades de medida',
     unitsAuto: 'Automático (região do aparelho)',
     unitsMetric: 'Métrico (kg, cm, ml)',

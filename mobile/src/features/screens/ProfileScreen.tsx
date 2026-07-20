@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useEffect, useState } from 'react';
-import { Platform, View } from 'react-native';
+import { I18nManager, Platform, View } from 'react-native';
 
 import { ageFromIsoDate, brDateToIso } from '@/core/datetime';
 import { db } from '@/db/client';
@@ -32,6 +32,8 @@ import { useProfileForm } from '@/features/profile/useProfileForm';
 import { strings } from '@/i18n/pt-BR';
 
 import {
+  getActiveLanguage,
+  isRtlLanguage,
   LANGUAGES,
   resolveAutoLanguage,
   resolveAutoMeasurement,
@@ -150,8 +152,10 @@ export function ProfileScreen() {
   const [reportMsg, setReportMsg] = useState<string | null>(null);
   const [langSel, setLangSel] = useState<'auto' | LanguageCode>('auto');
   const [unitSel, setUnitSel] = useState<'auto' | UnitSystem>('auto');
-  const [langChanged, setLangChanged] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
+  // O espelhamento RTL (árabe/hebraico) só se completa reabrindo o app:
+  // derivado do estado real, o aviso sobrevive à remontagem pós-troca.
+  const rtlPending = I18nManager.isRTL !== isRtlLanguage(getActiveLanguage());
 
   useEffect(() => {
     getSetting<'auto' | LanguageCode>(db, 'language')
@@ -164,9 +168,9 @@ export function ProfileScreen() {
 
   async function pickLanguage(code: 'auto' | LanguageCode) {
     setLangSel(code);
-    setLangChanged(true);
     setLangOpen(false);
     await setSetting(db, 'language', code).catch(() => undefined);
+    // Notifica o app inteiro: o layout raiz remonta as telas no idioma novo.
     setActiveLanguage(code === 'auto' ? resolveAutoLanguage() : code);
   }
 
@@ -490,7 +494,7 @@ export function ProfileScreen() {
             ))}
           </>
         ) : null}
-        {langChanged ? (
+        {rtlPending ? (
           <AppText variant="caption" muted>
             {strings.language.restartHint}
           </AppText>
