@@ -1,4 +1,3 @@
-// GERADO de mobile/src/i18n/legal-pt-BR.ts — não editar à mão (rode scripts/gen-legal.mts).
 export interface LegalSection { heading?: string; paragraphs: string[] }
 export interface LegalDoc { title: string; updated: string; sections: LegalSection[] }
 

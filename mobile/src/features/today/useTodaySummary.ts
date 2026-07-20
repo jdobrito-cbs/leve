@@ -31,27 +31,22 @@ export interface HealthLatest {
 
 export interface TodaySummary {
   loading: boolean;
-  /** Nome para a saudação: perfil, senão o da conta conectada. */
   userName: string | null;
   waterMl: number;
   waterGoalMl: number;
-  /** Horário (ISO) do último registro de água de hoje, ou null. */
   lastWaterAt: string | null;
   macros: DayMacros;
   kcal: number;
   calorieGoalKcal: number | null;
   lastWeightKg: number | null;
-  /** Primeiro peso registrado + os 5 últimos, em ordem cronológica. */
   weightSeries: WeightLog[];
   goalWeightKg: number | null;
   nextDoseAt: string | null;
-  /** Dias até a próxima dose, calculado na atualização (render puro). */
   daysToNextDose: number | null;
   lastDoseLabel: string | null;
   doseIntervalDays: number | null;
   doses: DoseLog[];
   symptomsCount: number;
-  /** Os 7 últimos sintomas registrados (mais recentes primeiro). */
   recentSymptoms: SymptomLog[];
   steps: number | null;
   activeCalories: number;
@@ -97,9 +92,7 @@ export function useTodaySummary(): TodaySummary {
   const [userName, setUserName] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
-    // Balança/wearable → app de saúde → Leve, sem toque (throttle de 1 h).
     await autoSyncIfDue(db).catch(() => undefined);
-    // Mesmo ciclo: sem passos na última hora → aviso de levantar e caminhar.
     checkMovementIfDue(db).catch(() => undefined);
     const now = new Date();
     const startOfDay = new Date(now);
@@ -125,7 +118,6 @@ export function useTodaySummary(): TodaySummary {
     }
     setMacros(dayMacros);
     setLastWeightKg(recentWeights[0]?.weightKg ?? null);
-    // Gráfico: do primeiro peso registrado aos 5 últimos.
     const recentAsc = [...recentWeights].reverse();
     setWeightSeries(
       first && !recentAsc.some((w) => w.id === first.id) ? [first, ...recentAsc] : recentAsc,
@@ -144,7 +136,6 @@ export function useTodaySummary(): TodaySummary {
       setCalorieGoalKcal(profile.calorieGoalKcal ?? null);
       setGoalWeightKg(profile.goalWeightKg ?? null);
     }
-    // Saudação usa só o primeiro nome (nomes extensos poluem o topo).
     const firstName = (full: string | null | undefined) =>
       full?.trim().split(/\s+/)[0] ?? null;
     try {
@@ -166,7 +157,6 @@ export function useTodaySummary(): TodaySummary {
     }
     try {
       const burned = await metricSeries(db, 'active_calories', startOfDay);
-      // Saúde conectada + exercícios registrados na Academia.
       const gymKcal = await gymKcalForDay(db, now).catch(() => 0);
       setActiveCalories(Math.round(burned.reduce((a, m) => a + m.value, 0) + gymKcal));
       const [sleep, sleepEff, breathing, hr, spo2, resp] = await Promise.all([

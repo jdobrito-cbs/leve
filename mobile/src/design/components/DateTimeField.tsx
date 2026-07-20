@@ -14,11 +14,9 @@ interface Props {
   timeValue: string;
   onChangeDate: (v: string) => void;
   onChangeTime: (v: string) => void;
-  /** Chamado quando qualquer campo interno ganha foco (fecha réguas abertas). */
   onFieldFocus?: () => void;
 }
 
-/** Máscara progressiva DD/MM/AAAA a partir só dos dígitos digitados. */
 export function maskDateBR(text: string): string {
   const d = text.replace(/\D/g, '').slice(0, 8);
   if (d.length <= 2) return d;
@@ -26,14 +24,12 @@ export function maskDateBR(text: string): string {
   return `${d.slice(0, 2)}/${d.slice(2, 4)}/${d.slice(4)}`;
 }
 
-/** Máscara progressiva HH:MM a partir só dos dígitos digitados. */
 export function maskTimeHM(text: string): string {
   const d = text.replace(/\D/g, '').slice(0, 4);
   if (d.length <= 2) return d;
   return `${d.slice(0, 2)}:${d.slice(2)}`;
 }
 
-/** Data e hora do registro (pré-preenchidas com agora; edite para lançar registros antigos). */
 export function DateTimeField({
   dateValue,
   timeValue,
@@ -44,7 +40,6 @@ export function DateTimeField({
   const { colors } = useTheme();
   const [picker, setPicker] = useState<'date' | 'time' | null>(null);
 
-  // Valor inicial do seletor: o que está digitado, senão agora.
   const pickerValue =
     parseDateTimeBR(
       /^\d{2}\/\d{2}\/\d{4}$/.test(dateValue) ? dateValue : formatDateBR(new Date()),
@@ -52,7 +47,6 @@ export function DateTimeField({
     ) ?? new Date();
 
   function onPicked(event: DateTimePickerEvent, selected?: Date) {
-    // Android abre como diálogo: qualquer evento (ok/cancelar) encerra.
     if (Platform.OS === 'android') setPicker(null);
     if (event.type === 'dismissed' || !selected) return;
     if (picker === 'date') onChangeDate(formatDateBR(selected));
@@ -134,7 +128,6 @@ export function DateTimeField({
             />
           </PickerSheet>
         ) : (
-          // Android: o seletor nativo já abre como diálogo com OK/Cancelar.
           <DateTimePicker
             value={pickerValue}
             mode={picker}

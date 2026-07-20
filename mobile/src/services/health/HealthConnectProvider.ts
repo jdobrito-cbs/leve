@@ -48,7 +48,6 @@ function getModule(): HealthConnectModule | null {
   }
 }
 
-/** Adapter fino sobre o Health Connect (Android). Nunca lança: falhas viram resultados vazios. */
 export class HealthConnectProvider implements HealthProvider {
   private mod = getModule();
 
@@ -136,7 +135,6 @@ export class HealthConnectProvider implements HealthProvider {
     }
   }
 
-  /** Noites de sono (deitar → acordar); sonecas <3h ficam de fora, como no iPhone. */
   async readSleepNights(since: Date): Promise<SleepNight[]> {
     if (!this.mod) return [];
     try {
@@ -193,7 +191,6 @@ export class HealthConnectProvider implements HealthProvider {
       const end = r.endTime ? new Date(r.endTime as string) : null;
       if (!start || !end || end <= start) continue;
       const sessionMs = end.getTime() - start.getTime();
-      // Estágios (quando o relógio registra): 2/4/5/6 = dormindo, 1/7 = acordado.
       const stages =
         (r.stages as { startTime?: string; endTime?: string; stage?: number }[] | undefined) ??
         [];
@@ -208,7 +205,6 @@ export class HealthConnectProvider implements HealthProvider {
       }
       const sleptMs = asleepMs > 0 ? asleepMs : sessionMs;
       push('sleep_hours', Math.round((sleptMs / 36e5) * 10) / 10, end);
-      // Mesma régua do iPhone: % da noite efetivamente dormida.
       if (asleepMs > 0 && sessionMs > asleepMs) {
         push(
           'sleep_efficiency_pct',

@@ -1,7 +1,5 @@
 import Svg, { Path } from 'react-native-svg';
 
-/** Arte do panda da aplicação GLP-1 (viewBox original 555×449);
- *  animação aplicada em pandas.tsx, por cima desta base. */
 export function DosePandaArt({ width, height }: { width: number; height: number }) {
   return (
     <Svg width={width} height={height} viewBox="0 0 555 449" style={{ position: 'absolute' }}>

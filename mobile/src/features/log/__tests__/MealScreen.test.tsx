@@ -136,7 +136,7 @@ test('scan: foto → candidato → casa com TACO → prato → salva com origin 
 });
 
 test('scan: sem base TACO, usa a nutrição da IA e calcula as calorias da porção', async () => {
-  mockSearch.mockResolvedValue([]); // graviola regional não está no banco
+  mockSearch.mockResolvedValue([]);
   mockRecognize.mockResolvedValue({
     label: 'suco de graviola',
     confidence: 0.85,
@@ -149,7 +149,7 @@ test('scan: sem base TACO, usa a nutrição da IA e calcula as calorias da porç
   await fireEvent.press(getByText(strings.meal.scanGallery));
   await waitFor(() => getByText('suco de graviola'));
   await fireEvent.press(getByText('suco de graviola'));
-  await waitFor(() => getByDisplayValue('200')); // porção estimada, modo busca
+  await waitFor(() => getByDisplayValue('200'));
   await fireEvent.press(getByText(strings.meal.addToPlate));
   await waitFor(() => getByText(strings.meal.plateSection));
   await fireEvent.press(getByText(strings.meal.addToMeal));
@@ -159,7 +159,7 @@ test('scan: sem base TACO, usa a nutrição da IA e calcula as calorias da porç
       expect.objectContaining({
         name: 'suco de graviola',
         portionGrams: 200,
-        calories: 124, // 62/100 × 200 ml
+        calories: 124,
         origin: 'scan',
       }),
     ),
@@ -167,7 +167,7 @@ test('scan: sem base TACO, usa a nutrição da IA e calcula as calorias da porç
 });
 
 test('descrever: texto → IA → candidato com porção editável → prato', async () => {
-  mockSearch.mockResolvedValue([]); // não está na TACO
+  mockSearch.mockResolvedValue([]);
   mockDescribe.mockResolvedValue([
     { label: 'ovo frito', confidence: 0.9, portionGrams: 100, unit: 'g', kcalPer100: 196, fiberG: 0 },
   ]);
@@ -177,7 +177,7 @@ test('descrever: texto → IA → candidato com porção editável → prato', a
   await fireEvent.press(getByText(strings.meal.describe.button));
   await waitFor(() => getByText('ovo frito'));
   await fireEvent.press(getByText('ovo frito'));
-  await waitFor(() => getByDisplayValue('100')); // porção editável antes do OK
+  await waitFor(() => getByDisplayValue('100'));
   await fireEvent.press(getByText(strings.meal.addToPlate));
   await waitFor(() => getByText(strings.meal.plateSection));
   await fireEvent.press(getByText(strings.meal.addToMeal));

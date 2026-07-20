@@ -7,7 +7,6 @@ import { AppText, Button, Card, Screen } from '@/design/components';
 import { spacing } from '@/design/tokens';
 import { strings } from '@/i18n/pt-BR';
 
-/** Ícone do app (broto sobre gradiente azul), igual ao da tela inicial. */
 function AppLogo({ size = 96 }: { size?: number }) {
   const glyph = size * 0.62;
   const offset = (size - glyph) / 2;
@@ -34,7 +33,6 @@ function AppLogo({ size = 96 }: { size?: number }) {
   );
 }
 
-/** Domínio oficial do Leve — site, painel de parceiros e serviços de IA. */
 const SITE_URL = 'https://levemobile.com.br';
 
 export function AboutScreen() {

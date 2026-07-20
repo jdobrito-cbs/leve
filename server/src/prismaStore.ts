@@ -69,7 +69,6 @@ export class PrismaStore implements Store, PartnerKeyStore, AdminStore {
     return updated.count > 0;
   }
   async bindPartnerKey(id: string, deviceId: string): Promise<boolean> {
-    // Só prende se ainda estiver livre e ativa (condição na cláusula where).
     const updated = await this.prisma.partnerKey.updateMany({
       where: { id, revokedAt: null, boundDeviceId: null },
       data: { boundDeviceId: deviceId, boundAt: new Date() },
@@ -84,7 +83,6 @@ export class PrismaStore implements Store, PartnerKeyStore, AdminStore {
     return updated.count > 0;
   }
   async deletePartnerKey(id: string): Promise<boolean> {
-    // Só apaga se já estiver revogada (limpeza; a revogação é o passo de corte).
     const deleted = await this.prisma.partnerKey.deleteMany({
       where: { id, NOT: { revokedAt: null } },
     });

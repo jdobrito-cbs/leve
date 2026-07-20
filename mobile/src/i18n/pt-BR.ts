@@ -531,7 +531,7 @@ const ptBR = {
       appointments: 'Agende suas consultas médicas marcadas em hospitais e clínicas e receba avisos no dia e nas horas antes do horário inserido',
     },
     medsLockedBody: 'O controle de medicamentos faz parte do Leve Premium.',
-    appointmentsLockedBody: 
+    appointmentsLockedBody:
       'A agenda das suas consultas marcadas em hospitais e clínicas, com avisos, faz parte do Leve Premium.',
     gymLockedBody: 'O registro de academia faz parte do Leve Premium.',
     cycleLockedBody: 'O controle de ciclo menstrual faz parte do Leve Premium.',
@@ -716,8 +716,6 @@ const ptBR = {
   },
 } as const;
 
-/** Esqueleto do catálogo com valores alargados para string — os outros idiomas
- *  declaram `const strings: Strings` e o compilador cobra TODAS as chaves. */
 type DeepStrings<T> = {
   [K in keyof T]: T[K] extends string ? string : DeepStrings<T[K]>;
 };
@@ -725,6 +723,4 @@ export type Strings = DeepStrings<typeof ptBR>;
 
 registerDefaultCatalog(ptBR as Strings);
 
-/** Proxy vivo: cada leitura busca o idioma ativo — os imports existentes
- *  (`import { strings } from '@/i18n/pt-BR'`) continuam funcionando. */
 export const strings: Strings = makeStringsProxy(ptBR as Strings);

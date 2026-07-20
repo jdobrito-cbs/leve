@@ -1,11 +1,5 @@
 import type { SleepNight } from './HealthProvider';
 
-/**
- * Horários típicos de dormir e acordar a partir das noites do app de saúde.
- * Usa a MEDIANA (resistente a noites atípicas). Para a hora de dormir, o
- * relógio "vira" à meia-noite (23:30 e 00:30 são vizinhos); deslocamos 12h
- * para o cluster noturno cair no meio da régua antes de ordenar.
- */
 function medianClockTime(dates: Date[], shiftMin: number, minCount: number): string | null {
   if (dates.length < minCount) return null;
   const shifted = dates
@@ -19,7 +13,6 @@ function medianClockTime(dates: Date[], shiftMin: number, minCount: number): str
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
-/** Hora típica de deitar (mín. 3 noites); null sem dados suficientes. */
 export function typicalBedtime(nights: SleepNight[], minNights = 3): string | null {
   return medianClockTime(
     nights.map((n) => n.start),
@@ -28,9 +21,7 @@ export function typicalBedtime(nights: SleepNight[], minNights = 3): string | nu
   );
 }
 
-/** Hora típica de acordar (mín. 3 noites); null sem dados suficientes. */
 export function typicalWakeTime(nights: SleepNight[], minNights = 3): string | null {
-  // Acordar cluster de manhã (5h–11h) — longe da meia-noite, sem deslocamento.
   return medianClockTime(
     nights.map((n) => n.end),
     0,

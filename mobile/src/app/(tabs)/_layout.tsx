@@ -37,7 +37,6 @@ import { useTheme } from '@/design/useTheme';
 import { useOnboarding } from '@/features/onboarding/useOnboarding';
 import { strings } from '@/i18n/pt-BR';
 
-/** Pulo elástico do ícone — redisparado a cada toque na aba (via `signal`). */
 function BouncyIcon({
   focused,
   signal,
@@ -60,7 +59,6 @@ function BouncyIcon({
   return <Animated.View style={style}>{children}</Animated.View>;
 }
 
-/** Botão central de Registrar: salta com mola a cada toque. */
 function Fab({ focused, signal }: { focused: boolean; signal: number }) {
   const { colors } = useTheme();
   const scale = useSharedValue(1);
@@ -103,15 +101,12 @@ function Fab({ focused, signal }: { focused: boolean; signal: number }) {
   );
 }
 
-// Elipse do vidro: mais larga que alta, como o Liquid Glass das abas do iOS.
 const GLASS_W = 62;
 const GLASS_H = 46;
-// No Registrar o vidro cresce para envolver o botão elevado + o rótulo.
 const BIG_W = 58;
 const BIG_H = 66;
 const BIG_TOP = -9;
 
-/** Vidro líquido do iOS 26 quando disponível; senão, círculo translúcido. */
 function getGlassView(): ComponentType<{
   style?: object;
   glassEffectStyle?: string;
@@ -126,11 +121,8 @@ function getGlassView(): ComponentType<{
     return null;
   }
 }
-// Resolvido uma vez na carga do módulo — nada de require no primeiro quadro.
 const GlassComponent = getGlassView();
 
-/** Botão de aba que aceita toque E arrasto: arrastar leva o vidro junto e,
- *  ao soltar, seleciona a aba sob o dedo — como no Liquid Glass do iOS. */
 function DragTabButton({
   children,
   style,
@@ -180,8 +172,6 @@ function DragTabButton({
   );
 }
 
-/** Fundo da barra de abas: elipse de vidro que desliza até a aba ativa,
- *  segue o dedo no arrasto e CRESCE ao passar pelo Registrar. */
 function GlassSlider({
   count,
   activeIndex,
@@ -198,25 +188,20 @@ function GlassSlider({
   onWidth: (w: number) => void;
 }) {
   const { mode } = useTheme();
-  // A barra ocupa a largura da tela: usar a janela como base elimina a espera
-  // pela medição de layout — o vidro aparece já no primeiro quadro.
   const { width: winW } = useWindowDimensions();
   const [measuredW, setMeasuredW] = useState(0);
   const barW = measuredW > 0 ? measuredW : winW;
-  const cx = useSharedValue(-9999); // centro da elipse
+  const cx = useSharedValue(-9999);
   const slot = count > 0 ? barW / count : 0;
   const Glass = GlassComponent;
 
   useEffect(() => {
     if (slot <= 0 || activeIndex < 0) return;
     const target = activeIndex * slot + slot / 2;
-    // Primeira medição posiciona sem animar; depois desliza com mola firme —
-    // sem ultrapassar o alvo (em saltos longos ele chegava a sair da tela).
     if (cx.value < -5000) cx.value = target;
     else cx.value = withSpring(target, { damping: 24, stiffness: 240, overshootClamping: true });
   }, [activeIndex, slot, cx]);
 
-  // Soltou o dedo → a mola parte da posição onde o vidro estava, sem pulo.
   useAnimatedReaction(
     () => dragging.value,
     (now, prev) => {
@@ -227,7 +212,6 @@ function GlassSlider({
     [barW],
   );
 
-  // 0→1 quando o centro está sobre a aba grande (Registrar), com mola.
   const bigTarget = useDerivedValue(() => {
     if (barW <= 0 || count <= 0 || bigIndex < 0) return 0;
     const center =
@@ -321,8 +305,6 @@ export default function TabsLayout() {
     ciclo: 0,
     perfil: 0,
   });
-  // A aba Ciclo só existe para o sexo feminino; o Perfil emite o sinal
-  // na hora do clique, e aqui só carregamos o valor salvo na primeira vez.
   const sexLive = useSyncExternalStore(subscribeSex, getSexSignal, getSexSignal);
   useEffect(() => {
     if (getSexSignal() !== null) return;
@@ -339,11 +321,9 @@ export default function TabsLayout() {
     ...(cycleTab ? ['ciclo'] : []),
     'perfil',
   ];
-  // Aba ativa pela rota atual ('/' = index; '/perfil' = perfil; fora das abas = -1).
   const pathname = usePathname();
   const activeTab = pathname === '/' ? 'index' : (pathname.split('/')[1] ?? '');
   const activeIndex = visibleNames.indexOf(activeTab);
-  // Arrasto do vidro: posição do dedo compartilhada entre botões e círculo.
   const dragX = useSharedValue(0);
   const dragging = useSharedValue(0);
   const [barW, setBarW] = useState(0);
@@ -389,13 +369,9 @@ export default function TabsLayout() {
         ),
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
-        // Em telas largas (tablet/web) o padrão vira ícone ao lado do texto,
-        // o que desmonta o botão central — mantém o layout vertical sempre.
         tabBarLabelPosition: 'below-icon',
-        // Fonte fixa (sem escala do sistema): rótulos ampliados estouravam as abas.
         tabBarAllowFontScaling: false,
         tabBarLabelStyle: { fontFamily: fonts.semibold, fontSize: 9 },
-        // Até 6 abas: zera folgas e larguras mínimas para nada vazar da tela.
         tabBarItemStyle: { paddingHorizontal: 0, marginHorizontal: 0, minWidth: 0, flex: 1 },
         tabBarIconStyle: { marginHorizontal: 0 },
         tabBarStyle: {
@@ -406,8 +382,6 @@ export default function TabsLayout() {
           shadowOpacity: mode === 'light' ? 0.08 : 0,
           shadowRadius: 16,
           shadowOffset: { width: 0, height: -4 },
-          // Altura inclui o recuo do indicador de início (senão fica um vão escuro
-          // abaixo da barra e ela briga com o gesto de home do iPhone).
           height: 64 + insets.bottom,
           paddingTop: 6,
           paddingBottom: Math.max(insets.bottom, 8),

@@ -36,7 +36,7 @@ test('tomadas do dia são criadas uma vez, marcadas e contadas na adesão', asyn
 
   let intakes = await todayIntakes(db, day);
   expect(intakes).toHaveLength(3);
-  intakes = await todayIntakes(db, day); // idempotente
+  intakes = await todayIntakes(db, day);
   expect(intakes).toHaveLength(3);
 
   await markTaken(db, intakes[0].intakeId, day);

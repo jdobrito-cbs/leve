@@ -6,8 +6,8 @@ test('maskDateBR formata progressivamente enquanto digita', () => {
   expect(maskDateBR('070')).toBe('07/0');
   expect(maskDateBR('0703')).toBe('07/03');
   expect(maskDateBR('07032026')).toBe('07/03/2026');
-  expect(maskDateBR('07/03/2026')).toBe('07/03/2026'); // já formatado permanece
-  expect(maskDateBR('070320269')).toBe('07/03/2026'); // dígito extra é descartado
+  expect(maskDateBR('07/03/2026')).toBe('07/03/2026');
+  expect(maskDateBR('070320269')).toBe('07/03/2026');
 });
 
 test('maskTimeHM formata progressivamente enquanto digita', () => {

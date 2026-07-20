@@ -7,7 +7,7 @@ export interface Medication {
   id: number;
   name: string;
   doseText: string | null;
-  times: string; // 'HH:MM,HH:MM'
+  times: string;
   active: number;
 }
 
@@ -16,14 +16,12 @@ export interface TodayIntake {
   medicationId: number;
   name: string;
   doseText: string | null;
-  time: string; // 'HH:MM'
+  time: string;
   takenAt: string | null;
 }
 
-/** Quantidades de doses diárias oferecidas (dividem 24 h em horas cheias). */
 export const DAILY_DOSE_COUNTS = [1, 2, 3, 4, 6, 8, 12] as const;
 
-/** Horários automáticos: doses igualmente espaçadas nas 24 h, ancoradas às 08:00. */
 export function timesForDailyCount(count: number): string[] {
   const stepMin = Math.round((24 * 60) / count);
   const times = Array.from({ length: count }, (_, i) => {
@@ -63,7 +61,6 @@ export async function deactivateMedication(db: AppDb, id: number): Promise<void>
   await db.update(medications).set({ active: 0 }).where(eq(medications.id, id));
 }
 
-/** Garante as tomadas do dia (idempotente) e devolve a lista com estado. */
 export async function todayIntakes(db: AppDb, day: Date): Promise<TodayIntake[]> {
   const meds = await listMedications(db);
   const dayKey = localDayKey(day);
@@ -114,7 +111,6 @@ export async function markTaken(db: AppDb, intakeId: number, at: Date): Promise<
   await db.update(medIntakes).set({ takenAt: at.toISOString() }).where(eq(medIntakes.id, intakeId));
 }
 
-/** Adesão dos últimos N dias (inclui hoje): tomadas / agendadas. */
 export async function adherence(db: AppDb, days: number, today: Date): Promise<{ taken: number; total: number }> {
   const since = new Date(today);
   since.setDate(since.getDate() - (days - 1));

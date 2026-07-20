@@ -1,17 +1,10 @@
 import Svg, { Path } from 'react-native-svg';
 
-/**
- * Arte do panda comemorando a queda de peso (viewBox original 547×456),
- * dividida em duas camadas com as MESMAS coordenadas: a balança fica parada e
- * o panda pula (animação em pandas.tsx). Traçados copiados do SVG original.
- */
-
 interface ArtProps {
   width: number;
   height: number;
 }
 
-/** Só a balança (canto inferior esquerdo) — camada estática. */
 export function SlimmerScaleArt({ width, height }: ArtProps) {
   return (
     <Svg width={width} height={height} viewBox="0 0 547 456" style={{ position: 'absolute' }}>
@@ -43,7 +36,6 @@ export function SlimmerScaleArt({ width, height }: ArtProps) {
   );
 }
 
-/** Só o panda comemorando — camada que pula. */
 export function SlimmerBodyArt({ width, height }: ArtProps) {
   return (
     <Svg width={width} height={height} viewBox="0 0 547 456" style={{ position: 'absolute' }}>

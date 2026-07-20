@@ -22,12 +22,6 @@ interface AccelModule {
   };
 }
 
-/**
- * Física da água pelo acelerômetro: `angle` segue a direção real da gravidade
- * com mola (inclinou o aparelho → a superfície continua nivelada) e `boost`
- * sobe no chacoalhão e decai (ondas ganham amplitude). Sem o módulo nativo
- * (build antiga, web sem sensor, testes), os valores ficam em 0 — água como antes.
- */
 export function useWaterPhysics(): {
   angle: SharedValue<number>;
   boost: SharedValue<number>;
@@ -38,8 +32,6 @@ export function useWaterPhysics(): {
   useEffect(() => {
     let sub: AccelSubscription | null = null;
     try {
-      // Sonda oficial: retorna null (sem erro e sem log) quando a build
-      // instalada não tem o módulo nativo do acelerômetro.
       const { requireOptionalNativeModule } = require('expo-modules-core') as {
         requireOptionalNativeModule(name: string): unknown;
       };
@@ -47,7 +39,6 @@ export function useWaterPhysics(): {
       const { Accelerometer } = require('expo-sensors') as AccelModule;
       Accelerometer.setUpdateInterval(60);
       sub = Accelerometer.addListener((d) => {
-        // iOS entrega o vetor da gravidade; Android entrega a reação (invertida).
         const gx = Platform.OS === 'android' ? -d.x : d.x;
         const gy = Platform.OS === 'android' ? -d.y : d.y;
         const target = Math.max(-2.2, Math.min(2.2, Math.atan2(gx, -gy)));
@@ -61,7 +52,6 @@ export function useWaterPhysics(): {
         }
       });
     } catch {
-      // sem acelerômetro neste ambiente — água estática
     }
     return () => sub?.remove();
   }, [angle, boost]);

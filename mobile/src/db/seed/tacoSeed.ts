@@ -14,9 +14,7 @@ interface SeedFood {
   carbsG: number | null;
   fatG: number | null;
   fiberG: number | null;
-  /** 'ml' para líquidos (valores por 100 ml); padrão 'g'. */
   unit?: 'g' | 'ml';
-  /** Porção de referência amigável, ex.: '1 fatia (60 g)'. */
   referencePortion?: string;
 }
 
@@ -42,29 +40,24 @@ async function insertChunked(db: AppDb, rows: ReturnType<typeof toRows>): Promis
   }
 }
 
-/** Sobe a versão ao mudar QUALQUER correção abaixo — instalações antigas aplicam na abertura. */
 const SEED_PATCH_VERSION = 1;
 
-/** Correções de dados da base TACO — fonte: IBGE/POF 2008-2009 (itens que vieram zerados). */
 const TACO_FIXES: { name: string; kcal: number; p: number; c: number; g: number; f: number }[] = [
   { name: 'Leite, de vaca, integral', kcal: 60, p: 3.2, c: 4.5, g: 3.3, f: 0 },
   { name: 'Leite, de vaca, desnatado, UHT', kcal: 34, p: 3.4, c: 5.0, g: 0.1, f: 0 },
   { name: 'Iogurte, sabor abacaxi', kcal: 99, p: 3.5, c: 14.6, g: 3.5, f: 0 },
 ];
 
-/** Líquidos da base TACO que passam a ser medidos em ml (além da categoria Bebidas). */
 const TACO_ML_NAMES = [
   'Leite, de vaca, integral',
   'Leite, de vaca, desnatado, UHT',
   'Leite, de vaca, achocolatado',
 ];
 
-/** Ajustes idempotentes aplicados uma única vez por versão (valem para quem já instalou). */
 async function applySeedPatches(db: AppDb): Promise<void> {
   const applied = (await getSetting<number>(db, 'foodSeedPatchV')) ?? 0;
   if (applied >= SEED_PATCH_VERSION) return;
 
-  // Renormaliza os nomes com a regra nova (sem pontuação) para a busca por palavras.
   const all = (await db
     .select({ id: foodItems.id, name: foodItems.name })
     .from(foodItems)) as { id: number; name: string }[];
@@ -104,8 +97,6 @@ export async function seedFoodItemsIfEmpty(db: AppDb): Promise<void> {
   if (existing.length === 0) {
     await insertChunked(db, toRows(taco as SeedFood[], 'taco'));
   }
-  // Pratos regionais: quando a lista cresce, re-semeia para chegar
-  // também a instalações antigas (compara pela quantidade).
   const regionalRows = await db
     .select({ id: foodItems.id })
     .from(foodItems)

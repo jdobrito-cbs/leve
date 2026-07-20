@@ -12,7 +12,6 @@ import { getEffectiveWaterGoal } from '@/features/water/waterGoal';
 import { strings } from '@/i18n/pt-BR';
 import { displayToMl, formatVolume, volumeUnit } from '@/core/units';
 
-// Copos de 200/300/500 ml; no sistema imperial o rótulo mostra fl oz.
 const quickOptions = () =>
   [200, 300, 500].map((amount) => ({ amount, label: `+ ${formatVolume(amount)}` }));
 
@@ -34,7 +33,6 @@ export function WaterScreen() {
 
   async function add(amountMl: number) {
     await addWater(db, amountMl, new Date());
-    // Gole registrado → panda hidratado por 1 minuto no Hoje.
     setMascotEvent('hydrated');
     setCustom('');
     await load();

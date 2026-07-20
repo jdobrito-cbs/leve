@@ -167,29 +167,29 @@ test('Hoje mostra todos os boxes na nova ordem', async () => {
       <TodayScreen />
     </SafeAreaProvider>,
   );
-  getByText('Olá, Jorge!'); // saudação com o nome do usuário
+  getByText('Olá, Jorge!');
   getByText('1.200');
   getByText(strings.today.waterRing);
   getByText(strings.today.weightSection);
   getByText(/93,2/);
   getByText(/Meta.*85/);
   getByText(strings.today.cards.kcal);
-  getByText(strings.today.cards.fiber); // novo card de fibras do dia
+  getByText(strings.today.cards.fiber);
   getByText(strings.today.cards.nextDose);
-  getByText(/14\/07\/2026 · \d+d/); // data + dias restantes
+  getByText(/14\/07\/2026 · \d+d/);
   getByText(strings.today.cards.symptoms);
-  getByText(/Náusea 3\/5/); // últimos sintomas na lateral do card
-  expect(getAllByText(/\d{2}\/\d{2} \d{2}:\d{2}/).length).toBeGreaterThanOrEqual(2); // data e hora
+  getByText(/Náusea 3\/5/);
+  expect(getAllByText(/\d{2}\/\d{2} \d{2}:\d{2}/).length).toBeGreaterThanOrEqual(2);
   getByText(strings.today.medicationSection);
   getByText(strings.today.mealsSection);
-  expect(getAllByText(/850/).length).toBeGreaterThanOrEqual(2); // card rápido + box de refeição
+  expect(getAllByText(/850/).length).toBeGreaterThanOrEqual(2);
   getByText(/62,5 g/);
   getByText(strings.today.nutrition.fiber);
   getByText(strings.today.activitySection);
-  expect(getAllByText(/320 kcal/).length).toBe(2); // atividades + balanço (perdidas)
+  expect(getAllByText(/320 kcal/).length).toBe(2);
   getByText('4.200');
   getByText(strings.today.balanceSection);
-  getByText(strings.today.balanceOver); // 850 consumidas × 320 queimadas
+  getByText(strings.today.balanceOver);
   getByText(strings.today.balanceGained);
   getByText(strings.today.medRemindersSection);
   getByText(/Metformina/);
@@ -212,7 +212,7 @@ test('Registrar lista as 5 categorias e navega nas ativas', async () => {
   ]) {
     getByText(label);
   }
-  await waitFor(() => getByText(strings.log.cycle)); // sexo feminino → item de ciclo aparece
+  await waitFor(() => getByText(strings.log.cycle));
   await fireEvent.press(getByText(strings.log.water));
   expect(router.push).toHaveBeenCalledWith('/log/agua');
 });
@@ -246,7 +246,7 @@ test('Conta e privacidade: exportar e excluir funcionam', async () => {
   expect(mockExportAll).toHaveBeenCalled();
 
   await fireEvent.press(getByText(strings.profile.deleteData));
-  expect(mockWipeAll).not.toHaveBeenCalled(); // primeiro toque só pede confirmação
+  expect(mockWipeAll).not.toHaveBeenCalled();
   await fireEvent.press(getByText(strings.profile.deleteData));
   expect(mockWipeAll).toHaveBeenCalled();
 });

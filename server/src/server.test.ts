@@ -14,7 +14,6 @@ describe('POST /scan-food', () => {
       payload: { imageBase64: IMG },
     });
     expect(res.statusCode).toBe(200);
-    // Campos de nutrição ausentes viram null (unit assume "g"): o app tolera.
     expect(res.json()).toEqual({
       foods: [
         {
@@ -61,7 +60,6 @@ describe('POST /scan-food', () => {
       },
     });
     expect((await failing.inject({ method: 'POST', url: '/scan-food', payload: {} })).statusCode).toBe(400);
-    // 422 (não 502): o Cloudflare substitui 5xx e o motivo do erro se perde.
     expect(
       (await failing.inject({ method: 'POST', url: '/scan-food', payload: { imageBase64: IMG } }))
         .statusCode,
@@ -103,7 +101,6 @@ describe('POST /scan-food', () => {
     expect(home.statusCode).toBe(200);
     expect(home.body).toContain('Leve');
     expect(home.body).toContain('não substitui');
-    // Documentos legais públicos (exigência das lojas).
     const priv = await app.inject({ method: 'GET', url: '/privacidade' });
     expect(priv.statusCode).toBe(200);
     expect(priv.headers['content-type']).toContain('text/html');

@@ -7,13 +7,10 @@ import { Button } from './Button';
 
 interface Props {
   visible: boolean;
-  /** OK: confirma e fecha. */
   onConfirm: () => void;
-  /** Toque fora / voltar: fecha sem confirmar. */
   onCancel: () => void;
 }
 
-/** Folha inferior para seletores (réguas, rolagens) com botão OK. */
 export function PickerSheet({ visible, onConfirm, onCancel, children }: PropsWithChildren<Props>) {
   const { colors } = useTheme();
   return (
@@ -23,7 +20,7 @@ export function PickerSheet({ visible, onConfirm, onCancel, children }: PropsWit
         style={{ flex: 1, backgroundColor: 'rgba(2, 8, 23, 0.5)' }}
         onPress={onCancel}
       />
-      {/* O teclado empurra a folha para cima — o campo nunca fica escondido. */}
+      {}
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View
           style={{

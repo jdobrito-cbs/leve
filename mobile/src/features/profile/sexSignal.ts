@@ -1,7 +1,3 @@
-/**
- * Sexo selecionado, em memória, para a tab bar reagir na hora ao clique
- * no Perfil (a aba Ciclo aparece/some sem esperar salvar ou navegar).
- */
 type Listener = () => void;
 
 let current: string | null = null;

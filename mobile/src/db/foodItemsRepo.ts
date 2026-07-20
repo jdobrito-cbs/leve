@@ -4,11 +4,8 @@ import type { FoodItem } from '@/core/types';
 import type { AppDb } from './client';
 import { foodItems } from './schema';
 
-/** Conectivos ignorados na busca — não carregam significado e travariam o match. */
 const STOPWORDS = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'com', 'em', 'a', 'o', 'no', 'na']);
 
-/** Busca por palavras: todas as significativas precisam aparecer no nome, em
- *  qualquer ordem — "torta de limão" encontra "Torta doce (limão, maracujá…)". */
 export async function searchFoods(db: AppDb, query: string): Promise<FoodItem[]> {
   const q = normalizeText(query);
   if (q.length < 2) return [];

@@ -3,11 +3,6 @@ import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { AdminPatch, AdminRecord, AdminStore } from './store.js';
 
-/**
- * Administradores do painel em arquivo JSON — permite login + 2FA sem banco de
- * dados. Com DATABASE_URL configurado, o Prisma assume no lugar deste store.
- * As senhas ficam como hash scrypt e o segredo TOTP cifrado (nunca em claro).
- */
 export class FileAdminStore implements AdminStore {
   constructor(private path: string) {
     mkdirSync(dirname(path), { recursive: true });

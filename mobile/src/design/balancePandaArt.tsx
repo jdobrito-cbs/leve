@@ -1,7 +1,5 @@
 import Svg, { Path } from 'react-native-svg';
 
-/** Arte do panda do balanço calórico favorável (viewBox original 575×434);
- *  animação aplicada em pandas.tsx, por cima desta base. */
 export function BalancePandaArt({ width, height }: { width: number; height: number }) {
   return (
     <Svg width={width} height={height} viewBox="0 0 575 434" style={{ position: 'absolute' }}>

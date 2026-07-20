@@ -12,7 +12,6 @@ function daysAgo(n: number): Date {
   return d;
 }
 
-/** Monta a entrada do motor de insights a partir do banco local. */
 export async function buildInsightInput(db: AppDb): Promise<InsightInput> {
   const since28 = daysAgo(28);
   const [weights, fat, skeletal, muscle, lean, water, sleep, hr, waterDays, goal] =
@@ -33,7 +32,6 @@ export async function buildInsightInput(db: AppDb): Promise<InsightInput> {
     (m) => ({ value: m.value }),
   );
   const cut7 = daysAgo(7).toISOString();
-  // exclui hoje (dia incompleto) da checagem de hidratação
   const waterPast = waterDays.slice(0, -1);
 
   return {

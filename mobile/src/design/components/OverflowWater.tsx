@@ -11,11 +11,6 @@ import Animated, {
 import Svg, { Path } from 'react-native-svg';
 import { useTheme } from '../useTheme';
 
-/**
- * Transbordo da meta de água (>100%): o box vai enchendo por trás do conteúdo,
- * com ondas na superfície. A cada +50% além da meta, o box enche por completo.
- */
-
 const WAVE_W = 1600;
 const WAVE_H = 16;
 const wave =
@@ -26,7 +21,7 @@ const wave =
 export function OverflowFill({ progress }: { progress: number }) {
   const { colors } = useTheme();
   const over = Math.max(0, progress - 1);
-  const fillPct = Math.min(over / 0.5, 1) * 100; // +50% além da meta = box cheio
+  const fillPct = Math.min(over / 0.5, 1) * 100;
 
   const height = useSharedValue(0);
   const drift = useSharedValue(0);
@@ -45,7 +40,6 @@ export function OverflowFill({ progress }: { progress: number }) {
   }));
 
   if (fillPct <= 0) return null;
-  // Box completamente cheio: a água passou da borda — sem superfície visível.
   const brimful = fillPct >= 100;
 
   return (
@@ -97,7 +91,6 @@ function Drip({ side, delay }: { side: 'left' | 'right'; delay: number }) {
 
   const style = useAnimatedStyle(() => ({
     transform: [{ translateY: fall.value * 46 }],
-    // some por completo no fim da queda (sem rastro)
     opacity: fall.value < 0.05 || fall.value > 0.92 ? 0 : 1 - fall.value * 0.85,
   }));
 
@@ -116,7 +109,6 @@ function Drip({ side, delay }: { side: 'left' | 'right'; delay: number }) {
   );
 }
 
-/** Gotas escorrendo pelas laterais do anel quando a meta transborda. */
 export function OverflowDrips({ active }: { active: boolean }) {
   if (!active) return null;
   return (

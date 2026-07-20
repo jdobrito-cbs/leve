@@ -22,7 +22,7 @@ function makeDb() {
 test('início/fim/fluxo do período e não duplica período aberto', async () => {
   const db = makeDb() as never;
   await startPeriod(db, new Date(2026, 5, 1));
-  await startPeriod(db, new Date(2026, 5, 2)); // ignorado — já aberto
+  await startPeriod(db, new Date(2026, 5, 2));
   expect((await listPeriods(db)).length).toBe(1);
   await setFlow(db, 'moderado');
   expect((await openPeriod(db))?.flow).toBe('moderado');
@@ -34,11 +34,11 @@ test('apaga ciclo registrado por engano (encerrado ou em aberto)', async () => {
   const db = makeDb() as never;
   await startPeriod(db, new Date(2026, 4, 1));
   await endPeriod(db, new Date(2026, 4, 5));
-  await startPeriod(db, new Date(2026, 5, 1)); // aberto por acidente
+  await startPeriod(db, new Date(2026, 5, 1));
   let list = await listPeriods(db);
   expect(list).toHaveLength(2);
 
-  await deletePeriod(db, list[0].id); // remove o aberto
+  await deletePeriod(db, list[0].id);
   expect(await openPeriod(db)).toBeNull();
 
   list = await listPeriods(db);

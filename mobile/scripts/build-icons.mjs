@@ -1,5 +1,3 @@
-// Gera os ícones e o splash do Leve (broto branco sobre gradiente azul).
-// Uso: node scripts/build-icons.mjs   (requer devDependency sharp)
 import { mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
@@ -22,7 +20,6 @@ const GRADIENT = `
     </linearGradient>
   </defs>`;
 
-// glyphScale = fração do canvas ocupada pelo broto
 function svg({ size, background, glyph = true, glyphScale = 0.56 }) {
   const glyphSize = size * glyphScale;
   const offset = (size - glyphSize) / 2;
@@ -35,13 +32,10 @@ function svg({ size, background, glyph = true, glyphScale = 0.56 }) {
 }
 
 const jobs = [
-  // iOS/geral: quadrado cheio com gradiente
   { file: 'icon.png', size: 1024, background: 'url(#g)', glyphScale: 0.56 },
-  // Android adaptive: fundo gradiente + broto menor (zona segura)
   { file: 'android-icon-background.png', size: 1024, background: 'url(#g)', glyph: false },
   { file: 'android-icon-foreground.png', size: 1024, background: null, glyphScale: 0.4 },
   { file: 'android-icon-monochrome.png', size: 1024, background: null, glyphScale: 0.4 },
-  // Splash e favicon
   { file: 'splash-icon.png', size: 512, background: null, glyphScale: 0.9 },
   { file: 'favicon.png', size: 48, background: 'url(#g)', glyphScale: 0.6 },
 ];

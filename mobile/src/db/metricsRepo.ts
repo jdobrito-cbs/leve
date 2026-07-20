@@ -29,7 +29,6 @@ export async function addMetric(
   });
 }
 
-/** Último valor de cada métrica que tiver algum registro. */
 export async function latestMetrics(db: AppDb): Promise<Map<MetricType, MetricRow>> {
   const rows = (await db
     .select()
@@ -40,7 +39,6 @@ export async function latestMetrics(db: AppDb): Promise<Map<MetricType, MetricRo
   return map;
 }
 
-/** Registros manuais dos tipos indicados, do mais recente ao mais antigo. */
 export async function listManualMetrics(
   db: AppDb,
   types: readonly MetricType[],
@@ -70,7 +68,6 @@ export async function metricSeries(
     .orderBy(asc(healthMetrics.loggedAt))) as MetricRow[];
 }
 
-/** Chaves 'type|loggedAt' das métricas importadas de plataformas de saúde (para dedup). */
 export async function importedMetricKeys(db: AppDb): Promise<Set<string>> {
   const rows = await db
     .select({ type: healthMetrics.type, loggedAt: healthMetrics.loggedAt })

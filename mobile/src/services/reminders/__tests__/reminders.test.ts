@@ -40,7 +40,7 @@ test('consulta futura agenda aviso do dia (08:00) e 3h/2h/1h antes; passada não
     { id: 2, place: 'HGE', specialty: 'Ortopedia', scheduledAt: new Date(Date.now() - 86400000).toISOString() },
   ]);
   expect(mockCancel).toHaveBeenCalledWith('appt-0');
-  expect(mockSchedule).toHaveBeenCalledTimes(4); // dia + 3h + 2h + 1h, só da futura
+  expect(mockSchedule).toHaveBeenCalledTimes(4);
   expect(mockSchedule).toHaveBeenCalledWith(
     expect.objectContaining({
       content: expect.objectContaining({ body: 'Cardiologia · Clínica Vida' }),

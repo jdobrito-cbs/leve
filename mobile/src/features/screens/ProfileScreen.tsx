@@ -69,9 +69,6 @@ function HealthSection() {
     if (!granted) setConnectDenied(true);
   }
 
-  // O sistema (Apple Saúde/Health Connect) gere as permissões: o app não pode
-  // reabrir o pedido nem revogar sozinho. Este atalho leva o usuário aos ajustes
-  // para conceder (após recusar sem querer) ou revogar o acesso.
   function openHealthSettings() {
     Linking.openSettings().catch(() => undefined);
   }
@@ -167,8 +164,6 @@ export function ProfileScreen() {
   const [langSel, setLangSel] = useState<'auto' | LanguageCode>('auto');
   const [unitSel, setUnitSel] = useState<'auto' | UnitSystem>('auto');
   const [langOpen, setLangOpen] = useState(false);
-  // O espelhamento RTL (árabe/hebraico) só se completa reabrindo o app:
-  // derivado do estado real, o aviso sobrevive à remontagem pós-troca.
   const rtlPending = I18nManager.isRTL !== isRtlLanguage(getActiveLanguage());
 
   useEffect(() => {
@@ -184,7 +179,6 @@ export function ProfileScreen() {
     setLangSel(code);
     setLangOpen(false);
     await setSetting(db, 'language', code).catch(() => undefined);
-    // Notifica o app inteiro: o layout raiz remonta as telas no idioma novo.
     setActiveLanguage(code === 'auto' ? resolveAutoLanguage() : code);
   }
 
@@ -194,7 +188,6 @@ export function ProfileScreen() {
     setUnitSystem(v === 'auto' ? resolveAutoMeasurement() : v);
   }
 
-  // Campos digitam na unidade de exibição; o formulário guarda métrico.
   const conv = convertDisplayInput;
   const heightShown = conv(form.heightStr, cmToDisplay, 0);
   const goalWeightShown = conv(form.goalWeightStr, kgToDisplay, 1);
@@ -219,7 +212,6 @@ export function ProfileScreen() {
         return;
       }
       const Print = require('expo-print') as typeof import('expo-print');
-      // Página A4 (595×842 pt) — o padrão do iOS é Carta e sobrava página em branco.
       const { uri } = await Print.printToFileAsync({
         html: reportHtml(report),
         width: 595,
@@ -229,7 +221,6 @@ export function ProfileScreen() {
         await Sharing.shareAsync(uri, { mimeType: 'application/pdf' });
       }
     } catch (e) {
-      // Build instalada sem o módulo nativo de impressão (anterior ao expo-print).
       const missingModule = e instanceof Error && /ExpoPrint|native module/i.test(e.message);
       setReportMsg(missingModule ? strings.report.needsUpdate : strings.report.failed);
     } finally {

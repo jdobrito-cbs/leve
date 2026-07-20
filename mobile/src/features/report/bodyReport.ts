@@ -13,11 +13,6 @@ import { waterDailyTotals, waterTotalForDay } from '@/db/waterRepo';
 import { listWeights, weightsSince } from '@/db/weightRepo';
 import { strings } from '@/i18n/pt-BR';
 
-/**
- * Relatório de composição corporal montado com os dados registrados no app
- * (balança/saúde conectada ou lançamentos manuais). Faixas de referência
- * padrão de bioimpedância; valores informativos — não é avaliação clínica.
- */
 
 export interface RangedValue {
   value: number;
@@ -25,7 +20,6 @@ export interface RangedValue {
   max: number;
 }
 
-/** Linha da composição: a faixa sempre existe; o valor pode não ter registro. */
 export interface CompositionRow {
   value: number | null;
   min: number;
@@ -33,7 +27,7 @@ export interface CompositionRow {
 }
 
 export interface SeriesPoint {
-  dayLabel: string; // 'DD/MM'
+  dayLabel: string;
   value: number;
 }
 
@@ -55,7 +49,6 @@ export interface BodyReport {
   bmi: RangedValue;
   fatPct: RangedValue | null;
   weightRange: RangedValue;
-  /** Ajustes sugeridos (negativo = reduzir), como no relatório de balança. */
   weightAdjustKg: number;
   fatAdjustKg: number | null;
   muscleAdjustKg: number | null;
@@ -66,15 +59,12 @@ export interface BodyReport {
     subcutaneousPct: number | null;
     smi: number | null;
     bodyAge: number | null;
-    /** Relação cintura-quadril (precisa das duas medidas registradas). */
     whr: number | null;
   };
   idealWeightKg: number;
   obesityLevel: string;
   bodyType: string | null;
-  /** true quando parte da composição foi derivada de peso + gordura corporal. */
   compositionEstimated: boolean;
-  /** Sinais vitais, sono e hidratação registrados no app. */
   vitals: {
     restingHr: number | null;
     avgHr: number | null;
@@ -97,12 +87,10 @@ export interface BodyReport {
 
 const FAT_PCT_RANGE = { masculino: [10, 20], feminino: [18, 28] } as const;
 
-/** Linha com valor registrado → RangedValue; sem registro → null (para a pontuação). */
 function withValue(row: CompositionRow): RangedValue | null {
   return row.value === null ? null : { value: row.value, min: row.min, max: row.max };
 }
 
-/** Média por dia — importações trazem várias amostras diárias e o gráfico vira rabisco. */
 function dailyAverages(rows: { loggedAt: string; value: number }[]): SeriesPoint[] {
   const byDay = new Map<string, { sum: number; n: number }>();
   for (const r of rows) {
@@ -120,7 +108,6 @@ function dailyAverages(rows: { loggedAt: string; value: number }[]): SeriesPoint
     }));
 }
 
-/** Taxa metabólica basal (Mifflin-St Jeor). */
 export function basalMetabolicRate(
   sex: 'masculino' | 'feminino',
   weightKg: number,
@@ -144,7 +131,6 @@ interface ScoreInput {
   visceral: number | null;
 }
 
-/** Pontuação 0–100: começa em 100 e desconta por indicador fora da faixa. */
 export function scoreOf(input: ScoreInput): number {
   let score = 100;
   const out = (r: RangedValue | null) => r !== null && (r.value < r.min || r.value > r.max);
@@ -157,7 +143,7 @@ export function scoreOf(input: ScoreInput): number {
 }
 
 function suggestionsOf(input: ScoreInput): string[] {
-  const R = strings.reportPdf; // idioma ativo — o relatório sai traduzido
+  const R = strings.reportPdf;
   const s: string[] = [];
   if (input.fatPct && input.fatPct.value > input.fatPct.max) {
     s.push(R.sugFatHigh);
@@ -232,10 +218,6 @@ export async function buildBodyReport(db: AppDb): Promise<BodyReport | null> {
   const round1 = (n: number) => Math.round(n * 10) / 10;
   const fatKg = fatPctV !== null ? Math.round(weight * fatPctV) / 100 : null;
 
-  // O Apple Saúde não tem água/proteína/óssea/esquelético — quando a balança
-  // não os informa, derivamos da decomposição padrão de bioimpedância sobre a
-  // massa livre de gordura (água 73,2%, óssea 6,8%, proteína = restante,
-  // músculo esquelético 57,5%), a mesma usada pelos relatórios de balança.
   let compositionEstimated = false;
   const ffm = fatPctV !== null ? weight * (1 - fatPctV / 100) : leanKg;
   let waterV = waterKg;
@@ -277,7 +259,6 @@ export async function buildBodyReport(db: AppDb): Promise<BodyReport | null> {
     max: Math.round(25 * heightM * heightM * 10) / 10,
   };
 
-  // Faixas no modelo da balança: derivadas do peso-ideal (IMC 18,5–25).
   const row = (
     value: number | null,
     component: 'fat' | 'water' | 'protein' | 'bone' | 'muscle' | 'skeletal',

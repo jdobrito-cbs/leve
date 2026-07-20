@@ -51,15 +51,13 @@ test('mostra seções e histórico de doses', async () => {
   getByText(strings.progress.pkDisclaimer);
   getByText(/nível relativo/);
   getByText(strings.progress.bodySection);
-  // Corpo e saúde agora traz réguas dos sinais de saúde (corporais ficam
-  // no box Dados corporais); FC de repouso 62 bpm cai na faixa Padrão.
   expect(getAllByText(/FC em repouso/).length).toBeGreaterThanOrEqual(1);
   expect(getAllByText(/62 bpm/).length).toBeGreaterThanOrEqual(1);
   getByText(strings.progress.weightSection);
   getByText(strings.progress.waterSection);
   getByText(strings.progress.kcalSection);
   getByText(strings.progress.dosesSection);
-  expect(getAllByText(/semaglutida/).length).toBeGreaterThanOrEqual(2); // curva PK + histórico
+  expect(getAllByText(/semaglutida/).length).toBeGreaterThanOrEqual(2);
 });
 
 test('sem dados mostra estados vazios', async () => {

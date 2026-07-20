@@ -23,7 +23,6 @@ export interface LeveExport {
   settings: Row[];
 }
 
-/** Exporta todos os dados do usuário (a base TACO fica de fora — é re-semeada). */
 export async function exportAllData(db: AppDb): Promise<LeveExport> {
   const [p, water, food, doses, symptoms, weights, sett] = await Promise.all([
     db.select().from(profile),
@@ -47,7 +46,6 @@ export async function exportAllData(db: AppDb): Promise<LeveExport> {
   };
 }
 
-/** Apaga todos os dados do usuário deste aparelho (mantém a base TACO). */
 export async function wipeAllData(db: AppDb): Promise<void> {
   await db.delete(waterLogs);
   await db.delete(foodLogs);
@@ -63,7 +61,6 @@ function stripId(row: Row): Row {
   return rest;
 }
 
-/** Substitui os dados locais pelo conteúdo do export (usado na restauração de backup). */
 export async function importAllData(db: AppDb, data: LeveExport): Promise<void> {
   if (data.version !== 1) throw new Error('versão de backup desconhecida');
   await wipeAllData(db);

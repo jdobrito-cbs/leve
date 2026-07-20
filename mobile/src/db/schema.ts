@@ -9,8 +9,8 @@ export const profile = sqliteTable('profile', {
   disclaimerAcceptedAt: text('disclaimer_accepted_at'),
   waterGoalMl: real('water_goal_ml').notNull().default(2000),
   calorieGoalKcal: real('calorie_goal_kcal'),
-  sex: text('sex'), // 'feminino' | 'masculino' | 'nao_informar'
-  birthDate: text('birth_date'), // 'YYYY-MM-DD'
+  sex: text('sex'),
+  birthDate: text('birth_date'),
 });
 
 export const waterLogs = sqliteTable('water_logs', {
@@ -23,7 +23,7 @@ export const foodLogs = sqliteTable('food_logs', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
   portionGrams: real('portion_grams'),
-  portionUnit: text('portion_unit').notNull().default('g'), // 'g' | 'ml'
+  portionUnit: text('portion_unit').notNull().default('g'),
   calories: real('calories'),
   proteinG: real('protein_g'),
   carbsG: real('carbs_g'),
@@ -31,11 +31,10 @@ export const foodLogs = sqliteTable('food_logs', {
   fiberG: real('fiber_g'),
   origin: text('origin').notNull().default('manual'),
   photoUri: text('photo_uri'),
-  period: text('period'), // 'cafe' | 'almoco' | 'lanche' | 'jantar' | 'ceia'
+  period: text('period'),
   loggedAt: text('logged_at').notNull(),
 });
 
-// Pratos salvos para reutilizar (modelos de refeição).
 export const dishes = sqliteTable('dishes', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
@@ -47,7 +46,7 @@ export const dishItems = sqliteTable('dish_items', {
   dishId: integer('dish_id').notNull(),
   name: text('name').notNull(),
   grams: real('grams'),
-  unit: text('unit').notNull().default('g'), // 'g' | 'ml'
+  unit: text('unit').notNull().default('g'),
   calories: real('calories'),
   proteinG: real('protein_g'),
   carbsG: real('carbs_g'),
@@ -85,7 +84,7 @@ export const foodItems = sqliteTable('food_items', {
   nameNormalized: text('name_normalized'),
   category: text('category'),
   referencePortion: text('reference_portion'),
-  unit: text('unit').notNull().default('g'), // 'g' (por 100 g) | 'ml' (por 100 ml)
+  unit: text('unit').notNull().default('g'),
   calories: real('calories'),
   proteinG: real('protein_g'),
   carbsG: real('carbs_g'),
@@ -119,24 +118,22 @@ export const medications = sqliteTable('medications', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
   doseText: text('dose_text'),
-  times: text('times').notNull(), // 'HH:MM,HH:MM'
+  times: text('times').notNull(),
   active: integer('active').notNull().default(1),
 });
 
-// Consultas médicas agendadas (com lembretes no dia e 3h/2h/1h antes).
 export const appointments = sqliteTable('appointments', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  place: text('place').notNull(), // hospital/clínica
+  place: text('place').notNull(),
   specialty: text('specialty').notNull(),
   doctor: text('doctor'),
   scheduledAt: text('scheduled_at').notNull(),
 });
 
-// Exercícios de academia (força e cardio) com estimativa de calorias.
 export const gymLogs = sqliteTable('gym_logs', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  exercise: text('exercise').notNull(), // chave do catálogo
-  kind: text('kind').notNull(), // 'forca' | 'cardio'
+  exercise: text('exercise').notNull(),
+  kind: text('kind').notNull(),
   weightKg: real('weight_kg'),
   sets: integer('sets'),
   reps: integer('reps'),
@@ -148,6 +145,6 @@ export const gymLogs = sqliteTable('gym_logs', {
 export const medIntakes = sqliteTable('med_intakes', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   medicationId: integer('medication_id').notNull(),
-  scheduledFor: text('scheduled_for').notNull(), // 'YYYY-MM-DD HH:MM'
+  scheduledFor: text('scheduled_for').notNull(),
   takenAt: text('taken_at'),
 });

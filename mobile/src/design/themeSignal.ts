@@ -1,7 +1,3 @@
-/**
- * Preferência de tema escolhida no Perfil, em memória, para o app inteiro
- * reagir na hora ao toggle. null = seguir o tema do sistema.
- */
 export type ThemeMode = 'light' | 'dark';
 
 type Listener = () => void;

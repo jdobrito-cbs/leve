@@ -1,13 +1,6 @@
 import { normalizeText } from '@/core/text';
 import type { DoseLog } from '@/core/types';
 
-/**
- * Estimativa INFORMATIVA de nível relativo de medicação.
- * Modelo de um compartimento (equação de Bateman) com parâmetros públicos de
- * farmacocinética populacional. Não reflete o nível real de nenhuma pessoa e
- * não deve orientar decisão clínica.
- */
-
 export interface PkParams {
   halfLifeHours: number;
   tmaxHours: number;
@@ -19,7 +12,6 @@ export const PK_PARAMS: Record<string, PkParams> = {
   liraglutida: { halfLifeHours: 13, tmaxHours: 10 },
 };
 
-/** Resolve ka numericamente a partir de tmax = ln(ka/ke)/(ka−ke) (bisseção). */
 export function kaFromTmax(ke: number, tmaxHours: number): number {
   let lo = ke * 1.0001;
   let hi = 10;
@@ -41,18 +33,15 @@ function bateman(hoursSinceDose: number, ke: number, ka: number): number {
 
 export interface PkPoint {
   timeMs: number;
-  level: number; // 0..1 (relativo ao pico da janela)
+  level: number;
 }
 
 export interface PkCurve {
   medKey: string;
   points: PkPoint[];
   rawPeak: number;
-  /** Dose (mg) da última aplicação registrada. */
   latestDoseMg: number;
-  /** Estimativa (mg-equivalente do modelo) no fim da janela, +7 dias. */
   endMgEstimate: number;
-  /** Índice do pico após a última dose (para rotular a dosagem no gráfico). */
   peakIndex: number;
 }
 
@@ -65,11 +54,6 @@ function pkKeyFor(medication: string): string | null {
   return Object.keys(PK_PARAMS).find((k) => norm.includes(k)) ?? null;
 }
 
-/**
- * Curva relativa (30 dias passados + 7 futuros) por superposição das doses
- * registradas da medicação mais recente. null quando a medicação não tem
- * parâmetros públicos na tabela.
- */
 export function estimateRelativeCurve(doses: DoseLog[], now: Date = new Date()): PkCurve | null {
   if (doses.length === 0) return null;
   const latest = [...doses].sort((a, b) => b.loggedAt.localeCompare(a.loggedAt))[0];

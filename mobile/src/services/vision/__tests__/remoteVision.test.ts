@@ -21,8 +21,6 @@ test('mapeia resposta do servidor para FoodRecognition', async () => {
       ],
     }),
   });
-  // Recebe a URL COMPLETA do scan (como em produção) e a usa direto, sem
-  // acrescentar path — senão viraria /scan-food/scan-food (o bug corrigido).
   const provider = new RemoteVisionProvider('https://levemobile.com.br/scan-food');
   const result = await provider.recognizeFood('file://foto.jpg');
   expect(result.label).toBe('arroz branco cozido');

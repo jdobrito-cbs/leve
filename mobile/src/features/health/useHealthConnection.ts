@@ -48,8 +48,6 @@ export function useHealthConnection() {
   const importNow = useCallback(async () => {
     setImporting(true);
     try {
-      // Tipos novos (ex.: sono) entram no app depois da conexão original;
-      // repedir autorização só mostra o pedido do que ainda não foi decidido.
       await provider.requestPermissions();
       const count = (await importWeights(db, provider)) + (await importMetrics(db, provider));
       setLastImported(count);

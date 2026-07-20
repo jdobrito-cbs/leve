@@ -1,9 +1,3 @@
-/**
- * Documentos legais do Leve em português europeu (pt-PT). Tradução de
- * cortesia do original em pt-BR (legal-pt-BR.ts): em caso de divergência,
- * prevalece a versão brasileira, e o direito aplicável continua a ser o
- * da República Federativa do Brasil.
- */
 import type { LegalCatalog } from '../legalCatalog';
 
 export const legal: LegalCatalog = {

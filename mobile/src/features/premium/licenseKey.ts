@@ -2,15 +2,9 @@ import { ed25519 } from '@noble/curves/ed25519.js';
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils.js';
 import { Base64 } from 'js-base64';
 
-/**
- * Chaves de desbloqueio definitivo (parceiros e amigos), assinadas offline.
- * A chave privada fica com o dono do projeto (scripts/gen-license.mjs);
- * o app só carrega a pública — ninguém consegue forjar chaves a partir dele.
- */
 export const LICENSE_PUBLIC_KEY_HEX =
   '98473d817ffe35b42755cc6deac77c94322f0b67d7d6fbd68d078ddf426e5f04';
 
-/** Valida uma chave `LEVE-…`; devolve o id da licença ou null se inválida. */
 export function verifyLicenseKey(
   key: string,
   publicKeyHex: string = LICENSE_PUBLIC_KEY_HEX,

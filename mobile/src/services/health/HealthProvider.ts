@@ -12,14 +12,11 @@ export interface StepsSample {
   date: string;
 }
 
-/** Uma noite de sono registrada: primeiro trecho (deitar) e último (acordar). */
 export interface SleepNight {
   start: Date;
   end: Date;
 }
 
-/** Agrega trechos de sono em noites (chave = dia em que a noite terminou);
- *  sonecas com menos de 3h no total ficam de fora. Compartilhado iOS/Android. */
 export function aggregateSleepNights(spans: SleepNight[]): SleepNight[] {
   const nights = new Map<string, { start: Date; end: Date; totalMs: number }>();
   for (const { start, end } of spans) {
@@ -44,11 +41,9 @@ export interface HealthProvider {
   readSteps(since: Date): Promise<StepsSample[]>;
   readMetrics(since: Date): Promise<MetricSample[]>;
   readSleepNights(since: Date): Promise<SleepNight[]>;
-  /** Soma de passos na janela; null quando a fonte está indisponível (≠ 0 passos). */
   readStepsWindow(start: Date, end: Date): Promise<number | null>;
 }
 
-/** Usado quando não há integração de saúde disponível no aparelho. */
 export class UnavailableHealthProvider implements HealthProvider {
   async isAvailable() {
     return false;
@@ -87,7 +82,6 @@ export function getHealthProvider(): HealthProvider {
       return new HealthKitProvider();
     }
   } catch {
-    // módulo nativo ausente (ex.: Expo Go) — cai no provider indisponível
   }
   return new UnavailableHealthProvider();
 }

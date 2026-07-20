@@ -12,18 +12,12 @@ import { useTheme } from '../useTheme';
 interface Props {
   value: number;
   zones: GaugeZone[];
-  /** Casas decimais dos números de fronteira. */
   digits?: number;
 }
 
 const fmtN = (n: number, digits: number) =>
   n.toLocaleString('pt-BR', { maximumFractionDigits: digits });
 
-/**
- * Medidor no estilo da balança: zonas de LARGURA IGUAL, números das fronteiras
- * acima (nas divisas), rótulos abaixo e marcador redondo na posição
- * proporcional dentro da zona — sem nunca colar nas bordas da régua.
- */
 export function RangeGauge({ value, zones, digits = 1 }: Props) {
   const { colors } = useTheme();
   const [width, setWidth] = useState(0);
@@ -35,7 +29,7 @@ export function RangeGauge({ value, zones, digits = 1 }: Props) {
 
   return (
     <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
-      {/* números das fronteiras, nas divisas das zonas */}
+      {}
       <View style={{ height: 14 }}>
         {width > 0
           ? bounds.map((b, i) => (
@@ -56,7 +50,7 @@ export function RangeGauge({ value, zones, digits = 1 }: Props) {
             ))
           : null}
       </View>
-      {/* barra de zonas iguais + marcador */}
+      {}
       <View style={{ height: 14, justifyContent: 'center' }}>
         <View style={{ flexDirection: 'row', height: 6, borderRadius: 3, overflow: 'hidden' }}>
           {zones.map((zone, i) => (
@@ -78,7 +72,7 @@ export function RangeGauge({ value, zones, digits = 1 }: Props) {
           />
         ) : null}
       </View>
-      {/* rótulos das zonas, um por segmento igual */}
+      {}
       <View style={{ flexDirection: 'row' }}>
         {zones.map((zone, i) => (
           <AppText

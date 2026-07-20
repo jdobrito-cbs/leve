@@ -1,4 +1,3 @@
-// Gera src/db/seed/taco.json a partir dos CSVs públicos do repo raulfdm/taco-api (dados TACO/NEPA-Unicamp).
 import { mkdirSync, writeFileSync } from 'node:fs';
 
 const BASE = 'https://raw.githubusercontent.com/raulfdm/taco-api/main/references/csv/';

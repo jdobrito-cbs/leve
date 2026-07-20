@@ -19,20 +19,16 @@ export interface BackupRecord {
 export interface PartnerKeyRecord {
   id: string;
   keyHash: string;
-  hint: string; // últimos 4 caracteres, para exibição
-  label: string; // nome do parceiro
+  hint: string;
+  label: string;
   createdAt: string;
   revokedAt: string | null;
-  boundDeviceId: string | null; // aparelho que resgatou a chave (trava de 1 aparelho)
+  boundDeviceId: string | null;
   boundAt: string | null;
-  /** Chave completa cifrada (AES-GCM, chave derivada do ADMIN_TOKEN) — permite
-   *  o dono rever o código no painel. null em registros antigos. */
   keyEnc: string | null;
-  /** Fim da validade (ISO); null = sem validade. Vencida → validação recusa. */
   expiresAt: string | null;
 }
 
-/** Armazenamento das chaves de parceiro emitidas pelo servidor. */
 export interface PartnerKeyStore {
   createPartnerKey(
     label: string,
@@ -44,11 +40,8 @@ export interface PartnerKeyStore {
   listPartnerKeys(): Promise<PartnerKeyRecord[]>;
   findPartnerKeyByHash(keyHash: string): Promise<PartnerKeyRecord | null>;
   revokePartnerKey(id: string): Promise<boolean>;
-  /** Prende a chave a um aparelho no primeiro resgate. */
   bindPartnerKey(id: string, deviceId: string): Promise<boolean>;
-  /** Solta a chave (o parceiro pode revincular em outro aparelho). */
   unbindPartnerKey(id: string): Promise<boolean>;
-  /** Apaga da lista — só chaves JÁ revogadas (limpeza do painel). */
   deletePartnerKey(id: string): Promise<boolean>;
 }
 
@@ -56,16 +49,12 @@ export type AdminRole = 'master' | 'admin';
 
 export interface AdminRecord {
   id: string;
-  /** E-mail de acesso do administrador (nome de campo mantido do formato original). */
   username: string;
   role: AdminRole;
   passwordHash: string;
-  /** Segredo TOTP cifrado (iv:tag:ct em base64); null enquanto não há 2FA. */
   totpSecretEnc: string | null;
   totpEnabled: boolean;
-  /** Hashes (sha256) dos códigos de backup ainda não usados. */
   backupCodeHashes: string[];
-  /** Sobe a cada troca de senha/reset para invalidar sessões antigas. */
   tokenVersion: number;
   failedAttempts: number;
   lockedUntil: string | null;
@@ -85,7 +74,6 @@ export type AdminPatch = Partial<
   >
 >;
 
-/** Administradores do painel (login + 2FA). Funciona com banco ou em arquivo. */
 export interface AdminStore {
   countAdmins(): Promise<number>;
   createAdmin(rec: Omit<AdminRecord, 'id' | 'createdAt'>): Promise<AdminRecord>;
@@ -113,7 +101,6 @@ export interface Store {
   getBackup(userId: string): Promise<BackupRecord | null>;
 }
 
-/** Store em memória — usado nos testes e como referência da interface. */
 export class MemoryStore implements Store, PartnerKeyStore, AdminStore {
   private partnerKeys = new Map<string, PartnerKeyRecord>();
   private pkSeq = 0;

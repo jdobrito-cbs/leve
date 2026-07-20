@@ -13,15 +13,12 @@ import {
   verifyPassword,
 } from './auth.js';
 
-/** Comparação de segredos em tempo constante (evita timing attack). */
 function safeEqual(a: string, b: string): boolean {
   const ba = Buffer.from(a);
   const bb = Buffer.from(b);
   return ba.length === bb.length && timingSafeEqual(ba, bb);
 }
 
-/** Hash-alvo fixo para gastar o mesmo tempo de verificação quando o e-mail não
- *  existe — sem isto, o tempo de resposta revela quais e-mails têm conta. */
 const DUMMY_PASSWORD_HASH = hashPassword('leve-dummy-password-for-timing');
 import { ADMIN_PAGE_HTML } from './adminPage.js';
 import { LANDING_PAGE_HTML } from './landingPage.js';
@@ -76,7 +73,6 @@ export interface HubConfig {
   model: string;
 }
 
-/** Chama o AI Hub e devolve o texto de resposta do modelo. */
 export type CallHub = (imageBase64: string, mimeType: string) => Promise<string>;
 
 const bodySchema = z.object({
@@ -86,8 +82,6 @@ const bodySchema = z.object({
 
 async function chatCompletion(config: HubConfig, body: object, timeoutMs: number): Promise<string> {
   let lastErr = 'upstream falhou';
-  // Uma repetição em erro transitório (limite de taxa / servidor do provedor
-  // sobrecarregado) — comum no nível gratuito. Timeout não repete (propaga).
   for (let attempt = 0; attempt < 2; attempt++) {
     const res = await fetch(`${config.baseUrl.replace(/\/$/, '')}/chat/completions`, {
       method: 'POST',
@@ -106,7 +100,6 @@ async function chatCompletion(config: HubConfig, body: object, timeoutMs: number
       if (content) return content;
       lastErr = 'upstream sem conteúdo';
     } else {
-      // O corpo do erro do provedor (chave/política/modelo) vai só para o LOG.
       const detail = (await res.text().catch(() => '')).slice(0, 300);
       lastErr = `upstream ${res.status}: ${detail}`;
       if (attempt === 0 && (res.status === 429 || res.status >= 500)) {
@@ -119,12 +112,10 @@ async function chatCompletion(config: HubConfig, body: object, timeoutMs: number
   throw new Error(lastErr);
 }
 
-/** Motivo curto e seguro (sem segredos) para devolver ao cliente no erro. */
 function aiFailReason(msg: string): string {
   const up = msg.match(/^upstream (\d+): ?([\s\S]*)/);
   if (up) {
     const status = up[1];
-    // Detalhe do provedor (modelo/endereço/imagem) — sem a chave. Ajuda o diagnóstico.
     const detail = (up[2] || '').replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
     if (status === '429') return 'limite de uso da IA (aguarde um pouco)';
     if (status === '401' || status === '403') return 'chave da IA inválida';
@@ -137,7 +128,6 @@ function aiFailReason(msg: string): string {
     return 'o servidor não conseguiu se conectar à IA';
   if (/sem conteúdo/i.test(msg)) return 'a IA respondeu vazio';
   if (/JSON|sem JSON|Unexpected token/i.test(msg)) return 'a IA respondeu fora do formato';
-  // Sem correspondência: devolve um trecho do erro real (sem segredos) p/ diagnóstico.
   return 'IA — ' + msg.replace(/[\r\n]+/g, ' ').slice(0, 100);
 }
 
@@ -146,14 +136,12 @@ export function makeHubCaller(config: HubConfig): CallHub {
     chatCompletion(config, buildHubBody(imageBase64, mimeType, config.model), 30_000);
 }
 
-/** Consulta nutricional por nome (texto puro, sem imagem). */
 export type CallFoodHub = (name: string) => Promise<string>;
 
 export function makeFoodHubCaller(config: HubConfig): CallFoodHub {
   return (name) => chatCompletion(config, buildFoodInfoBody(name, config.model), 20_000);
 }
 
-/** Interpreta uma refeição descrita em texto e devolve alimentos (mesma saída do scan). */
 export type CallDescribeHub = (text: string) => Promise<string>;
 
 export function makeDescribeHubCaller(config: HubConfig): CallDescribeHub {
@@ -176,38 +164,26 @@ const deleteSchema = z.object({ password: z.string().min(1) });
 
 export interface ServerOptions {
   callHub: CallHub;
-  /** Consulta nutricional por nome; ausente = rota /food-info responde 503. */
   callFoodHub?: CallFoodHub;
-  /** Interpreta refeição descrita em texto; ausente = rota /describe-food responde 503. */
   callDescribeHub?: CallDescribeHub;
   appToken?: string;
   store?: Store;
   jwtSecret?: string;
-  /** Chaves de parceiro geridas pelo dono (painel /painel). */
   partnerStore?: PartnerKeyStore;
-  /** Administradores do painel (login + 2FA); ausente = só o ADMIN_TOKEN. */
   adminStore?: AdminStore;
   adminToken?: string;
-  /** Ligue quando o servidor roda atrás de um proxy HTTPS (Caddy/Nginx):
-   *  o rate limit passa a ver o IP real do visitante (X-Forwarded-For) em vez
-   *  do IP do proxy — sem isto, todos dividiriam o mesmo limite. */
   trustProxy?: boolean;
 }
 
 const partnerCreateSchema = z.object({
   label: z.string().trim().min(1).max(120),
-  // Validade da chave: sem prazo (padrão) ou 1 ano a partir da emissão.
   validity: z.enum(['none', 'year']).default('none'),
 });
 const partnerValidateSchema = z.object({
   key: z.string().min(4).max(40),
-  // Id do aparelho (gerado no app) para a trava de 1 dispositivo; opcional para
-  // compatibilidade com versões antigas do app, que validam só pela chave.
   deviceId: z.string().trim().min(8).max(200).optional(),
 });
 
-// Painel: o acesso é por e-mail (normalizado p/ minúsculas) + senha forte.
-// Internamente o campo continua se chamando `username` (guarda o e-mail).
 const adminEmailSchema = z.string().trim().toLowerCase().email().max(80);
 const adminPasswordSchema = z.string().min(8).max(200);
 const adminSetupSchema = z.object({
@@ -234,8 +210,6 @@ const adminRecoverSchema = z.object({
 });
 
 export async function buildServer(options: ServerOptions) {
-  // Corpo pequeno por padrão (barra DoS de memória); só /scan-food e /backup
-  // sobem o limite por rota. Sem log de corpo por privacidade.
   const app = Fastify({
     bodyLimit: 64 * 1024,
     logger: false,
@@ -243,17 +217,11 @@ export async function buildServer(options: ServerOptions) {
   });
   const { store, jwtSecret } = options;
 
-  // Erros lançados (banco fora de sincronia, bugs) não podem vazar detalhes
-  // internos na resposta: 5xx sai genérico; 4xx (rate limit, corpo grande,
-  // JSON inválido) mantém a mensagem própria.
   app.setErrorHandler((err: Error & { statusCode?: number }, _req, reply) => {
     const status = err.statusCode ?? 500;
     reply.code(status).send({ error: status >= 500 ? 'erro interno' : err.message });
   });
 
-  // POST sem corpo com content-type application/json não pode virar 400:
-  // navegadores enviam o cabeçalho por padrão e várias rotas do painel
-  // (2FA, revogar, sair) não têm corpo. Vazio → undefined; inválido → 400.
   app.addContentTypeParser('application/json', { parseAs: 'string' }, (_req, body, done) => {
     if (body === '' || body == null) return done(null, undefined);
     try {
@@ -265,10 +233,6 @@ export async function buildServer(options: ServerOptions) {
     }
   });
 
-  // Plugins registrados com await ANTES das rotas: o rate limit por rota depende
-  // do hook onRoute já estar instalado quando cada rota é adicionada.
-  // Cabeçalhos de segurança (noSniff, frameguard, HSTS, Referrer-Policy) + CSP.
-  // As páginas do painel e da landing são inline por design → 'unsafe-inline'.
   await app.register(helmet, {
     contentSecurityPolicy: {
       directives: {
@@ -283,26 +247,20 @@ export async function buildServer(options: ServerOptions) {
       },
     },
   });
-  // Sem CORS de navegador: a API é consumida pelos apps nativos (sem Origin) e
-  // pela landing/painel na mesma origem. Requisições cross-site são recusadas.
-  // Limite de taxa global (anti-abuso/força-bruta); rotas sensíveis apertam mais.
   await app.register(rateLimit, { max: 120, timeWindow: '1 minute' });
 
   app.get('/health', async () => ({ ok: true, accounts: Boolean(store) }));
 
-  // Ícones do site (logotipo do app na aba do navegador e em favoritos).
   const pngRoute = (bytes: Buffer) => async (_req: FastifyRequest, reply: FastifyReply) =>
     reply.type('image/png').header('cache-control', 'public, max-age=86400').send(bytes);
   app.get('/favicon.png', pngRoute(FAVICON_PNG));
-  app.get('/favicon.ico', pngRoute(FAVICON_PNG)); // navegadores pedem por padrão
+  app.get('/favicon.ico', pngRoute(FAVICON_PNG));
   app.get('/apple-touch-icon.png', pngRoute(APPLE_ICON_PNG));
 
-  // Raiz do domínio: landing do produto para quem chega pelo site.
   app.get('/', async (_req, reply) => {
     return reply.type('text/html; charset=utf-8').send(LANDING_PAGE_HTML);
   });
 
-  // Documentos legais públicos (exigidos pelas lojas em URL pública).
   const htmlPage = (html: string) => async (_req: FastifyRequest, reply: FastifyReply) =>
     reply.type('text/html; charset=utf-8').send(html);
   app.get('/privacidade', htmlPage(PRIVACY_PAGE_HTML));
@@ -355,8 +313,6 @@ export async function buildServer(options: ServerOptions) {
         const parsed = loginSchema.safeParse(req.body);
         if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
         const user = await store.findUserByEmail(parsed.data.email);
-        // Verifica sempre (contra hash real ou dummy) — mesmo custo de tempo com
-        // e sem conta, para não vazar quais e-mails existem por timing.
         const ok = verifyPassword(parsed.data.password, user?.passwordHash ?? DUMMY_PASSWORD_HASH);
         if (!user || !ok) {
           return reply.code(401).send({ error: 'e-mail ou senha incorretos' });
@@ -373,7 +329,7 @@ export async function buildServer(options: ServerOptions) {
       if (!record || record.revokedAt || record.expiresAt.getTime() < Date.now()) {
         return reply.code(401).send({ error: 'sessão expirada' });
       }
-      await store.revokeRefreshToken(tokenHash); // rotação
+      await store.revokeRefreshToken(tokenHash);
       return issueTokens(record.userId);
     });
 
@@ -410,7 +366,6 @@ export async function buildServer(options: ServerOptions) {
       if (!userId) return;
       const parsed = backupSchema.safeParse(req.body);
       if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
-      // O blob chega cifrado no aparelho (E2E) — o servidor não tem a chave.
       await store.putBackup(userId, parsed.data.blob);
       return { ok: true };
     });
@@ -439,11 +394,9 @@ export async function buildServer(options: ServerOptions) {
 
   const { partnerStore, adminStore, adminToken } = options;
 
-  // Segredos derivados do ADMIN_TOKEN: assinam a sessão e cifram o segredo TOTP.
   const adminSecret = adminToken ? adminSessionSecret(adminToken) : '';
   const encKey = adminToken ? adminEncKey(adminToken) : Buffer.alloc(0);
 
-  /** Carrega o admin logado a partir do cookie de sessão (null se inválido). */
   const loadSession = async (
     req: FastifyRequest,
     scope: 'full' | 'any',
@@ -456,11 +409,10 @@ export async function buildServer(options: ServerOptions) {
     if (scope === 'full' && session.scope !== 'full') return null;
     const admin = await adminStore.findAdminById(session.sub);
     if (!admin) return null;
-    if (admin.tokenVersion !== session.ver) return null; // sessão invalidada (troca de senha/reset)
+    if (admin.tokenVersion !== session.ver) return null;
     return { admin, scope: session.scope };
   };
 
-  /** Conta uma tentativa falha e bloqueia por um tempo ao passar do limite. */
   const registerFailure = async (admin: AdminRecord): Promise<void> => {
     if (!adminStore) return;
     const failed = admin.failedAttempts + 1;
@@ -481,9 +433,6 @@ export async function buildServer(options: ServerOptions) {
     scope: AdminScope,
   ): void => {
     const ttl = scope === 'full' ? FULL_TTL_SEC : ENROLL_TTL_SEC;
-    // Secure só quando o acesso veio por HTTPS (com TRUST_PROXY, o protocolo é
-    // o do visitante). Em http simples (teste por IP), o navegador descartaria
-    // um cookie Secure e o login não se sustentaria.
     const secure = req.protocol === 'https';
     reply.header(
       'set-cookie',
@@ -491,7 +440,6 @@ export async function buildServer(options: ServerOptions) {
     );
   };
 
-  // Painel (HTML) servido sempre que há ADMIN_TOKEN; as ações exigem sessão.
   if (adminToken) {
     app.get('/painel', async (_req, reply) =>
       reply.type('text/html; charset=utf-8').send(ADMIN_PAGE_HTML),
@@ -499,7 +447,6 @@ export async function buildServer(options: ServerOptions) {
     app.get('/admin', async (_req, reply) => reply.redirect('/painel'));
   }
 
-  // API de administradores (login + 2FA + CRUD). Precisa de store + ADMIN_TOKEN.
   if (adminStore && adminToken) {
     app.get(
       '/admin/setup-state',
@@ -507,7 +454,6 @@ export async function buildServer(options: ServerOptions) {
       async () => ({ needsSetup: (await adminStore.countAdmins()) === 0 }),
     );
 
-    // Cadastro do master — só na primeira vez e exige o ADMIN_TOKEN do servidor.
     app.post(
       '/admin/setup',
       { config: { rateLimit: { max: 5, timeWindow: '1 minute' } } },
@@ -531,7 +477,7 @@ export async function buildServer(options: ServerOptions) {
           failedAttempts: 0,
           lockedUntil: null,
         });
-        setSession(req, reply, master, 'enroll'); // segue direto para configurar o 2FA
+        setSession(req, reply, master, 'enroll');
         return { ok: true, needEnroll: true };
       },
     );
@@ -546,19 +492,16 @@ export async function buildServer(options: ServerOptions) {
         if (admin?.lockedUntil && new Date(admin.lockedUntil).getTime() > Date.now()) {
           return reply.code(429).send({ error: 'muitas tentativas; tente mais tarde' });
         }
-        // Verifica sempre (hash real ou dummy) para não vazar e-mails por timing.
         const pwOk = verifyPassword(parsed.data.password, admin?.passwordHash ?? DUMMY_PASSWORD_HASH);
         if (!admin || !pwOk) {
           if (admin) await registerFailure(admin);
           return reply.code(401).send({ error: 'e-mail ou senha incorretos' });
         }
         if (!admin.totpEnabled) {
-          // Senha certa, mas 2FA ainda não configurado → sessão de configuração.
           await adminStore.updateAdmin(admin.id, { failedAttempts: 0, lockedUntil: null });
           setSession(req, reply, admin, 'enroll');
           return { ok: true, needEnroll: true };
         }
-        // 2FA obrigatório: aceita o código do app OU um código de backup.
         let second = false;
         if (parsed.data.backupCode) {
           const hash = hashBackupCode(parsed.data.backupCode);
@@ -601,7 +544,6 @@ export async function buildServer(options: ServerOptions) {
       };
     });
 
-    // Configuração do 2FA: gera o segredo e devolve a URL otpauth (para QR/manual).
     app.post('/admin/2fa/setup', async (req, reply) => {
       const sess = await loadSession(req, 'any');
       if (!sess) return reply.code(401).send({ error: 'não autenticado' });
@@ -609,7 +551,6 @@ export async function buildServer(options: ServerOptions) {
       const secret = generateTotpSecret();
       await adminStore.updateAdmin(sess.admin.id, { totpSecretEnc: encryptSecret(secret, encKey) });
       const url = otpauthUrl(secret, sess.admin.username);
-      // QR é conveniência: se falhar por qualquer motivo, a chave manual segue.
       let qr: string | null = null;
       try {
         qr = qrDataUrl(url);
@@ -619,7 +560,6 @@ export async function buildServer(options: ServerOptions) {
       return { secret, otpauthUrl: url, qr };
     });
 
-    // Confirma o 2FA com um código válido e devolve os códigos de backup (uma vez).
     app.post('/admin/2fa/confirm', async (req, reply) => {
       const sess = await loadSession(req, 'any');
       if (!sess) return reply.code(401).send({ error: 'não autenticado' });
@@ -657,7 +597,6 @@ export async function buildServer(options: ServerOptions) {
       }));
     });
 
-    // Cadastrar novo administrador — só o master.
     app.post('/admin', async (req, reply) => {
       const sess = await loadSession(req, 'full');
       if (!sess) return reply.code(401).send({ error: 'não autenticado' });
@@ -681,7 +620,6 @@ export async function buildServer(options: ServerOptions) {
       return { ok: true, id: created.id };
     });
 
-    // Trocar a PRÓPRIA senha (exige a senha atual; mantém a sessão viva).
     app.post('/admin/password', async (req, reply) => {
       const sess = await loadSession(req, 'full');
       if (!sess) return reply.code(401).send({ error: 'não autenticado' });
@@ -694,11 +632,10 @@ export async function buildServer(options: ServerOptions) {
         passwordHash: hashPassword(parsed.data.newPassword),
         tokenVersion: sess.admin.tokenVersion + 1,
       });
-      if (updated) setSession(req, reply, updated, 'full'); // renova o cookie (segue logado)
+      if (updated) setSession(req, reply, updated, 'full');
       return { ok: true };
     });
 
-    // Redefinir a senha de OUTRO admin (sem senha atual), conforme a matriz.
     app.post('/admin/:id/password', async (req, reply) => {
       const sess = await loadSession(req, 'full');
       if (!sess) return reply.code(401).send({ error: 'não autenticado' });
@@ -715,14 +652,13 @@ export async function buildServer(options: ServerOptions) {
       if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
       await adminStore.updateAdmin(id, {
         passwordHash: hashPassword(parsed.data.newPassword),
-        tokenVersion: target.tokenVersion + 1, // derruba as sessões dele
+        tokenVersion: target.tokenVersion + 1,
         failedAttempts: 0,
         lockedUntil: null,
       });
       return { ok: true };
     });
 
-    // Excluir administrador — só o master, e nunca o próprio master.
     app.delete('/admin/:id', async (req, reply) => {
       const sess = await loadSession(req, 'full');
       if (!sess) return reply.code(401).send({ error: 'não autenticado' });
@@ -736,7 +672,6 @@ export async function buildServer(options: ServerOptions) {
       return { ok: true };
     });
 
-    // Resetar o 2FA de outro admin (recuperação) — só o master.
     app.post('/admin/:id/reset-2fa', async (req, reply) => {
       const sess = await loadSession(req, 'full');
       if (!sess) return reply.code(401).send({ error: 'não autenticado' });
@@ -755,8 +690,6 @@ export async function buildServer(options: ServerOptions) {
       return { ok: true };
     });
 
-    // Porta dos fundos: com o ADMIN_TOKEN do servidor, redefine a senha do master
-    // e zera o 2FA dele (recuperação quando tudo mais foi perdido).
     app.post(
       '/admin/recover',
       { config: { rateLimit: { max: 5, timeWindow: '1 minute' } } },
@@ -783,8 +716,6 @@ export async function buildServer(options: ServerOptions) {
   }
 
   if (partnerStore) {
-    // Validação pública: o app confere a chave no resgate e periodicamente.
-    // Com deviceId, prende a chave a 1 aparelho no primeiro resgate.
     app.post(
       '/partner-keys/validate',
       { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } },
@@ -800,7 +731,7 @@ export async function buildServer(options: ServerOptions) {
         const deviceId = parsed.data.deviceId;
         if (deviceId) {
           if (!record.boundDeviceId) {
-            await partnerStore.bindPartnerKey(record.id, deviceId); // primeiro resgate
+            await partnerStore.bindPartnerKey(record.id, deviceId);
             return { valid: true, label: record.label };
           }
           if (record.boundDeviceId !== deviceId) {
@@ -812,7 +743,6 @@ export async function buildServer(options: ServerOptions) {
     );
 
     if (adminToken) {
-      // Autoriza o gestor: sessão do painel OU o ADMIN_TOKEN (chave-mestra).
       const requireAdmin = async (req: FastifyRequest, reply: FastifyReply): Promise<boolean> => {
         if (await loadSession(req, 'full')) return true;
         const header = req.headers.authorization ?? '';
@@ -825,7 +755,6 @@ export async function buildServer(options: ServerOptions) {
       app.get('/partner-keys', async (req, reply) => {
         if (!(await requireAdmin(req, reply))) return;
         const keys = await partnerStore.listPartnerKeys();
-        // Nunca devolve o hash, a cifra nem o id do aparelho — só exibição.
         return keys.map(
           ({ id, label, hint, createdAt, revokedAt, boundDeviceId, boundAt, keyEnc, expiresAt }) => ({
             id,
@@ -854,7 +783,6 @@ export async function buildServer(options: ServerOptions) {
           parsed.data.label,
           hashPartnerKey(key),
           partnerKeyHint(key),
-          // Cifrada em repouso: o painel pode reexibir a chave sob demanda.
           encryptSecret(key, encKey),
           expiresAt,
         );
@@ -867,7 +795,6 @@ export async function buildServer(options: ServerOptions) {
         };
       });
 
-      // Reexibe o código completo (o hash não volta; a cifra é decifrada aqui).
       app.get('/partner-keys/:id/reveal', async (req, reply) => {
         if (!(await requireAdmin(req, reply))) return;
         const { id } = req.params as { id: string };
@@ -891,7 +818,6 @@ export async function buildServer(options: ServerOptions) {
         return { ok: true };
       });
 
-      // Desvincular: libera a chave para o parceiro usar em outro aparelho.
       app.post('/partner-keys/:id/unbind', async (req, reply) => {
         if (!(await requireAdmin(req, reply))) return;
         const { id } = req.params as { id: string };
@@ -900,7 +826,6 @@ export async function buildServer(options: ServerOptions) {
         return { ok: true };
       });
 
-      // Limpeza do painel: apaga da lista uma chave JÁ revogada.
       app.delete('/partner-keys/:id', async (req, reply) => {
         if (!(await requireAdmin(req, reply))) return;
         const { id } = req.params as { id: string };
@@ -913,9 +838,6 @@ export async function buildServer(options: ServerOptions) {
     }
   }
 
-  // Header do app é embutido no bundle público (EXPO_PUBLIC) → não é segredo
-  // real; serve só para barrar tráfego casual. A proteção efetiva de custo/DoS
-  // nas rotas de IA é o rate limit por rota abaixo. Comparação em tempo constante.
   const appTokenOk = (req: FastifyRequest): boolean => {
     if (!options.appToken) return true;
     const sent = req.headers['x-leve-app'];
@@ -936,8 +858,6 @@ export async function buildServer(options: ServerOptions) {
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         console.warn('[scan-food] falha:', msg);
-        // 422 (não 502): o Cloudflare troca respostas 5xx pela própria página de
-        // erro e o motivo se perde; 4xx passa com o corpo JSON até o cliente.
         return reply
           .code(422)
           .send({ error: 'não foi possível analisar a imagem agora', reason: aiFailReason(msg) });
@@ -962,7 +882,6 @@ export async function buildServer(options: ServerOptions) {
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         console.warn('[food-info] falha:', msg);
-        // 422 em vez de 502: o Cloudflare substitui 5xx e o motivo se perde.
         return reply
           .code(422)
           .send({ error: 'não foi possível consultar agora', reason: aiFailReason(msg) });
@@ -988,7 +907,6 @@ export async function buildServer(options: ServerOptions) {
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
         console.warn('[describe-food] falha:', msg);
-        // 422 (não 5xx): o Cloudflare troca 5xx e o motivo se perde; 4xx passa.
         return reply
           .code(422)
           .send({ error: 'não foi possível interpretar agora', reason: aiFailReason(msg) });

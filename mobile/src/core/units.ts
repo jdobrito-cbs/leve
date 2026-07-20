@@ -1,10 +1,3 @@
-/**
- * Sistema de medidas do Leve.
- *
- * O BANCO guarda sempre métrico (kg, cm, ml) — trocar de sistema nunca
- * converte dados, só a exibição e a entrada. 'auto' segue a região do
- * aparelho (EUA → imperial; resto do mundo → métrico).
- */
 import { numberLocale } from '@/i18n/engine';
 import { parseDecimalBR } from './text';
 
@@ -16,8 +9,6 @@ const ML_PER_FLOZ = 29.5735295625;
 
 let active: UnitSystem = 'metric';
 
-// Assinantes da troca de sistema: o layout raiz re-renderiza o app na hora
-// (sem isto, telas já montadas manteriam kg/lb antigos até reabrir o app).
 const unitListeners = new Set<() => void>();
 
 export function subscribeUnits(listener: () => void): () => void {
@@ -36,8 +27,6 @@ export function getUnitSystem(): UnitSystem {
   return active;
 }
 
-/** Campos de formulário digitam na unidade de exibição e o app guarda métrico:
- *  converte a string digitada aplicando f (ida ou volta) com casas fixas. */
 export function convertDisplayInput(
   s: string,
   f: (n: number) => number,
@@ -55,7 +44,6 @@ const fmt = (v: number, digits: number) =>
     maximumFractionDigits: digits,
   });
 
-// ——— Peso (kg ↔ lb) ———
 
 export function weightUnit(): 'kg' | 'lb' {
   return active === 'imperial' ? 'lb' : 'kg';
@@ -73,7 +61,6 @@ export function formatWeight(kg: number, digits = 1): string {
   return `${fmt(kgToDisplay(kg), digits)} ${weightUnit()}`;
 }
 
-// ——— Comprimento (cm ↔ in / ft'in") ———
 
 export function lengthUnit(): 'cm' | 'in' {
   return active === 'imperial' ? 'in' : 'cm';
@@ -87,7 +74,6 @@ export function displayToCm(value: number): number {
   return active === 'imperial' ? value * CM_PER_IN : value;
 }
 
-/** Altura: métrico "175 cm"; imperial "5'9"" (pés e polegadas). */
 export function formatHeight(cm: number): string {
   if (active !== 'imperial') return `${fmt(cm, 0)} cm`;
   const totalIn = Math.round(cm / CM_PER_IN);
@@ -101,7 +87,6 @@ export function cmToFtIn(cm: number): { ft: number; inches: number } {
   return { ft: Math.floor(totalIn / 12), inches: totalIn % 12 };
 }
 
-// ——— Volume (ml ↔ fl oz) ———
 
 export function volumeUnit(): 'ml' | 'fl oz' {
   return active === 'imperial' ? 'fl oz' : 'ml';

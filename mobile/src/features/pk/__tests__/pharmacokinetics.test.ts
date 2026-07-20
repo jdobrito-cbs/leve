@@ -49,7 +49,6 @@ test('superposição: segunda dose eleva o nível; medicação desconhecida → 
     [dose('semaglutida', t0), dose('semaglutida', t0 + 7 * 24 * HOUR)],
     now,
   )!;
-  // nível absoluto interno é normalizado; compara pelo pico bruto
   expect(two.rawPeak).toBeGreaterThan(one.rawPeak);
   expect(estimateRelativeCurve([dose('minha medicação', t0)], now)).toBeNull();
   expect(Object.keys(PK_PARAMS)).toContain('tirzepatida');

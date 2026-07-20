@@ -1,8 +1,3 @@
-/**
- * Renderiza os documentos legais (aviso médico, termos, política) como páginas
- * públicas na web — a App Store e a Play Store exigem a política de privacidade
- * numa URL pública. Conteúdo gerado da fonte do app (legalContent.ts).
- */
 import { medicalNotice, privacyPolicy, termsOfUse, type LegalDoc } from './legalContent.js';
 
 function esc(s: string): string {

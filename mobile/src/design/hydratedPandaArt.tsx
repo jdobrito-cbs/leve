@@ -1,7 +1,5 @@
 import Svg, { Path } from 'react-native-svg';
 
-/** Arte estática do panda hidratado (viewBox 604×413); a água da garrafa
- *  animada fica em pandas.tsx, por cima desta base. */
 export function HydratedPandaArt({ width, height }: { width: number; height: number }) {
   return (
     <Svg width={width} height={height} viewBox="0 0 604 413" style={{ position: 'absolute' }}>

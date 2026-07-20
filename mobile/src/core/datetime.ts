@@ -26,7 +26,6 @@ export function formatTimeHM(date: Date): string {
   return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 }
 
-/** 'DD/MM/AAAA' + 'HH:MM' → Date local; null se inválido (inclusive 31/02 etc.). */
 export function parseDateTimeBR(dateStr: string, timeStr: string): Date | null {
   const dm = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(dateStr.trim());
   const tm = /^(\d{2}):(\d{2})$/.exec(timeStr.trim());
@@ -45,7 +44,6 @@ export function parseDateTimeBR(dateStr: string, timeStr: string): Date | null {
   return date;
 }
 
-/** Idade completa em anos a partir de 'YYYY-MM-DD'; null se inválida. */
 export function ageFromIsoDate(iso: string, today: Date = new Date()): number | null {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
   if (!m) return null;
@@ -57,19 +55,16 @@ export function ageFromIsoDate(iso: string, today: Date = new Date()): number | 
   return age >= 0 && age < 130 ? age : null;
 }
 
-/** 'YYYY-MM-DD' → 'DD/MM/AAAA' (sem criar Date; evita fuso). */
 export function isoDateToBR(iso: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
   return m ? `${m[3]}/${m[2]}/${m[1]}` : '';
 }
 
-/** 'DD/MM/AAAA' → 'YYYY-MM-DD'; null se inválida. */
 export function brDateToIso(br: string): string | null {
   const date = parseDateTimeBR(br, '00:00');
   return date ? localDayKey(date) : null;
 }
 
-/** ISO → 'DD/MM HH:MM' (hora local), para listas compactas. */
 export function formatDateTimeShort(iso: string): string {
   const d = new Date(iso);
   const day = String(d.getDate()).padStart(2, '0');
@@ -77,7 +72,6 @@ export function formatDateTimeShort(iso: string): string {
   return `${day}/${month} ${formatTimeHM(d)}`;
 }
 
-/** ISO → 'DD/MM/AAAA · HH:MM' (hora local), para listas de registros. */
 export function formatDateTimeLabel(iso: string): string {
   const d = new Date(iso);
   return `${formatDateBR(d)} · ${formatTimeHM(d)}`;

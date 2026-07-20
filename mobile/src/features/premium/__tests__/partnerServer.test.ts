@@ -55,12 +55,10 @@ test('revalidação derruba a chave revogada e mantém acesso quando offline', a
     partnerKey: 'LEVE-AAAA-BBBB-CCCC',
   });
 
-  // Offline: nada muda e o próximo ciclo tenta de novo.
   global.fetch = jest.fn().mockRejectedValue(new Error('offline')) as never;
   await revalidatePartnerIfDue(db);
   expect((await getEntitlement(db)).plan).toBe('partner');
 
-  // Servidor diz que foi revogada → volta ao gratuito.
   global.fetch = jest.fn().mockResolvedValue({
     ok: true,
     json: async () => ({ valid: false }),

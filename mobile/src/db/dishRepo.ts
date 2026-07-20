@@ -32,7 +32,6 @@ export async function saveDish(
   createdAt: Date,
 ): Promise<void> {
   await db.insert(dishes).values({ name, createdAt: createdAt.toISOString() });
-  // Banco local de usuário único: o prato recém-criado é o de maior id.
   const rows = await db.select({ id: dishes.id }).from(dishes).orderBy(desc(dishes.id)).limit(1);
   const dishId = rows[0].id;
   for (const item of items) {

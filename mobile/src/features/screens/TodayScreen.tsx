@@ -102,7 +102,6 @@ function StatCard({
   );
 }
 
-/** Ícone de fibra (trigo) com a cor do tema, no mesmo contrato dos logIcons. */
 function WheatIcon({ size = 20 }: { size?: number }) {
   const { colors } = useTheme();
   return <Wheat size={size} color={colors.primary} />;
@@ -125,14 +124,11 @@ export function TodayScreen() {
   const { height: winH } = useWindowDimensions();
   const summary = useTodaySummary();
   const mascot = useMascot();
-  // Saldo calórico virou positivo/zerado → panda do balanço por 1 minuto.
   useEffect(() => {
     if (!summary.loading) {
       reportCaloricBalance(summary.activeCalories - summary.macros.kcal >= 0);
     }
   }, [summary.loading, summary.activeCalories, summary.macros.kcal]);
-  // Azul sólido até a altura do cabeçalho (início do primeiro box); o degradê
-  // acontece logo abaixo e termina na cor do tema.
   const blueEnd = Math.min(0.85, (insets.top + 128) / winH);
   const fadeEnd = Math.min(1, blueEnd + 0.4);
   const progress = summary.waterGoalMl > 0 ? summary.waterMl / summary.waterGoalMl : 0;
@@ -141,8 +137,7 @@ export function TodayScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {/* Fundo FIXO: azul até o início do primeiro box, depois degradê até a
-          cor do tema (preto no escuro, claro no claro). Não rola com a lista. */}
+      {}
       <LinearGradient
         pointerEvents="none"
         colors={[colors.heroStart, colors.heroStart, colors.background, colors.background]}
@@ -150,7 +145,7 @@ export function TodayScreen() {
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
     <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: spacing.xl }}>
-      {/* Topo sem box: textos à esquerda, panda à direita, sobre o azul. */}
+      {}
       <View
         style={{
           paddingTop: insets.top + spacing.md,
@@ -180,9 +175,7 @@ export function TodayScreen() {
             {strings.today.summaryLabel} {formatDateBR(new Date())}
           </AppText>
         </View>
-        {/* Mascote: feliz por padrão; eventos trocam por 1 min e ele volta
-            sozinho (água → sede/hidratado; peso caiu; remédio; dose GLP-1;
-            balanço calórico favorável). */}
+        {}
         {mascot === 'thirsty' ? (
           <ThirstyPanda width={128} />
         ) : mascot === 'hydrated' ? (
@@ -200,7 +193,7 @@ export function TodayScreen() {
         )}
       </View>
       <View style={{ padding: spacing.md, gap: spacing.md }}>
-        {/* 1 — Água (transborda quando passa de 100%) */}
+        {}
         <Animated.View entering={FadeInDown.duration(420)}>
           <Pressable accessibilityRole="button" onPress={() => router.push('/log/agua' as never)}>
             <Card style={{ gap: spacing.sm, overflow: 'hidden' }}>
@@ -232,13 +225,12 @@ export function TodayScreen() {
           </Pressable>
         </Animated.View>
 
-        {/* 2 — Peso */}
+        {}
         <Box index={1} route="/log/peso">
           <AppText variant="title">{strings.today.weightSection}</AppText>
           {summary.weightSeries.length >= 2 ? (
             <FitChart>
               {(width) => {
-                // Escala na faixa real dos pesos (senão a linha fica achatada).
                 const values = summary.weightSeries.map((w) => w.weightKg);
                 const minV = Math.min(...values);
                 const maxV = Math.max(...values);
@@ -250,8 +242,6 @@ export function TodayScreen() {
                       dataPointText: w.weightKg.toLocaleString('pt-BR', {
                         maximumFractionDigits: 1,
                       }),
-                      // Rótulos alternam acima/abaixo da linha para não se sobrepor;
-                      // o último é puxado para dentro para não cortar na borda.
                       textShiftY: i % 2 === 0 ? -8 : 20,
                       textShiftX: i === arr.length - 1 ? -24 : -8,
                     }))}
@@ -299,7 +289,7 @@ export function TodayScreen() {
           </View>
         </Box>
 
-        {/* 3 — Cards rápidos: calorias, próxima dose e sintomas */}
+        {}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md }}>
           <StatCard
             index={2}
@@ -328,7 +318,7 @@ export function TodayScreen() {
           />
         </View>
 
-        {/* 4 — Nível estimado da medicação */}
+        {}
         <Box index={3} route="/log/dose">
           <TitleRow Anim={SyringeInjectIcon} title={strings.today.medicationSection} />
           {pk ? (
@@ -338,7 +328,6 @@ export function TodayScreen() {
                   <LineChart
                     data={pk.points.map((p, i, arr) => ({
                       value: Math.round(p.level * 100),
-                      // Só o pico da última dose e o fim da projeção têm ponto e rótulo.
                       hideDataPoint: i !== pk.peakIndex && i !== arr.length - 1,
                       dataPointText:
                         i === pk.peakIndex
@@ -386,7 +375,7 @@ export function TodayScreen() {
           </AppText>
         </Box>
 
-        {/* 4 — Refeição diária */}
+        {}
         <Box index={3} route="/log/refeicao">
           <TitleRow Anim={UtensilsCrossIcon} title={strings.today.mealsSection} />
           <AppText style={{ fontFamily: fonts.bold, fontSize: 26, color: colors.text }}>
@@ -404,7 +393,7 @@ export function TodayScreen() {
           </View>
         </Box>
 
-        {/* 5 — Atividades */}
+        {}
         <Box index={4} route="/perfil">
           <TitleRow Anim={FootprintsWalkIcon} title={strings.today.activitySection} />
           {summary.steps !== null || summary.activeCalories > 0 ? (
@@ -422,7 +411,7 @@ export function TodayScreen() {
           )}
         </Box>
 
-        {/* 5b — Balanço calórico: consumidas × queimadas */}
+        {}
         <Box index={4}>
           <TitleRow Anim={DrugstoreScaleIcon} title={strings.today.balanceSection} />
           {(() => {
@@ -461,7 +450,7 @@ export function TodayScreen() {
           })()}
         </Box>
 
-        {/* 6 — Lembretes de medicações */}
+        {}
         <Box index={5} route="/remedios">
           <TitleRow Anim={PillRollIcon} title={strings.today.medRemindersSection} />
           {summary.intakes.length > 0 ? (
@@ -495,7 +484,7 @@ export function TodayScreen() {
           )}
         </Box>
 
-        {/* 7 — Saúde (sono, FC, oxigênio, FR) */}
+        {}
         <Box index={6} route="/perfil">
           <TitleRow Anim={NotesWritingIcon} title={strings.today.healthSection} />
           {summary.healthLatest.sleepHours !== null ||
@@ -546,7 +535,7 @@ export function TodayScreen() {
           )}
         </Box>
 
-        {/* 7b — Sintomas: contador à esquerda, últimos 7 com data e hora na lateral */}
+        {}
         <Box index={7} route="/log/sintoma">
           <View style={{ flexDirection: 'row', gap: spacing.md }}>
             <View style={{ gap: spacing.sm }}>
@@ -586,7 +575,7 @@ export function TodayScreen() {
           </View>
         </Box>
 
-        {/* 8 — Observações (por último) */}
+        {}
         {summary.insights.length > 0 ? (
           <Box index={7}>
             <AppText variant="title">{strings.insights.section}</AppText>

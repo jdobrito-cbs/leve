@@ -43,8 +43,6 @@ import { cmToDisplay, formatWeight, getUnitSystem, kgToDisplay } from '@/core/un
 
 type RangeKey = '30' | '90' | '120' | 'all';
 
-// Função (não constante de módulo): rótulos relidos a cada render para a
-// troca de idioma valer na hora, sem reabrir o app.
 const rangeOptions = () => [
   { value: '30' as RangeKey, label: strings.progress.range30 },
   { value: '90' as RangeKey, label: strings.progress.range90 },
@@ -61,7 +59,6 @@ function weekdayLabel(dayKey: string): string {
 
 const fmtMg = (n: number) => n.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
 
-/** Converte medidor de kg/cm para lb/in quando o sistema é imperial (só exibição). */
 function toDisplayGauge<T extends { unit: string; value: number | null; zones: GaugeZone[] }>(
   g: T,
 ): T {
@@ -76,7 +73,6 @@ function toDisplayGauge<T extends { unit: string; value: number | null; zones: G
   };
 }
 
-/** Dados corporais no estilo da balança: valor + medidor de faixas por item. */
 function BodyDataSection() {
   const [gauges, setGauges] = useState<GaugeSpec[] | null>(null);
   const [facts, setFacts] = useState<{ label: string; value: string }[]>([]);
@@ -144,7 +140,6 @@ function BodyDataSection() {
   );
 }
 
-/** Faixas-padrão por métrica de saúde (as corporais já vivem em Dados corporais). */
 function vitalZonesFor(type: MetricType, sex: Sex): GaugeZone[] | null {
   switch (type) {
     case 'sleep_hours':
@@ -176,7 +171,6 @@ function BodyHealthSection({ metrics }: { metrics: MetricRow[] }) {
       .catch(() => undefined);
   }, []);
 
-  // Corporais ficam no box Dados corporais; aqui, os sinais de saúde.
   const rows = metrics
     .map((m) => ({ metric: m, zones: vitalZonesFor(m.type, sex) }))
     .filter((r) => r.zones !== null || !MANUAL_BODY_METRICS.includes(r.metric.type));
@@ -195,7 +189,6 @@ function BodyHealthSection({ metrics }: { metrics: MetricRow[] }) {
       <AppText variant="title">{strings.progress.bodySection}</AppText>
       {rows.map(({ metric, zones: zones0 }) => {
         const digits = metric.type === 'breathing_disturbances' ? 1 : 0;
-        // Cintura/quadril em cm viram polegadas no sistema imperial.
         const disp = toDisplayGauge({
           unit: METRIC_DEFS[metric.type].unit,
           value: metric.value,
@@ -247,17 +240,14 @@ export function ProgressScreen() {
       since.setDate(since.getDate() - Number(range));
       filtered = weights.filter((w) => new Date(w.loggedAt) >= since);
     }
-    // Importações de saúde podem trazer milhares de pesos; o gráfico trava.
     if (filtered.length > 120) {
       const step = Math.ceil(filtered.length / 120);
       const last = filtered.length - 1;
       filtered = filtered.filter((_, i) => i % step === 0 || i === last);
     }
-    // Gráfico na unidade de exibição (kg ou lb).
     return filtered.map((w) => ({ value: Math.round(kgToDisplay(w.weightKg) * 10) / 10 }));
   }, [weights, range]);
 
-  // Escala na faixa real dos pesos (eixo a partir de 0 achata a linha).
   const weightBounds = useMemo(() => {
     if (weightData.length === 0) return null;
     const values = weightData.map((d) => d.value);
@@ -286,7 +276,6 @@ export function ProgressScreen() {
             <FitChart>{(fitWidth) => (<LineChart width={fitWidth - 64}
               data={pk.points.map((p, i, arr) => ({
                 value: Math.round(p.level * 100),
-                // Igual ao painel: só o pico da última dose e o fim da projeção têm rótulo.
                 hideDataPoint: i !== pk.peakIndex && i !== arr.length - 1,
                 dataPointText:
                   i === pk.peakIndex
@@ -378,8 +367,6 @@ disableScroll
         <AppText variant="title">{strings.progress.waterSection}</AppText>
         {hasWater ? (
           <FitChart>{(fitWidth) => {
-            // Largura das barras calculada à mão: adjustToWidth não desconta o eixo y
-            // e empurrava a última barra para fora do box.
             const slot = (fitWidth - 64) / waterData.length;
             return (<BarChart width={fitWidth - 64}
             data={waterData}

@@ -41,7 +41,6 @@ const specialtyOptions = () => (
   Object.keys(strings.appointments.specialties) as SpecialtyKey[]
 ).map((value) => ({ value, label: strings.appointments.specialties[value] }));
 
-/** Reaplica os avisos com base no toggle do Perfil e nas consultas atuais. */
 async function rescheduleReminders() {
   const reminders = await getSetting<ReminderSettings>(db, 'reminders');
   const appts = await listAppointments(db);
@@ -61,7 +60,6 @@ export function AppointmentsScreen() {
   const [timeStr, setTimeStr] = useState(formatTimeHM(new Date()));
   const at = parseDateTimeBR(dateStr, timeStr);
 
-  // "Agora" nasce na carga da lista — render puro (React Compiler).
   const [nowTs, setNowTs] = useState(0);
 
   const load = useCallback(async () => {
@@ -73,7 +71,6 @@ export function AppointmentsScreen() {
     load();
   }, [load]);
 
-  // (Hook antes do return condicional — regra dos hooks.)
   const { upcoming, past } = useMemo(
     () => ({
       upcoming: list.filter((a) => new Date(a.scheduledAt).getTime() >= nowTs),

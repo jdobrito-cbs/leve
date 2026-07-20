@@ -1,12 +1,3 @@
-// Gera chaves de desbloqueio definitivo para parceiros e amigos.
-//
-// Uso:
-//   node scripts/gen-license.mjs           → gera 1 chave
-//   node scripts/gen-license.mjs 5         → gera 5 chaves
-//
-// A chave privada fica em scripts/license-key.private.json (fora do Git).
-// Guarde uma cópia segura dela: sem a privada não é possível emitir novas
-// chaves, e quem tiver a privada consegue emitir chaves válidas.
 import { randomBytes } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';

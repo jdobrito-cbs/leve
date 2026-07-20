@@ -66,7 +66,6 @@ export function DoseScreen() {
     setLastSite(last);
     setSite(suggestNextSite(last));
     setList(doses);
-    // Medicação atual do Perfil pré-seleciona o registro (se nada foi escolhido).
     const profileMed = profile?.medication?.trim();
     if (profileMed) {
       const norm = normalizeText(profileMed);
@@ -91,7 +90,6 @@ export function DoseScreen() {
 
   async function save() {
     if (!valid || !medName || doseMg === null || !at) return;
-    // Intervalo é configuração global (Perfil): define próxima dose e lembrete.
     const intervalDays = (await getSetting<number>(db, 'doseIntervalDays')) ?? 7;
     const nextDoseAt =
       intervalDays > 0 ? new Date(at.getTime() + intervalDays * 24 * 3600 * 1000) : null;

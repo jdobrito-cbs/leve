@@ -2,11 +2,9 @@ export type GymKind = 'forca' | 'cardio';
 
 export interface GymExercise {
   kind: GymKind;
-  /** MET do Compêndio de Atividades Físicas (intensidade típica). */
   met: number;
 }
 
-/** Catálogo de exercícios; os nomes exibidos ficam em strings.gym.exercises. */
 export const GYM_EXERCISES = {
   supino: { kind: 'forca', met: 5 },
   agachamento: { kind: 'forca', met: 5.5 },
@@ -28,15 +26,10 @@ export const GYM_EXERCISES = {
 
 export type GymExerciseKey = keyof typeof GYM_EXERCISES;
 
-/** kcal = MET × 3,5 × peso(kg) / 200 × minutos (fórmula padrão de METs). */
 export function cardioKcal(met: number, bodyKg: number, minutes: number): number {
   return Math.round(((met * 3.5 * bodyKg) / 200) * minutes);
 }
 
-/**
- * Força: o tempo da série é estimado (4 s por repetição + 75 s de descanso)
- * e o volume levantado dá um acréscimo pequeno.
- */
 export function strengthKcal(
   met: number,
   bodyKg: number,

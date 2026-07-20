@@ -26,7 +26,6 @@ export async function addAppointment(db: AppDb, input: AddAppointmentInput): Pro
   });
 }
 
-/** Todas as consultas, das mais próximas às mais distantes. */
 export async function listAppointments(db: AppDb, limit = 100): Promise<Appointment[]> {
   return (await db
     .select()

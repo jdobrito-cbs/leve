@@ -23,7 +23,7 @@ test('trocar o sistema de medidas notifica assinantes (o app re-renderiza)', () 
   expect(seen).toEqual(['imperial']);
   off();
   setUnitSystem('metric');
-  expect(seen).toEqual(['imperial']); // cancelado: não recebe mais
+  expect(seen).toEqual(['imperial']);
 });
 
 test('métrico é identidade', () => {
@@ -50,6 +50,6 @@ test('imperial converte e volta sem perda relevante', () => {
 
 test('altura imperial em pés e polegadas', () => {
   setUnitSystem('imperial');
-  expect(formatHeight(175)).toBe(`5'9"`); // 175 cm ≈ 68,9 in → 5 ft 9 in
+  expect(formatHeight(175)).toBe(`5'9"`);
   expect(cmToFtIn(183)).toEqual({ ft: 6, inches: 0 });
 });

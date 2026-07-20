@@ -8,15 +8,11 @@ export interface PlanPrices {
 }
 
 export interface PurchasesProvider {
-  /** Preços localizados vindos da loja (null enquanto a loja não responde). */
   getPrices(): Promise<PlanPrices>;
-  /** true se a compra foi concluída. */
   purchase(plan: PaidPlan): Promise<boolean>;
-  /** Plano da assinatura restaurada, ou null se não havia nada para restaurar. */
   restore(): Promise<PaidPlan | null>;
 }
 
-/** Usado quando o app foi buildado sem as chaves da loja de assinaturas. */
 class UnconfiguredPurchasesProvider implements PurchasesProvider {
   async getPrices(): Promise<PlanPrices> {
     return { monthly: null, annual: null };

@@ -16,11 +16,8 @@ interface ScanResponse {
   }[];
 }
 
-/** Envia a foto ao servidor do Leve (que guarda a chave do AI Hub). Opt-in por foto. */
 export class RemoteVisionProvider implements VisionProvider {
   constructor(
-    /** URL COMPLETA do /scan-food (já montada em scanUrl()) — NÃO acrescentar
-     *  path aqui, senão vira /scan-food/scan-food e o servidor responde 404. */
     private endpoint: string,
     private appToken?: string,
   ) {}

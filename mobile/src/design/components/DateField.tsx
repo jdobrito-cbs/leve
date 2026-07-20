@@ -11,13 +11,11 @@ import { PickerSheet } from './PickerSheet';
 
 interface Props {
   label: string;
-  value: string; // 'DD/MM/AAAA'
+  value: string;
   onChange: (v: string) => void;
-  /** Chamado quando o campo ganha foco (fecha réguas abertas na tela). */
   onFieldFocus?: () => void;
 }
 
-/** Campo de data com máscara DD/MM/AAAA e rolagem de data do sistema. */
 export function DateField({ label, value, onChange, onFieldFocus }: Props) {
   const { colors } = useTheme();
   const [open, setOpen] = useState(false);
@@ -79,7 +77,6 @@ export function DateField({ label, value, onChange, onFieldFocus }: Props) {
             />
           </PickerSheet>
         ) : (
-          // Android: diálogo nativo com OK/Cancelar próprios.
           <DateTimePicker
             value={pickerValue}
             mode="date"

@@ -29,7 +29,6 @@ export function CycleScreen() {
   const [open, setOpen] = useState<PeriodLog | null>(null);
   const [history, setHistory] = useState<PeriodLog[]>([]);
 
-  // "Agora" nasce na carga dos dados — render puro (React Compiler).
   const [nowTs, setNowTs] = useState(0);
 
   const load = useCallback(async () => {
@@ -144,7 +143,7 @@ export function CycleScreen() {
         </Card>
       ) : null}
       <DisclaimerBanner />
-      {/* Como aba própria não há para onde "voltar"; o botão só aparece vindo do Registrar. */}
+      {}
       {router.canGoBack?.() ? (
         <Button label={strings.common.close} variant="secondary" onPress={() => router.back()} />
       ) : null}

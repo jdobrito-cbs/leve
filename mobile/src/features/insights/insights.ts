@@ -1,11 +1,5 @@
 import { strings } from '@/i18n/pt-BR';
 
-/**
- * Observações informativas — NUNCA diagnóstico ou conduta clínica.
- * Regras baseadas em referências públicas gerais; todo texto de "atenção"
- * termina orientando a conversar com o médico.
- */
-
 export interface Insight {
   id: string;
   kind: 'positivo' | 'atencao';
@@ -17,19 +11,18 @@ export interface Point {
 }
 
 export interface InsightInput {
-  weights28: Point[]; // últimos 28 dias, ordem cronológica
-  bodyFat28: Point[]; // % gordura
-  muscle28: Point[]; // massa muscular (esquelética > muscular > magra, a que houver)
-  bodyWater28: Point[]; // kg
-  sleep7: number[]; // horas por noite, últimos 7 dias
-  restingHr7: number[]; // bpm, últimos 7 dias
-  restingHr30: number[]; // bpm, dias 8–30 atrás
-  waterPctOfGoal7: number[]; // razão ingestão/meta por dia, últimos 7 dias
+  weights28: Point[];
+  bodyFat28: Point[];
+  muscle28: Point[];
+  bodyWater28: Point[];
+  sleep7: number[];
+  restingHr7: number[];
+  restingHr30: number[];
+  waterPctOfGoal7: number[];
 }
 
 const avg = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
 
-/** Diferença entre a média da metade recente e a da metade antiga (null se <4 pontos). */
 function trend(points: Point[]): number | null {
   if (points.length < 4) return null;
   const mid = Math.floor(points.length / 2);

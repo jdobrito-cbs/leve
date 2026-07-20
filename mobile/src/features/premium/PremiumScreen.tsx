@@ -65,9 +65,7 @@ export function PremiumScreen() {
       }
     } catch (e) {
       const detail = e instanceof Error ? e.message : String(e);
-      // Usuário fechou a folha de pagamento: não é erro, não mostra nada.
       if (detail !== 'cancelled') {
-        // Mostra o motivo real da loja entre parênteses (diagnóstico).
         setMessage({ text: `${strings.premium.purchaseFailed} (${detail})`, ok: false });
       }
     } finally {
@@ -101,7 +99,6 @@ export function PremiumScreen() {
   async function confirmKey() {
     const trimmed = keyStr.trim();
 
-    // Chave curta do servidor: validada online e revogável pelo painel.
     if (isServerPartnerKey(trimmed)) {
       setBusy(true);
       try {
@@ -136,7 +133,6 @@ export function PremiumScreen() {
       return;
     }
 
-    // Chave longa assinada offline (formato antigo) continua valendo.
     const licenseId = verifyLicenseKey(trimmed);
     if (!licenseId) {
       setKeyError(strings.premium.keyInvalid);
@@ -274,7 +270,7 @@ export function PremiumScreen() {
         />
       </Card>
 
-      {/* Modal da chave: campo sempre visível acima do teclado + OK. */}
+      {}
       <PickerSheet visible={keyOpen} onConfirm={confirmKey} onCancel={() => setKeyOpen(false)}>
         <AppText variant="title">{strings.premium.keySectionTitle}</AppText>
         <Input

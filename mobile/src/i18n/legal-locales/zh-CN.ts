@@ -1,7 +1,3 @@
-/**
- * Documentos legais em chinês simplificado (zh-CN) — tradução de cortesia.
- * Em divergência, prevalece a versão em português (Brasil) em legal-pt-BR.ts.
- */
 import type { LegalCatalog } from '../legalCatalog';
 
 export const legal: LegalCatalog = {

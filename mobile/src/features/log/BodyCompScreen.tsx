@@ -37,7 +37,6 @@ import {
   weightUnit,
 } from '@/core/units';
 
-/** Conversões por unidade da métrica (kg/cm) — demais unidades ficam como são. */
 function displayUnitOf(unit: string): string {
   if (unit === 'kg') return weightUnit();
   if (unit === 'cm') return lengthUnit();
@@ -92,7 +91,6 @@ export function BodyCompScreen() {
   async function save() {
     if (!at) return;
     for (const type of filled) {
-      // Digitado na unidade de exibição (kg/lb, cm/in); o banco guarda métrico.
       const typed = parseDecimalBR(values[type] ?? '')!;
       await addMetric(db, type, toCanonical(METRIC_DEFS[type].unit, typed), at);
     }

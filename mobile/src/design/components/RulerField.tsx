@@ -21,11 +21,9 @@ interface Props {
   majorEvery?: number;
   labelEvery?: number;
   decimals?: number;
-  /** Posição inicial da régua quando o campo está vazio. */
   fallback: number;
 }
 
-/** Campo numérico com régua em modal (botão de régua → arrasta → OK). */
 export function RulerField({
   label,
   value,

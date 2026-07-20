@@ -27,8 +27,6 @@ const mockVerify = jest.fn();
 jest.mock('@/features/premium/licenseKey', () => ({
   verifyLicenseKey: (...a: unknown[]) => mockVerify(...a),
 }));
-// Mantém formatPartnerKeyInput/isServerPartnerKey reais; só a validação online
-// (rede) e o id do aparelho são simulados.
 jest.mock('@/features/premium/partnerServer', () => ({
   ...jest.requireActual('@/features/premium/partnerServer'),
   validatePartnerKey: jest.fn(),
@@ -40,7 +38,7 @@ beforeEach(() => {
   for (const k of Object.keys(mockStore)) delete mockStore[k];
   mockVerify.mockReset();
   mockValidate.mockReset();
-  mockValidate.mockResolvedValue(null); // padrão: sem servidor
+  mockValidate.mockResolvedValue(null);
 });
 
 test('bloqueios configurados: scan e saúde exigem premium; o resto é livre', () => {
@@ -54,14 +52,13 @@ test('modal da chave: inválida mostra erro dentro do modal', async () => {
   mockVerify.mockReturnValue(null);
   const { getByText, getByPlaceholderText } = await render(<PremiumScreen />);
   getByText(strings.premium.benefitsTitle);
-  await fireEvent.press(getByText(strings.premium.redeem)); // abre o modal
+  await fireEvent.press(getByText(strings.premium.redeem));
   await fireEvent.changeText(getByPlaceholderText(strings.premium.keyPlaceholder), 'LEVE-x');
-  await fireEvent.press(getByText(strings.common.confirm)); // OK
+  await fireEvent.press(getByText(strings.common.confirm));
   await waitFor(() => getByText(strings.premium.keyInvalid));
 });
 
 test('chave de parceiro válida ativa o desbloqueio de parceiro', async () => {
-  // O campo formata para LEVE-XXXX-XXXX-XXXX, então o fluxo é o do servidor.
   mockValidate.mockResolvedValue({ valid: true, label: 'Dra. Ana' });
   const { getByText, getByPlaceholderText } = await render(<PremiumScreen />);
   await fireEvent.press(getByText(strings.premium.redeem));

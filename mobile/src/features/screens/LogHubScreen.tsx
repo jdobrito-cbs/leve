@@ -24,8 +24,6 @@ interface HubItem {
   route: string;
 }
 
-// Função (não constante de módulo): os rótulos precisam ser relidos a cada
-// render para a troca de idioma valer na hora, sem reabrir o app.
 const baseItems = (): HubItem[] => [
   { Anim: WaterGlassIcon, label: strings.log.water, route: '/log/agua' },
   { Anim: UtensilsCrossIcon, label: strings.log.meal, route: '/log/refeicao' },

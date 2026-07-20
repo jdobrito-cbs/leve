@@ -7,8 +7,6 @@ import { strings } from '@/i18n/pt-BR';
 
 type DocKey = 'medicalNotice' | 'termsOfUse' | 'privacyPolicy';
 
-/** Leitor dos documentos legais (aviso médico, termos, política) no idioma
- *  ativo; traduções mostram o aviso de que a versão pt-BR prevalece. */
 export function LegalDocScreen({ docKey }: { docKey: DocKey }) {
   const catalog: LegalCatalog = getLegalCatalog();
   const doc = catalog[docKey];

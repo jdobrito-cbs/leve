@@ -14,12 +14,6 @@ interface CategorySample {
   endDate?: string | Date;
 }
 
-/**
- * Superfície mínima usada do @kingstinct/react-native-healthkit.
- * ATENÇÃO: iOS não é testável neste ambiente (sem Mac); o adapter é defensivo —
- * qualquer divergência de API resulta em listas vazias, nunca em crash.
- */
-/** Opções da v14: `limit` é OBRIGATÓRIO (0 = todos) e o período vai em filter.date. */
 interface HKQueryOptions {
   filter?: { date?: { startDate?: Date; endDate?: Date } };
   limit: number;
@@ -29,7 +23,6 @@ interface HKQueryOptions {
 
 interface HealthKitModule {
   isHealthDataAvailable(): Promise<boolean>;
-  /** v14: opções em objeto — { toRead, toShare }. */
   requestAuthorization(options: { toRead: string[]; toShare: string[] }): Promise<boolean>;
   queryQuantitySamples(
     identifier: string,
@@ -49,7 +42,6 @@ const BODY_MASS = 'HKQuantityTypeIdentifierBodyMass';
 const STEP_COUNT = 'HKQuantityTypeIdentifierStepCount';
 const SLEEP = 'HKCategoryTypeIdentifierSleepAnalysis';
 
-/** Identificadores HealthKit → métrica do Leve (iOS não testável neste ambiente; adapter defensivo). */
 const HK_METRICS: { id: string; type: MetricType; unit?: string }[] = [
   { id: 'HKQuantityTypeIdentifierWaistCircumference', type: 'waist_cm', unit: 'cm' },
   { id: 'HKQuantityTypeIdentifierBodyFatPercentage', type: 'body_fat_pct' },
@@ -60,7 +52,6 @@ const HK_METRICS: { id: string; type: MetricType; unit?: string }[] = [
   { id: 'HKQuantityTypeIdentifierRespiratoryRate', type: 'respiratory_rate' },
   { id: 'HKQuantityTypeIdentifierActiveEnergyBurned', type: 'active_calories' },
   { id: 'HKQuantityTypeIdentifierAppleExerciseTime', type: 'exercise_minutes' },
-  // Apneia: distúrbios respiratórios por hora de sono (Apple Watch, iOS 18+).
   { id: 'HKQuantityTypeIdentifierAppleSleepingBreathingDisturbances', type: 'breathing_disturbances' },
 ];
 
@@ -72,7 +63,6 @@ function getModule(): HealthKitModule | null {
   }
 }
 
-/** Adapter fino sobre o HealthKit (iOS). Nunca lança: falhas viram resultados vazios. */
 export class HealthKitProvider implements HealthProvider {
   private mod = getModule();
 
@@ -171,22 +161,18 @@ export class HealthKitProvider implements HealthProvider {
         );
         for (const s of rows) {
           if (typeof s.quantity === 'number' && Number.isFinite(s.quantity) && s.startDate) {
-            // Percentuais podem vir como fração (0,314) — normaliza para 31,4%.
             const isPct = type === 'body_fat_pct' || type === 'spo2';
             const value = isPct && s.quantity <= 1 ? s.quantity * 100 : s.quantity;
             samples.push({ type, value, takenAt: new Date(s.startDate) });
           }
         }
       } catch {
-        // tipo indisponível neste aparelho — segue para o próximo
       }
     }
     samples.push(...(await this.readSleep(since)));
     return samples;
   }
 
-  /** Sono por noite a partir dos trechos do HealthKit: horas dormidas e
-   *  eficiência (% do tempo na cama efetivamente dormindo). */
   private async readSleep(since: Date): Promise<MetricSample[]> {
     if (!this.mod?.queryCategorySamples) return [];
     try {
@@ -196,7 +182,6 @@ export class HealthKitProvider implements HealthProvider {
           limit: 0,
         })) as CategorySample[] | { samples?: CategorySample[] },
       ) as CategorySample[];
-      // Valores HKCategoryValueSleepAnalysis: 0 na cama, 2 acordado, 1/3/4/5 dormindo.
       const nights = new Map<
         string,
         { asleepMs: number; inBedMs: number; awakeMs: number; end: Date }
@@ -223,7 +208,6 @@ export class HealthKitProvider implements HealthProvider {
           value: Math.round((night.asleepMs / 36e5) * 10) / 10,
           takenAt: night.end,
         });
-        // Sem trechos de "na cama"/"acordado" não há como medir eficiência.
         if (night.inBedMs + night.awakeMs > 0) {
           const denom = Math.max(night.inBedMs, night.asleepMs + night.awakeMs);
           out.push({
@@ -240,7 +224,6 @@ export class HealthKitProvider implements HealthProvider {
     }
   }
 
-  /** Noites de sono (deitar → acordar) para estimar horários típicos. */
   async readSleepNights(since: Date): Promise<SleepNight[]> {
     if (!this.mod?.queryCategorySamples) return [];
     try {

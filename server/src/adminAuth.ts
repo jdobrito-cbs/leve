@@ -11,17 +11,6 @@ import jwt from 'jsonwebtoken';
 import qrcode from 'qrcode-generator';
 import type { AdminRecord, AdminRole } from './store.js';
 
-/**
- * Núcleo de autenticação do painel: senha (scrypt, via auth.ts), 2FA TOTP
- * (RFC 6238, HMAC-SHA1, sem biblioteca externa), códigos de backup, sessão
- * em cookie assinado e cifra do segredo TOTP em repouso. As chaves de sessão
- * e de cifra derivam do ADMIN_TOKEN — girar esse token encerra as sessões e
- * exige reconfigurar o 2FA (é também a chave-mestra de recuperação).
- */
-
-// ---------------------------------------------------------------------------
-// Base32 (RFC 4648) — para o segredo TOTP legível pelos apps autenticadores.
-// ---------------------------------------------------------------------------
 const B32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
 export function base32Encode(buf: Buffer): string {
@@ -56,9 +45,6 @@ export function base32Decode(input: string): Buffer {
   return Buffer.from(out);
 }
 
-// ---------------------------------------------------------------------------
-// TOTP (RFC 6238) sobre HOTP (RFC 4226).
-// ---------------------------------------------------------------------------
 function hotp(secret: Buffer, counter: number, digits: number): string {
   const buf = Buffer.alloc(8);
   buf.writeUInt32BE(Math.floor(counter / 0x100000000), 0);
@@ -78,7 +64,6 @@ export function totpAt(secretBase32: string, timeMs: number, digits = 6, stepSec
   return hotp(base32Decode(secretBase32), counter, digits);
 }
 
-/** Aceita uma janela de ±1 passo (30 s) para tolerar relógio dessincronizado. */
 export function verifyTotp(
   secretBase32: string,
   token: string,
@@ -112,8 +97,6 @@ export function otpauthUrl(secretBase32: string, account: string, issuer = 'Leve
   return `otpauth://totp/${label}?${params.toString()}`;
 }
 
-/** QR code (data URL GIF) do otpauth para escanear no app autenticador.
- *  data: é permitido pelo CSP em <img>; nenhuma dependência de rede. */
 export function qrDataUrl(text: string): string {
   const qr = qrcode(0, 'M');
   qr.addData(text);
@@ -121,10 +104,7 @@ export function qrDataUrl(text: string): string {
   return qr.createDataURL(4, 8);
 }
 
-// ---------------------------------------------------------------------------
-// Códigos de backup — usados no lugar do 2FA se o app autenticador for perdido.
-// ---------------------------------------------------------------------------
-const BACKUP_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // sem 0/O/1/I/L
+const BACKUP_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 
 export function generateBackupCodes(count = 8): string[] {
   const pick = () => BACKUP_ALPHABET[randomBytes(1)[0] % BACKUP_ALPHABET.length];
@@ -137,9 +117,6 @@ export function hashBackupCode(code: string): string {
   return createHash('sha256').update(norm).digest('hex');
 }
 
-// ---------------------------------------------------------------------------
-// Cifra do segredo TOTP em repouso (AES-256-GCM). Chave derivada do ADMIN_TOKEN.
-// ---------------------------------------------------------------------------
 export function adminEncKey(adminToken: string): Buffer {
   return scryptSync(adminToken, 'leve-admin-enc-v1', 32);
 }
@@ -163,9 +140,6 @@ export function decryptSecret(enc: string, key: Buffer): string | null {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Sessão em cookie assinado (JWT com segredo derivado do ADMIN_TOKEN).
-// ---------------------------------------------------------------------------
 export type AdminScope = 'full' | 'enroll';
 export interface AdminSession {
   sub: string;
@@ -211,9 +185,6 @@ export function verifyAdminSession(token: string, secret: string): AdminSession 
   }
 }
 
-/** `secure` acompanha o protocolo do acesso: em HTTPS o cookie leva `Secure`
- *  (não viaja em texto claro); em http simples (teste por IP/porta) o atributo
- *  é omitido — senão o navegador descarta o cookie e o login não se sustenta. */
 export function serializeSessionCookie(value: string, maxAgeSec: number, secure = true): string {
   const parts = [
     `${ADMIN_COOKIE}=${value}`,
@@ -240,12 +211,6 @@ export function readSessionCookie(cookieHeader: string | undefined): string | nu
   return null;
 }
 
-// ---------------------------------------------------------------------------
-// Matriz de permissões.
-//  master: cria, exclui (menos a si) e troca a senha de todos; só ele troca a
-//          própria senha e é o único que reseta 2FA de terceiros.
-//  admin comum: não cria nem exclui; pode trocar a senha de admins comuns.
-// ---------------------------------------------------------------------------
 export function canCreateAdmin(actor: { role: AdminRole }): boolean {
   return actor.role === 'master';
 }
@@ -255,13 +220,10 @@ export function canDeleteAdmin(actor: AdminRecord, target: AdminRecord): boolean
 }
 
 export function canChangePassword(actor: AdminRecord, target: AdminRecord): boolean {
-  // A senha do master só o próprio master troca.
   if (target.role === 'master') return actor.id === target.id;
-  // Qualquer admin logado pode redefinir a senha de um admin comum (inclui a si).
   return true;
 }
 
 export function canResetTotp(actor: AdminRecord, target: AdminRecord): boolean {
-  // Reset de 2FA de terceiros é recuperação — só o master, nunca em si mesmo.
   return actor.role === 'master' && actor.id !== target.id;
 }

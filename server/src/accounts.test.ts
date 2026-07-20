@@ -77,7 +77,6 @@ describe('contas e backup E2E', () => {
       payload: { refreshToken },
     });
     expect(refreshed.statusCode).toBe(200);
-    // rotação: o token antigo não vale mais
     const reused = await app.inject({
       method: 'POST',
       url: '/auth/refresh',

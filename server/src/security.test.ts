@@ -19,7 +19,7 @@ describe('endurecimento de segurança', () => {
       store: new MemoryStore(),
       jwtSecret: 'x'.repeat(40),
     });
-    const big = 'a'.repeat(200 * 1024); // 200 KB > limite global de 64 KB
+    const big = 'a'.repeat(200 * 1024);
     const res = await app.inject({
       method: 'POST',
       url: '/auth/login',
@@ -51,7 +51,6 @@ describe('endurecimento de segurança', () => {
 
   test('erro interno responde genérico, sem vazar detalhes do banco', async () => {
     const store = new MemoryStore();
-    // Simula o banco fora de sincronia: a consulta lança um erro interno.
     store.findPartnerKeyByHash = async () => {
       throw new Error('coluna secreta X não existe na tabela Y');
     };

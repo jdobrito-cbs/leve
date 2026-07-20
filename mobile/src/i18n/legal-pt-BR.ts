@@ -1,11 +1,3 @@
-/**
- * Documentos legais do Leve (pt-BR), redigidos para a realidade do app:
- * dados locais no aparelho, integrações de saúde mediante permissão, conta
- * opcional, backup cifrado de ponta a ponta e análise de foto sob demanda.
- * Rascunhos alinhados à LGPD e a boas práticas internacionais — revisão por
- * advogado é recomendada antes da publicação nas lojas.
- */
-
 export interface LegalSection {
   heading?: string;
   paragraphs: string[];

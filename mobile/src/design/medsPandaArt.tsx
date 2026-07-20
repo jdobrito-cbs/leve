@@ -1,7 +1,5 @@
 import Svg, { Path } from 'react-native-svg';
 
-/** Arte do panda da hora do remédio de apoio (viewBox original 549×455);
- *  animação aplicada em pandas.tsx, por cima desta base. */
 export function MedsPandaArt({ width, height }: { width: number; height: number }) {
   return (
     <Svg width={width} height={height} viewBox="0 0 549 455" style={{ position: 'absolute' }}>

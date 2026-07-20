@@ -12,13 +12,11 @@ function makeApp() {
   return buildServer({ callHub: hub, partnerStore: store, adminStore: store, adminToken: ADMIN_TOKEN });
 }
 
-// Extrai o cookie de sessão da resposta do inject.
 function cookieOf(res: { cookies: Array<{ name: string; value: string }> }): string {
   const c = res.cookies.find((x) => x.name === 'leve_admin');
   return c ? 'leve_admin=' + c.value : '';
 }
 
-// Cria o master e configura o 2FA; devolve o cookie com sessão completa.
 async function bootstrapMaster(app: FastifyInstance, email = 'jorge@leve.app') {
   const setup = await app.inject({
     method: 'POST',
@@ -38,7 +36,6 @@ async function bootstrapMaster(app: FastifyInstance, email = 'jorge@leve.app') {
   return { cookie, secret, backupCodes: confirm.json().backupCodes as string[] };
 }
 
-// Cria um admin comum (pelo master) e configura o 2FA dele.
 async function addAdmin(app: FastifyInstance, masterCookie: string, email: string) {
   await app.inject({
     method: 'POST',
@@ -86,7 +83,6 @@ describe('cookie de sessão: Secure acompanha o protocolo', () => {
       url: '/admin/setup',
       payload: { adminToken: ADMIN_TOKEN, email: 'jorge@leve.app', password: 'senha-super-forte' },
     });
-    // inject simula http puro → sem Secure (senão o navegador descarta).
     const raw = String(setup.headers['set-cookie']);
     expect(raw).toContain('leve_admin=');
     expect(raw).not.toContain('Secure');
@@ -105,13 +101,12 @@ describe('POST sem corpo com cabeçalho JSON (como o navegador envia)', () => {
   it('não vira 400: o 2FA responde com segredo e QR', async () => {
     const app = await makeApp();
     const { cookie } = await bootstrapMaster(app);
-    // Recria o cenário: fetch do painel com content-type e corpo vazio.
     const fresh = await app.inject({
       method: 'POST',
       url: '/admin/setup',
       payload: { adminToken: ADMIN_TOKEN, email: 'outro@leve.app', password: 'senha-super-forte' },
     });
-    expect(fresh.statusCode).toBe(409); // painel já configurado (sanidade)
+    expect(fresh.statusCode).toBe(409);
 
     const logout = await app.inject({
       method: 'POST',
@@ -145,7 +140,6 @@ describe('POST sem corpo com cabeçalho JSON (como o navegador envia)', () => {
     expect(body.secret).toMatch(/^[A-Z2-7]{32}$/);
     expect(body.qr).toMatch(/^data:image\/gif;base64,/);
 
-    // JSON quebrado continua sendo recusado com 400.
     const bad = await app2.inject({
       method: 'POST',
       url: '/admin/login',
@@ -236,7 +230,6 @@ describe('login com 2FA', () => {
       });
       expect(r.statusCode).toBe(401);
     }
-    // Bloqueado: mesmo com a senha e o código certos, recusa por um tempo.
     const locked = await app.inject({
       method: 'POST',
       url: '/admin/login',
@@ -271,7 +264,6 @@ describe('matriz de permissões', () => {
     const adminId = await idOf(app, master.cookie, 'ana@leve.app');
     const masterId = await idOf(app, master.cookie, 'jorge@leve.app');
 
-    // admin comum não cadastra nem exclui
     const create = await app.inject({
       method: 'POST',
       url: '/admin',
@@ -286,7 +278,6 @@ describe('matriz de permissões', () => {
     });
     expect(del.statusCode).toBe(403);
 
-    // admin comum não troca a senha do master
     const pwMaster = await app.inject({
       method: 'POST',
       url: '/admin/' + masterId + '/password',
@@ -295,7 +286,6 @@ describe('matriz de permissões', () => {
     });
     expect(pwMaster.statusCode).toBe(403);
 
-    // master não pode ser excluído
     const delMaster = await app.inject({
       method: 'DELETE',
       url: '/admin/' + masterId,
@@ -303,7 +293,6 @@ describe('matriz de permissões', () => {
     });
     expect(delMaster.statusCode).toBe(403);
 
-    // master exclui o admin comum
     const delAdmin = await app.inject({
       method: 'DELETE',
       url: '/admin/' + adminId,
@@ -327,7 +316,6 @@ describe('matriz de permissões', () => {
     });
     expect(reset.statusCode).toBe(200);
 
-    // A nova senha vale (o 2FA da bia continua ativo → precisa do código).
     const login = await app.inject({
       method: 'POST',
       url: '/admin/login',
@@ -350,8 +338,7 @@ describe('matriz de permissões', () => {
       payload: { currentPassword: 'senha-super-forte', newPassword: 'outra-senha-forte' },
     });
     expect(change.statusCode).toBe(200);
-    const fresh = cookieOf(change); // cookie renovado
-    // O cookie antigo não vale mais; o novo sim.
+    const fresh = cookieOf(change);
     const oldSession = await app.inject({
       method: 'GET',
       url: '/admin/list',
@@ -389,7 +376,6 @@ describe('chave de parceiro: trava de 1 aparelho', () => {
     });
     expect(b.json()).toEqual({ valid: false, reason: 'bound_elsewhere' });
 
-    // A lista mostra a chave como vinculada.
     const list = await app.inject({
       method: 'GET',
       url: '/partner-keys',
@@ -404,7 +390,6 @@ describe('chave de parceiro: trava de 1 aparelho', () => {
     });
     expect(unbind.statusCode).toBe(200);
 
-    // Agora o aparelho B consegue vincular.
     const b2 = await app.inject({
       method: 'POST',
       url: '/partner-keys/validate',
@@ -432,7 +417,6 @@ describe('recuperação (chave-mestra)', () => {
     });
     expect(ok.statusCode).toBe(200);
 
-    // Após recuperar, a nova senha entra e o 2FA volta a ser configurado.
     const login = await app.inject({
       method: 'POST',
       url: '/admin/login',

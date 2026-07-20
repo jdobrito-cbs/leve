@@ -63,14 +63,14 @@ test('autoSyncIfDue exige premium e respeita conexão e throttle de 1h', async (
   const db = makeDb() as never;
   const provider = fakeProvider();
   await setSetting(db, 'health', { connected: true });
-  expect(await autoSyncIfDue(db, provider)).toBe(false); // sem premium, não busca
+  expect(await autoSyncIfDue(db, provider)).toBe(false);
   await setSetting(db, 'entitlement', { plan: 'partner' });
   await setSetting(db, 'health', { connected: false });
-  expect(await autoSyncIfDue(db, provider)).toBe(false); // saúde não conectada
+  expect(await autoSyncIfDue(db, provider)).toBe(false);
   await setSetting(db, 'health', { connected: true });
   expect(await autoSyncIfDue(db, provider)).toBe(true);
   expect(await getSetting(db, 'lastHealthSyncAt')).not.toBeNull();
-  expect(await autoSyncIfDue(db, provider)).toBe(false); // dentro da 1h
+  expect(await autoSyncIfDue(db, provider)).toBe(false);
 });
 
 test('detectSleepSchedule guarda sugestões e atualiza lembrete automático', async () => {
@@ -92,14 +92,14 @@ test('detectSleepSchedule guarda sugestões e atualiza lembrete automático', as
     sleepAuto: true,
     wakeEnabled: true,
     wakeAuto: false,
-    wakeTime: '06:00', // fixado pelo usuário — a detecção não pode mexer
+    wakeTime: '06:00',
   });
   await detectSleepSchedule(db, provider);
   expect(await getSetting(db, 'sleepBedtimeDetected')).toBe('23:00');
   expect(await getSetting(db, 'sleepWakeDetected')).toBe('07:00');
   const r = await getSetting<{ sleepTime?: string; wakeTime?: string }>(db, 'reminders');
-  expect(r?.sleepTime).toBe('23:00'); // automático seguiu a detecção
-  expect(r?.wakeTime).toBe('06:00'); // fixo permaneceu intocado
+  expect(r?.sleepTime).toBe('23:00');
+  expect(r?.wakeTime).toBe('06:00');
 });
 
 test('readTodaySteps devolve o total do dia ou null', async () => {

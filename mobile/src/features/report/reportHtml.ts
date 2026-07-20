@@ -16,9 +16,6 @@ import { getActiveLanguage, numberLocale } from '@/i18n/engine';
 import { strings } from '@/i18n/pt-BR';
 import type { BodyReport, CompositionRow, RangedValue, SeriesPoint } from './bodyReport';
 
-/** Documento A4 do relatório corporal (HTML → PDF via expo-print), fiel ao
- *  padrão dos relatórios de bioimpedância (Fitdays). Textos seguem o idioma
- *  ativo (strings.reportPdf) e pesos/volumes seguem o sistema de medidas. */
 
 const BLUE = '#2563EB';
 const INK = '#0F172A';
@@ -29,7 +26,6 @@ const GRID = '#EEF2F7';
 const fmt = (n: number, d = 1) =>
   n.toLocaleString(numberLocale(), { minimumFractionDigits: d, maximumFractionDigits: d });
 
-// ——— Conversões de exibição (o relatório calcula em kg; imperial mostra lb) ———
 
 const r1 = (n: number) => Math.round(kgToDisplay(n) * 10) / 10;
 
@@ -50,8 +46,6 @@ function convSeries(points: SeriesPoint[]): SeriesPoint[] {
 }
 
 
-/** Medidor compacto no estilo da balança: zonas de largura IGUAL e marcador
- *  na posição proporcional dentro da zona (mesma geometria do app). */
 function miniGauge(value: number, zones: GaugeZone[]): string {
   if (zones.filter((z) => z.to !== null).length === 0) return '';
   const segs = zones.map((z) => `<i style="flex:1;background:${z.color}"></i>`).join('');
@@ -67,7 +61,6 @@ function compRow(
   zones: GaugeZone[] | null,
   unit = 'kg',
 ): string {
-  // Selo com a semântica REAL da métrica (água alta = excelente, não erro).
   const st = row.value !== null && zones ? zoneOf(row.value, zones) : null;
   const value =
     row.value === null
@@ -86,8 +79,6 @@ function compRow(
   </div></div>`;
 }
 
-/** Posição do fim da barra nas zonas Baixo/Padrão/Alto — mesma geometria dos
- *  medidores (proporcional dentro da zona; excesso assintótico, sem colar). */
 function barPos(r: RangedValue): number {
   const zones: GaugeZone[] = [
     { to: r.min, label: '', color: '' },
@@ -95,7 +86,6 @@ function barPos(r: RangedValue): number {
     { to: null, label: '', color: '' },
   ];
   const pos = gaugeMarkerFraction(r.value, zones) * 100;
-  // Piso = largura mínima do chip com o número dentro; teto evita colar na borda.
   return Math.max(14, Math.min(97, pos));
 }
 
@@ -106,8 +96,6 @@ function barHead(extraLabel: string): string {
     <td class="bextra">${extraLabel}</td></tr>`;
 }
 
-/** Cores da barra de valor (baixo | padrão | alto), por semântica da métrica.
- *  A cor é aplicada na própria barra conforme a zona do valor; o fundo fica cinza. */
 const BAR_FAT_LIKE: [string, string, string] = [ZONE.thin, ZONE.ok, ZONE.bad];
 const BAR_MUSCLE_LIKE: [string, string, string] = [ZONE.bad, ZONE.ok, ZONE.thin];
 
@@ -130,7 +118,6 @@ function bar(
 }
 
 function donut(report: BodyReport): string {
-  // Proporções em kg (adimensionais); o número central sai na unidade de exibição.
   const w = report.weightKg;
   const c = report.composition;
   let parts = [
@@ -139,7 +126,6 @@ function donut(report: BodyReport): string {
     { color: '#FACC15', kg: c.fatKg.value ?? 0 },
     { color: '#2DD4BF', kg: c.boneKg.value ?? 0 },
   ].filter((p) => p.kg > 0);
-  // Sem os componentes da balança: mostra gordura + massa magra (músculo).
   if (parts.length <= 1 && c.fatKg.value !== null && c.muscleKg.value !== null) {
     parts = [
       { color: '#FACC15', kg: c.fatKg.value },
@@ -165,12 +151,11 @@ function donut(report: BodyReport): string {
   </svg>`;
 }
 
-/** Gráfico de história no padrão Fitdays: grade, máx/mín à direita, datas embaixo. */
 function chart(title: string, unit: string, points: SeriesPoint[]): string {
   if (points.length < 2) return '';
   const W = 330;
   const H = 78;
-  const R = 40; // faixa direita para os rótulos de máx/mín
+  const R = 40;
   const T = 6;
   const B = 6;
   const values = points.map((p) => p.value);
@@ -222,7 +207,6 @@ export function reportHtml(r: BodyReport): string {
   const ind = r.indicators;
   const v = r.vitals;
   const sexKey: Sex = r.sex;
-  // Medidores dos indicadores: mesmas faixas do box "Dados corporais" do app.
   const gaugeRow = (label: string, valueStr: string, gauge: string) =>
     `<tr><td>${label}${gauge}</td><td class="ival">${valueStr}</td></tr>`;
   const visceralGauge =
@@ -245,7 +229,6 @@ export function reportHtml(r: BodyReport): string {
     ind.whr !== null
       ? gaugeRow(R.whr, fmt(ind.whr, 2), miniGauge(ind.whr, whrZones(sexKey)))
       : indicatorRow(R.whr, '—');
-  // Linhas de saúde/hidratação divididas em duas colunas para caber no A4.
   const vitalRows = [
     indicatorRow(R.restingHr, v.restingHr !== null ? `${fmt(v.restingHr, 0)} bpm` : null),
     indicatorRow(R.avgHr, v.avgHr !== null ? `${fmt(v.avgHr, 0)} bpm` : null),

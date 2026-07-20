@@ -1,7 +1,5 @@
 import Svg, { Path } from 'react-native-svg';
 
-/** Arte estática do panda com sede (viewBox 561×444); as camadas animadas
- *  (água do pote e suor) ficam em pandas.tsx, por cima desta base. */
 export function ThirstyPandaArt({ width, height }: { width: number; height: number }) {
   return (
     <Svg width={width} height={height} viewBox="0 0 561 444" style={{ position: 'absolute' }}>

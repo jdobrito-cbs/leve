@@ -62,7 +62,6 @@ export function GymScreen() {
   const at = parseDateTimeBR(dateStr, timeStr);
 
   const kind = GYM_EXERCISES[exercise].kind;
-  // Campo digita na unidade de exibição (kg ou lb); cálculo e banco usam kg.
   const enteredWeight = parseDecimalBR(weightStr);
   const weightKg = enteredWeight !== null ? Math.round(displayToKg(enteredWeight) * 10) / 10 : null;
   const sets = parseDecimalBR(setsStr);

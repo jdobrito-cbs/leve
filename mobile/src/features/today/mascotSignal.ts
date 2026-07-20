@@ -1,10 +1,5 @@
 import { useSyncExternalStore } from 'react';
 
-/**
- * Mascote do topo do Hoje. O padrão é SEMPRE o panda feliz; eventos do app
- * (aviso de beber água, gole registrado…) trocam o mascote por um período
- * curto e ele volta ao feliz sozinho.
- */
 export type MascotKind =
   | 'happy'
   | 'thirsty'
@@ -24,7 +19,6 @@ function emit(): void {
   for (const listener of listeners) listener();
 }
 
-/** Mostra o mascote do evento por `durationMs` e volta ao panda feliz. */
 export function setMascotEvent(
   kind: Exclude<MascotKind, 'happy'>,
   durationMs: number = MASCOT_EVENT_MS,
@@ -56,8 +50,6 @@ export function useMascot(): MascotKind {
 
 let lastBalancePositive: boolean | null = null;
 
-/** Dispara o panda do balanço quando o saldo calórico VIRA positivo/zerado
- *  (não repete a cada atualização do Hoje enquanto continuar favorável). */
 export function reportCaloricBalance(positiveOrEven: boolean): void {
   if (positiveOrEven && lastBalancePositive !== true) setMascotEvent('balance');
   lastBalancePositive = positiveOrEven;

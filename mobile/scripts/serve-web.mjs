@@ -1,5 +1,3 @@
-// Servidor local da versão web (pasta dist) com os cabeçalhos COOP/COEP que o
-// SQLite em WebAssembly exige. Uso: npm run web:preview
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import http from 'node:http';
 import { extname, join } from 'node:path';

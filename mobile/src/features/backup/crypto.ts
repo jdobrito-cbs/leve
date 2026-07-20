@@ -4,12 +4,6 @@ import { scrypt } from '@noble/hashes/scrypt.js';
 import * as Crypto from 'expo-crypto';
 import { Base64 } from 'js-base64';
 
-/**
- * Criptografia de ponta a ponta do backup: a chave nasce da senha no aparelho
- * e nunca é enviada — o servidor só vê um blob opaco. Senha esquecida ⇒ backup
- * irrecuperável (os dados locais permanecem no aparelho).
- */
-
 export function deriveBackupKey(password: string, email: string): Uint8Array {
   return scrypt(utf8ToBytes(password), utf8ToBytes(`leve:${email.toLowerCase().trim()}`), {
     N: 2 ** 15,

@@ -15,14 +15,13 @@ function makeDb() {
 }
 
 test('regra 35 ml/kg com arredondamento e piso', () => {
-  expect(waterGoalFromWeightKg(93.2)).toBe(3250); // 3262 → 3250
+  expect(waterGoalFromWeightKg(93.2)).toBe(3250);
   expect(waterGoalFromWeightKg(80)).toBe(2800);
-  expect(waterGoalFromWeightKg(20)).toBe(1000); // piso
+  expect(waterGoalFromWeightKg(20)).toBe(1000);
 });
 
 test('meta efetiva: automática pelo último peso; manual quando desligada; fallback sem peso', async () => {
   const db = makeDb() as never;
-  // sem peso registrado → fallback perfil/padrão
   expect(await getEffectiveWaterGoal(db)).toEqual({ goalMl: 2000, auto: true });
 
   await addWeight(db, 80, new Date());

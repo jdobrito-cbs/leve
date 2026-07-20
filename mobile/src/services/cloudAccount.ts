@@ -3,10 +3,6 @@ import type { AppDb } from '@/db/client';
 import { getProfile, updateProfile } from '@/db/profileRepo';
 import { getSetting, setSetting } from '@/db/settingsRepo';
 
-/**
- * Conta do usuário (Apple/Google) para o backup na nuvem dele.
- * O login registra a identidade; a gravação no iCloud/Drive vem na sequência.
- */
 export interface CloudAccount {
   provider: 'apple' | 'google';
   userId: string;
@@ -29,7 +25,6 @@ export function isGoogleSignInSupported(): boolean {
   return Platform.OS === 'ios' || Platform.OS === 'android';
 }
 
-// IDs de cliente OAuth do Google — são públicos por definição (não são segredos).
 const GOOGLE_WEB_CLIENT_ID =
   '60542120655-jqvbgai6sbm4k0pbr3rtbsau7ajnvs2v.apps.googleusercontent.com';
 const GOOGLE_IOS_CLIENT_ID =
@@ -43,8 +38,6 @@ interface GoogleUser {
   email?: string | null;
 }
 
-/** null quando o usuário cancela; lança 'google-unavailable' quando a build
- *  instalada não tem o módulo nativo do login Google. */
 export async function signInWithGoogle(db: AppDb): Promise<CloudAccount | null> {
   let GoogleSignin: {
     configure(opts: { webClientId: string; iosClientId?: string }): void;
@@ -81,7 +74,6 @@ export async function signInWithGoogle(db: AppDb): Promise<CloudAccount | null> 
     connectedAt: new Date().toISOString(),
   };
   await setSetting(db, KEY, account);
-  // A conta preenche o nome do perfil quando ele ainda está vazio.
   if (account.name) {
     const profile = await getProfile(db);
     if (!profile?.name) await updateProfile(db, { name: account.name });
@@ -89,7 +81,6 @@ export async function signInWithGoogle(db: AppDb): Promise<CloudAccount | null> 
   return account;
 }
 
-/** null quando o usuário cancela; lança erro quando o login não está disponível. */
 export async function signInWithApple(db: AppDb): Promise<CloudAccount | null> {
   const Apple = require('expo-apple-authentication') as typeof import('expo-apple-authentication');
   if (!(await Apple.isAvailableAsync())) throw new Error('apple-unavailable');
@@ -104,8 +95,6 @@ export async function signInWithApple(db: AppDb): Promise<CloudAccount | null> {
       [credential.fullName?.givenName, credential.fullName?.familyName]
         .filter(Boolean)
         .join(' ') || null;
-    // A Apple envia nome/e-mail apenas na PRIMEIRA autorização do Apple ID;
-    // nos logins seguintes vêm nulos — preserva o que já foi salvo.
     const prev = await getCloudAccount(db);
     const samePrev = prev?.provider === 'apple' && prev.userId === credential.user;
     const account: CloudAccount = {
@@ -116,7 +105,6 @@ export async function signInWithApple(db: AppDb): Promise<CloudAccount | null> {
       connectedAt: new Date().toISOString(),
     };
     await setSetting(db, KEY, account);
-    // A conta preenche o nome do perfil quando ele ainda está vazio.
     if (account.name) {
       const profile = await getProfile(db);
       if (!profile?.name) await updateProfile(db, { name: account.name });

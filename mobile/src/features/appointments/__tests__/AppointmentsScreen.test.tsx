@@ -42,9 +42,9 @@ test('campo de outra especialidade só existe com "Outra especialidade" escolhid
   const { getByText, queryByText } = await render(<AppointmentsScreen />);
   expect(queryByText(strings.appointments.otherSpecialtyLabel)).toBeNull();
   await fireEvent.press(getByText(strings.appointments.specialties.outra));
-  getByText(strings.appointments.otherSpecialtyLabel); // campo apareceu
+  getByText(strings.appointments.otherSpecialtyLabel);
   await fireEvent.press(getByText(strings.appointments.specialties.cardiologia));
-  expect(queryByText(strings.appointments.otherSpecialtyLabel)).toBeNull(); // e sumiu
+  expect(queryByText(strings.appointments.otherSpecialtyLabel)).toBeNull();
 });
 
 test('salva consulta com especialidade da lista', async () => {

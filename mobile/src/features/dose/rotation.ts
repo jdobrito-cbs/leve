@@ -13,7 +13,6 @@ export const INJECTION_SITES = [
 
 export type InjectionSite = (typeof INJECTION_SITES)[number];
 
-/** Sugestão de rodízio — apoio de memória; a escolha final é do usuário/médico. */
 export function suggestNextSite(last: InjectionSite | null): InjectionSite {
   if (!last) return INJECTION_SITES[0];
   const i = INJECTION_SITES.indexOf(last);

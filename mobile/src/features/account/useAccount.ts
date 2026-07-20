@@ -24,7 +24,6 @@ async function saveSession(email: string, tokens: { accessToken: string; refresh
   if (keyHex) await SecureStore.setItemAsync(KEYS.backupKey, keyHex);
 }
 
-/** Executa uma chamada autenticada; em 401 tenta uma rotação de refresh e repete uma vez. */
 async function withAuth<T>(fn: (token: string) => Promise<T>): Promise<T> {
   const access = await SecureStore.getItemAsync(KEYS.access);
   if (!access) throw new AuthError('sem sessão');
@@ -51,7 +50,7 @@ export function useAccount() {
   useEffect(() => {
     SecureStore.getItemAsync(KEYS.email)
       .then(setEmail)
-      .catch(() => setEmail(null)) // web: cofre indisponível — segue deslogado
+      .catch(() => setEmail(null))
       .finally(() => setLoading(false));
   }, []);
 

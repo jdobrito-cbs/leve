@@ -4,12 +4,11 @@ import Svg, { Circle } from 'react-native-svg';
 import { useTheme } from '../useTheme';
 
 interface Props extends PropsWithChildren {
-  progress: number; // 0..1
+  progress: number;
   size?: number;
   strokeWidth?: number;
 }
 
-/** Anel de progresso circular — assinatura visual dos resumos do Leve. */
 export function ProgressRing({ progress, size = 140, strokeWidth = 12, children }: Props) {
   const { colors } = useTheme();
   const r = (size - strokeWidth) / 2;

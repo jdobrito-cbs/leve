@@ -9,17 +9,11 @@ export interface FoodInfo {
   fiberG: number | null;
 }
 
-/** URL da consulta nutricional no servidor do Leve (mesma base do scan). */
 function foodInfoUrl(): string | null {
   const base = process.env.EXPO_PUBLIC_LEVE_SERVER_URL;
   return base ? `${base.replace(/\/$/, '')}/food-info` : null;
 }
 
-/**
- * Consulta na internet (servidor do Leve) a estimativa nutricional por 100 g/ml
- * de um alimento digitado à mão. Nunca lança: sem servidor, sem rede ou sem
- * resposta confiável, devolve null e o registro segue sem calorias, como antes.
- */
 export async function lookupFoodInfo(name: string): Promise<FoodInfo | null> {
   const url = foodInfoUrl();
   if (!url || name.trim().length < 2) return null;

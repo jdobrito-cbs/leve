@@ -62,7 +62,6 @@ const periodOptions = () =>
     label: strings.meal.periods[value],
   }));
 
-/** Sugere o período da refeição a partir da hora do registro. */
 export function suggestPeriod(hour: number): MealPeriod {
   if (hour < 10) return 'cafe';
   if (hour < 14) return 'almoco';
@@ -77,14 +76,11 @@ function scaled(per100: number | null | undefined, portion: number): number | nu
     : Math.round(((per100 * portion) / 100) * 10) / 10;
 }
 
-/** Calorias do candidato do scan para a porção estimada (kcal/100 × peso). */
 function candidateKcal(c: FoodCandidate): number | null {
   if (c.kcalPer100 == null || c.portionGrams == null) return null;
   return scaled(c.kcalPer100, c.portionGrams);
 }
 
-/** Nutrição vinda da IA vira uma base local (sintética) para o mesmo fluxo do
- *  alimento escolhido — evita uma segunda consulta quando não há match na TACO. */
 function candidateToFoodItem(c: FoodCandidate): FoodItem {
   return {
     id: -1,
@@ -101,7 +97,6 @@ function candidateToFoodItem(c: FoodCandidate): FoodItem {
   };
 }
 
-/** Extrai a porção de referência ("1 fatia (60 g)") para o atalho de preenchimento. */
 function refPortionShortcut(item: FoodItem): { label: string; value: number } | null {
   const m = item.referencePortion?.match(/\((\d+(?:[.,]\d+)?)\s*(g|ml)\)/);
   if (!m) return null;
@@ -119,7 +114,6 @@ function fmtKcal(v: number | null): string {
   return v !== null ? `${v.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} kcal` : '—';
 }
 
-/** Fibra formatada para as listas ("Fib 2,4 g"); null quando não há valor. */
 function fmtFiber(v: number | null | undefined): string | null {
   return v != null ? `Fib ${v.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} g` : null;
 }
@@ -174,7 +168,6 @@ export function MealScreen() {
     loadDishes();
   }, [loadDishes]);
 
-  // Hora editada sugere o período, até o usuário escolher manualmente.
   useEffect(() => {
     if (periodTouched) return;
     const parsed = parseDateTimeBR(dateStr, timeStr);
@@ -195,7 +188,6 @@ export function MealScreen() {
     };
   }, [query]);
 
-  // Modo manual: procura a base nutricional pelo nome digitado.
   useEffect(() => {
     let active = true;
     if (manualName.trim().length < 2) {
@@ -245,7 +237,6 @@ export function MealScreen() {
       manualBase;
     let unit = manualUnit;
     setLookupNote(false);
-    // Sem base local: busca automática das calorias na internet (quando liberada).
     if (!base && !scanLocked && !lookingUp) {
       setLookingUp(true);
       const info = await lookupFoodInfo(manualName.trim()).catch(() => null);
@@ -338,9 +329,6 @@ export function MealScreen() {
     setScanning(true);
     setScanCandidates([]);
     try {
-      // Foto de câmera vem com vários MB; o modelo não precisa de mais que
-      // ~1280 px. Reduz upload, dados móveis e latência; se falhar, envia a
-      // original mesmo.
       const small = await manipulateAsync(
         picked.assets[0].uri,
         [{ resize: { width: 1280 } }],
@@ -360,12 +348,10 @@ export function MealScreen() {
     const portionText = String(Math.round(candidate.portionGrams ?? 100));
     const matches = await searchFoods(db, candidate.label);
     if (matches.length > 0) {
-      // Base TACO é mais precisa: prefere o banco quando o alimento existe.
       setSelected(matches[0]);
       setPortionStr(portionText);
       setMode('search');
     } else if (candidate.kcalPer100 != null) {
-      // Sem match no banco, mas a IA já trouxe a nutrição: usa direto, sem 2ª consulta.
       setSelected(candidateToFoodItem(candidate));
       setPortionStr(portionText);
       setMode('search');
@@ -376,8 +362,6 @@ export function MealScreen() {
     }
   }
 
-  // Texto livre do que a pessoa comeu → IA → mesmos candidatos do scan (a porção
-  // fica editável ao escolher, então dá para ajustar a quantidade antes do OK).
   async function interpretMeal() {
     setScanError(null);
     setScanCandidates([]);
@@ -393,7 +377,6 @@ export function MealScreen() {
     }
   }
 
-  /** Lista de candidatos (foto ou texto) — cada um leva à porção editável. */
   function candidatesList() {
     if (scanCandidates.length === 0) return null;
     return (

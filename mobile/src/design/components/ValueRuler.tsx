@@ -32,16 +32,12 @@ interface Props {
   onChange: (value: number) => void;
   min: number;
   max: number;
-  /** Incremento por traço (ex.: 0.1 kg, 1 cm). */
   step: number;
-  /** Traço maior a cada N traços. */
   majorEvery?: number;
-  /** Número acima do traço a cada N traços. */
   labelEvery?: number;
   decimals?: number;
 }
 
-/** Régua rolante: arraste para escolher o valor de `step` em `step`. */
 export function ValueRuler({
   value,
   onChange,
@@ -61,7 +57,6 @@ export function ValueRuler({
   const ticks = useMemo(() => Array.from({ length: count }, (_, i) => i), [count]);
   const round = (v: number) => Number(v.toFixed(decimals));
 
-  // Valor digitado no campo move a régua (sem eco do próprio arrasto).
   useEffect(() => {
     if (width === 0) return;
     if (Math.abs(value - lastReported.current) < step / 2) return;
@@ -89,7 +84,6 @@ export function ValueRuler({
             data={ticks}
             horizontal
             showsHorizontalScrollIndicator={false}
-            // Sem trava por traço: desliza livre e o valor arredonda sozinho.
             decelerationRate="normal"
             initialScrollIndex={Math.round(valueToOffset(value, min, max, step) / RULER_TICK_WIDTH)}
             getItemLayout={(_, index) => ({
@@ -139,7 +133,7 @@ export function ValueRuler({
               );
             }}
           />
-          {/* Agulha central */}
+          {}
           <View
             pointerEvents="none"
             style={{

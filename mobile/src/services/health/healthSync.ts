@@ -16,11 +16,6 @@ import {
 import { getHealthProvider, type HealthProvider } from './HealthProvider';
 import { typicalBedtime, typicalWakeTime } from './sleepSchedule';
 
-/**
- * Importa pesos do provider para o banco local (opt-in, acionado pelo usuário).
- * Idempotente: amostras com o mesmo timestamp e origem de saúde não são duplicadas.
- * Retorna o número de registros importados.
- */
 export async function importWeights(
   db: AppDb,
   provider: HealthProvider,
@@ -46,7 +41,6 @@ export async function importWeights(
   return count;
 }
 
-/** Importa métricas de saúde (sono, FC, composição corporal etc.) com dedup. */
 export async function importMetrics(
   db: AppDb,
   provider: HealthProvider,
@@ -69,13 +63,8 @@ export async function importMetrics(
   return count;
 }
 
-const SYNC_THROTTLE_MS = 60 * 60 * 1000; // 1 h
+const SYNC_THROTTLE_MS = 60 * 60 * 1000;
 
-/**
- * Sync automático (balança/relógio → app de saúde → Leve sem toque): roda na
- * abertura do app e ao focar o Hoje, no máximo 1x por hora.
- * Exclusivo do Leve Premium — sem assinatura ativa, nada é buscado.
- */
 export async function autoSyncIfDue(db: AppDb, provider?: HealthProvider): Promise<boolean> {
   if (isLocked('healthSync', isPremium(await getEntitlement(db)))) return false;
   const health = await getSetting<{ connected?: boolean }>(db, 'health');
@@ -90,11 +79,6 @@ export async function autoSyncIfDue(db: AppDb, provider?: HealthProvider): Promi
   return true;
 }
 
-/**
- * Detecta os horários típicos de dormir e acordar (últimas 14 noites) e guarda
- * como sugestão. Se o lembrete correspondente está ligado no modo automático,
- * reagenda com o horário novo; horário fixado pelo usuário nunca é alterado.
- */
 export async function detectSleepSchedule(db: AppDb, provider: HealthProvider): Promise<void> {
   const since = new Date();
   since.setDate(since.getDate() - 14);
@@ -121,7 +105,6 @@ export async function detectSleepSchedule(db: AppDb, provider: HealthProvider): 
   if (changed) await setSetting(db, 'reminders', r);
 }
 
-/** Passos de hoje segundo o provider; null quando não há dado (ou provider indisponível). */
 export async function readTodaySteps(
   provider: HealthProvider,
   today: Date = new Date(),

@@ -20,7 +20,7 @@ export async function openPeriod(db: AppDb): Promise<PeriodLog | null> {
 }
 
 export async function startPeriod(db: AppDb, at: Date, flow?: string): Promise<void> {
-  if (await openPeriod(db)) return; // já em andamento
+  if (await openPeriod(db)) return;
   await db.insert(periodLogs).values({ startedAt: at.toISOString(), flow: flow ?? null });
 }
 
@@ -36,7 +36,6 @@ export async function setFlow(db: AppDb, flow: string): Promise<void> {
   await db.update(periodLogs).set({ flow }).where(eq(periodLogs.id, open.id));
 }
 
-/** Apaga um ciclo registrado por engano (aberto ou já encerrado). */
 export async function deletePeriod(db: AppDb, id: number): Promise<void> {
   await db.delete(periodLogs).where(eq(periodLogs.id, id));
 }
@@ -49,7 +48,6 @@ export async function listPeriods(db: AppDb, limit = 12): Promise<PeriodLog[]> {
     .limit(limit)) as PeriodLog[];
 }
 
-/** Previsão informativa da próxima menstruação pela média dos últimos ciclos (mín. 2 inícios). */
 export function predictNextPeriod(
   periods: PeriodLog[],
 ): { expectedAt: Date; avgCycleDays: number } | null {
@@ -61,7 +59,7 @@ export function predictNextPeriod(
   const gaps: number[] = [];
   for (let i = 1; i < starts.length; i++) gaps.push((starts[i] - starts[i - 1]) / 86400000);
   const avg = gaps.reduce((a, b) => a + b, 0) / gaps.length;
-  if (avg < 15 || avg > 60) return null; // fora de faixa plausível — sem previsão
+  if (avg < 15 || avg > 60) return null;
   return {
     expectedAt: new Date(starts[starts.length - 1] + avg * 86400000),
     avgCycleDays: Math.round(avg),

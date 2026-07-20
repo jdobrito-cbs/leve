@@ -11,7 +11,6 @@ import { exportAllData, wipeAllData } from '@/features/backup/exportData';
 import { getCloudAccount, type CloudAccount } from '@/services/cloudAccount';
 import { strings } from '@/i18n/pt-BR';
 
-/** Conta conectada + direitos sobre os dados: exportar, excluir e backup. */
 export function AccountPrivacyScreen() {
   const { colors } = useTheme();
   const [account, setAccount] = useState<CloudAccount | null>(null);

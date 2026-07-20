@@ -15,12 +15,11 @@ import { useWaterPhysics } from './useWaterPhysics';
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 interface Props extends PropsWithChildren {
-  progress: number; // 0..1
+  progress: number;
   size?: number;
   strokeWidth?: number;
 }
 
-/** Onda de dois períodos com linha de base em y=0. */
 function wavePath(width: number, height: number, amplitude: number): string {
   const half = width / 2;
   const q = half / 4;
@@ -31,20 +30,14 @@ function wavePath(width: number, height: number, amplitude: number): string {
   );
 }
 
-/**
- * Anel de água do Leve: o nível sobe até o progresso da meta e as ondas se
- * movem continuamente. As ondas são camadas de View animadas dentro de um
- * recorte circular (borderRadius + overflow hidden) — funciona em nativo e web.
- */
 export function WaterRing({ progress, size = 148, strokeWidth = 12, children }: Props) {
   const { colors } = useTheme();
   const r = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * r;
-  const inner = r - strokeWidth / 2 - 2; // raio do "copo"
+  const inner = r - strokeWidth / 2 - 2;
   const cx = size / 2;
   const cupSize = inner * 2;
   const clamped = Math.min(Math.max(progress, 0), 1);
-  // Cor por status: 0–40% vermelho · 41–60% amarelo · 61–99% azul · 100%+ verde.
   const statusColor =
     clamped >= 1
       ? colors.success
@@ -57,7 +50,6 @@ export function WaterRing({ progress, size = 148, strokeWidth = 12, children }: 
   const phase = useSharedValue(0);
   const level = useSharedValue(0);
   const ring = useSharedValue(0);
-  // Física real: ângulo segue a gravidade do aparelho; boost = chacoalhão.
   const { angle, boost } = useWaterPhysics();
 
   useEffect(() => {
@@ -73,14 +65,10 @@ export function WaterRing({ progress, size = 148, strokeWidth = 12, children }: 
     strokeDashoffset: circumference * (1 - ring.value),
   }));
 
-  // A água inteira gira ao contrário da inclinação do aparelho → superfície
-  // sempre nivelada com o chão de verdade (rotação em volta do centro do copo).
   const tiltLayer = useAnimatedStyle(() => ({
     transform: [{ rotate: `${-angle.value}rad` }],
   }));
 
-  // topo da água dentro do copo: fundo quando 0, topo quando 1.
-  // O boost do chacoalhão vira tremida extra nas duas camadas, dessincronizada.
   const backWave = useAnimatedStyle(() => ({
     transform: [
       {

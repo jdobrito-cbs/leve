@@ -23,11 +23,6 @@ import Svg, { Circle, Path } from 'react-native-svg';
 import { View } from 'react-native';
 import { useTheme } from './useTheme';
 
-/**
- * Ícones do Registrar em movimento contínuo, cada um com uma coreografia que
- * conta o que ele faz. Camadas de View animadas (funciona em nativo e web).
- */
-
 const SIZE = 20;
 const stroke = { strokeWidth: 1.9, strokeLinecap: 'round', strokeLinejoin: 'round' } as const;
 
@@ -35,7 +30,6 @@ interface IconProps {
   size?: number;
 }
 
-/** Água: o copo inclina como se fosse derramar e a água chacoalha dentro. */
 export function WaterGlassIcon({ size = SIZE }: IconProps) {
   const { colors } = useTheme();
   const tilt = useSharedValue(0);
@@ -45,7 +39,7 @@ export function WaterGlassIcon({ size = SIZE }: IconProps) {
     tilt.value = withRepeat(
       withSequence(
         withDelay(900, withTiming(-18, { duration: 500, easing: Easing.inOut(Easing.quad) })),
-        withTiming(-18, { duration: 300 }), // segura o "derramar"
+        withTiming(-18, { duration: 300 }),
         withSpring(0, { damping: 6, stiffness: 140 }),
         withTiming(0, { duration: 700 }),
       ),
@@ -75,7 +69,6 @@ export function WaterGlassIcon({ size = SIZE }: IconProps) {
   );
 }
 
-/** Refeição: garfo e faca se cruzam num X e voltam. */
 export function UtensilsCrossIcon({ size = SIZE }: IconProps) {
   const { colors } = useTheme();
   const cross = useSharedValue(0);
@@ -116,7 +109,6 @@ export function UtensilsCrossIcon({ size = SIZE }: IconProps) {
   );
 }
 
-/** Dose: a seringa avança e recua, como aplicando a injeção. */
 export function SyringeInjectIcon({ size = SIZE }: IconProps) {
   const { colors } = useTheme();
   const press = useSharedValue(0);
@@ -144,7 +136,6 @@ export function SyringeInjectIcon({ size = SIZE }: IconProps) {
   );
 }
 
-/** Peso: cai de cima e assenta quicando — o peso descendo. */
 export function WeightDropIcon({ size = SIZE }: IconProps) {
   const { colors } = useTheme();
   const drop = useSharedValue(0);
@@ -173,7 +164,6 @@ export function WeightDropIcon({ size = SIZE }: IconProps) {
   );
 }
 
-/** Sintoma: a prancheta balança em traços curtos, como quem escreve. */
 export function NotesWritingIcon({ size = SIZE }: IconProps) {
   const { colors } = useTheme();
   const pen = useSharedValue(0);
@@ -204,7 +194,6 @@ export function NotesWritingIcon({ size = SIZE }: IconProps) {
   );
 }
 
-/** Composição corporal: o boneco dança pé de chinelo, gingando de um lado a outro. */
 export function BodyDanceIcon({ size = SIZE }: IconProps) {
   const { colors } = useTheme();
   const groove = useSharedValue(0);
@@ -237,7 +226,6 @@ export function BodyDanceIcon({ size = SIZE }: IconProps) {
   );
 }
 
-/** Remédios: a pílula rola de um lado para o outro, como na palma da mão. */
 export function PillRollIcon({ size = SIZE }: IconProps) {
   const { colors } = useTheme();
   const roll = useSharedValue(0);
@@ -265,7 +253,6 @@ export function PillRollIcon({ size = SIZE }: IconProps) {
   );
 }
 
-/** Passos: ritmo de caminhada — um passinho para cada lado, sem parar. */
 export function FootprintsWalkIcon({ size = SIZE }: IconProps) {
   const { colors } = useTheme();
   const step = useSharedValue(0);
@@ -293,10 +280,6 @@ export function FootprintsWalkIcon({ size = SIZE }: IconProps) {
   );
 }
 
-/** Ciclo: o coração do calendário pulsa como batimento. */
-/** Consultas: estetoscópio balança de leve, como pendurado no pescoço. */
-/** Balança de drogaria (de pesar gente): coluna com visor redondo e ponteiro
- *  que oscila como numa pesagem. */
 export function DrugstoreScaleIcon({ size = SIZE }: IconProps) {
   const { colors } = useTheme();
   const swing = useSharedValue(0);
@@ -325,7 +308,7 @@ export function DrugstoreScaleIcon({ size = SIZE }: IconProps) {
         <Path d="M10.6 11.4v6M13.4 11.4v6" />
         <Path d="M5.2 20.4h13.6" />
       </Svg>
-      {/* Ponteiro do visor, girando em torno do centro do mostrador */}
+      {}
       <Animated.View
         style={[
           {

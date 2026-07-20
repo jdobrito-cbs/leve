@@ -17,19 +17,12 @@ import { MedsPandaArt } from './medsPandaArt';
 import { SlimmerBodyArt, SlimmerScaleArt } from './slimmerPandaArt';
 import { ThirstyPandaArt } from './thirstyPandaArt';
 
-/**
- * Mascotes panda do Leve.
- * Regra de ouro: cada panda declara o viewBox ORIGINAL do arquivo e a altura é
- * sempre derivada dele a partir da largura — proporção exata, sem quebras de
- * layout entre um panda e outro.
- */
 export const PANDA_DEFAULT_WIDTH = 112;
 
 interface PandaProps {
   width?: number;
 }
 
-/** Panda feliz — topo do Hoje. viewBox original: 604×413. */
 export function HappyPanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
   const height = (413 / 604) * width;
   return (
@@ -66,7 +59,6 @@ export function HappyPanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
   );
 }
 
-/** Gota de suor animada: cai e some, em loop. */
 function SweatDrop({
   x,
   y,
@@ -112,8 +104,6 @@ function SweatDrop({
   );
 }
 
-/** Panda com sede — aparece no Hoje enquanto a meta de água não foi batida.
- *  viewBox original: 561×444. Água do pote balança e o suor pinga. */
 export function ThirstyPanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
   const height = (444 / 561) * width;
   const s = width / 561;
@@ -137,7 +127,7 @@ export function ThirstyPanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
   return (
     <View style={{ width, height }}>
       <ThirstyPandaArt width={width} height={height} />
-      {/* Superfície da água do pote, balançando */}
+      {}
       <Animated.View
         style={[{ position: 'absolute', left: 243 * s, top: 325 * s }, water]}
       >
@@ -146,15 +136,13 @@ export function ThirstyPanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
           <Ellipse cx={14} cy={5} rx={6} ry={2} fill="#BFE6F5" opacity={0.8} />
         </Svg>
       </Animated.View>
-      {/* Gotas de suor caindo das têmporas */}
+      {}
       <SweatDrop x={360 * s} y={110 * s} scale={s * 2.2} delayMs={0} />
       <SweatDrop x={210 * s} y={104 * s} scale={s * 2.2} delayMs={700} />
     </View>
   );
 }
 
-/** Panda comemorando a queda de peso — só o panda pula; a balança fica parada.
- *  viewBox original: 547×456. */
 export function SlimmerPanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
   const height = (456 / 547) * width;
   const jumpPx = width * 0.09;
@@ -185,8 +173,6 @@ export function SlimmerPanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
   );
 }
 
-/** Panda da hora do remédio de apoio — balança de leve chamando atenção.
- *  viewBox original: 549×455. */
 export function MedsPanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
   const height = (455 / 549) * width;
   const sway = useSharedValue(0);
@@ -215,8 +201,6 @@ export function MedsPanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
   );
 }
 
-/** Panda da aplicação GLP-1 — pulso suave de "chegou a hora".
- *  viewBox original: 555×449. */
 export function DosePanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
   const height = (449 / 555) * width;
   const pulse = useSharedValue(0);
@@ -245,8 +229,6 @@ export function DosePanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
   );
 }
 
-/** Panda do balanço calórico favorável — pulinho comemorativo.
- *  viewBox original: 575×434. */
 export function BalancePanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
   const height = (434 / 575) * width;
   const jumpPx = width * 0.06;
@@ -276,8 +258,6 @@ export function BalancePanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
   );
 }
 
-/** Panda hidratado — aparece ao registrar água e enquanto a meta está batida.
- *  viewBox original: 604×413. Única animação: a água da garrafa balançando. */
 export function HydratedPanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
   const height = (413 / 604) * width;
   const s = width / 604;
@@ -301,7 +281,7 @@ export function HydratedPanda({ width = PANDA_DEFAULT_WIDTH }: PandaProps) {
   return (
     <View style={{ width, height }}>
       <HydratedPandaArt width={width} height={height} />
-      {/* Superfície da água da garrafa, balançando */}
+      {}
       <Animated.View
         style={[{ position: 'absolute', left: 259 * s, top: 257 * s }, water]}
       >

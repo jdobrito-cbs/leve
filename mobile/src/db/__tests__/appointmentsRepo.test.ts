@@ -27,7 +27,7 @@ test('agenda, lista em ordem cronológica e apaga consultas (erradas ou passadas
 
   const list = await listAppointments(db);
   expect(list).toHaveLength(2);
-  expect(list[0].place).toBe('HGE'); // mais próxima primeiro
+  expect(list[0].place).toBe('HGE');
   expect(list[1].doctor).toBe('Dra. Ana');
 
   await deleteAppointment(db, list[0].id);

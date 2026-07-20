@@ -7,8 +7,6 @@ export const foodsSchema = z.object({
         name: z.string().min(1),
         portionGrams: z.number().positive().nullable().catch(null),
         confidence: z.number().min(0).max(1).catch(0.5),
-        // Nutrição estimada na MESMA chamada de visão (por 100 g/ml), para o app
-        // já mostrar as calorias com o peso, sem uma segunda consulta.
         unit: z.enum(['g', 'ml']).catch('g'),
         kcalPer100: z.number().min(0).max(900).nullable().catch(null),
         proteinG: z.number().min(0).max(100).nullable().catch(null),
@@ -32,7 +30,6 @@ Responda SOMENTE com JSON válido no formato:
 - kcalPer100, proteinG, carbsG, fatG, fiberG: valores POR 100 g/ml de tabelas brasileiras (TACO/TBCA) ou rótulos; NÃO invente, campo desconhecido = null.
 - Se não houver comida na foto, responda {"foods":[]}.`;
 
-/** Corpo de requisição no formato OpenAI-compatível (chat/completions com imagem). */
 export function buildHubBody(imageBase64: string, mimeType: string, model: string) {
   return {
     model,
@@ -54,7 +51,6 @@ export function buildHubBody(imageBase64: string, mimeType: string, model: strin
   };
 }
 
-/** Isola o objeto JSON da resposta (tolerante a cercas de markdown e texto ao redor). */
 function extractJson(content: string): string {
   const stripped = content
     .trim()
@@ -66,12 +62,9 @@ function extractJson(content: string): string {
   return stripped.slice(start, end + 1);
 }
 
-/** Extrai e valida o JSON da resposta do modelo. */
 export function parseHubContent(content: string): ScanResult {
   return foodsSchema.parse(JSON.parse(extractJson(content)));
 }
-
-// ——— Consulta nutricional por nome (alimento digitado à mão no app) ———
 
 export const foodInfoSchema = z.object({
   found: z.boolean().catch(true),
@@ -92,7 +85,6 @@ Responda SOMENTE com JSON válido no formato:
 - Use o valor típico de tabela oficial ou rótulo; NÃO invente: campo desconhecido = null.
 - Alimento irreconhecível ou ambíguo demais: {"found":false} com os demais campos null.`;
 
-/** Corpo OpenAI-compatível da consulta nutricional por texto. */
 export function buildFoodInfoBody(name: string, model: string) {
   return {
     model,
@@ -109,8 +101,6 @@ export function parseFoodInfoContent(content: string): FoodInfoResult {
   return foodInfoSchema.parse(JSON.parse(extractJson(content)));
 }
 
-// ——— Interpretação de refeição descrita em texto (mesma saída do scan) ———
-
 const DESCRIBE_PROMPT = `Você interpreta o que uma pessoa escreveu que comeu, para um diário alimentar brasileiro, e estima a nutrição de cada item.
 Responda SOMENTE com JSON válido no formato:
 {"foods":[{"name":"ovo frito","portionGrams":100,"confidence":0.9,"unit":"g","kcalPer100":196,"proteinG":13.6,"carbsG":1.2,"fatG":15,"fiberG":0}]}
@@ -120,7 +110,6 @@ Responda SOMENTE com JSON válido no formato:
 - kcalPer100, proteinG, carbsG, fatG, fiberG: valores POR 100 g/ml de tabelas brasileiras (TACO/TBCA) ou rótulos; NÃO invente, campo desconhecido = null.
 - confidence: número de 0 a 1. Se não houver comida no texto, responda {"foods":[]}.`;
 
-/** Corpo OpenAI-compatível para interpretar a refeição descrita (texto puro). */
 export function buildDescribeBody(text: string, model: string) {
   return {
     model,

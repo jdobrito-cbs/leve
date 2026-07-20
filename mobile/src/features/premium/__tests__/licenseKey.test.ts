@@ -19,9 +19,8 @@ test('aceita chave assinada e devolve o id; rejeita adulteração e lixo', () =>
 
   const key = makeKey(priv, payload);
   expect(verifyLicenseKey(key, pub)).toBe(bytesToHex(payload));
-  expect(verifyLicenseKey(` ${key} `, pub)).toBe(bytesToHex(payload)); // espaços ok
+  expect(verifyLicenseKey(` ${key} `, pub)).toBe(bytesToHex(payload));
 
-  // payload adulterado invalida a assinatura
   const tampered = new Uint8Array(payload);
   tampered[0] ^= 0xff;
   const raw = Base64.toUint8Array(key.slice(5));
@@ -36,5 +35,5 @@ test('aceita chave assinada e devolve o id; rejeita adulteração e lixo', () =>
 test('chave gerada com outra privada não vale para a pública oficial', () => {
   const otherPriv = new Uint8Array(randomBytes(32));
   const key = makeKey(otherPriv, new Uint8Array(randomBytes(8)));
-  expect(verifyLicenseKey(key)).toBeNull(); // usa a pública embutida no app
+  expect(verifyLicenseKey(key)).toBeNull();
 });

@@ -2,13 +2,6 @@ import type { AppDb } from '@/db/client';
 import { getSetting, setSetting } from '@/db/settingsRepo';
 import { getEntitlement, setEntitlement } from './entitlement';
 
-/**
- * Chaves de parceiro emitidas pelo SERVIDOR (curtas, LEVE-XXXX-XXXX-XXXX).
- * O servidor é a autoridade: valida no resgate e reconfere periodicamente —
- * revogar no painel derruba o acesso na próxima verificação do aparelho.
- */
-
-/** Base do servidor do Leve (validação de parceiros e scan de comida). */
 export function leveServerUrl(): string | null {
   const url = process.env.EXPO_PUBLIC_LEVE_SERVER_URL;
   return url ? url.replace(/\/$/, '') : null;
@@ -18,12 +11,10 @@ export function isServerPartnerKey(key: string): boolean {
   return /^LEVE-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(key.trim().toUpperCase());
 }
 
-/** Formata o que o usuário digita para o padrão LEVE-XXXX-XXXX-XXXX: sempre em
- *  maiúsculas, com o prefixo e os separadores já incluídos. Campo vazio → "LEVE-". */
 export function formatPartnerKeyInput(raw: string): string {
   let code = raw.toUpperCase().replace(/[^A-Z0-9]/g, '');
-  if (code.startsWith('LEVE')) code = code.slice(4); // evita duplicar o prefixo
-  code = code.slice(0, 12); // XXXX XXXX XXXX
+  if (code.startsWith('LEVE')) code = code.slice(4);
+  code = code.slice(0, 12);
   const groups = code.match(/.{1,4}/g) ?? [];
   return groups.length ? 'LEVE-' + groups.join('-') : 'LEVE-';
 }
@@ -31,14 +22,11 @@ export function formatPartnerKeyInput(raw: string): string {
 export interface PartnerValidation {
   valid: boolean;
   label?: string;
-  /** 'bound_elsewhere' quando a chave já está presa a outro aparelho. */
   reason?: string;
 }
 
 const DEVICE_KEY = 'partnerDeviceId';
 
-/** Id de instalação (não é dado de hardware): só precisa ser único por aparelho
- *  e estável. Gerado uma vez e guardado localmente. */
 function randomId(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
@@ -46,7 +34,6 @@ function randomId(): string {
   });
 }
 
-/** Devolve o id deste aparelho, criando e salvando na primeira vez. */
 export async function getDeviceId(db: AppDb): Promise<string> {
   const saved = await getSetting<string>(db, DEVICE_KEY);
   if (saved) return saved;
@@ -55,8 +42,6 @@ export async function getDeviceId(db: AppDb): Promise<string> {
   return id;
 }
 
-/** null = não deu para falar com o servidor (sem rede, servidor fora do ar).
- *  Com deviceId, o servidor prende a chave a este aparelho no primeiro uso. */
 export async function validatePartnerKey(
   key: string,
   deviceId?: string,
@@ -79,8 +64,6 @@ export async function validatePartnerKey(
 const RECHECK_KEY = 'partnerRecheckAt';
 const RECHECK_MS = 12 * 60 * 60 * 1000;
 
-/** Reconfere a chave de parceiro no servidor (no máximo a cada 12 h).
- *  Sem rede mantém o acesso; revogada → volta ao plano gratuito. */
 export async function revalidatePartnerIfDue(db: AppDb): Promise<void> {
   const ent = await getEntitlement(db);
   if (ent.plan !== 'partner' || !ent.partnerKey) return;

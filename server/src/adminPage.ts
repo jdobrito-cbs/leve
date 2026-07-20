@@ -1,8 +1,3 @@
-/** Painel do dono em /painel. Login com usuário e senha + 2FA obrigatório
- *  (app autenticador), com cadastro do master no primeiro acesso e gestão de
- *  administradores e chaves de parceiro. Mesmo visual do site (modo escuro por
- *  padrão). Segurança: esc() antes de qualquer innerHTML (anti-XSS) e sessão em
- *  cookie httpOnly no servidor — o navegador não guarda senha nem token. */
 export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>

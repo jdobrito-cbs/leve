@@ -15,8 +15,6 @@ const {
   TRUST_PROXY,
 } = process.env;
 
-// Sem a chave de IA o servidor sobe mesmo assim (site, painel e chaves de
-// parceiro funcionam); scan e busca nutricional respondem erro até configurar.
 const hubConfigured = Boolean(HUB_BASE_URL && HUB_API_KEY && HUB_MODEL);
 if (!hubConfigured) {
   console.warn(
@@ -24,8 +22,6 @@ if (!hubConfigured) {
   );
 }
 
-// Recusa segredos fracos: um JWT_SECRET/ADMIN_TOKEN curto é adivinhável e
-// comprometeria sessões e o painel. Melhor não subir do que subir inseguro.
 if (JWT_SECRET && JWT_SECRET.length < 32) {
   console.error('JWT_SECRET muito curto: use pelo menos 32 caracteres aleatórios.');
   process.exit(1);
@@ -48,7 +44,6 @@ async function main() {
     adminStore = prismaStore;
     console.log('contas/backup: ATIVOS (PostgreSQL)');
   } else {
-    // Sem banco: chaves de parceiro e administradores em arquivo local.
     const dir = DATA_DIR ?? './data';
     partnerStore = new FilePartnerKeyStore(`${dir}/partner-keys.json`);
     adminStore = new FileAdminStore(`${dir}/admins.json`);
@@ -75,7 +70,6 @@ async function main() {
     partnerStore,
     adminStore,
     adminToken: ADMIN_TOKEN || undefined,
-    // TRUST_PROXY=1 quando atrás de um proxy HTTPS (produção no domínio).
     trustProxy: TRUST_PROXY === '1' || TRUST_PROXY === 'true',
   });
 

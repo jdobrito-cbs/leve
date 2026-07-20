@@ -25,8 +25,6 @@ import { revalidatePartnerIfDue } from '@/features/premium/partnerServer';
 import { setMascotEvent } from '@/features/today/mascotSignal';
 import { autoSyncIfDue } from '@/services/health/healthSync';
 import { checkMovementIfDue } from '@/services/activity/movementCheck';
-// Importa no escopo global: o defineTask da tarefa horária precisa existir
-// também quando o sistema acorda o app em segundo plano (partida headless).
 import { registerHealthBackgroundTask } from '@/services/activity/backgroundTasks';
 import { attachReminderMascotListeners } from '@/services/reminders/reminders';
 import { strings } from '@/i18n/pt-BR';
@@ -40,7 +38,6 @@ import {
 } from '@/i18n/engine';
 import { getUnitSystem, setUnitSystem, subscribeUnits, type UnitSystem } from '@/core/units';
 
-// No Expo Go alguns módulos nativos não existem — não pode derrubar o app.
 try {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -54,7 +51,6 @@ try {
   console.warn('Notificações indisponíveis neste ambiente:', e);
 }
 
-/** Mostra o erro real na tela em vez de deixar tudo em branco. */
 class RootErrorBoundary extends Component<PropsWithChildren, { error: Error | null }> {
   state: { error: Error | null } = { error: null };
 
@@ -79,9 +75,6 @@ export default function RootLayout() {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [stage, setStage] = useState<string>(strings.common.bootDb);
-  // Idioma/unidades ativos: trocar no Perfil (ou onboarding) remonta a árvore
-  // de navegação via `key` — todas as telas renascem já no idioma novo, sem
-  // precisar fechar e reabrir o app.
   const lang = useSyncExternalStore(subscribeLanguage, getActiveLanguage, getActiveLanguage);
   const units = useSyncExternalStore(subscribeUnits, getUnitSystem, getUnitSystem);
   const [fontsLoaded, fontError] = useFonts({
@@ -89,7 +82,6 @@ export default function RootLayout() {
     Manrope_600SemiBold,
     Manrope_700Bold,
   });
-  // Fonte que falhou não pode segurar o app — segue com a fonte do sistema.
   const fontsReady = fontsLoaded || fontError !== null;
 
   const load = useCallback(() => {
@@ -105,23 +97,17 @@ export default function RootLayout() {
         );
       })
       .then(async () => {
-        // Preferência de tema salva no Perfil vale desde a abertura.
         const themeMode = await getSetting<ThemeMode>(db, 'themeMode').catch(() => null);
         if (themeMode) setThemeSignal(themeMode);
-        // Idioma e unidades ANTES do primeiro render: 'auto' segue o aparelho.
         const language = await getSetting<LanguageCode | 'auto'>(db, 'language').catch(() => null);
         setActiveLanguage(language && language !== 'auto' ? language : resolveAutoLanguage());
         const units = await getSetting<UnitSystem | 'auto'>(db, 'unitSystem').catch(() => null);
         setUnitSystem(units && units !== 'auto' ? units : resolveAutoMeasurement());
         console.log('[leve] inicialização concluída');
         setReady(true);
-        // Busca automática da saúde na abertura (Premium; throttle de 1 h).
         autoSyncIfDue(db).catch(() => undefined);
-        // Sem passos na última hora → aviso de levantar (mesmo ciclo de 1 h).
         checkMovementIfDue(db).catch(() => undefined);
-        // Tarefa horária em segundo plano (sync + movimento) — melhor esforço.
         registerHealthBackgroundTask().catch(() => undefined);
-        // Chave de parceiro do servidor: reconfere (revogação vale aqui).
         revalidatePartnerIfDue(db).catch(() => undefined);
       })
       .catch((e) => setError(e instanceof Error ? e : new Error(String(e))));
@@ -129,8 +115,6 @@ export default function RootLayout() {
 
   useEffect(() => {
     load();
-    // Avisos → mascote por 1 minuto: água → com sede; remédio de apoio →
-    // hora do remédio; aplicação GLP-1 → panda da dose.
     attachReminderMascotListeners({
       onWater: () => setMascotEvent('thirsty'),
       onMeds: () => setMascotEvent('meds'),
@@ -138,7 +122,6 @@ export default function RootLayout() {
     });
   }, [load]);
 
-  // Vigia: travou em alguma etapa → vira erro legível em vez de spinner eterno.
   useEffect(() => {
     if (ready || error) return;
     const timer = setTimeout(

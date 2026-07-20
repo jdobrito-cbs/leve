@@ -18,8 +18,6 @@ import {
 const B = () => strings.bodyData;
 const L = () => strings.gauge;
 
-/** Lista de medidores do box "Dados corporais" (e do relatório), a partir do
- *  relatório corporal já montado. Só entram itens com valor. */
 export function buildBodyGauges(report: BodyReport): GaugeSpec[] {
   const sex = report.sex;
   const h = report.heightCm;
@@ -132,7 +130,6 @@ export function buildBodyGauges(report: BodyReport): GaugeSpec[] {
   return specs.filter((s) => s.value !== null);
 }
 
-/** Linhas de texto do box (sem medidor): peso ideal, nível de obesidade, tipo. */
 export function buildBodyFacts(report: BodyReport): { label: string; value: string }[] {
   const facts: { label: string; value: string }[] = [
     { label: B().idealWeight, value: formatWeight(report.idealWeightKg) },

@@ -56,7 +56,6 @@ export interface DayMacros {
   fiberG: number;
 }
 
-/** Totais nutricionais do dia (refeição diária). */
 export async function macrosForDay(db: AppDb, day: Date): Promise<DayMacros> {
   const { startIso, endIso } = dayRangeUtc(day);
   const rows = await db

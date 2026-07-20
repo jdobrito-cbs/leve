@@ -10,11 +10,11 @@ import { weightsSince } from '@/db/weightRepo';
 
 export interface ProgressData {
   loading: boolean;
-  weights: WeightLog[]; // todos os registros, asc (a tela filtra por período)
+  weights: WeightLog[];
   water7: { dayKey: string; totalMl: number }[];
   kcal7: { dayKey: string; kcal: number }[];
   doses: DoseLog[];
-  metrics: MetricRow[]; // último valor de cada métrica com dados
+  metrics: MetricRow[];
   refresh: () => Promise<void>;
 }
 

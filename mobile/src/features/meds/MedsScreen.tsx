@@ -50,7 +50,6 @@ export function MedsScreen() {
   const [name, setName] = useState('');
   const [doseText, setDoseText] = useState('');
   const [doseCount, setDoseCount] = useState('1');
-  // Horários sugeridos pelo sistema, editáveis pela pessoa antes de adicionar.
   const [timesStr, setTimesStr] = useState(timesForDailyCount(1).join(', '));
 
   function pickDoseCount(v: string) {

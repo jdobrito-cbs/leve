@@ -16,7 +16,6 @@ interface Props {
 const W = 200;
 const H = 290;
 
-// Vista em espelho (como você se vê): lado esquerdo do corpo à esquerda da tela.
 const POS: Record<InjectionSite, { x: number; y: number }> = {
   abdomen_sup_e: { x: 88, y: 100 },
   abdomen_sup_d: { x: 112, y: 100 },
@@ -30,7 +29,6 @@ const POS: Record<InjectionSite, { x: number; y: number }> = {
   coxa_d: { x: 116, y: 198 },
 };
 
-// Contorno único do corpo (braços abertos, pernas com vão), estilo linha fina.
 const BODY_OUTLINE =
   'M 80 52 L 32 72 A 7 7 0 0 1 38 86 L 76 70 L 76 150 L 68 256 A 8 8 0 0 1 84 258 ' +
   'L 96 168 L 104 168 L 116 258 A 8 8 0 0 1 132 256 L 124 150 L 124 70 L 162 86 ' +
@@ -56,7 +54,6 @@ function LegendDot({ color, dashed, label }: { color: string; dashed?: boolean; 
   );
 }
 
-/** Bonequinho com os pontos de aplicação: toque em uma bolinha para escolher. */
 export function BodyMapPicker({ value, onChange, lastSite, suggested }: Props) {
   const { colors } = useTheme();
   const outline = {

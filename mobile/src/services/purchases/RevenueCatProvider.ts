@@ -19,7 +19,6 @@ interface RcModule {
   };
 }
 
-/** Assinaturas via loja (App Store/Play) — carregado só quando há chave configurada. */
 export class RevenueCatProvider implements PurchasesProvider {
   private configured = false;
 
@@ -61,15 +60,8 @@ export class RevenueCatProvider implements PurchasesProvider {
     if (!pkg) throw new Error('plan-unavailable');
     try {
       const result = await this.rc().purchasePackage(pkg);
-      // QUALQUER entitlement ativo conta como premium (o app tem um único
-      // nível). Assim não dependemos do identificador exato configurado no
-      // RevenueCat — era a causa de "comprou na Apple mas o app não liberou".
       return Object.keys(result.customerInfo.entitlements.active).length > 0;
     } catch (e) {
-      // O SDK lança com userCancelled (fechou a folha de pagamento) e um
-      // readableErrorCode legível (ex.: PurchaseNotAllowedError,
-      // ProductNotAvailableForPurchaseError, StoreProblemError). Repassa o
-      // motivo REAL para aparecer na tela — sem isso, todo erro vira genérico.
       const err = e as {
         userCancelled?: boolean;
         readableErrorCode?: string;
@@ -84,7 +76,6 @@ export class RevenueCatProvider implements PurchasesProvider {
     }
   }
 
-  /** Deduz o plano pela assinatura ativa (…annual/…year → anual; senão mensal). */
   private planFrom(active: RcEntitlements['active']): PaidPlan | null {
     const ent = Object.values(active)[0];
     if (!ent) return null;

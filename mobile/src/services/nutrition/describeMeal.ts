@@ -12,7 +12,6 @@ interface DescribeFood {
   fiberG?: number | null;
 }
 
-/** URL da interpretação de refeição por texto (mesma base do scan). */
 function describeUrl(): string | null {
   const base = process.env.EXPO_PUBLIC_LEVE_SERVER_URL;
   return base ? `${base.replace(/\/$/, '')}/describe-food` : null;
@@ -22,12 +21,6 @@ export function isDescribeConfigured(): boolean {
   return Boolean(describeUrl());
 }
 
-/**
- * Envia ao servidor do Leve o texto do que a pessoa comeu e recebe os alimentos
- * (com porção e nutrição estimadas), no mesmo formato dos candidatos do scan —
- * para reaproveitar a lista de escolha e a porção editável. Lança em erro de
- * rede/servidor para a tela mostrar uma mensagem neutra.
- */
 export async function describeMeal(text: string): Promise<FoodCandidate[]> {
   const url = describeUrl();
   if (!url || text.trim().length < 3) return [];

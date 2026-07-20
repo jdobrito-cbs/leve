@@ -3,7 +3,6 @@ import { reportHtml } from '../reportHtml';
 
 test('IMC e taxa metabólica basal (Mifflin-St Jeor)', () => {
   expect(bmiOf(106.7, 182)).toBe(32.2);
-  // 10×106,7 + 6,25×182 − 5×49 + 5 = 1964,5 → 1965
   expect(basalMetabolicRate('masculino', 106.7, 182, 49)).toBe(1965);
   expect(basalMetabolicRate('feminino', 70, 165, 30)).toBe(
     Math.round(10 * 70 + 6.25 * 165 - 150 - 161),

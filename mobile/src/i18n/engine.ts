@@ -1,11 +1,3 @@
-/**
- * Motor de idiomas do Leve.
- *
- * O catálogo pt-BR é a fonte da verdade (e o fallback). Os demais idiomas
- * vivem em ./locales/<código>.ts com o MESMO formato (tipo Strings). O app
- * inteiro lê um Proxy: cada acesso a `strings.x` resolve no idioma ativo,
- * então trocar de idioma não exige tocar em nenhum import.
- */
 
 export type LanguageCode =
   | 'pt-BR'
@@ -21,7 +13,6 @@ export type LanguageCode =
   | 'he'
   | 'hi';
 
-/** Rótulos no próprio idioma — padrão de seletor de idiomas. */
 export const LANGUAGES: { code: LanguageCode; label: string }[] = [
   { code: 'pt-BR', label: 'Português (Brasil)' },
   { code: 'pt-PT', label: 'Português (Portugal)' },
@@ -37,7 +28,6 @@ export const LANGUAGES: { code: LanguageCode; label: string }[] = [
   { code: 'hi', label: 'हिन्दी' },
 ];
 
-/** Locale BCP-47 para formatação de números/datas por idioma. */
 export function numberLocale(code: LanguageCode = activeCode): string {
   switch (code) {
     case 'pt-BR':
@@ -71,9 +61,6 @@ let defaultCatalog: Record<string, unknown> | null = null;
 let activeCatalog: Record<string, unknown> | null = null;
 let activeCode: LanguageCode = 'pt-BR';
 
-// Assinantes da troca de idioma: o layout raiz usa isto para re-renderizar o
-// app inteiro na hora (sem isto, telas já montadas ficariam no idioma antigo
-// até reabrir o app). Mesmo padrão do themeSignal.
 const languageListeners = new Set<() => void>();
 
 export function subscribeLanguage(listener: () => void): () => void {
@@ -88,7 +75,6 @@ export function registerDefaultCatalog(catalog: object): void {
   if (!activeCatalog) activeCatalog = defaultCatalog;
 }
 
-/** Proxy vivo sobre o idioma ativo, com fallback por seção para o pt-BR. */
 export function makeStringsProxy<T extends object>(fallback: T): T {
   return new Proxy(fallback, {
     get(target, prop) {
@@ -98,7 +84,6 @@ export function makeStringsProxy<T extends object>(fallback: T): T {
   }) as T;
 }
 
-/** Carrega o catálogo do idioma; ausência (build antigo) cai no pt-BR. */
 function catalogFor(code: LanguageCode): Record<string, unknown> | null {
   try {
     switch (code) {
@@ -147,7 +132,6 @@ export function isRtlLanguage(code: LanguageCode = activeCode): boolean {
   return code === 'ar' || code === 'he';
 }
 
-/** Espelhamento RTL (árabe/hebraico) — o sistema aplica no próximo reinício. */
 function applyRtl(code: LanguageCode): void {
   try {
     const { I18nManager } = require('react-native') as typeof import('react-native');
@@ -155,11 +139,9 @@ function applyRtl(code: LanguageCode): void {
     const wantRtl = isRtlLanguage(code);
     if (I18nManager.isRTL !== wantRtl) I18nManager.forceRTL(wantRtl);
   } catch {
-    // web/testes sem react-native completo — segue sem espelhar
   }
 }
 
-/** Idioma automático: melhor correspondência com o idioma do aparelho. */
 export function resolveAutoLanguage(): LanguageCode {
   try {
     const { getLocales } = require('expo-localization') as typeof import('expo-localization');
@@ -178,12 +160,10 @@ export function resolveAutoLanguage(): LanguageCode {
       if (lang === 'hi') return 'hi';
     }
   } catch {
-    // módulo indisponível (testes) — padrão do produto
   }
   return 'pt-BR';
 }
 
-/** Sistema de medida da região do aparelho ('us' → imperial). */
 export function resolveAutoMeasurement(): 'metric' | 'imperial' {
   try {
     const { getLocales } = require('expo-localization') as typeof import('expo-localization');

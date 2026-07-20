@@ -46,11 +46,9 @@ test('sem passos na última hora avisa; com passos não; throttle de ~1h segura'
   const db = await readyDb();
   expect(await checkMovementIfDue(db, provider(10), at10h)).toBe(true);
   expect(mockAlert).toHaveBeenCalledTimes(1);
-  // 30 min depois: dentro do throttle, nem lê os passos de novo.
   const at1030 = new Date(2026, 6, 17, 10, 30);
   expect(await checkMovementIfDue(db, provider(0), at1030)).toBe(false);
   expect(mockAlert).toHaveBeenCalledTimes(1);
-  // 1h depois, movimento suficiente → sem aviso.
   const at11h = new Date(2026, 6, 17, 11, 0);
   expect(await checkMovementIfDue(db, provider(800), at11h)).toBe(false);
   expect(mockAlert).toHaveBeenCalledTimes(1);

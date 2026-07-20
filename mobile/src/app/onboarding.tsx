@@ -52,8 +52,6 @@ import {
   type LanguageCode,
 } from '@/i18n/engine';
 
-/** Dados básicos obrigatórios — a conta Apple/Google não fornece sexo nem
- *  nascimento (a Apple envia só nome/e-mail, e apenas no primeiro login). */
 function ProfileStep() {
   const [name, setName] = useState('');
   const [sex, setSex] = useState<SexOption | null>(null);
@@ -78,9 +76,7 @@ function ProfileStep() {
   const age = birthIso ? ageFromIsoDate(birthIso) : null;
   const heightCm = parseDecimalBR(heightStr);
   const goalWeightKg = parseDecimalBR(goalWeightStr);
-  // Campos digitam na unidade de exibição (cm/in, kg/lb); o estado guarda métrico.
   const conv = convertDisplayInput;
-  // Meta de calorias automática: manter o peso-meta (ajustável no Perfil).
   const calorieGoal =
     sex !== null && age !== null && heightCm && goalWeightKg
       ? estimateCalorieGoal(sex, goalWeightKg, heightCm, age)
@@ -174,11 +170,7 @@ function ProfileStep() {
   );
 }
 
-/** Primeira coisa na primeira abertura: escolher o idioma. O da região do
- *  aparelho vem pré-selecionado e a tela muda de idioma ao tocar na opção. */
 function LanguageStep({ onDone }: { onDone: () => void }) {
-  // Idioma ativo (não o do aparelho): tocar numa opção remonta a árvore e a
-  // seleção precisa renascer apontando para o idioma recém-escolhido.
   const [selected, setSelected] = useState<LanguageCode>(getActiveLanguage());
 
   function pick(code: LanguageCode) {
@@ -304,8 +296,6 @@ export default function Onboarding() {
     }
   }
 
-  // Mesmo padrão visual da Home nova: azul sólido até o fim do cabeçalho e
-  // degradê fixo até a cor do tema; os boxes entram em cascata (FadeInDown).
   const insets = useSafeAreaInsets();
   const { height: winH } = useWindowDimensions();
   const blueEnd = Math.min(0.85, (insets.top + 128) / winH);
@@ -324,11 +314,9 @@ export default function Onboarding() {
       contentContainerStyle={{ paddingBottom: spacing.xl * 2 }}
       keyboardDismissMode="on-drag"
       keyboardShouldPersistTaps="handled"
-      // iOS: rola o conteúdo para cima quando o teclado abre — sem isto,
-      // altura, meta de peso e o botão Concluir somem atrás do teclado.
       automaticallyAdjustKeyboardInsets
     >
-      {/* Cabeçalho sem box, texto direto sobre o azul — igual à Home. */}
+      {}
       <View
         style={{
           paddingTop: insets.top + spacing.md,

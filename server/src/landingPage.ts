@@ -1,9 +1,3 @@
-/**
- * Site do Leve — página única servida na raiz do domínio (www.levemobile.com.br).
- * Modo escuro por padrão com alternador, ícones de linha, planos interativos,
- * responsivo e acessível. Sem dependências externas (SVG e CSS inline).
- */
-
 export const LANDING_PAGE_HTML = `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>

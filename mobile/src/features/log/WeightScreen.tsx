@@ -36,7 +36,6 @@ export function WeightScreen() {
     load();
   }, [load]);
 
-  // O campo digita na unidade de exibição (kg ou lb); o banco guarda kg.
   const entered = parseDecimalBR(value);
   const kg = entered !== null ? displayToKg(entered) : null;
   const at = parseDateTimeBR(dateStr, timeStr);
@@ -46,7 +45,6 @@ export function WeightScreen() {
   async function save() {
     if (kg === null || kg <= 0 || !at) return;
     await addWeight(db, kg, at);
-    // Peso caiu → panda comemorando por 1 minuto no Hoje.
     if (diff !== null && diff < 0) setMascotEvent('slimmer');
     setValue('');
     setSaved(true);

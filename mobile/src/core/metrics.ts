@@ -1,9 +1,6 @@
-/** Métricas de saúde suportadas. `platform: true` = pode vir do HealthKit/Health Connect. */
 export const METRIC_DEFS = {
   sleep_hours: { unit: 'h', platform: true },
-  /** Eficiência: % do tempo na cama efetivamente dormindo. */
   sleep_efficiency_pct: { unit: '%', platform: true },
-  /** Distúrbios respiratórios do sono (apneia) por hora — Apple Watch (iOS 18+). */
   breathing_disturbances: { unit: '/h', platform: true },
   heart_rate_resting: { unit: 'bpm', platform: true },
   heart_rate_avg: { unit: 'bpm', platform: true },

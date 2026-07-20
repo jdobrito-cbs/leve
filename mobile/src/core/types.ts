@@ -8,14 +8,13 @@ export interface Profile {
   heightCm: number | null;
   goalWeightKg: number | null;
   medication: string | null;
-  disclaimerAcceptedAt: string | null; // ISO 8601
+  disclaimerAcceptedAt: string | null;
   waterGoalMl: number;
   calorieGoalKcal: number | null;
   sex: 'feminino' | 'masculino' | 'nao_informar' | null;
-  birthDate: string | null; // 'YYYY-MM-DD'
+  birthDate: string | null;
 }
 
-/** Unidade da porção: sólidos em gramas, líquidos em mililitros. */
 export type PortionUnit = 'g' | 'ml';
 
 export interface FoodLog {

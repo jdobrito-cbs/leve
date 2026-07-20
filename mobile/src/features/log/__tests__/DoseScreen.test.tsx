@@ -31,7 +31,7 @@ test('medicação atual do Perfil vem pré-selecionada no registro', async () =>
   mockAddDose.mockResolvedValue(undefined);
   const { getByText, getByPlaceholderText } = await render(<DoseScreen />);
   await fireEvent.changeText(getByPlaceholderText('0,0'), '5');
-  await fireEvent.press(getByText(strings.dose.save)); // sem tocar nos chips de medicação
+  await fireEvent.press(getByText(strings.dose.save));
   await waitFor(() =>
     expect(mockAddDose).toHaveBeenCalledWith(
       {},
@@ -56,7 +56,7 @@ test('sugere próximo local do rodízio e salva dose de injeção', async () => 
         doseMg: 0.5,
         route: 'injecao',
         injectionSite: 'abdomen_sup_d',
-        nextDoseAt: expect.any(Date), // intervalo padrão de 7 dias
+        nextDoseAt: expect.any(Date),
       }),
     ),
   );

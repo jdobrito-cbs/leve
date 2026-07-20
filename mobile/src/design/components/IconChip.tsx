@@ -10,17 +10,11 @@ import Animated, {
 import { useTheme } from '../useTheme';
 
 interface Props extends PropsWithChildren {
-  /** Ícone padrão; ignorado quando `children` traz um ícone animado customizado. */
   Icon?: LucideIcon;
   size?: number;
-  /** Quando este valor muda, o chip dá uma sacudidinha (dado atualizado). */
   wiggleKey?: string | number;
 }
 
-/**
- * Ícone flat dentro de um chip arredondado — motivo visual do Leve.
- * Nasce com um pop de mola e sacode quando o dado que representa muda.
- */
 export function IconChip({ Icon, size = 40, wiggleKey, children }: Props) {
   const { colors } = useTheme();
   const scale = useSharedValue(0.4);

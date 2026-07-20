@@ -6,10 +6,7 @@ export type PlanKind = 'free' | 'monthly' | 'annual' | 'partner';
 export interface Entitlement {
   plan: PlanKind;
   activatedAt?: string;
-  /** Id da licença de parceiro, quando o desbloqueio veio de uma chave. */
   licenseId?: string;
-  /** Chave curta emitida pelo servidor — guardada para a reverificação
-   *  periódica (revogação no painel derruba o acesso). */
   partnerKey?: string;
 }
 

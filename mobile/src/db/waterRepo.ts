@@ -16,7 +16,6 @@ export async function waterTotalForDay(db: AppDb, day: Date): Promise<number> {
   return Number(rows[0]?.total ?? 0);
 }
 
-/** Horário do último registro de água do dia (para o mascote reagir ao gole). */
 export async function latestWaterAt(db: AppDb, day: Date): Promise<string | null> {
   const { startIso, endIso } = dayRangeUtc(day);
   const rows = await db

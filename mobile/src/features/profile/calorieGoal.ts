@@ -1,11 +1,6 @@
 import type { SexOption } from '@/features/profile/useProfileForm';
 import { basalMetabolicRate } from '@/features/report/bodyReport';
 
-/**
- * Meta calórica automática: calorias para MANTER o peso-meta (Mifflin-St Jeor
- * com fator de rotina leve 1,2), arredondada de 50 em 50 e dentro da faixa da
- * régua do Perfil. Estimativa informativa — ajustável manualmente no Perfil.
- */
 export function estimateCalorieGoal(
   sex: SexOption,
   goalWeightKg: number,

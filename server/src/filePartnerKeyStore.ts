@@ -3,10 +3,6 @@ import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { PartnerKeyRecord, PartnerKeyStore } from './store.js';
 
-/**
- * Chaves de parceiro em arquivo JSON — permite rodar o painel sem banco de
- * dados. Com DATABASE_URL configurado, o Prisma assume no lugar deste store.
- */
 export class FilePartnerKeyStore implements PartnerKeyStore {
   constructor(private path: string) {
     mkdirSync(dirname(path), { recursive: true });
@@ -56,7 +52,6 @@ export class FilePartnerKeyStore implements PartnerKeyStore {
   }
 
   async findPartnerKeyByHash(keyHash: string): Promise<PartnerKeyRecord | null> {
-    // Compatível com arquivos antigos sem os campos novos.
     const found = this.load().find((k) => k.keyHash === keyHash);
     if (!found) return null;
     return {

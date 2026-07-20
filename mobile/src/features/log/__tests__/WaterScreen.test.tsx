@@ -19,7 +19,6 @@ test('botão rápido registra 200 ml', async () => {
   mockTotal.mockResolvedValue(500);
   mockAddWater.mockResolvedValue(undefined);
   const { getByText } = await render(<WaterScreen />);
-  // Rótulo montado por formatVolume (métrico nos testes): "+ 200 ml".
   await waitFor(() => getByText('+ 200 ml'));
   await fireEvent.press(getByText('+ 200 ml'));
   await waitFor(() => expect(mockAddWater).toHaveBeenCalledWith({}, 200, expect.any(Date)));

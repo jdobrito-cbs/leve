@@ -10,13 +10,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle, Path } from 'react-native-svg';
 
-/**
- * Ícones da tab bar com movimento interno real, em todas as plataformas:
- * as camadas móveis são Views animadas (transformações de layout), não SVG
- * interno — por isso funcionam igual no nativo e na web.
- * `signal` muda a cada toque na aba e redispara a animação, mesmo com a aba já ativa.
- */
-
 interface TabIconProps {
   color: ColorValue;
   focused: boolean;
@@ -26,7 +19,6 @@ interface TabIconProps {
 
 const stroke = { strokeWidth: 1.9, strokeLinecap: 'round', strokeLinejoin: 'round' } as const;
 
-/** Hoje: as folhas balançam como ao vento (o chão fica firme). */
 export function SproutTabIcon({ color, focused, signal, size = 22 }: TabIconProps) {
   const sway = useSharedValue(0);
 
@@ -34,7 +26,7 @@ export function SproutTabIcon({ color, focused, signal, size = 22 }: TabIconProp
     if (!focused) return;
     sway.value = withSequence(
       withTiming(-14, { duration: 110, easing: Easing.out(Easing.quad) }),
-      withSpring(0, { damping: 4, stiffness: 140 }), // oscila várias vezes até assentar
+      withSpring(0, { damping: 4, stiffness: 140 }),
     );
   }, [focused, signal, sway]);
 
@@ -70,7 +62,6 @@ export function SproutTabIcon({ color, focused, signal, size = 22 }: TabIconProp
   );
 }
 
-/** Progresso: a linha de tendência se desenha da esquerda para a direita. */
 export function ChartTabIcon({ color, focused, signal, size = 22 }: TabIconProps) {
   const reveal = useSharedValue(size);
 
@@ -104,7 +95,6 @@ export function ChartTabIcon({ color, focused, signal, size = 22 }: TabIconProps
   );
 }
 
-/** Perfil: o boneco dá um mergulho rápido e volta, dentro do círculo parado. */
 export function UserTabIcon({ color, focused, signal, size = 22 }: TabIconProps) {
   const dip = useSharedValue(0);
 
@@ -143,7 +133,6 @@ export function UserTabIcon({ color, focused, signal, size = 22 }: TabIconProps)
   );
 }
 
-/** Ciclo: gota que balança e "cai" suavemente a cada toque. */
 export function CycleTabIcon({ color, focused, signal, size = 22 }: TabIconProps) {
   const drop = useSharedValue(0);
 
@@ -170,7 +159,6 @@ export function CycleTabIcon({ color, focused, signal, size = 22 }: TabIconProps
   );
 }
 
-/** Academia: boneco em pose de duplo bíceps — os braços "bombam" a cada toque. */
 export function MuscleTabIcon({ color, focused, signal, size = 22 }: TabIconProps) {
   const pump = useSharedValue(1);
 
@@ -188,7 +176,7 @@ export function MuscleTabIcon({ color, focused, signal, size = 22 }: TabIconProp
 
   return (
     <View style={{ width: size, height: size }}>
-      {/* Cabeça, tronco e pernas (firmes) */}
+      {}
       <Svg
         width={size}
         height={size}
@@ -203,7 +191,7 @@ export function MuscleTabIcon({ color, focused, signal, size = 22 }: TabIconProp
         <Path d="M9 9h6l-1.1 7.2h-3.8z" />
         <Path d="M10.1 16.2 9.2 21.4M13.9 16.2l.9 5.2" />
       </Svg>
-      {/* Braços flexionados (camada que bomba) */}
+      {}
       <Animated.View style={[{ position: 'absolute', inset: 0, transformOrigin: '50% 45%' }, arms]}>
         <Svg
           width={size}

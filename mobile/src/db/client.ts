@@ -14,13 +14,11 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/** No web o arquivo do banco (OPFS) é exclusivo: outra aba do app o mantém aberto. */
 export function isDbLockedError(e: unknown): boolean {
   const msg = e instanceof Error ? `${e.name} ${e.message}` : String(e);
   return msg.includes('Access Handle') || msg.includes('NoModificationAllowedError');
 }
 
-/** Aplica as migrations pendentes usando a API assíncrona (funciona em nativo e web). */
 async function runMigrations(sqlite: SQLiteDatabase): Promise<void> {
   await sqlite.execAsync('CREATE TABLE IF NOT EXISTS __leve_migrations (idx INTEGER PRIMARY KEY)');
   for (const entry of migrations.journal.entries) {
@@ -40,10 +38,6 @@ async function runMigrations(sqlite: SQLiteDatabase): Promise<void> {
   }
 }
 
-/**
- * Abre o banco no web com retentativas: após recarregar a página, a aba
- * anterior pode segurar o arquivo (OPFS é exclusivo) por alguns instantes.
- */
 async function openWebDatabase(
   expoSqlite: typeof import('expo-sqlite'),
 ): Promise<SQLiteDatabase> {
@@ -65,12 +59,9 @@ async function create(): Promise<AppDb> {
   const expoSqlite = await import('expo-sqlite');
 
   if (Platform.OS === 'web') {
-    // O armazenamento do navegador (OPFS) só existe em contexto seguro —
-    // https ou localhost. Via http://IP:porta ele trava sem mensagem.
     if (typeof globalThis.isSecureContext === 'boolean' && !globalThis.isSecureContext) {
       throw new Error(strings.common.dbInsecureContext);
     }
-    // Web: driver assíncrono (não depende de SharedArrayBuffer/COOP/COEP).
     const sqlite = await openWebDatabase(expoSqlite);
     const { drizzle } = await import('drizzle-orm/sqlite-proxy');
     const db = drizzle(
@@ -91,7 +82,6 @@ async function create(): Promise<AppDb> {
     return db as unknown as AppDb;
   }
 
-  // Nativo: driver síncrono (rápido, roda na própria thread de JS).
   console.log('[leve] abrindo banco nativo…');
   const sqlite = expoSqlite.openDatabaseSync('leve.db');
   console.log('[leve] banco aberto; aplicando migrations…');
@@ -101,7 +91,6 @@ async function create(): Promise<AppDb> {
   return drizzle(sqlite, { schema }) as unknown as AppDb;
 }
 
-/** Abre o banco e aplica migrations; chamado uma vez pelo layout raiz antes de renderizar o app. */
 export async function initDb(): Promise<AppDb> {
   if (!initPromise) {
     initPromise = create().then(
@@ -110,7 +99,6 @@ export async function initDb(): Promise<AppDb> {
         return db;
       },
       (e) => {
-        // Falhou (ex.: banco preso em outra aba): libera para tentar de novo.
         initPromise = null;
         throw e;
       },
@@ -119,10 +107,6 @@ export async function initDb(): Promise<AppDb> {
   return initPromise;
 }
 
-/**
- * Acesso ao banco após a inicialização. O layout raiz garante o `initDb()`
- * antes de qualquer tela usar `db`.
- */
 export const db: AppDb = new Proxy({} as AppDb, {
   get(_target, prop) {
     if (!instance) throw new Error('banco ainda não inicializado');

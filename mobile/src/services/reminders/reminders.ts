@@ -8,21 +8,16 @@ const MAX_WATER = 6;
 export interface ReminderSettings {
   doseEnabled: boolean;
   waterEnabled: boolean;
-  waterTimes: string[]; // 'HH:MM'
+  waterTimes: string[];
   insightsEnabled?: boolean;
   appointmentsEnabled?: boolean;
-  /** Lembretes diários dos remédios de apoio (horários de cada remédio). */
   medsEnabled?: boolean;
-  /** Aviso diário na hora de dormir; horário vem do sono no app de saúde. */
   sleepEnabled?: boolean;
-  sleepTime?: string; // 'HH:MM'
-  /** true = segue a detecção automática; false = horário fixado pelo usuário. */
+  sleepTime?: string;
   sleepAuto?: boolean;
-  /** "Bom dia" + copo de água na hora típica de acordar. */
   wakeEnabled?: boolean;
-  wakeTime?: string; // 'HH:MM'
+  wakeTime?: string;
   wakeAuto?: boolean;
-  /** Aviso para levantar e caminhar quando não há passos na última hora. */
   movementEnabled?: boolean;
 }
 
@@ -44,10 +39,6 @@ const INSIGHTS_ID = 'insights-daily';
 const MED_PREFIX = 'med-';
 const MAX_MED_SLOTS = 40;
 
-/**
- * No Expo Go (Android) o módulo de notificações não existe — agendar falharia.
- * Nenhum lembrete pode derrubar a ação do usuário (salvar perfil, dose etc.).
- */
 async function safely(run: () => Promise<void>): Promise<void> {
   try {
     await run();
@@ -56,9 +47,6 @@ async function safely(run: () => Promise<void>): Promise<void> {
   }
 }
 
-/** Chama o callback do tipo quando um aviso chega (app aberto), é tocado, ou
- *  quando o app foi aberto a partir de um aviso recente (partida fria).
- *  Água → onWater; remédios de apoio → onMeds; aplicação GLP-1 → onDose. */
 export function attachReminderMascotListeners(handlers: {
   onWater: () => void;
   onMeds: () => void;
@@ -78,7 +66,7 @@ export function attachReminderMascotListeners(handlers: {
       .then((r) => {
         if (!r) return;
         const raw = r.notification.date;
-        const ts = raw > 1e12 ? raw : raw * 1000; // iOS reporta em segundos
+        const ts = raw > 1e12 ? raw : raw * 1000;
         if (Date.now() - ts < 10 * 60 * 1000) dispatch(r.notification.request.identifier);
       })
       .catch(() => undefined);
@@ -87,7 +75,6 @@ export function attachReminderMascotListeners(handlers: {
   }
 }
 
-/** Reagenda os lembretes DAILY de todos os remédios ativos (apoio de memória). */
 export async function applyMedicationReminders(
   enabled: boolean,
   meds: { id: number; name: string; doseText: string | null; times: string[] }[],
@@ -116,11 +103,9 @@ export async function applyMedicationReminders(
 }
 
 const SLEEP_ID = 'sleep-reminder';
-// Prefixo water- de propósito: tocar no aviso matinal acorda o panda com sede.
 const MORNING_ID = 'water-morning';
 const MOVE_ID = 'movement-alert';
 
-/** Aviso diário na hora de dormir (horário do sono do app de saúde ou do usuário). */
 export async function applySleepReminder(enabled: boolean, time: string | undefined): Promise<void> {
   await safely(async () => {
     await Notifications.cancelScheduledNotificationAsync(SLEEP_ID);
@@ -134,8 +119,6 @@ export async function applySleepReminder(enabled: boolean, time: string | undefi
   });
 }
 
-/** "Bom dia" + copo de água, entregue na hora típica de acordar — fica na tela
- *  bloqueada e aparece quando a pessoa pega o celular pela primeira vez. */
 export async function applyMorningWaterReminder(
   enabled: boolean,
   time: string | undefined,
@@ -152,7 +135,6 @@ export async function applyMorningWaterReminder(
   });
 }
 
-/** Aviso imediato de levantar e caminhar (sem passos na última hora). */
 export async function sendMovementAlert(): Promise<void> {
   await safely(async () => {
     await Notifications.scheduleNotificationAsync({
@@ -163,7 +145,6 @@ export async function sendMovementAlert(): Promise<void> {
   });
 }
 
-/** Resumo diário neutro (a análise roda ao abrir o app; sem processamento em background). */
 export async function applyInsightsReminder(enabled: boolean): Promise<void> {
   await safely(async () => {
     await Notifications.cancelScheduledNotificationAsync(INSIGHTS_ID);
@@ -177,12 +158,10 @@ export async function applyInsightsReminder(enabled: boolean): Promise<void> {
 }
 
 const APPT_PREFIX = 'appt-';
-const MAX_APPT_SLOTS = 80; // 20 consultas × 4 avisos
+const MAX_APPT_SLOTS = 80;
 
-/** Horas antes da consulta em que o aviso toca (0 = manhã do dia, às 08:00). */
 const APPT_OFFSETS_H = [3, 2, 1];
 
-/** Reagenda os avisos de todas as consultas futuras: no dia (08:00) e 3h/2h/1h antes. */
 export async function applyAppointmentReminders(
   enabled: boolean,
   appts: { id: number; place: string; specialty: string; scheduledAt: string }[],
@@ -233,7 +212,6 @@ export async function cancelDoseReminder(): Promise<void> {
   await safely(() => Notifications.cancelScheduledNotificationAsync(DOSE_ID));
 }
 
-/** Apoio de memória — não é orientação clínica. Só agenda datas futuras. */
 export async function scheduleDoseReminder(at: Date): Promise<void> {
   await safely(async () => {
     await Notifications.cancelScheduledNotificationAsync(DOSE_ID);

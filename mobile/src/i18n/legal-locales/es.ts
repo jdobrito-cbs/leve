@@ -1,8 +1,3 @@
-/**
- * Documentos legales de Leve — traducción de cortesía al español.
- * La versión en portugués (Brasil) de legal-pt-BR.ts es la que prevalece
- * jurídicamente.
- */
 import type { LegalCatalog } from '../legalCatalog';
 
 export const legal: LegalCatalog = {

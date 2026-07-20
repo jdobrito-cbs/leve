@@ -13,7 +13,6 @@ function makeDb() {
 
 test('registra, lista (desc), soma o dia e apaga exercícios', async () => {
   const db = makeDb();
-  // Meio-dia fixo: rodar o teste na virada da meia-noite não muda o dia da soma.
   const today = new Date();
   today.setHours(12, 0, 0, 0);
   await addGymLog(db, {
@@ -39,7 +38,7 @@ test('registra, lista (desc), soma o dia e apaga exercícios', async () => {
 
   const list = await listGymLogs(db);
   expect(list).toHaveLength(2);
-  expect(list[0].exercise).toBe('danca'); // mais recente primeiro
+  expect(list[0].exercise).toBe('danca');
   expect(await gymKcalForDay(db, today)).toBe(401);
 
   await deleteGymLog(db, list[0].id);

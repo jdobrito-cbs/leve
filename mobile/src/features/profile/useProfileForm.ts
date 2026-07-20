@@ -28,7 +28,7 @@ export type SexOption = 'feminino' | 'masculino' | 'nao_informar';
 export interface ProfileForm {
   name: string;
   sex: SexOption | null;
-  birthDateStr: string; // 'DD/MM/AAAA'
+  birthDateStr: string;
   heightStr: string;
   goalWeightStr: string;
   doseIntervalStr: string;
@@ -37,14 +37,14 @@ export interface ProfileForm {
   calorieGoalStr: string;
   doseEnabled: boolean;
   waterEnabled: boolean;
-  waterTimesStr: string; // 'HH:MM, HH:MM'
+  waterTimesStr: string;
   insightsEnabled: boolean;
   appointmentsEnabled: boolean;
   medsEnabled: boolean;
   sleepEnabled: boolean;
-  sleepTimeStr: string; // 'HH:MM'
+  sleepTimeStr: string;
   wakeEnabled: boolean;
-  wakeTimeStr: string; // 'HH:MM'
+  wakeTimeStr: string;
   movementEnabled: boolean;
 }
 
@@ -97,7 +97,6 @@ export function useProfileForm() {
     setDetectedWake(wakeDet);
     setAutoGoalMl(weight ? waterGoalFromWeightKg(weight.weightKg) : null);
     setForm({
-      // Sem nome salvo, usa o da conta conectada (Apple/Google).
       name: profile?.name ?? account?.name ?? '',
       sex: (profile?.sex as SexOption | null) ?? null,
       birthDateStr: profile?.birthDate ? isoDateToBR(profile.birthDate) : '',
@@ -208,15 +207,12 @@ export function useProfileForm() {
       medsEnabled,
       sleepEnabled,
       sleepTime,
-      // Igual ao detectado (ou sem detecção ainda) = segue o sono automaticamente;
-      // horário próprio digitado = fica fixo e o sync não mexe.
       sleepAuto: detectedBedtime === null || sleepTime === detectedBedtime,
       wakeEnabled,
       wakeTime,
       wakeAuto: detectedWake === null || wakeTime === detectedWake,
       movementEnabled,
     };
-    // A aba Ciclo só muda depois de SALVAR o sexo (não no clique do chip).
     setSexSignal(form.sex ?? 'nao_informar');
     await setSetting(db, 'reminders', reminders);
     await setSetting(db, 'waterGoalAuto', form.waterGoalAuto);

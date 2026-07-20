@@ -2,7 +2,6 @@ import type { SleepNight } from '../HealthProvider';
 import { typicalBedtime, typicalWakeTime } from '../sleepSchedule';
 
 function night(d: number, sh: number, sm: number, eh: number, em: number): SleepNight {
-  // Deitar no dia d (ou d+1 quando sh < 12, madrugada) e acordar na manhã seguinte.
   const startDay = sh >= 12 ? d : d + 1;
   return {
     start: new Date(2026, 6, startDay, sh, sm),
@@ -16,7 +15,7 @@ test('hora típica de dormir é a mediana e atravessa a meia-noite sem quebrar',
     night(11, 23, 5, 6, 50),
     night(12, 23, 10, 7, 0),
     night(13, 23, 40, 7, 10),
-    night(14, 0, 20, 8, 5), // virou o dia — vizinho de 23:40, não de 01:00 da régua
+    night(14, 0, 20, 8, 5),
   ];
   expect(typicalBedtime(nights)).toBe('23:10');
   expect(typicalWakeTime(nights)).toBe('07:00');
@@ -28,7 +27,7 @@ test('mediana resiste a uma noite atípica (soneca ou madrugada isolada)', () =>
     night(11, 23, 0, 7, 0),
     night(12, 23, 5, 7, 5),
     night(13, 23, 0, 7, 0),
-    { start: new Date(2026, 6, 15, 13, 0), end: new Date(2026, 6, 15, 16, 30) }, // atípica
+    { start: new Date(2026, 6, 15, 13, 0), end: new Date(2026, 6, 15, 16, 30) },
   ];
   expect(typicalBedtime(nights)).toBe('23:00');
   expect(typicalWakeTime(nights)).toBe('07:00');

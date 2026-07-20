@@ -96,15 +96,12 @@ describe('rotas de chaves de parceiro', () => {
     });
     const { id, key } = created.json() as { id: string; key: string };
 
-    // A lista informa que dá para reexibir.
     const list = await app.inject({ method: 'GET', url: '/partner-keys', headers: adminHeaders });
     expect((list.json() as Array<{ canReveal: boolean }>)[0].canReveal).toBe(true);
 
-    // Sem autorização, nada.
     const anon = await app.inject({ method: 'GET', url: `/partner-keys/${id}/reveal` });
     expect(anon.statusCode).toBe(401);
 
-    // Autorizado, devolve exatamente o código emitido.
     const reveal = await app.inject({
       method: 'GET',
       url: `/partner-keys/${id}/reveal`,
@@ -113,7 +110,6 @@ describe('rotas de chaves de parceiro', () => {
     expect(reveal.statusCode).toBe(200);
     expect(reveal.json()).toEqual({ id, label: 'Dra. Ana', key });
 
-    // Revogada não volta mais.
     await app.inject({ method: 'POST', url: `/partner-keys/${id}/revoke`, headers: adminHeaders });
     const gone = await app.inject({
       method: 'GET',
@@ -149,7 +145,6 @@ describe('rotas de chaves de parceiro', () => {
     });
     expect(ok.json()).toEqual({ valid: true, label: 'Clínica Anual' });
 
-    // Vencida (criada direto no store com data no passado) → recusada.
     const oldKey = generatePartnerKey();
     await store.createPartnerKey(
       'Parceiro Vencido',
@@ -165,7 +160,6 @@ describe('rotas de chaves de parceiro', () => {
     });
     expect(expired.json()).toEqual({ valid: false, reason: 'expired' });
 
-    // Sem validade continua atemporal.
     const forever = await app.inject({
       method: 'POST',
       url: '/partner-keys',
@@ -185,7 +179,6 @@ describe('rotas de chaves de parceiro', () => {
     });
     const { id } = created.json() as { id: string };
 
-    // Ativa não pode ser excluída direto (revogar é o passo de corte).
     const active = await app.inject({
       method: 'DELETE',
       url: `/partner-keys/${id}`,
@@ -204,7 +197,6 @@ describe('rotas de chaves de parceiro', () => {
     const list = await app.inject({ method: 'GET', url: '/partner-keys', headers: adminHeaders });
     expect(list.json()).toEqual([]);
 
-    // Sem autorização, nada de excluir.
     const anon = await app.inject({ method: 'DELETE', url: `/partner-keys/${id}` });
     expect(anon.statusCode).toBe(401);
   });
@@ -215,7 +207,6 @@ describe('rotas de chaves de parceiro', () => {
       const res = await app.inject({ method: 'GET', url });
       expect(res.statusCode).toBe(200);
       expect(res.headers['content-type']).toBe('image/png');
-      // Assinatura PNG (\x89PNG) — garante que o binário chegou íntegro.
       expect(res.rawPayload.subarray(1, 4).toString('ascii')).toBe('PNG');
     }
   });

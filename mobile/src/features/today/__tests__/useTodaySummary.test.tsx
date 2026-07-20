@@ -92,13 +92,12 @@ test('agrega os dados do dia', async () => {
   expect(result.current.waterGoalMl).toBe(2000);
   expect(result.current.kcal).toBe(250);
   expect(result.current.lastWeightKg).toBe(93.2);
-  // primeiro peso (100) + últimos em ordem cronológica
   expect(result.current.weightSeries.map((w) => w.weightKg)).toEqual([100, 95.5, 93.2]);
   expect(result.current.goalWeightKg).toBe(85);
   expect(result.current.nextDoseAt).toBe('2026-07-14T12:00:00.000Z');
   expect(result.current.symptomsCount).toBe(1);
   expect(result.current.recentSymptoms).toHaveLength(1);
-  expect(result.current.userName).toBe('Jorge'); // só o primeiro nome
-  expect(result.current.activeCalories).toBe(400); // saúde (320) + academia (80)
+  expect(result.current.userName).toBe('Jorge');
+  expect(result.current.activeCalories).toBe(400);
   expect(result.current.steps).toBe(4200);
 });

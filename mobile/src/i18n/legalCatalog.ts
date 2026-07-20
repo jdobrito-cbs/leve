@@ -1,9 +1,3 @@
-/**
- * Documentos legais por idioma. O pt-BR (legal-pt-BR.ts) é a versão que
- * prevalece juridicamente; as traduções em ./legal-locales são cortesia e
- * carregam um aviso dizendo isso (translationNote). Idioma sem tradução
- * (ou build antiga) cai no pt-BR.
- */
 import { getActiveLanguage, type LanguageCode } from './engine';
 import { medicalNotice, privacyPolicy, termsOfUse, type LegalDoc } from './legal-pt-BR';
 
@@ -11,7 +5,6 @@ export interface LegalCatalog {
   medicalNotice: LegalDoc;
   termsOfUse: LegalDoc;
   privacyPolicy: LegalDoc;
-  /** Presente só nas traduções: "cortesia; prevalece o português (Brasil)". */
   translationNote?: string;
 }
 
