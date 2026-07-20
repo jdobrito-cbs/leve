@@ -93,7 +93,12 @@ async function chatCompletion(config: HubConfig, body: object, timeoutMs: number
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(timeoutMs),
   });
-  if (!res.ok) throw new Error(`upstream ${res.status}`);
+  if (!res.ok) {
+    // O corpo do erro do provedor explica a causa (chave inválida, política de
+    // dados, modelo) — vai só para o LOG do servidor, nunca para o cliente.
+    const detail = (await res.text().catch(() => '')).slice(0, 300);
+    throw new Error(`upstream ${res.status}: ${detail}`);
+  }
   const json = (await res.json()) as {
     choices?: Array<{ message?: { content?: string } }>;
   };
@@ -885,7 +890,8 @@ export async function buildServer(options: ServerOptions) {
         const content = await options.callHub(parsed.data.imageBase64, parsed.data.mimeType);
         const result: ScanResult = parseHubContent(content);
         return result;
-      } catch {
+      } catch (e) {
+        console.warn('[scan-food] falha:', e instanceof Error ? e.message : e);
         return reply.code(502).send({ error: 'não foi possível analisar a imagem agora' });
       }
     },
@@ -905,7 +911,8 @@ export async function buildServer(options: ServerOptions) {
         const content = await options.callFoodHub(parsed.data.name);
         const result: FoodInfoResult = parseFoodInfoContent(content);
         return result;
-      } catch {
+      } catch (e) {
+        console.warn('[food-info] falha:', e instanceof Error ? e.message : e);
         return reply.code(502).send({ error: 'não foi possível consultar agora' });
       }
     },
