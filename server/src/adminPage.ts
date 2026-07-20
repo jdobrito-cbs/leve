@@ -329,6 +329,7 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
     $('who').classList.toggle('hidden',id!=='s-dash');}
 
   function boot(){
+    stopKeyPolling();
     show('s-loading');
     api('/admin/setup-state').then(function(r){
       if(r.json&&r.json.needsSetup){show('s-setup');$('su-token').focus();return;}
@@ -411,34 +412,57 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
     $('dash-me').textContent='Conectado como '+info.email;
     $('dash-role').innerHTML=info.role==='master'?'<span class="badge master">master</span>':'<span class="badge admin">admin</span>';
     $('a-createWrap').classList.toggle('hidden',info.role!=='master');
-    loadKeys();loadAdmins();
+    loadKeys();loadAdmins();startKeyPolling();
   }
 
-  function loadKeys(){
-    $('k-err').textContent='';
+  // Só mexe no DOM quando a lista muda de fato (evita piscar no auto-refresh).
+  var keysSig='';
+  function renderKeys(list){
+    var sig=JSON.stringify(list);
+    if(sig===keysSig)return;
+    keysSig=sig;
+    var rows=list.map(function(k){
+      var expired=!k.revokedAt&&k.expiresAt&&new Date(k.expiresAt).getTime()<Date.now();
+      var sit=k.revokedAt?'<span class="badge off">revogada</span>'
+        :(expired?'<span class="badge off">expirada</span>':'<span class="badge on">ativa</span>');
+      var val=k.expiresAt?new Date(k.expiresAt).toLocaleDateString('pt-BR'):'—';
+      var dev=k.revokedAt?'—':(k.bound?'<span class="badge bound">vinculada</span>':'<span class="badge free">livre</span>');
+      var act='';
+      if(!k.revokedAt){
+        if(k.canReveal)act+='<button class="btn ghost mini" data-act="reveal" data-id="'+esc(k.id)+'">Ver</button>';
+        if(k.bound)act+='<button class="btn ghost mini" data-act="unbind" data-id="'+esc(k.id)+'">Desvincular</button>';
+        act+='<button class="btn danger" data-act="revoke" data-id="'+esc(k.id)+'">Revogar</button>';
+      }else{
+        act+='<button class="btn danger" data-act="del" data-id="'+esc(k.id)+'">Excluir</button>';
+      }
+      return '<tr><td>'+esc(k.label)+'</td><td class="mono">…'+esc(k.hint)+'</td><td class="mono">'+esc(fmt(k.createdAt))+
+        '</td><td class="mono">'+esc(val)+'</td><td>'+sit+'</td><td>'+dev+'</td><td><div class="actions">'+act+'</div></td></tr>';
+    }).join('');
+    $('k-rows').innerHTML=rows||'<tr><td colspan="7" class="empty">Nenhuma chave emitida ainda.</td></tr>';
+  }
+  // silent (no auto-refresh): não limpa mensagens nem mostra "sessão expirada".
+  function loadKeys(silent){
+    if(!silent)$('k-err').textContent='';
     api('/partner-keys').then(function(r){
-      if(!r.ok){$('k-rows').innerHTML='<tr><td colspan="7" class="empty">sessão expirada</td></tr>';return;}
-      var rows=(r.json||[]).map(function(k){
-        var expired=!k.revokedAt&&k.expiresAt&&new Date(k.expiresAt).getTime()<Date.now();
-        var sit=k.revokedAt?'<span class="badge off">revogada</span>'
-          :(expired?'<span class="badge off">expirada</span>':'<span class="badge on">ativa</span>');
-        var val=k.expiresAt?new Date(k.expiresAt).toLocaleDateString('pt-BR'):'—';
-        var dev=k.revokedAt?'—':(k.bound?'<span class="badge bound">vinculada</span>':'<span class="badge free">livre</span>');
-        var act='';
-        if(!k.revokedAt){
-          if(k.canReveal)act+='<button class="btn ghost mini" data-act="reveal" data-id="'+esc(k.id)+'">Ver</button>';
-          if(k.bound)act+='<button class="btn ghost mini" data-act="unbind" data-id="'+esc(k.id)+'">Desvincular</button>';
-          act+='<button class="btn danger" data-act="revoke" data-id="'+esc(k.id)+'">Revogar</button>';
-        }else{
-          act+='<button class="btn danger" data-act="del" data-id="'+esc(k.id)+'">Excluir</button>';
-        }
-        return '<tr><td>'+esc(k.label)+'</td><td class="mono">…'+esc(k.hint)+'</td><td class="mono">'+esc(fmt(k.createdAt))+
-          '</td><td class="mono">'+esc(val)+'</td><td>'+sit+'</td><td>'+dev+'</td><td><div class="actions">'+act+'</div></td></tr>';
-      }).join('');
-      $('k-rows').innerHTML=rows||'<tr><td colspan="7" class="empty">Nenhuma chave emitida ainda.</td></tr>';
+      if(!r.ok){
+        if(!silent){$('k-rows').innerHTML='<tr><td colspan="7" class="empty">sessão expirada</td></tr>';keysSig='';}
+        return;
+      }
+      renderKeys(r.json||[]);
     });
   }
-  $('k-reload').addEventListener('click',loadKeys);
+  // Atualiza sozinho: quando um parceiro vincula a chave no app, aparece aqui em
+  // segundos, sem F5. Poll leve a cada 12s (só com a aba visível) + ao voltar à aba.
+  var keyPoll=null;
+  function startKeyPolling(){
+    stopKeyPolling();
+    keyPoll=setInterval(function(){if(document.visibilityState==='visible')loadKeys(true);},12000);
+  }
+  function stopKeyPolling(){if(keyPoll){clearInterval(keyPoll);keyPoll=null;}}
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible'&&keyPoll)loadKeys(true);
+  });
+  $('k-reload').addEventListener('click',function(){loadKeys();});
   $('k-create').addEventListener('click',function(){
     $('k-err').textContent='';$('k-new').innerHTML='';
     var label=$('k-label').value.trim();
