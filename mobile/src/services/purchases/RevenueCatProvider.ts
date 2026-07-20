@@ -1,21 +1,21 @@
 import type { PaidPlan, PlanPrices, PurchasesProvider } from './PurchasesProvider';
 
-const ENTITLEMENT_ID = 'premium';
-
 interface RcPackage {
   identifier: string;
   packageType: string;
   product: { priceString: string };
 }
 
+interface RcEntitlements {
+  active: Record<string, { productIdentifier?: string }>;
+}
+
 interface RcModule {
   default: {
     configure(opts: { apiKey: string }): void;
     getOfferings(): Promise<{ current: { availablePackages: RcPackage[] } | null }>;
-    purchasePackage(pkg: RcPackage): Promise<{
-      customerInfo: { entitlements: { active: Record<string, unknown> } };
-    }>;
-    restorePurchases(): Promise<{ entitlements: { active: Record<string, unknown> } }>;
+    purchasePackage(pkg: RcPackage): Promise<{ customerInfo: { entitlements: RcEntitlements } }>;
+    restorePurchases(): Promise<{ entitlements: RcEntitlements }>;
   };
 }
 
@@ -59,12 +59,41 @@ export class RevenueCatProvider implements PurchasesProvider {
   async purchase(plan: PaidPlan): Promise<boolean> {
     const pkg = await this.findPackage(plan);
     if (!pkg) throw new Error('plan-unavailable');
-    const result = await this.rc().purchasePackage(pkg);
-    return Boolean(result.customerInfo.entitlements.active[ENTITLEMENT_ID]);
+    try {
+      const result = await this.rc().purchasePackage(pkg);
+      // QUALQUER entitlement ativo conta como premium (o app tem um único
+      // nível). Assim não dependemos do identificador exato configurado no
+      // RevenueCat — era a causa de "comprou na Apple mas o app não liberou".
+      return Object.keys(result.customerInfo.entitlements.active).length > 0;
+    } catch (e) {
+      // O SDK lança com userCancelled (fechou a folha de pagamento) e um
+      // readableErrorCode legível (ex.: PurchaseNotAllowedError,
+      // ProductNotAvailableForPurchaseError, StoreProblemError). Repassa o
+      // motivo REAL para aparecer na tela — sem isso, todo erro vira genérico.
+      const err = e as {
+        userCancelled?: boolean;
+        readableErrorCode?: string;
+        code?: string | number;
+        message?: string;
+        underlyingErrorMessage?: string;
+      };
+      if (err.userCancelled) throw new Error('cancelled');
+      const label = err.readableErrorCode || String(err.code ?? 'erro');
+      const extra = err.underlyingErrorMessage || err.message || '';
+      throw new Error(extra ? `${label}: ${extra}` : label);
+    }
   }
 
-  async restore(): Promise<boolean> {
+  /** Deduz o plano pela assinatura ativa (…annual/…year → anual; senão mensal). */
+  private planFrom(active: RcEntitlements['active']): PaidPlan | null {
+    const ent = Object.values(active)[0];
+    if (!ent) return null;
+    const pid = (ent.productIdentifier ?? '').toLowerCase();
+    return pid.includes('annual') || pid.includes('year') ? 'annual' : 'monthly';
+  }
+
+  async restore(): Promise<PaidPlan | null> {
     const info = await this.rc().restorePurchases();
-    return Boolean(info.entitlements.active[ENTITLEMENT_ID]);
+    return this.planFrom(info.entitlements.active);
   }
 }

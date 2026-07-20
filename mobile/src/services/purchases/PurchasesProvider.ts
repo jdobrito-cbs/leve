@@ -12,8 +12,8 @@ export interface PurchasesProvider {
   getPrices(): Promise<PlanPrices>;
   /** true se a compra foi concluída. */
   purchase(plan: PaidPlan): Promise<boolean>;
-  /** true se encontrou uma assinatura ativa para restaurar. */
-  restore(): Promise<boolean>;
+  /** Plano da assinatura restaurada, ou null se não havia nada para restaurar. */
+  restore(): Promise<PaidPlan | null>;
 }
 
 /** Usado quando o app foi buildado sem as chaves da loja de assinaturas. */
@@ -26,8 +26,8 @@ class UnconfiguredPurchasesProvider implements PurchasesProvider {
     throw new Error('unconfigured');
   }
 
-  async restore(): Promise<boolean> {
-    return false;
+  async restore(): Promise<PaidPlan | null> {
+    return null;
   }
 }
 

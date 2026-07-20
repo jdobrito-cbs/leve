@@ -58,8 +58,13 @@ export function PremiumScreen() {
       } else {
         setMessage({ text: strings.premium.purchaseFailed, ok: false });
       }
-    } catch {
-      setMessage({ text: strings.premium.purchaseFailed, ok: false });
+    } catch (e) {
+      const detail = e instanceof Error ? e.message : String(e);
+      // Usuário fechou a folha de pagamento: não é erro, não mostra nada.
+      if (detail !== 'cancelled') {
+        // Mostra o motivo real da loja entre parênteses (diagnóstico).
+        setMessage({ text: `${strings.premium.purchaseFailed} (${detail})`, ok: false });
+      }
     } finally {
       setBusy(false);
     }
@@ -73,8 +78,9 @@ export function PremiumScreen() {
     }
     setBusy(true);
     try {
-      if (await getPurchasesProvider().restore()) {
-        await setEntitlement(db, { plan: 'annual', activatedAt: new Date().toISOString() });
+      const restoredPlan = await getPurchasesProvider().restore();
+      if (restoredPlan) {
+        await setEntitlement(db, { plan: restoredPlan, activatedAt: new Date().toISOString() });
         await refresh();
         setMessage({ text: strings.premium.restored, ok: true });
       } else {
