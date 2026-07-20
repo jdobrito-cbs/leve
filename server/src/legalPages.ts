@@ -27,6 +27,8 @@ function renderLegalDoc(doc: LegalDoc): string {
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>${esc(doc.title)} · Leve</title>
+<link rel="icon" type="image/png" href="/favicon.png"/>
+<link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
 <style>
   :root { --blue:#2563EB; --ink:#0F172A; --muted:#64748B; --line:#E2E8F0; --bg:#FFFFFF; }
   @media (prefers-color-scheme: dark) {

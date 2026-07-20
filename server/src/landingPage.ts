@@ -9,6 +9,8 @@ export const LANDING_PAGE_HTML = `<!DOCTYPE html>
 <head>
 <meta charset="utf-8"/>
 <title>Leve — Seu diário de saúde</title>
+<link rel="icon" type="image/png" href="/favicon.png"/>
+<link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="description" content="O Leve organiza seu dia a dia de saúde no tratamento GLP-1: água, refeições com a tabela TACO, peso, doses e saúde do relógio — em 12 idiomas, com tudo no seu aparelho."/>
 <style>

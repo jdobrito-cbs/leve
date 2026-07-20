@@ -25,6 +25,7 @@ function safeEqual(a: string, b: string): boolean {
 const DUMMY_PASSWORD_HASH = hashPassword('leve-dummy-password-for-timing');
 import { ADMIN_PAGE_HTML } from './adminPage.js';
 import { LANDING_PAGE_HTML } from './landingPage.js';
+import { APPLE_ICON_PNG, FAVICON_PNG } from './siteAssets.js';
 import { MEDICAL_PAGE_HTML, PRIVACY_PAGE_HTML, TERMS_PAGE_HTML } from './legalPages.js';
 import {
   buildFoodInfoBody,
@@ -228,6 +229,13 @@ export async function buildServer(options: ServerOptions) {
   await app.register(rateLimit, { max: 120, timeWindow: '1 minute' });
 
   app.get('/health', async () => ({ ok: true, accounts: Boolean(store) }));
+
+  // Ícones do site (logotipo do app na aba do navegador e em favoritos).
+  const pngRoute = (bytes: Buffer) => async (_req: FastifyRequest, reply: FastifyReply) =>
+    reply.type('image/png').header('cache-control', 'public, max-age=86400').send(bytes);
+  app.get('/favicon.png', pngRoute(FAVICON_PNG));
+  app.get('/favicon.ico', pngRoute(FAVICON_PNG)); // navegadores pedem por padrão
+  app.get('/apple-touch-icon.png', pngRoute(APPLE_ICON_PNG));
 
   // Raiz do domínio: landing do produto para quem chega pelo site.
   app.get('/', async (_req, reply) => {
@@ -754,8 +762,8 @@ export async function buildServer(options: ServerOptions) {
       app.get('/partner-keys', async (req, reply) => {
         if (!(await requireAdmin(req, reply))) return;
         const keys = await partnerStore.listPartnerKeys();
-        // Nunca devolve o hash nem o id do aparelho — só metadados de exibição.
-        return keys.map(({ id, label, hint, createdAt, revokedAt, boundDeviceId, boundAt }) => ({
+        // Nunca devolve o hash, a cifra nem o id do aparelho — só exibição.
+        return keys.map(({ id, label, hint, createdAt, revokedAt, boundDeviceId, boundAt, keyEnc }) => ({
           id,
           label,
           hint,
@@ -763,6 +771,7 @@ export async function buildServer(options: ServerOptions) {
           revokedAt,
           bound: Boolean(boundDeviceId),
           boundAt,
+          canReveal: Boolean(keyEnc) && !revokedAt,
         }));
       });
 
@@ -775,9 +784,26 @@ export async function buildServer(options: ServerOptions) {
           parsed.data.label,
           hashPartnerKey(key),
           partnerKeyHint(key),
+          // Cifrada em repouso: o painel pode reexibir a chave sob demanda.
+          encryptSecret(key, encKey),
         );
-        // Única resposta que contém o código completo.
         return { id: record.id, label: record.label, key, createdAt: record.createdAt };
+      });
+
+      // Reexibe o código completo (o hash não volta; a cifra é decifrada aqui).
+      app.get('/partner-keys/:id/reveal', async (req, reply) => {
+        if (!(await requireAdmin(req, reply))) return;
+        const { id } = req.params as { id: string };
+        const record = (await partnerStore.listPartnerKeys()).find((k) => k.id === id);
+        if (!record) return reply.code(404).send({ error: 'chave não encontrada' });
+        if (record.revokedAt) return reply.code(410).send({ error: 'chave revogada' });
+        const key = record.keyEnc ? decryptSecret(record.keyEnc, encKey) : null;
+        if (!key) {
+          return reply
+            .code(404)
+            .send({ error: 'esta chave não pode ser reexibida (emitida antes do recurso)' });
+        }
+        return { id: record.id, label: record.label, key };
       });
 
       app.post('/partner-keys/:id/revoke', async (req, reply) => {

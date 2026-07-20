@@ -26,7 +26,12 @@ export class FilePartnerKeyStore implements PartnerKeyStore {
     renameSync(tmp, this.path);
   }
 
-  async createPartnerKey(label: string, keyHash: string, hint: string): Promise<PartnerKeyRecord> {
+  async createPartnerKey(
+    label: string,
+    keyHash: string,
+    hint: string,
+    keyEnc: string | null = null,
+  ): Promise<PartnerKeyRecord> {
     const all = this.load();
     const record: PartnerKeyRecord = {
       id: randomUUID(),
@@ -37,6 +42,7 @@ export class FilePartnerKeyStore implements PartnerKeyStore {
       revokedAt: null,
       boundDeviceId: null,
       boundAt: null,
+      keyEnc,
     };
     all.push(record);
     this.save(all);
@@ -48,10 +54,15 @@ export class FilePartnerKeyStore implements PartnerKeyStore {
   }
 
   async findPartnerKeyByHash(keyHash: string): Promise<PartnerKeyRecord | null> {
-    // Compatível com arquivos antigos sem os campos de vínculo.
+    // Compatível com arquivos antigos sem os campos novos.
     const found = this.load().find((k) => k.keyHash === keyHash);
     if (!found) return null;
-    return { ...found, boundDeviceId: found.boundDeviceId ?? null, boundAt: found.boundAt ?? null };
+    return {
+      ...found,
+      boundDeviceId: found.boundDeviceId ?? null,
+      boundAt: found.boundAt ?? null,
+      keyEnc: found.keyEnc ?? null,
+    };
   }
 
   async revokePartnerKey(id: string): Promise<boolean> {

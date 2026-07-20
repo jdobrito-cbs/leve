@@ -25,11 +25,19 @@ export interface PartnerKeyRecord {
   revokedAt: string | null;
   boundDeviceId: string | null; // aparelho que resgatou a chave (trava de 1 aparelho)
   boundAt: string | null;
+  /** Chave completa cifrada (AES-GCM, chave derivada do ADMIN_TOKEN) — permite
+   *  o dono rever o código no painel. null em registros antigos. */
+  keyEnc: string | null;
 }
 
 /** Armazenamento das chaves de parceiro emitidas pelo servidor. */
 export interface PartnerKeyStore {
-  createPartnerKey(label: string, keyHash: string, hint: string): Promise<PartnerKeyRecord>;
+  createPartnerKey(
+    label: string,
+    keyHash: string,
+    hint: string,
+    keyEnc?: string | null,
+  ): Promise<PartnerKeyRecord>;
   listPartnerKeys(): Promise<PartnerKeyRecord[]>;
   findPartnerKeyByHash(keyHash: string): Promise<PartnerKeyRecord | null>;
   revokePartnerKey(id: string): Promise<boolean>;
@@ -105,7 +113,12 @@ export class MemoryStore implements Store, PartnerKeyStore, AdminStore {
   private partnerKeys = new Map<string, PartnerKeyRecord>();
   private pkSeq = 0;
 
-  async createPartnerKey(label: string, keyHash: string, hint: string): Promise<PartnerKeyRecord> {
+  async createPartnerKey(
+    label: string,
+    keyHash: string,
+    hint: string,
+    keyEnc: string | null = null,
+  ): Promise<PartnerKeyRecord> {
     const record: PartnerKeyRecord = {
       id: `pk${++this.pkSeq}`,
       keyHash,
@@ -115,6 +128,7 @@ export class MemoryStore implements Store, PartnerKeyStore, AdminStore {
       revokedAt: null,
       boundDeviceId: null,
       boundAt: null,
+      keyEnc,
     };
     this.partnerKeys.set(record.id, record);
     return record;

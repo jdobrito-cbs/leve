@@ -86,6 +86,54 @@ describe('rotas de chaves de parceiro', () => {
     expect(rows[0].keyHash).toBeUndefined();
   });
 
+  it('reexibe a chave criada (cifrada em repouso) e nega sem autorização', async () => {
+    const app = await makeApp();
+    const created = await app.inject({
+      method: 'POST',
+      url: '/partner-keys',
+      headers: adminHeaders,
+      payload: { label: 'Dra. Ana' },
+    });
+    const { id, key } = created.json() as { id: string; key: string };
+
+    // A lista informa que dá para reexibir.
+    const list = await app.inject({ method: 'GET', url: '/partner-keys', headers: adminHeaders });
+    expect((list.json() as Array<{ canReveal: boolean }>)[0].canReveal).toBe(true);
+
+    // Sem autorização, nada.
+    const anon = await app.inject({ method: 'GET', url: `/partner-keys/${id}/reveal` });
+    expect(anon.statusCode).toBe(401);
+
+    // Autorizado, devolve exatamente o código emitido.
+    const reveal = await app.inject({
+      method: 'GET',
+      url: `/partner-keys/${id}/reveal`,
+      headers: adminHeaders,
+    });
+    expect(reveal.statusCode).toBe(200);
+    expect(reveal.json()).toEqual({ id, label: 'Dra. Ana', key });
+
+    // Revogada não volta mais.
+    await app.inject({ method: 'POST', url: `/partner-keys/${id}/revoke`, headers: adminHeaders });
+    const gone = await app.inject({
+      method: 'GET',
+      url: `/partner-keys/${id}/reveal`,
+      headers: adminHeaders,
+    });
+    expect(gone.statusCode).toBe(410);
+  });
+
+  it('serve o favicon (logotipo do app) para a aba do navegador', async () => {
+    const app = await makeApp();
+    for (const url of ['/favicon.png', '/favicon.ico', '/apple-touch-icon.png']) {
+      const res = await app.inject({ method: 'GET', url });
+      expect(res.statusCode).toBe(200);
+      expect(res.headers['content-type']).toBe('image/png');
+      // Assinatura PNG (\x89PNG) — garante que o binário chegou íntegro.
+      expect(res.rawPayload.subarray(1, 4).toString('ascii')).toBe('PNG');
+    }
+  });
+
   it('chave desconhecida é inválida e o painel /admin responde HTML', async () => {
     const app = await makeApp();
     const unknown = await app.inject({

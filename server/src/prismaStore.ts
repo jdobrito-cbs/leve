@@ -24,6 +24,7 @@ export class PrismaStore implements Store, PartnerKeyStore, AdminStore {
     revokedAt: Date | null;
     boundDeviceId: string | null;
     boundAt: Date | null;
+    keyEnc: string | null;
   }): PartnerKeyRecord {
     return {
       id: k.id,
@@ -34,11 +35,17 @@ export class PrismaStore implements Store, PartnerKeyStore, AdminStore {
       revokedAt: k.revokedAt ? k.revokedAt.toISOString() : null,
       boundDeviceId: k.boundDeviceId,
       boundAt: k.boundAt ? k.boundAt.toISOString() : null,
+      keyEnc: k.keyEnc,
     };
   }
 
-  async createPartnerKey(label: string, keyHash: string, hint: string): Promise<PartnerKeyRecord> {
-    const k = await this.prisma.partnerKey.create({ data: { label, keyHash, hint } });
+  async createPartnerKey(
+    label: string,
+    keyHash: string,
+    hint: string,
+    keyEnc: string | null = null,
+  ): Promise<PartnerKeyRecord> {
+    const k = await this.prisma.partnerKey.create({ data: { label, keyHash, hint, keyEnc } });
     return this.toPartnerRecord(k);
   }
   async listPartnerKeys(): Promise<PartnerKeyRecord[]> {

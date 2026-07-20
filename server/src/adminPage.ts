@@ -9,6 +9,8 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Leve · Painel de parceiros</title>
+<link rel="icon" type="image/png" href="/favicon.png"/>
+<link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
 <style>
   :root{
     --bg:#090E17; --bg2:#0C1320; --surface:#131C2B; --surface2:#182338;
@@ -98,6 +100,12 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
     background:var(--blue);color:#fff;font-size:11px;font-weight:800;display:grid;place-items:center}
   footer{color:var(--faint);font-size:12px;text-align:center;margin-top:24px}
   .hidden{display:none!important}
+  .modalbg{position:fixed;inset:0;background:rgba(3,6,12,.62);backdrop-filter:blur(3px);
+    display:grid;place-items:center;padding:20px;z-index:50}
+  .modal{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+    padding:22px;max-width:420px;width:100%}
+  .modal h2{margin-bottom:4px}
+  .modal .muted{margin-bottom:4px}
 </style>
 </head>
 <body>
@@ -263,6 +271,19 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
     </div>
 
     <footer>Área restrita · levemobile.com.br/painel</footer>
+
+    <div id="kv-modal" class="modalbg hidden">
+      <div class="modal">
+        <h2>Chave do parceiro</h2>
+        <div class="muted" id="kv-label"></div>
+        <div class="newkey" id="kv-key"></div>
+        <div class="hintnote">Envie ao parceiro por um canal seguro.</div>
+        <div class="row" style="margin-top:14px">
+          <button class="btn" id="kv-copy" style="flex:1">Copiar</button>
+          <button class="btn ghost" id="kv-close" style="flex:1">Fechar</button>
+        </div>
+      </div>
+    </div>
   </div>
 
 <script>
@@ -395,6 +416,7 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
         var dev=k.revokedAt?'—':(k.bound?'<span class="badge bound">vinculada</span>':'<span class="badge free">livre</span>');
         var act='';
         if(!k.revokedAt){
+          if(k.canReveal)act+='<button class="btn ghost mini" data-act="reveal" data-id="'+esc(k.id)+'">Ver</button>';
           if(k.bound)act+='<button class="btn ghost mini" data-act="unbind" data-id="'+esc(k.id)+'">Desvincular</button>';
           act+='<button class="btn danger" data-act="revoke" data-id="'+esc(k.id)+'">Revogar</button>';
         }
@@ -424,6 +446,28 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
     }else if(act==='unbind'){
       if(!confirm('Desvincular do aparelho atual? O parceiro poderá usar a chave em outro dispositivo.'))return;
       api('/partner-keys/'+id+'/unbind','POST').then(loadKeys);
+    }else if(act==='reveal'){
+      api('/partner-keys/'+id+'/reveal').then(function(r){
+        if(!r.ok){alert((r.json&&r.json.error)||'não foi possível exibir');return;}
+        $('kv-label').textContent='Chave de '+r.json.label;
+        $('kv-key').textContent=r.json.key;
+        $('kv-modal').classList.remove('hidden');
+      });
+    }
+  });
+
+  $('kv-close').addEventListener('click',function(){$('kv-modal').classList.add('hidden');});
+  $('kv-modal').addEventListener('click',function(e){if(e.target===$('kv-modal'))$('kv-modal').classList.add('hidden');});
+  $('kv-copy').addEventListener('click',function(){
+    var key=$('kv-key').textContent||'';
+    function done(){$('kv-copy').textContent='Copiado ✓';setTimeout(function(){$('kv-copy').textContent='Copiar';},1600);}
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(key).then(done,function(){fallback();});
+    }else{fallback();}
+    function fallback(){
+      var sel=window.getSelection(),range=document.createRange();
+      range.selectNodeContents($('kv-key'));sel.removeAllRanges();sel.addRange(range);
+      try{document.execCommand('copy');done();}catch(err){alert('selecione o código e copie manualmente');}
     }
   });
 
