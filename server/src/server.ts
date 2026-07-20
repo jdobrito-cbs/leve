@@ -822,6 +822,17 @@ export async function buildServer(options: ServerOptions) {
         if (!done) return reply.code(404).send({ error: 'chave não encontrada ou já livre' });
         return { ok: true };
       });
+
+      // Limpeza do painel: apaga da lista uma chave JÁ revogada.
+      app.delete('/partner-keys/:id', async (req, reply) => {
+        if (!(await requireAdmin(req, reply))) return;
+        const { id } = req.params as { id: string };
+        const done = await partnerStore.deletePartnerKey(id);
+        if (!done) {
+          return reply.code(404).send({ error: 'chave não encontrada ou ainda ativa (revogue antes)' });
+        }
+        return { ok: true };
+      });
     }
   }
 

@@ -45,6 +45,8 @@ export interface PartnerKeyStore {
   bindPartnerKey(id: string, deviceId: string): Promise<boolean>;
   /** Solta a chave (o parceiro pode revincular em outro aparelho). */
   unbindPartnerKey(id: string): Promise<boolean>;
+  /** Apaga da lista — só chaves JÁ revogadas (limpeza do painel). */
+  deletePartnerKey(id: string): Promise<boolean>;
 }
 
 export type AdminRole = 'master' | 'admin';
@@ -158,6 +160,11 @@ export class MemoryStore implements Store, PartnerKeyStore, AdminStore {
     record.boundDeviceId = null;
     record.boundAt = null;
     return true;
+  }
+  async deletePartnerKey(id: string) {
+    const record = this.partnerKeys.get(id);
+    if (!record || !record.revokedAt) return false;
+    return this.partnerKeys.delete(id);
   }
 
   private admins = new Map<string, AdminRecord>();

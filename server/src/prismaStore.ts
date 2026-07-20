@@ -78,6 +78,13 @@ export class PrismaStore implements Store, PartnerKeyStore, AdminStore {
     });
     return updated.count > 0;
   }
+  async deletePartnerKey(id: string): Promise<boolean> {
+    // Só apaga se já estiver revogada (limpeza; a revogação é o passo de corte).
+    const deleted = await this.prisma.partnerKey.deleteMany({
+      where: { id, NOT: { revokedAt: null } },
+    });
+    return deleted.count > 0;
+  }
 
   private toAdminRecord(a: {
     id: string;

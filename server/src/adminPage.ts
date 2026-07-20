@@ -419,6 +419,8 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
           if(k.canReveal)act+='<button class="btn ghost mini" data-act="reveal" data-id="'+esc(k.id)+'">Ver</button>';
           if(k.bound)act+='<button class="btn ghost mini" data-act="unbind" data-id="'+esc(k.id)+'">Desvincular</button>';
           act+='<button class="btn danger" data-act="revoke" data-id="'+esc(k.id)+'">Revogar</button>';
+        }else{
+          act+='<button class="btn danger" data-act="del" data-id="'+esc(k.id)+'">Excluir</button>';
         }
         return '<tr><td>'+esc(k.label)+'</td><td class="mono">…'+esc(k.hint)+'</td><td class="mono">'+esc(fmt(k.createdAt))+
           '</td><td>'+sit+'</td><td>'+dev+'</td><td><div class="actions">'+act+'</div></td></tr>';
@@ -453,6 +455,9 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
         $('kv-key').textContent=r.json.key;
         $('kv-modal').classList.remove('hidden');
       });
+    }else if(act==='del'){
+      if(!confirm('Excluir esta chave revogada da lista? Isso é definitivo.'))return;
+      api('/partner-keys/'+id,'DELETE').then(loadKeys);
     }
   });
 

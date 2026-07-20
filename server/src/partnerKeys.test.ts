@@ -123,6 +123,40 @@ describe('rotas de chaves de parceiro', () => {
     expect(gone.statusCode).toBe(410);
   });
 
+  it('exclui da lista só depois de revogar (limpeza do painel)', async () => {
+    const app = await makeApp();
+    const created = await app.inject({
+      method: 'POST',
+      url: '/partner-keys',
+      headers: adminHeaders,
+      payload: { label: 'Parceiro Antigo' },
+    });
+    const { id } = created.json() as { id: string };
+
+    // Ativa não pode ser excluída direto (revogar é o passo de corte).
+    const active = await app.inject({
+      method: 'DELETE',
+      url: `/partner-keys/${id}`,
+      headers: adminHeaders,
+    });
+    expect(active.statusCode).toBe(404);
+
+    await app.inject({ method: 'POST', url: `/partner-keys/${id}/revoke`, headers: adminHeaders });
+    const deleted = await app.inject({
+      method: 'DELETE',
+      url: `/partner-keys/${id}`,
+      headers: adminHeaders,
+    });
+    expect(deleted.statusCode).toBe(200);
+
+    const list = await app.inject({ method: 'GET', url: '/partner-keys', headers: adminHeaders });
+    expect(list.json()).toEqual([]);
+
+    // Sem autorização, nada de excluir.
+    const anon = await app.inject({ method: 'DELETE', url: `/partner-keys/${id}` });
+    expect(anon.statusCode).toBe(401);
+  });
+
   it('serve o favicon (logotipo do app) para a aba do navegador', async () => {
     const app = await makeApp();
     for (const url of ['/favicon.png', '/favicon.ico', '/apple-touch-icon.png']) {

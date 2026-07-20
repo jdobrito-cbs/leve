@@ -93,4 +93,12 @@ export class FilePartnerKeyStore implements PartnerKeyStore {
     this.save(all);
     return true;
   }
+
+  async deletePartnerKey(id: string): Promise<boolean> {
+    const all = this.load();
+    const record = all.find((k) => k.id === id);
+    if (!record || !record.revokedAt) return false;
+    this.save(all.filter((k) => k.id !== id));
+    return true;
+  }
 }
