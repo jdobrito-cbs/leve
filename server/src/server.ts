@@ -84,27 +84,52 @@ const bodySchema = z.object({
 });
 
 async function chatCompletion(config: HubConfig, body: object, timeoutMs: number): Promise<string> {
-  const res = await fetch(`${config.baseUrl.replace(/\/$/, '')}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      authorization: `Bearer ${config.apiKey}`,
-    },
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(timeoutMs),
-  });
-  if (!res.ok) {
-    // O corpo do erro do provedor explica a causa (chave inválida, política de
-    // dados, modelo) — vai só para o LOG do servidor, nunca para o cliente.
-    const detail = (await res.text().catch(() => '')).slice(0, 300);
-    throw new Error(`upstream ${res.status}: ${detail}`);
+  let lastErr = 'upstream falhou';
+  // Uma repetição em erro transitório (limite de taxa / servidor do provedor
+  // sobrecarregado) — comum no nível gratuito. Timeout não repete (propaga).
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const res = await fetch(`${config.baseUrl.replace(/\/$/, '')}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${config.apiKey}`,
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+    if (res.ok) {
+      const json = (await res.json()) as {
+        choices?: Array<{ message?: { content?: string } }>;
+      };
+      const content = json.choices?.[0]?.message?.content;
+      if (content) return content;
+      lastErr = 'upstream sem conteúdo';
+    } else {
+      // O corpo do erro do provedor (chave/política/modelo) vai só para o LOG.
+      const detail = (await res.text().catch(() => '')).slice(0, 300);
+      lastErr = `upstream ${res.status}: ${detail}`;
+      if (attempt === 0 && (res.status === 429 || res.status >= 500)) {
+        await new Promise((r) => setTimeout(r, 800));
+        continue;
+      }
+    }
+    break;
   }
-  const json = (await res.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  const content = json.choices?.[0]?.message?.content;
-  if (!content) throw new Error('upstream sem conteúdo');
-  return content;
+  throw new Error(lastErr);
+}
+
+/** Motivo curto e seguro (sem segredos) para devolver ao cliente no erro 502. */
+function aiFailReason(msg: string): string {
+  const up = msg.match(/^upstream (\d+)/);
+  if (up) {
+    if (up[1] === '429') return 'limite de uso da IA (tente em instantes)';
+    if (up[1] === '401' || up[1] === '403') return 'chave da IA inválida';
+    if (up[1] === '400') return 'a IA recusou a imagem';
+    return `IA indisponível (${up[1]})`;
+  }
+  if (/sem conteúdo|JSON|resposta/i.test(msg)) return 'resposta inválida da IA';
+  if (/timeout|abort/i.test(msg)) return 'a IA demorou demais';
+  return 'falha na IA';
 }
 
 export function makeHubCaller(config: HubConfig): CallHub {
@@ -891,8 +916,11 @@ export async function buildServer(options: ServerOptions) {
         const result: ScanResult = parseHubContent(content);
         return result;
       } catch (e) {
-        console.warn('[scan-food] falha:', e instanceof Error ? e.message : e);
-        return reply.code(502).send({ error: 'não foi possível analisar a imagem agora' });
+        const msg = e instanceof Error ? e.message : String(e);
+        console.warn('[scan-food] falha:', msg);
+        return reply
+          .code(502)
+          .send({ error: 'não foi possível analisar a imagem agora', reason: aiFailReason(msg) });
       }
     },
   );
@@ -912,8 +940,11 @@ export async function buildServer(options: ServerOptions) {
         const result: FoodInfoResult = parseFoodInfoContent(content);
         return result;
       } catch (e) {
-        console.warn('[food-info] falha:', e instanceof Error ? e.message : e);
-        return reply.code(502).send({ error: 'não foi possível consultar agora' });
+        const msg = e instanceof Error ? e.message : String(e);
+        console.warn('[food-info] falha:', msg);
+        return reply
+          .code(502)
+          .send({ error: 'não foi possível consultar agora', reason: aiFailReason(msg) });
       }
     },
   );

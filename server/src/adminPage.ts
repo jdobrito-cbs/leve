@@ -600,7 +600,7 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
     if(!name){$('ia-text-out').textContent='digite um alimento';return;}
     $('ia-text-out').textContent='Consultando…';
     api('/food-info','POST',{name:name}).then(function(r){
-      if(!r.ok){$('ia-text-out').textContent='erro ('+((r.json&&r.json.error)||r.status)+')';return;}
+      if(!r.ok){$('ia-text-out').textContent='erro: '+((r.json&&(r.json.reason||r.json.error))||('status '+r.status));return;}
       var d=r.json||{};
       if(!d.found){$('ia-text-out').textContent='Alimento não reconhecido.';return;}
       $('ia-text-out').innerHTML='Por 100 '+esc(d.unit||'g')+': <b>'+esc(d.kcalPer100)+' kcal</b> · P '+esc(d.proteinG)+' · C '+esc(d.carbsG)+' · G '+esc(d.fatG)+' · Fibra '+esc(d.fiberG);
@@ -611,18 +611,34 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
     var f=$('ia-file').files&&$('ia-file').files[0];
     if(!f){$('ia-scan-out').textContent='escolha uma foto';return;}
     $('ia-scan-out').textContent='Analisando a foto… (alguns segundos)';
-    var reader=new FileReader();
-    reader.onload=function(){
-      var url=String(reader.result||''),comma=url.indexOf(',');
-      var b64=url.slice(comma+1),mime=(url.slice(5,comma).split(';')[0])||'image/jpeg';
+    function send(b64,mime){
       api('/scan-food','POST',{imageBase64:b64,mimeType:mime}).then(function(r){
-        if(!r.ok){$('ia-scan-out').textContent='erro ('+((r.json&&r.json.error)||r.status)+')';return;}
+        if(!r.ok){$('ia-scan-out').textContent='erro: '+((r.json&&(r.json.reason||r.json.error))||('status '+r.status));return;}
         var foods=(r.json&&r.json.foods)||[];
         if(!foods.length){$('ia-scan-out').textContent='Nenhum alimento identificado na foto.';return;}
         $('ia-scan-out').innerHTML=foods.map(function(fd){
           return '• '+esc(fd.name)+' — '+(fd.portionGrams!=null?esc(fd.portionGrams)+' g':'porção estimada')+' ('+Math.round((fd.confidence||0)*100)+'%)';
         }).join('<br>');
       });
+    }
+    var reader=new FileReader();
+    reader.onload=function(){
+      var dataUrl=String(reader.result||'');
+      function original(){var c=dataUrl.indexOf(',');send(dataUrl.slice(c+1),(dataUrl.slice(5,c).split(';')[0])||'image/jpeg');}
+      // Reduz para no máximo 1280px (como o app) antes de enviar.
+      var img=new Image();
+      img.onload=function(){
+        try{
+          var max=1280,w=img.width,h=img.height;
+          if(w>max||h>max){if(w>=h){h=Math.round(h*max/w);w=max;}else{w=Math.round(w*max/h);h=max;}}
+          var cv=document.createElement('canvas');cv.width=w;cv.height=h;
+          cv.getContext('2d').drawImage(img,0,0,w,h);
+          var out=cv.toDataURL('image/jpeg',0.7);
+          send(out.slice(out.indexOf(',')+1),'image/jpeg');
+        }catch(e){original();}
+      };
+      img.onerror=original;
+      img.src=dataUrl;
     };
     reader.readAsDataURL(f);
   });
