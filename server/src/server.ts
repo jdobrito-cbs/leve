@@ -139,6 +139,10 @@ export interface ServerOptions {
   /** Administradores do painel (login + 2FA); ausente = só o ADMIN_TOKEN. */
   adminStore?: AdminStore;
   adminToken?: string;
+  /** Ligue quando o servidor roda atrás de um proxy HTTPS (Caddy/Nginx):
+   *  o rate limit passa a ver o IP real do visitante (X-Forwarded-For) em vez
+   *  do IP do proxy — sem isto, todos dividiriam o mesmo limite. */
+  trustProxy?: boolean;
 }
 
 const partnerCreateSchema = z.object({ label: z.string().trim().min(1).max(120) });
@@ -183,7 +187,11 @@ const adminRecoverSchema = z.object({
 export async function buildServer(options: ServerOptions) {
   // Corpo pequeno por padrão (barra DoS de memória); só /scan-food e /backup
   // sobem o limite por rota. Sem log de corpo por privacidade.
-  const app = Fastify({ bodyLimit: 64 * 1024, logger: false });
+  const app = Fastify({
+    bodyLimit: 64 * 1024,
+    logger: false,
+    trustProxy: options.trustProxy ?? false,
+  });
   const { store, jwtSecret } = options;
 
   // Plugins registrados com await ANTES das rotas: o rate limit por rota depende

@@ -12,6 +12,7 @@ const {
   JWT_SECRET,
   ADMIN_TOKEN,
   DATA_DIR,
+  TRUST_PROXY,
 } = process.env;
 
 if (!HUB_BASE_URL || !HUB_API_KEY || !HUB_MODEL) {
@@ -63,6 +64,8 @@ async function main() {
     partnerStore,
     adminStore,
     adminToken: ADMIN_TOKEN || undefined,
+    // TRUST_PROXY=1 quando atrás de um proxy HTTPS (produção no domínio).
+    trustProxy: TRUST_PROXY === '1' || TRUST_PROXY === 'true',
   });
 
   const port = Number(PORT ?? 3333);

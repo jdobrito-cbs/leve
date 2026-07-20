@@ -3,15 +3,24 @@ services:
     build: .
     restart: unless-stopped
     ports:
-      - "3333:3333"
+      # Só a máquina local (o proxy HTTPS repassa); nada exposto direto à internet.
+      - "127.0.0.1:3333:3333"
     env_file:
       - .env
     environment:
       DATABASE_URL: postgresql://leve:${POSTGRES_PASSWORD:-leve}@postgres:5432/leve
+    volumes:
+      # Dados do modo arquivo (chaves/admins sem banco) sobrevivem a rebuilds.
+      - leve-data:/app/data
     depends_on:
       postgres:
         condition: service_healthy
     command: sh -c "npx prisma migrate deploy && node dist/index.js"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3333/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
   postgres:
     image: postgres:16-alpine
@@ -30,3 +39,4 @@ services:
 
 volumes:
   leve-pgdata:
+  leve-data:
