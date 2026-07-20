@@ -37,9 +37,8 @@ Legenda: [x] já pronto no código · [ ] ação sua (fora do código) · ⚙️
 
 ### 2b. Assinaturas (Leve Premium)
 - [ ] App Store Connect → Assinaturas → **grupo "Leve Premium"** com 2 produtos auto-renováveis:
-  - `leve.premium.monthly` — mensal (ex.: R$ 10,00)
-  - `leve.premium.annual` — anual (ex.: R$ 75,00)
-  - (preços finais você define; estes são sugestão)
+  - `leve.premium.monthly` — mensal (R$ 11,90)
+  - `leve.premium.annual` — anual (R$ 106,90)
 - [ ] Descrição e "display name" de cada assinatura + captura de tela da tela de assinatura (a Apple exige).
 - [ ] **App Store Small Business Program** — inscrever-se baixa a comissão de 30% → **15%** (não é automático) — developer.apple.com/app-store/small-business-program.
 - ⚙️ **RevenueCat**: criar o entitlement `premium`, vincular os 2 produtos e montar a offering padrão (pacotes MONTHLY e ANNUAL). Eu monto quando a conta existir.

@@ -322,7 +322,7 @@ export const LANDING_PAGE_HTML = `<!DOCTYPE html>
       <h3>Compare</h3>
       <div class="row"><span>Grátis</span><b>R$ 0</b></div>
       <div class="row"><span>Premium mensal</span><b>R$ 11,90/mês</b></div>
-      <div class="row"><span>Premium anual</span><b>R$ 107,10/ano</b></div>
+      <div class="row"><span>Premium anual</span><b>R$ 106,90/ano</b></div>
       <div class="row"><span>Economia no anual</span><b style="color:var(--green-ink)">~25%</b></div>
       <p style="color:var(--muted);font-size:13.5px;margin-top:4px">Cobrado pela App Store ou Google Play. Renova automaticamente até você cancelar.</p>
     </div>
@@ -392,9 +392,9 @@ export const LANDING_PAGE_HTML = `<!DOCTYPE html>
     function setPlan(m){
       tm.classList.toggle('on',m);ta.classList.toggle('on',!m);
       tm.setAttribute('aria-pressed',m);ta.setAttribute('aria-pressed',!m);
-      document.getElementById('pv').textContent=m?'R$ 11,90':'R$ 107,10';
+      document.getElementById('pv').textContent=m?'R$ 11,90':'R$ 106,90';
       document.getElementById('pp').textContent=m?' /mês':' /ano';
-      document.getElementById('per').textContent=m?'Renova todo mês, cancele quando quiser.':'Equivale a R$ 8,93/mês — cerca de 3 meses grátis.';
+      document.getElementById('per').textContent=m?'Renova todo mês, cancele quando quiser.':'Equivale a R$ 8,91/mês — cerca de 3 meses grátis.';
     }
     tm.addEventListener('click',function(){setPlan(true)});
     ta.addEventListener('click',function(){setPlan(false)});
