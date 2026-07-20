@@ -75,6 +75,7 @@ export const strings: Strings = {
     ofGoal: '的目标',
     cards: {
       kcal: '今日卡路里',
+      fiber: '今日纤维',
       nextDose: '下一剂',
       symptoms: '今日症状',
     },

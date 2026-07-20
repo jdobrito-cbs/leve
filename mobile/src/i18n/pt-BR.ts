@@ -75,6 +75,7 @@ const ptBR = {
     ofGoal: 'da meta',
     cards: {
       kcal: 'Calorias hoje',
+      fiber: 'Fibras hoje',
       nextDose: 'Próxima dose',
       symptoms: 'Sintomas hoje',
     },

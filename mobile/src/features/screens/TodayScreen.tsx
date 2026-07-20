@@ -4,7 +4,7 @@ import { Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LineChart } from 'react-native-gifted-charts';
-import { TrendingUp, Trophy } from 'lucide-react-native';
+import { TrendingUp, Trophy, Wheat } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { formatDateBR, formatDateTimeShort } from '@/core/datetime';
 import { AppText, Card, FitChart, IconChip, WaterRing } from '@/design/components';
@@ -100,6 +100,12 @@ function StatCard({
       </Pressable>
     </Animated.View>
   );
+}
+
+/** Ícone de fibra (trigo) com a cor do tema, no mesmo contrato dos logIcons. */
+function WheatIcon({ size = 20 }: { size?: number }) {
+  const { colors } = useTheme();
+  return <Wheat size={size} color={colors.primary} />;
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
@@ -300,6 +306,13 @@ export function TodayScreen() {
             Anim={UtensilsCrossIcon}
             label={strings.today.cards.kcal}
             value={`${fmt(summary.macros.kcal)} kcal`}
+            route="/log/refeicao"
+          />
+          <StatCard
+            index={2}
+            Anim={WheatIcon}
+            label={strings.today.cards.fiber}
+            value={`${fmt(summary.macros.fiberG, 1)} g`}
             route="/log/refeicao"
           />
           <StatCard

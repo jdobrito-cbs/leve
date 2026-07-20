@@ -120,6 +120,11 @@ function fmtKcal(v: number | null): string {
   return v !== null ? `${v.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} kcal` : '—';
 }
 
+/** Fibra formatada para as listas ("Fib 2,4 g"); null quando não há valor. */
+function fmtFiber(v: number | null | undefined): string | null {
+  return v != null ? `Fib ${v.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} g` : null;
+}
+
 export function MealScreen() {
   const { colors } = useTheme();
   const { premium } = usePremium();
@@ -207,6 +212,7 @@ export function MealScreen() {
   const portion = parseDecimalBR(portionStr);
   const manualGrams = parseDecimalBR(manualWeightStr);
   const plateKcal = plate.reduce((acc, i) => acc + (i.calories ?? 0), 0);
+  const plateFiber = plate.reduce((acc, i) => acc + (i.fiberG ?? 0), 0);
 
   function pushToPlate(item: PlateItem) {
     setPlate((p) => [...p, item]);
@@ -381,6 +387,7 @@ export function MealScreen() {
   }, [dayList]);
 
   const dayKcal = dayList.reduce((acc, f) => acc + (f.calories ?? 0), 0);
+  const dayFiber = dayList.reduce((acc, f) => acc + (f.fiberG ?? 0), 0);
 
   return (
     <Screen>
@@ -432,7 +439,8 @@ export function MealScreen() {
               <AppText variant="title">{selected.name}</AppText>
               <AppText variant="caption" muted>
                 {selected.calories ?? '—'} kcal · P {selected.proteinG ?? '—'} g · C{' '}
-                {selected.carbsG ?? '—'} g · G {selected.fatG ?? '—'} g (
+                {selected.carbsG ?? '—'} g · G {selected.fatG ?? '—'} g · Fib{' '}
+                {selected.fiberG ?? '—'} g (
                 {strings.meal.per100.replace('{unit}', selected.unit)})
               </AppText>
               <NumberField
@@ -453,7 +461,8 @@ export function MealScreen() {
                   {scaled(selected.calories, portion) ?? '—'} kcal · P{' '}
                   {scaled(selected.proteinG, portion) ?? '—'} g · C{' '}
                   {scaled(selected.carbsG, portion) ?? '—'} g · G{' '}
-                  {scaled(selected.fatG, portion) ?? '—'} g
+                  {scaled(selected.fatG, portion) ?? '—'} g · Fib{' '}
+                  {scaled(selected.fiberG, portion) ?? '—'} g
                 </AppText>
               ) : null}
               <Button
@@ -577,7 +586,8 @@ export function MealScreen() {
               {fmtKcal(scaled(manualBase.calories, manualGrams))} · P{' '}
               {scaled(manualBase.proteinG, manualGrams) ?? '—'} g · C{' '}
               {scaled(manualBase.carbsG, manualGrams) ?? '—'} g · G{' '}
-              {scaled(manualBase.fatG, manualGrams) ?? '—'} g
+              {scaled(manualBase.fatG, manualGrams) ?? '—'} g · Fib{' '}
+              {scaled(manualBase.fiberG, manualGrams) ?? '—'} g
             </AppText>
           ) : null}
           <Button
@@ -595,13 +605,18 @@ export function MealScreen() {
             <ListRow
               key={`${item.name}-${index}`}
               title={item.name}
-              subtitle={item.grams !== null ? `${item.grams} ${item.unit}` : undefined}
+              subtitle={
+                [item.grams !== null ? `${item.grams} ${item.unit}` : null, fmtFiber(item.fiberG)]
+                  .filter(Boolean)
+                  .join(' · ') || undefined
+              }
               right={fmtKcal(item.calories)}
               onDelete={() => setPlate((p) => p.filter((_, i) => i !== index))}
             />
           ))}
           <AppText>
             {strings.meal.plateTotal}: {fmtKcal(plateKcal)}
+            {plateFiber > 0 ? ` · ${fmtFiber(plateFiber)}` : ''}
           </AppText>
           <Button label={strings.meal.addToMeal} onPress={addPlateToMeal} disabled={!at} />
           <Input
@@ -655,7 +670,14 @@ export function MealScreen() {
                 <ListRow
                   key={f.id}
                   title={f.name}
-                  subtitle={f.portionGrams ? `${f.portionGrams} ${f.portionUnit ?? 'g'}` : undefined}
+                  subtitle={
+                    [
+                      f.portionGrams ? `${f.portionGrams} ${f.portionUnit ?? 'g'}` : null,
+                      fmtFiber(f.fiberG),
+                    ]
+                      .filter(Boolean)
+                      .join(' · ') || undefined
+                  }
                   right={f.calories !== null ? fmtKcal(f.calories) : undefined}
                   onDelete={async () => {
                     await deleteFoodLog(db, f.id);
@@ -667,6 +689,7 @@ export function MealScreen() {
           ))}
           <AppText muted style={{ marginTop: spacing.sm }}>
             {strings.meal.todayTotal}: {fmtKcal(dayKcal)}
+            {dayFiber > 0 ? ` · ${fmtFiber(dayFiber)}` : ''}
           </AppText>
         </Card>
       ) : null}
