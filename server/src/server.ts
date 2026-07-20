@@ -194,6 +194,20 @@ export async function buildServer(options: ServerOptions) {
   });
   const { store, jwtSecret } = options;
 
+  // POST sem corpo com content-type application/json não pode virar 400:
+  // navegadores enviam o cabeçalho por padrão e várias rotas do painel
+  // (2FA, revogar, sair) não têm corpo. Vazio → undefined; inválido → 400.
+  app.addContentTypeParser('application/json', { parseAs: 'string' }, (_req, body, done) => {
+    if (body === '' || body == null) return done(null, undefined);
+    try {
+      done(null, JSON.parse(body as string));
+    } catch {
+      const err = new Error('JSON inválido') as Error & { statusCode: number };
+      err.statusCode = 400;
+      done(err, undefined);
+    }
+  });
+
   // Plugins registrados com await ANTES das rotas: o rate limit por rota depende
   // do hook onRoute já estar instalado quando cada rota é adicionada.
   // Cabeçalhos de segurança (noSniff, frameguard, HSTS, Referrer-Policy) + CSP.

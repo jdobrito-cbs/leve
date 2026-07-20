@@ -101,6 +101,61 @@ describe('cookie de sessão: Secure acompanha o protocolo', () => {
   });
 });
 
+describe('POST sem corpo com cabeçalho JSON (como o navegador envia)', () => {
+  it('não vira 400: o 2FA responde com segredo e QR', async () => {
+    const app = await makeApp();
+    const { cookie } = await bootstrapMaster(app);
+    // Recria o cenário: fetch do painel com content-type e corpo vazio.
+    const fresh = await app.inject({
+      method: 'POST',
+      url: '/admin/setup',
+      payload: { adminToken: ADMIN_TOKEN, username: 'outro', password: 'senha-super-forte' },
+    });
+    expect(fresh.statusCode).toBe(409); // painel já configurado (sanidade)
+
+    const logout = await app.inject({
+      method: 'POST',
+      url: '/admin/logout',
+      headers: { cookie, 'content-type': 'application/json' },
+      payload: '',
+    });
+    expect(logout.statusCode).toBe(204);
+
+    const store2 = new MemoryStore();
+    const app2 = await buildServer({
+      callHub: hub,
+      partnerStore: store2,
+      adminStore: store2,
+      adminToken: ADMIN_TOKEN,
+    });
+    const master2 = await app2.inject({
+      method: 'POST',
+      url: '/admin/setup',
+      payload: { adminToken: ADMIN_TOKEN, username: 'jorge', password: 'senha-super-forte' },
+    });
+    const c2 = cookieOf(master2);
+    const enroll = await app2.inject({
+      method: 'POST',
+      url: '/admin/2fa/setup',
+      headers: { cookie: c2, 'content-type': 'application/json' },
+      payload: '',
+    });
+    expect(enroll.statusCode).toBe(200);
+    const body = enroll.json() as { secret: string; qr: string };
+    expect(body.secret).toMatch(/^[A-Z2-7]{32}$/);
+    expect(body.qr).toMatch(/^data:image\/gif;base64,/);
+
+    // JSON quebrado continua sendo recusado com 400.
+    const bad = await app2.inject({
+      method: 'POST',
+      url: '/admin/login',
+      headers: { 'content-type': 'application/json' },
+      payload: '{invalido',
+    });
+    expect(bad.statusCode).toBe(400);
+  });
+});
+
 describe('cadastro inicial e 2FA', () => {
   it('setup-state indica cadastro só até existir o master', async () => {
     const app = await makeApp();

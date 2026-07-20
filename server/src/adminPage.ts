@@ -287,9 +287,9 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
   function fmt(iso){var d=new Date(iso);return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
 
   function api(path,method,body){
-    return fetch(path,{method:method||'GET',credentials:'same-origin',
-      headers:{'content-type':'application/json'},
-      body:body?JSON.stringify(body):undefined}).then(function(r){
+    var opt={method:method||'GET',credentials:'same-origin'};
+    if(body){opt.headers={'content-type':'application/json'};opt.body=JSON.stringify(body);}
+    return fetch(path,opt).then(function(r){
         return r.text().then(function(t){var j=null;try{j=t?JSON.parse(t):null;}catch(e){}return {status:r.status,ok:r.ok,json:j};});
       }).catch(function(){
         return {status:0,ok:false,json:{error:'sem conexão com o servidor'}};
