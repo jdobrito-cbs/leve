@@ -4,7 +4,6 @@ import { Pressable, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { AppText, Card, IconChip, Screen } from '@/design/components';
 import {
-  BodyDanceIcon,
   CycleHeartIcon,
   NotesWritingIcon,
   PillRollIcon,
@@ -33,7 +32,6 @@ const baseItems = (): HubItem[] => [
   { Anim: SyringeInjectIcon, label: strings.log.dose, route: '/log/dose' },
   { Anim: WeightDropIcon, label: strings.log.weight, route: '/log/peso' },
   { Anim: NotesWritingIcon, label: strings.log.symptom, route: '/log/sintoma' },
-  { Anim: BodyDanceIcon, label: strings.log.bodyComp, route: '/log/corpo' },
   { Anim: PillRollIcon, label: strings.meds.title, route: '/remedios' },
   { Anim: StethoscopeSwingIcon, label: strings.appointments.title, route: '/consultas' },
 ];
