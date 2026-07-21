@@ -25,7 +25,7 @@ export async function describeMeal(text: string): Promise<FoodCandidate[]> {
   const url = describeUrl();
   if (!url || text.trim().length < 3) return [];
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 20_000);
+  const timer = setTimeout(() => controller.abort(), 35_000);
   try {
     const token = process.env.EXPO_PUBLIC_SCAN_TOKEN;
     const res = await fetch(url, {

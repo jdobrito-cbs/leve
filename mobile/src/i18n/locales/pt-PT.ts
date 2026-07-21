@@ -246,6 +246,7 @@ export const strings: Strings = {
     scanPick: 'O que encontrámos — qual destes é?',
     scanConfidence: 'confiança',
     scanFailed: 'Não foi possível analisar a fotografia agora. Tente novamente ou adicione manualmente.',
+    scanTimeout: 'A IA está a demorar mais que o normal. Tente novamente daqui a instantes ou adicione manualmente.',
     scanNoFood: 'Não identificámos alimentos na fotografia. Tente outro ângulo ou adicione manualmente.',
     scanPrivacy: 'A fotografia é enviada de forma segura apenas para identificar os alimentos e não é guardada.',
   },

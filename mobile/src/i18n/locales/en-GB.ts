@@ -246,6 +246,7 @@ export const strings: Strings = {
     scanPick: 'Here\'s what we found — which of these is it?',
     scanConfidence: 'confidence',
     scanFailed: 'We couldn\'t analyse the photo just now. Try again or add it manually.',
+    scanTimeout: 'The AI is taking longer than usual. Try again in a moment or add it manually.',
     scanNoFood: 'We didn\'t identify any food in the photo. Try another angle or add it manually.',
     scanPrivacy: 'The photo is sent securely only to identify the food and is not stored.',
   },

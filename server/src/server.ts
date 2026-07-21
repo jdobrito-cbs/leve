@@ -133,7 +133,7 @@ function aiFailReason(msg: string): string {
 
 export function makeHubCaller(config: HubConfig): CallHub {
   return (imageBase64, mimeType) =>
-    chatCompletion(config, buildHubBody(imageBase64, mimeType, config.model), 30_000);
+    chatCompletion(config, buildHubBody(imageBase64, mimeType, config.model), 45_000);
 }
 
 export type CallFoodHub = (name: string) => Promise<string>;

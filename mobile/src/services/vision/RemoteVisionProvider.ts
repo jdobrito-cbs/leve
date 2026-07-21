@@ -26,15 +26,35 @@ export class RemoteVisionProvider implements VisionProvider {
     const imageBase64 = await FileSystem.readAsStringAsync(photoUri, {
       encoding: FileSystem.EncodingType.Base64,
     });
-    const res = await fetch(this.endpoint, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        ...(this.appToken ? { 'x-leve-app': this.appToken } : {}),
-      },
-      body: JSON.stringify({ imageBase64, mimeType: 'image/jpeg' }),
-    });
-    if (!res.ok) throw new Error(strings.meal.scanFailed);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 60_000);
+    let res: Response;
+    try {
+      res = await fetch(this.endpoint, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          ...(this.appToken ? { 'x-leve-app': this.appToken } : {}),
+        },
+        body: JSON.stringify({ imageBase64, mimeType: 'image/jpeg' }),
+        signal: controller.signal,
+      });
+    } catch {
+      throw new Error(strings.meal.scanTimeout);
+    } finally {
+      clearTimeout(timer);
+    }
+    if (!res.ok) {
+      let reason = '';
+      try {
+        const body = (await res.json()) as { reason?: unknown };
+        if (typeof body.reason === 'string') reason = body.reason;
+      } catch {
+        reason = '';
+      }
+      if (/demor|tempo|esgot|timeout/i.test(reason)) throw new Error(strings.meal.scanTimeout);
+      throw new Error(strings.meal.scanFailed);
+    }
     const json = (await res.json()) as ScanResponse;
     const foods = json.foods ?? [];
     if (foods.length === 0) throw new Error(strings.meal.scanNoFood);

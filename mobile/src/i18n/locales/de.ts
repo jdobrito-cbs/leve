@@ -246,6 +246,7 @@ export const strings: Strings = {
     scanPick: 'Das haben wir gefunden — welches davon ist es?',
     scanConfidence: 'Sicherheit',
     scanFailed: 'Das Foto konnte gerade nicht analysiert werden. Versuchen Sie es erneut oder fügen Sie die Mahlzeit manuell hinzu.',
+    scanTimeout: 'Die KI braucht länger als gewöhnlich. Versuchen Sie es gleich noch einmal oder fügen Sie die Mahlzeit manuell hinzu.',
     scanNoFood: 'Auf dem Foto wurden keine Lebensmittel erkannt. Versuchen Sie einen anderen Winkel oder fügen Sie manuell hinzu.',
     scanPrivacy: 'Das Foto wird nur zur Erkennung der Lebensmittel sicher übertragen und nicht gespeichert.',
   },

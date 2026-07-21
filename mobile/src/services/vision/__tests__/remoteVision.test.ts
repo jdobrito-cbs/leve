@@ -51,3 +51,13 @@ test('erro do servidor e foto sem comida lançam mensagens neutras', async () =>
   mockFetch.mockResolvedValue({ ok: true, json: async () => ({ foods: [] }) });
   await expect(provider.recognizeFood('file://x.jpg')).rejects.toThrow(strings.meal.scanNoFood);
 });
+
+test('422 com motivo de demora vira mensagem de timeout', async () => {
+  mockFetch.mockResolvedValue({
+    ok: false,
+    status: 422,
+    json: async () => ({ error: 'x', reason: 'a IA demorou demais (tempo esgotado)' }),
+  });
+  const provider = new RemoteVisionProvider('https://levemobile.com.br/scan-food');
+  await expect(provider.recognizeFood('file://x.jpg')).rejects.toThrow(strings.meal.scanTimeout);
+});

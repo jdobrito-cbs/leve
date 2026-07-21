@@ -246,6 +246,7 @@ const ptBR = {
     scanPick: 'O que encontramos — qual destes é?',
     scanConfidence: 'confiança',
     scanFailed: 'Não foi possível analisar a foto agora. Tente de novo ou adicione manualmente.',
+    scanTimeout: 'A IA está demorando mais que o normal. Tente de novo em instantes ou adicione manualmente.',
     scanNoFood: 'Não identificamos alimentos na foto. Tente outro ângulo ou adicione manualmente.',
     scanPrivacy: 'A foto é enviada com segurança apenas para identificar os alimentos e não é armazenada.',
   },

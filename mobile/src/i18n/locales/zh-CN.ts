@@ -246,6 +246,7 @@ export const strings: Strings = {
     scanPick: '识别到以下结果——是其中哪一个？',
     scanConfidence: '置信度',
     scanFailed: '暂时无法分析照片。请重试或手动添加。',
+    scanTimeout: 'AI 分析用时比平常长。请稍后重试或手动添加。',
     scanNoFood: '未在照片中识别到食物。请换个角度再试或手动添加。',
     scanPrivacy: '照片仅会被安全传输用于识别食物，不会被存储。',
   },
