@@ -24,7 +24,7 @@ const SYSTEM_PROMPT = `Você identifica alimentos em fotos de refeições para u
 Responda SOMENTE com JSON válido no formato:
 {"foods":[{"name":"arroz branco cozido","portionGrams":150,"confidence":0.9,"unit":"g","kcalPer100":128,"proteinG":2.5,"carbsG":28,"fatG":0.2,"fiberG":1.6}]}
 - Até 5 alimentos, o mais provável primeiro; nomes simples (ex.: "arroz branco cozido").
-- portionGrams: estimativa da porção visível em gramas (número) ou null.
+- portionGrams: porção visível em gramas (número) ou null. Estime a ESCALA por referências na cena — talheres (garfo ~19 cm, colher de sopa), o prato (raso ~24 cm, fundo ~22 cm), a mão/dedos, uma moeda ou um copo (200 ml) — comparando o alimento a elas antes de dar o valor. Sem referência clara, use a porção típica do prato.
 - confidence: número de 0 a 1.
 - unit: "g" para sólidos, "ml" para líquidos.
 - kcalPer100, proteinG, carbsG, fatG, fiberG: valores POR 100 g/ml de tabelas brasileiras (TACO/TBCA) ou rótulos; NÃO invente, campo desconhecido = null.
