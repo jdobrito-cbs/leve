@@ -195,7 +195,7 @@ export const strings: Strings = {
   },
   meal: {
     title: 'Log meal',
-    searchTab: 'Search (TACO)',
+    searchTab: 'Search',
     manualTab: 'Manual',
     describe: {
       tab: 'Describe',
@@ -245,6 +245,7 @@ export const strings: Strings = {
     scanning: 'Analysing the photo…',
     scanPick: 'Here\'s what we found — which of these is it?',
     scanConfidence: 'confidence',
+    scanAddAll: 'Add all to plate',
     scanFailed: 'We couldn\'t analyse the photo just now. Try again or add it manually.',
     scanTimeout: 'The AI is taking longer than usual. Try again in a moment or add it manually.',
     scanNoFood: 'We didn\'t identify any food in the photo. Try another angle or add it manually.',

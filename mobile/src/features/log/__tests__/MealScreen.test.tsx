@@ -118,7 +118,6 @@ test('scan: foto → candidato → casa com TACO → prato → salva com origin 
   await fireEvent.press(getByText(strings.meal.scanTab));
   await fireEvent.press(getByText(strings.meal.scanGallery));
   await waitFor(() => getByText('feijão carioca'));
-  await fireEvent.press(getByText('feijão carioca'));
   await waitFor(() => getByDisplayValue('80'));
   await fireEvent.press(getByText(strings.meal.addToPlate));
   await waitFor(() => getByText(strings.meal.plateSection));
@@ -148,7 +147,6 @@ test('scan: sem base TACO, usa a nutrição da IA e calcula as calorias da porç
   await fireEvent.press(getByText(strings.meal.scanTab));
   await fireEvent.press(getByText(strings.meal.scanGallery));
   await waitFor(() => getByText('suco de graviola'));
-  await fireEvent.press(getByText('suco de graviola'));
   await waitFor(() => getByDisplayValue('200'));
   await fireEvent.press(getByText(strings.meal.addToPlate));
   await waitFor(() => getByText(strings.meal.plateSection));
@@ -176,7 +174,6 @@ test('descrever: texto → IA → candidato com porção editável → prato', a
   await fireEvent.changeText(getByPlaceholderText(strings.meal.describe.hint), '2 ovos fritos');
   await fireEvent.press(getByText(strings.meal.describe.button));
   await waitFor(() => getByText('ovo frito'));
-  await fireEvent.press(getByText('ovo frito'));
   await waitFor(() => getByDisplayValue('100'));
   await fireEvent.press(getByText(strings.meal.addToPlate));
   await waitFor(() => getByText(strings.meal.plateSection));
@@ -192,6 +189,26 @@ test('descrever: texto → IA → candidato com porção editável → prato', a
       }),
     ),
   );
+});
+
+test('scan: "adicionar todos" põe todos os itens do prato de uma vez', async () => {
+  mockSearch.mockResolvedValue([]);
+  mockRecognize.mockResolvedValue({
+    label: 'arroz',
+    confidence: 0.9,
+    candidates: [
+      { label: 'arroz', confidence: 0.9, portionGrams: 150, unit: 'g', kcalPer100: 130 },
+      { label: 'feijão', confidence: 0.8, portionGrams: 100, unit: 'g', kcalPer100: 76 },
+    ],
+  });
+  const { getByText } = await render(<MealScreen />);
+  await fireEvent.press(getByText(strings.meal.scanTab));
+  await fireEvent.press(getByText(strings.meal.scanGallery));
+  await waitFor(() => getByText(strings.meal.scanAddAll));
+  await fireEvent.press(getByText(strings.meal.scanAddAll));
+  await waitFor(() => getByText(strings.meal.plateSection));
+  await fireEvent.press(getByText(strings.meal.addToMeal));
+  await waitFor(() => expect(mockAddFood).toHaveBeenCalledTimes(2));
 });
 
 test('modo manual: peso digitado + base TACO calculam as calorias', async () => {

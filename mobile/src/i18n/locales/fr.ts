@@ -195,7 +195,7 @@ export const strings: Strings = {
   },
   meal: {
     title: 'Enregistrer un repas',
-    searchTab: 'Rechercher (TACO)',
+    searchTab: 'Rechercher',
     manualTab: 'Manuel',
     describe: {
       tab: 'Décrire',
@@ -245,6 +245,7 @@ export const strings: Strings = {
     scanning: 'Analyse de la photo…',
     scanPick: 'Voici ce que nous avons trouvé — lequel est-ce ?',
     scanConfidence: 'confiance',
+    scanAddAll: 'Tout ajouter à l\'assiette',
     scanFailed: 'Impossible d\'analyser la photo pour le moment. Réessayez ou ajoutez manuellement.',
     scanTimeout: 'L\'IA met plus de temps que d\'habitude. Réessayez dans un instant ou ajoutez manuellement.',
     scanNoFood: 'Aucun aliment identifié sur la photo. Essayez un autre angle ou ajoutez manuellement.',

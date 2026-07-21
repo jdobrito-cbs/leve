@@ -195,7 +195,7 @@ const ptBR = {
   },
   meal: {
     title: 'Registrar refeição',
-    searchTab: 'Buscar (TACO)',
+    searchTab: 'Buscar',
     manualTab: 'Manual',
     describe: {
       tab: 'Descrever',
@@ -245,6 +245,7 @@ const ptBR = {
     scanning: 'Analisando a foto…',
     scanPick: 'O que encontramos — qual destes é?',
     scanConfidence: 'confiança',
+    scanAddAll: 'Adicionar todos ao prato',
     scanFailed: 'Não foi possível analisar a foto agora. Tente de novo ou adicione manualmente.',
     scanTimeout: 'A IA está demorando mais que o normal. Tente de novo em instantes ou adicione manualmente.',
     scanNoFood: 'Não identificamos alimentos na foto. Tente outro ângulo ou adicione manualmente.',

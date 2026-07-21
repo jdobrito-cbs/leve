@@ -194,7 +194,7 @@ export const strings: Strings = {
   },
   meal: {
     title: 'تسجيل وجبة',
-    searchTab: 'بحث (TACO)',
+    searchTab: 'بحث',
     manualTab: 'يدوي',
     describe: {
       tab: 'وصف',
@@ -243,6 +243,7 @@ export const strings: Strings = {
     scanning: 'جارٍ تحليل الصورة…',
     scanPick: 'هذا ما وجدناه — أي منها هو؟',
     scanConfidence: 'الثقة',
+    scanAddAll: 'أضف الكل إلى الطبق',
     scanFailed: 'تعذّر تحليل الصورة الآن. حاول مجددًا أو أضف يدويًا.',
     scanTimeout: 'الذكاء الاصطناعي يستغرق وقتًا أطول من المعتاد. أعد المحاولة بعد قليل أو أضف يدويًا.',
     scanNoFood: 'لم نتعرف على أطعمة في الصورة. جرّب زاوية أخرى أو أضف يدويًا.',

@@ -76,11 +76,6 @@ function scaled(per100: number | null | undefined, portion: number): number | nu
     : Math.round(((per100 * portion) / 100) * 10) / 10;
 }
 
-function candidateKcal(c: FoodCandidate): number | null {
-  if (c.kcalPer100 == null || c.portionGrams == null) return null;
-  return scaled(c.kcalPer100, c.portionGrams);
-}
-
 function candidateToFoodItem(c: FoodCandidate): FoodItem {
   return {
     id: -1,
@@ -136,7 +131,7 @@ export function MealScreen() {
   const [scanning, setScanning] = useState(false);
   const [scanError, setScanError] = useState<string | null>(null);
   const [scanCandidates, setScanCandidates] = useState<FoodCandidate[]>([]);
-  const [fromScan, setFromScan] = useState(false);
+  const [candPortions, setCandPortions] = useState<Record<string, string>>({});
   const [describeText, setDescribeText] = useState('');
   const [describing, setDescribing] = useState(false);
   const [plate, setPlate] = useState<PlateItem[]>([]);
@@ -223,12 +218,11 @@ export function MealScreen() {
       carbsG: scaled(selected.carbsG, portion),
       fatG: scaled(selected.fatG, portion),
       fiberG: scaled(selected.fiberG, portion),
-      origin: fromScan ? 'scan' : 'manual',
+      origin: 'manual',
     });
     setSelected(null);
     setQuery('');
     setPortionStr('100');
-    setFromScan(false);
   }
 
   async function addManualToPlate() {
@@ -262,12 +256,11 @@ export function MealScreen() {
       carbsG: base ? scaled(base.carbsG, manualGrams) : null,
       fatG: base ? scaled(base.fatG, manualGrams) : null,
       fiberG: base ? scaled(base.fiberG, manualGrams) : null,
-      origin: fromScan ? 'scan' : 'manual',
+      origin: 'manual',
     });
     setManualName('');
     setManualWeightStr('');
     setManualUnit('g');
-    setFromScan(false);
   }
 
   async function addPlateToMeal() {
@@ -335,7 +328,7 @@ export function MealScreen() {
         { compress: 0.7, format: SaveFormat.JPEG },
       ).catch(() => null);
       const result = await getVisionProvider().recognizeFood(small?.uri ?? picked.assets[0].uri);
-      setScanCandidates(result.candidates);
+      showCandidates(result.candidates);
     } catch (e) {
       setScanError(e instanceof Error ? e.message : strings.meal.scanFailed);
     } finally {
@@ -343,23 +336,34 @@ export function MealScreen() {
     }
   }
 
-  async function chooseCandidate(candidate: FoodCandidate) {
-    setFromScan(true);
-    const portionText = String(Math.round(candidate.portionGrams ?? 100));
-    const matches = await searchFoods(db, candidate.label);
-    if (matches.length > 0) {
-      setSelected(matches[0]);
-      setPortionStr(portionText);
-      setMode('search');
-    } else if (candidate.kcalPer100 != null) {
-      setSelected(candidateToFoodItem(candidate));
-      setPortionStr(portionText);
-      setMode('search');
-    } else {
-      setManualName(candidate.label);
-      setManualWeightStr(portionText);
-      setMode('manual');
-    }
+  function showCandidates(cands: FoodCandidate[]) {
+    setScanCandidates(cands);
+    setCandPortions(
+      Object.fromEntries(cands.map((c) => [c.label, String(Math.round(c.portionGrams ?? 100))])),
+    );
+  }
+
+  async function addCandidateToPlate(c: FoodCandidate) {
+    const grams = parseDecimalBR(candPortions[c.label] ?? '');
+    if (grams === null || grams <= 0) return;
+    const matches = await searchFoods(db, c.label);
+    const base = matches[0] ?? candidateToFoodItem(c);
+    pushToPlate({
+      name: matches[0]?.name ?? c.label,
+      grams,
+      unit: matches[0]?.unit ?? c.unit ?? 'g',
+      calories: scaled(base.calories, grams),
+      proteinG: scaled(base.proteinG, grams),
+      carbsG: scaled(base.carbsG, grams),
+      fatG: scaled(base.fatG, grams),
+      fiberG: scaled(base.fiberG, grams),
+      origin: 'scan',
+    });
+    setScanCandidates((cs) => cs.filter((x) => x.label !== c.label));
+  }
+
+  async function addAllCandidates() {
+    for (const c of scanCandidates) await addCandidateToPlate(c);
   }
 
   async function interpretMeal() {
@@ -369,7 +373,7 @@ export function MealScreen() {
     try {
       const cands = await describeMeal(describeText);
       if (cands.length === 0) setScanError(strings.meal.describe.failed);
-      else setScanCandidates(cands);
+      else showCandidates(cands);
     } catch {
       setScanError(strings.meal.describe.failed);
     } finally {
@@ -380,26 +384,40 @@ export function MealScreen() {
   function candidatesList() {
     if (scanCandidates.length === 0) return null;
     return (
-      <View>
+      <View style={{ gap: spacing.sm }}>
         <AppText variant="title">{strings.meal.scanPick}</AppText>
         {scanCandidates.map((c) => {
-          const kcal = candidateKcal(c);
-          const subtitle = [
-            c.portionGrams ? `≈ ${Math.round(c.portionGrams)} ${c.unit ?? 'g'}` : null,
-            kcal != null ? `~${Math.round(kcal)} kcal` : null,
-          ]
-            .filter(Boolean)
-            .join(' · ');
+          const grams = parseDecimalBR(candPortions[c.label] ?? '');
+          const kcal =
+            c.kcalPer100 != null && grams !== null && grams > 0
+              ? scaled(c.kcalPer100, grams)
+              : null;
           return (
-            <ListRow
-              key={c.label}
-              title={c.label}
-              subtitle={subtitle || undefined}
-              right={`${Math.round(c.confidence * 100)}% ${strings.meal.scanConfidence}`}
-              onPress={() => chooseCandidate(c)}
-            />
+            <Card key={c.label} style={{ gap: spacing.sm }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                <AppText variant="title" style={{ flex: 1 }}>
+                  {c.label}
+                </AppText>
+                <AppText variant="caption" muted>
+                  {Math.round(c.confidence * 100)}% {strings.meal.scanConfidence}
+                </AppText>
+              </View>
+              <NumberField
+                label={strings.meal.portionLabel}
+                value={candPortions[c.label] ?? ''}
+                onChangeText={(t) => setCandPortions((p) => ({ ...p, [c.label]: t }))}
+                suffix={c.unit ?? 'g'}
+              />
+              {kcal != null ? (
+                <AppText variant="caption" muted>{`~${Math.round(kcal)} kcal`}</AppText>
+              ) : null}
+              <Button label={strings.meal.addToPlate} onPress={() => addCandidateToPlate(c)} />
+            </Card>
           );
         })}
+        {scanCandidates.length > 1 ? (
+          <Button label={strings.meal.scanAddAll} onPress={addAllCandidates} />
+        ) : null}
       </View>
     );
   }
