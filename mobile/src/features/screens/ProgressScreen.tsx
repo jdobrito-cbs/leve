@@ -292,6 +292,11 @@ export function ProgressScreen() {
             hideDataPoints={weightData.length > 20}
             dataPointsColor={colors.primary}
             dataPointsRadius={3.5}
+            areaChart
+            startFillColor={colors.primary}
+            startOpacity={0.16}
+            endFillColor={colors.primary}
+            endOpacity={0.01}
             yAxisTextStyle={{ color: colors.textMuted, fontSize: 11 }}
             xAxisColor={colors.border}
             yAxisColor={colors.border}

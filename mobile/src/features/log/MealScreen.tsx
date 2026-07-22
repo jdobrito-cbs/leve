@@ -2,7 +2,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 import { formatDateBR, formatTimeHM, localDayKey, parseDateTimeBR } from '@/core/datetime';
 import { parseDecimalBR } from '@/core/text';
 import type { FoodItem, FoodLog, LogOrigin, MealPeriod, PortionUnit } from '@/core/types';
@@ -22,7 +22,7 @@ import {
   Screen,
   SegmentedChips,
 } from '@/design/components';
-import { spacing } from '@/design/tokens';
+import { fonts, radius, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
 import { isLocked } from '@/features/premium/gates';
@@ -31,7 +31,7 @@ import { Dish, DishItemInput, deleteDish, listDishes, saveDish } from '@/db/dish
 import { searchFoods } from '@/db/foodItemsRepo';
 import { addFoodLog, deleteFoodLog, foodForDay } from '@/db/foodLogRepo';
 import { strings } from '@/i18n/pt-BR';
-import { Utensils } from 'lucide-react-native';
+import { Camera, PencilLine, Search, Type, Utensils } from 'lucide-react-native';
 
 type Mode = 'search' | 'manual' | 'scan' | 'describe';
 
@@ -39,19 +39,25 @@ interface PlateItem extends DishItemInput {
   origin: LogOrigin;
 }
 
-function modeOptions(scanLocked: boolean) {
-  const aiLabel = (label: string) =>
-    scanLocked ? `${label} · ${strings.premium.lockedTag}` : label;
-  return [
-    { value: 'search' as Mode, label: strings.meal.searchTab },
-    { value: 'manual' as Mode, label: strings.meal.manualTab },
-    ...(isDescribeConfigured()
-      ? [{ value: 'describe' as Mode, label: aiLabel(strings.meal.describe.tab) }]
-      : []),
-    ...(isScanConfigured()
-      ? [{ value: 'scan' as Mode, label: aiLabel(strings.meal.scanTab) }]
-      : []),
-  ];
+const MODE_META = [
+  { value: 'search' as Mode, Icon: Search, ai: false },
+  { value: 'manual' as Mode, Icon: PencilLine, ai: false },
+  { value: 'describe' as Mode, Icon: Type, ai: true },
+  { value: 'scan' as Mode, Icon: Camera, ai: true },
+];
+
+function modeLabel(v: Mode): string {
+  return v === 'search'
+    ? strings.meal.searchTab
+    : v === 'manual'
+      ? strings.meal.manualTab
+      : v === 'describe'
+        ? strings.meal.describe.tab
+        : strings.meal.scanTab;
+}
+
+function modeVisible(v: Mode): boolean {
+  return v === 'describe' ? isDescribeConfigured() : v === 'scan' ? isScanConfigured() : true;
 }
 
 const PERIOD_ORDER: MealPeriod[] = ['cafe', 'almoco', 'lanche', 'jantar', 'ceia'];
@@ -458,17 +464,52 @@ export function MealScreen() {
           onChangeTime={setTimeStr}
         />
       </Card>
-      <SegmentedChips
-        options={modeOptions(scanLocked)}
-        value={mode}
-        onChange={(v) => {
-          if ((v === 'scan' || v === 'describe') && scanLocked) {
-            router.push('/assinatura' as never);
-            return;
-          }
-          setMode(v);
-        }}
-      />
+      <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+        {MODE_META.filter((t) => modeVisible(t.value)).map((t) => {
+          const active = mode === t.value;
+          const locked = t.ai && scanLocked;
+          return (
+            <Pressable
+              key={t.value}
+              accessibilityRole="button"
+              style={{ flex: 1 }}
+              onPress={() => {
+                if (locked) {
+                  router.push('/assinatura' as never);
+                  return;
+                }
+                setMode(t.value);
+              }}
+            >
+              <View
+                style={{
+                  alignItems: 'center',
+                  gap: 4,
+                  paddingVertical: spacing.sm,
+                  borderRadius: radius.md,
+                  backgroundColor: active ? colors.primary : colors.surface,
+                  borderWidth: 1,
+                  borderColor: active ? colors.primary : colors.border,
+                  opacity: locked ? 0.6 : 1,
+                }}
+              >
+                <t.Icon size={18} color={active ? colors.onPrimary : colors.primary} />
+                <AppText
+                  variant="caption"
+                  numberOfLines={1}
+                  style={{
+                    color: active ? colors.onPrimary : colors.text,
+                    fontFamily: fonts.semibold,
+                    fontSize: 11,
+                  }}
+                >
+                  {modeLabel(t.value)}
+                </AppText>
+              </View>
+            </Pressable>
+          );
+        })}
+      </View>
 
       {mode === 'search' ? (
         <Card style={{ gap: spacing.md }}>

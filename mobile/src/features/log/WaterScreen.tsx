@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { Coffee, CupSoda, GlassWater, Milk } from 'lucide-react-native';
 import { parseDecimalBR } from '@/core/text';
-import { AppText, Button, Card, NumberField, Screen } from '@/design/components';
-import { spacing } from '@/design/tokens';
+import { AppText, Button, Card, IconChip, NumberField, Screen } from '@/design/components';
+import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
 import { addWater, waterTotalForDay } from '@/db/waterRepo';
@@ -12,8 +13,12 @@ import { getEffectiveWaterGoal } from '@/features/water/waterGoal';
 import { strings } from '@/i18n/pt-BR';
 import { displayToMl, formatVolume, volumeUnit } from '@/core/units';
 
-const quickOptions = () =>
-  [200, 300, 500].map((amount) => ({ amount, label: `+ ${formatVolume(amount)}` }));
+const QUICK = [
+  { amount: 100, Icon: CupSoda },
+  { amount: 200, Icon: GlassWater },
+  { amount: 500, Icon: Milk },
+  { amount: 1000, Icon: Coffee },
+];
 
 export function WaterScreen() {
   const { colors } = useTheme();
@@ -75,10 +80,22 @@ export function WaterScreen() {
         ) : null}
       </Card>
       <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-        {quickOptions().map((q) => (
-          <View key={q.amount} style={{ flex: 1 }}>
-            <Button label={q.label} onPress={() => add(q.amount)} />
-          </View>
+        {QUICK.map((q) => (
+          <Pressable
+            key={q.amount}
+            accessibilityRole="button"
+            style={{ flex: 1 }}
+            onPress={() => add(q.amount)}
+          >
+            <Card style={{ alignItems: 'center', gap: spacing.xs, paddingVertical: spacing.md }}>
+              <IconChip size={40}>
+                <q.Icon size={20} color={colors.primary} />
+              </IconChip>
+              <AppText variant="caption" style={{ fontFamily: fonts.semibold }} numberOfLines={1}>
+                + {formatVolume(q.amount)}
+              </AppText>
+            </Card>
+          </Pressable>
         ))}
       </View>
       <Card style={{ gap: spacing.md }}>
