@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
+import * as Location from 'expo-location';
 import { useKeepAwake } from 'expo-keep-awake';
 import { AppText, Button, Card, Screen, SegmentedChips } from '@/design/components';
 import { fonts, spacing } from '@/design/tokens';
@@ -27,8 +28,37 @@ function Stat({ label, value }: { label: string; value: string }) {
 export function RecordRunScreen() {
   const { colors } = useTheme();
   const [type, setType] = useState<WorkoutType>('run');
+  const [center, setCenter] = useState<{ lat: number; lng: number } | null>(null);
   const tracker = useRunTracker();
   useKeepAwake();
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const perm = await Location.getForegroundPermissionsAsync();
+        let granted = perm.status === 'granted';
+        if (!granted) {
+          const req = await Location.requestForegroundPermissionsAsync();
+          granted = req.status === 'granted';
+        }
+        if (!granted) return;
+        const known = await Location.getLastKnownPositionAsync();
+        if (active && known) {
+          setCenter({ lat: known.coords.latitude, lng: known.coords.longitude });
+        }
+        const pos = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+        if (active) setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      } catch {
+        if (active) setCenter(null);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const recording = tracker.status === 'recording';
   const paused = tracker.status === 'paused';
@@ -65,7 +95,7 @@ export function RecordRunScreen() {
       ) : null}
 
       <Card style={{ padding: 0, overflow: 'hidden', height: 280 }}>
-        <RouteMap points={tracker.points} style={{ flex: 1 }} />
+        <RouteMap points={tracker.points} center={center} style={{ flex: 1 }} />
       </Card>
 
       <Card style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
