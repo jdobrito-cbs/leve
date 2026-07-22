@@ -1,3 +1,4 @@
+import { numberLocale } from '@/i18n/engine';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -208,7 +209,7 @@ export function GymScreen() {
         />
         {kcal !== null ? (
           <AppText>
-            {strings.gym.estimateLabel}: ≈ {kcal.toLocaleString('pt-BR')} kcal
+            {strings.gym.estimateLabel}: ≈ {kcal.toLocaleString(numberLocale())} kcal
           </AppText>
         ) : null}
         <AppText variant="caption" muted>
@@ -225,7 +226,7 @@ export function GymScreen() {
       {todayKcal > 0 ? (
         <Card>
           <AppText variant="title">
-            {strings.gym.todayTotal}: {Math.round(todayKcal).toLocaleString('pt-BR')} kcal
+            {strings.gym.todayTotal}: {Math.round(todayKcal).toLocaleString(numberLocale())} kcal
           </AppText>
         </Card>
       ) : null}
@@ -240,7 +241,7 @@ export function GymScreen() {
                 strings.gym.exercises[log.exercise as GymExerciseKey] ?? log.exercise
               }
               subtitle={`${formatDateTimeLabel(log.loggedAt)} · ${detailLabel(log)}`}
-              right={`${Math.round(log.kcal).toLocaleString('pt-BR')} kcal`}
+              right={`${Math.round(log.kcal).toLocaleString(numberLocale())} kcal`}
               onDelete={async () => {
                 await deleteGymLog(db, log.id);
                 await load();

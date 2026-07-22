@@ -1,3 +1,4 @@
+import { numberLocale } from '@/i18n/engine';
 import { Ruler } from 'lucide-react-native';
 import { useState } from 'react';
 import { Keyboard, Pressable, View } from 'react-native';
@@ -43,7 +44,7 @@ export function RulerField({
   const [temp, setTemp] = useState(fallback);
 
   const fmt = (v: number) =>
-    v.toLocaleString('pt-BR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+    v.toLocaleString(numberLocale(), { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 
   function openSheet() {
     Keyboard.dismiss();

@@ -1,3 +1,4 @@
+import { numberLocale } from '@/i18n/engine';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   FlatList,
@@ -118,7 +119,7 @@ export function ValueRuler({
                       muted
                       style={{ position: 'absolute', top: 0, width: 48, textAlign: 'center' }}
                     >
-                      {round(min + i * step).toLocaleString('pt-BR')}
+                      {round(min + i * step).toLocaleString(numberLocale())}
                     </AppText>
                   ) : null}
                   <View

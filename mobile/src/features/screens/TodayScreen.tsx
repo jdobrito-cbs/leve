@@ -1,3 +1,4 @@
+import { numberLocale } from '@/i18n/engine';
 import { router } from 'expo-router';
 import { useEffect, useMemo, type ComponentType, type PropsWithChildren } from 'react';
 import { Pressable, ScrollView, View, useWindowDimensions } from 'react-native';
@@ -35,7 +36,7 @@ import { strings } from '@/i18n/pt-BR';
 import { formatVolume, mlToDisplay, volumeUnit } from '@/core/units';
 
 const fmt = (n: number, digits = 0) =>
-  n.toLocaleString('pt-BR', { maximumFractionDigits: digits });
+  n.toLocaleString(numberLocale(), { maximumFractionDigits: digits });
 
 function Box({
   index,

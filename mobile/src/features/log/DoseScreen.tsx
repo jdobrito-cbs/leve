@@ -1,3 +1,4 @@
+import { numberLocale } from '@/i18n/engine';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -117,7 +118,7 @@ export function DoseScreen() {
 
   function doseRowTitle(d: DoseLog): string {
     const label = strings.dose.medications[d.medication as MedKey] ?? d.medication;
-    return `${label} · ${d.doseMg.toLocaleString('pt-BR')} mg`;
+    return `${label} · ${d.doseMg.toLocaleString(numberLocale())} mg`;
   }
 
   return (

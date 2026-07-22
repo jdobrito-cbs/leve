@@ -1,3 +1,4 @@
+import { numberLocale } from '@/i18n/engine';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { View } from 'react-native';
@@ -14,7 +15,7 @@ import { estimateRelativeCurve } from '@/features/pk/pharmacokinetics';
 import { strings } from '@/i18n/pt-BR';
 
 const fmt = (n: number, digits = 0) =>
-  n.toLocaleString('pt-BR', { maximumFractionDigits: digits });
+  n.toLocaleString(numberLocale(), { maximumFractionDigits: digits });
 
 export function MedicationScreen() {
   const { colors } = useTheme();

@@ -1,3 +1,4 @@
+import { numberLocale } from '@/i18n/engine';
 import * as ImagePicker from 'expo-image-picker';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { router } from 'expo-router';
@@ -112,11 +113,11 @@ const UNIT_OPTIONS: { value: PortionUnit; label: string }[] = [
 ];
 
 function fmtKcal(v: number | null): string {
-  return v !== null ? `${v.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} kcal` : '—';
+  return v !== null ? `${v.toLocaleString(numberLocale(), { maximumFractionDigits: 0 })} kcal` : '—';
 }
 
 function fmtFiber(v: number | null | undefined): string | null {
-  return v != null ? `Fib ${v.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} g` : null;
+  return v != null ? `Fib ${v.toLocaleString(numberLocale(), { maximumFractionDigits: 1 })} g` : null;
 }
 
 export function MealScreen() {

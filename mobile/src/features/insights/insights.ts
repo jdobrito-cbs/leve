@@ -1,3 +1,4 @@
+import { numberLocale } from '@/i18n/engine';
 import { strings } from '@/i18n/pt-BR';
 
 export interface Insight {
@@ -30,7 +31,7 @@ function trend(points: Point[]): number | null {
 }
 
 const fmt = (n: number) =>
-  `${n >= 0 ? '+' : '−'}${Math.abs(n).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}`;
+  `${n >= 0 ? '+' : '−'}${Math.abs(n).toLocaleString(numberLocale(), { maximumFractionDigits: 1 })}`;
 
 export function buildInsights(input: InsightInput): Insight[] {
   const out: Insight[] = [];
@@ -67,7 +68,7 @@ export function buildInsights(input: InsightInput): Insight[] {
     out.push({
       id: 'sono-baixo',
       kind: 'atencao',
-      text: `${t.sleepLow} (média de ${avg(input.sleep7).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} h; referência geral: 7–9 h). ${t.talkToDoctor}`,
+      text: `${t.sleepLow} (média de ${avg(input.sleep7).toLocaleString(numberLocale(), { maximumFractionDigits: 1 })} h; referência geral: 7–9 h). ${t.talkToDoctor}`,
     });
   }
 

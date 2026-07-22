@@ -115,7 +115,7 @@ function BodyDataSection() {
                 {zone.label}
               </AppText>
               <AppText style={{ fontFamily: fonts.bold, fontSize: 18 }}>
-                {(g.value as number).toLocaleString('pt-BR', { maximumFractionDigits: g.digits })}
+                {(g.value as number).toLocaleString(numberLocale(), { maximumFractionDigits: g.digits })}
                 {g.unit ? ` ${g.unit}` : ''}
               </AppText>
             </View>
@@ -193,7 +193,7 @@ function BodyHealthSection({ metrics }: { metrics: MetricRow[] }) {
         });
         const zones = zones0 ? disp.zones : null;
         const shownValue = disp.value ?? metric.value;
-        const valueLabel = `${shownValue.toLocaleString('pt-BR', {
+        const valueLabel = `${shownValue.toLocaleString(numberLocale(), {
           maximumFractionDigits: 1,
         })} ${disp.unit}`.trim();
         if (!zones) {
@@ -363,7 +363,7 @@ export function ProgressScreen() {
           doses.map((d) => (
             <ListRow
               key={d.id}
-              title={`${d.medication} · ${d.doseMg.toLocaleString('pt-BR')} mg`}
+              title={`${d.medication} · ${d.doseMg.toLocaleString(numberLocale())} mg`}
               subtitle={
                 d.route === 'injecao' && d.injectionSite
                   ? `${strings.dose.routes.injecao} · ${strings.dose.sites[d.injectionSite as InjectionSite] ?? d.injectionSite}`

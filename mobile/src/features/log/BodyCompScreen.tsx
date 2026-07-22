@@ -1,3 +1,4 @@
+import { numberLocale } from '@/i18n/engine';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -144,7 +145,7 @@ export function BodyCompScreen() {
               key={m.id}
               title={strings.metrics[m.type]}
               subtitle={formatDateTimeLabel(m.loggedAt)}
-              right={`${toShown(m.unit, m.value).toLocaleString('pt-BR', {
+              right={`${toShown(m.unit, m.value).toLocaleString(numberLocale(), {
                 maximumFractionDigits: 1,
               })} ${displayUnitOf(m.unit)}`}
               onDelete={async () => {

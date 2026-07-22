@@ -1,3 +1,4 @@
+import { numberLocale } from '@/i18n/engine';
 import { useState } from 'react';
 import { View } from 'react-native';
 import { AppText } from './AppText';
@@ -16,7 +17,7 @@ interface Props {
 }
 
 const fmtN = (n: number, digits: number) =>
-  n.toLocaleString('pt-BR', { maximumFractionDigits: digits });
+  n.toLocaleString(numberLocale(), { maximumFractionDigits: digits });
 
 export function RangeGauge({ value, zones, digits = 1 }: Props) {
   const { colors } = useTheme();
