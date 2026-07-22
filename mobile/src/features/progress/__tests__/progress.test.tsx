@@ -47,9 +47,6 @@ jest.mock('../useProgressData', () => ({ useProgressData: () => mockData }));
 test('mostra seções e histórico de doses', async () => {
   const rendered = await render(<ProgressScreen />);
   const { getByText, getAllByText } = rendered;
-  getByText(strings.progress.pkSection);
-  getByText(strings.progress.pkDisclaimer);
-  getByText(/nível relativo/);
   getByText(strings.progress.bodySection);
   expect(getAllByText(/FC em repouso/).length).toBeGreaterThanOrEqual(1);
   expect(getAllByText(/62 bpm/).length).toBeGreaterThanOrEqual(1);
@@ -57,7 +54,7 @@ test('mostra seções e histórico de doses', async () => {
   getByText(strings.progress.waterSection);
   getByText(strings.progress.kcalSection);
   getByText(strings.progress.dosesSection);
-  expect(getAllByText(/semaglutida/).length).toBeGreaterThanOrEqual(2);
+  expect(getAllByText(/semaglutida/).length).toBeGreaterThanOrEqual(1);
 });
 
 test('sem dados mostra estados vazios', async () => {

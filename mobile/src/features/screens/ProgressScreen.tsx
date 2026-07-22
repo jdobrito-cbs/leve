@@ -35,7 +35,6 @@ import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
 import { type MetricRow } from '@/db/metricsRepo';
 import type { InjectionSite } from '@/features/dose/rotation';
-import { estimateRelativeCurve } from '@/features/pk/pharmacokinetics';
 import { useProgressData } from '@/features/progress/useProgressData';
 import { strings } from '@/i18n/pt-BR';
 import { numberLocale } from '@/i18n/engine';
@@ -56,8 +55,6 @@ function weekdayLabel(dayKey: string): string {
     .toLocaleDateString(numberLocale(), { weekday: 'short' })
     .slice(0, 3);
 }
-
-const fmtMg = (n: number) => n.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
 
 function toDisplayGauge<T extends { unit: string; value: number | null; zones: GaugeZone[] }>(
   g: T,
@@ -263,65 +260,9 @@ export function ProgressScreen() {
   const hasWater = water7.some((d) => d.totalMl > 0);
   const hasKcal = kcal7.some((d) => d.kcal > 0);
 
-  const pk = useMemo(() => estimateRelativeCurve(doses), [doses]);
-
   return (
     <Screen>
       <AppText variant="display">{strings.tabs.progress}</AppText>
-
-      <Card style={{ gap: spacing.md }}>
-        <AppText variant="title">{strings.progress.pkSection}</AppText>
-        {pk ? (
-          <>
-            <FitChart>{(fitWidth) => (<LineChart width={fitWidth - 64}
-              data={pk.points.map((p, i, arr) => ({
-                value: Math.round(p.level * 100),
-                hideDataPoint: i !== pk.peakIndex && i !== arr.length - 1,
-                dataPointText:
-                  i === pk.peakIndex
-                    ? `${fmtMg(pk.latestDoseMg)} mg`
-                    : i === arr.length - 1
-                      ? `≈ ${fmtMg(pk.endMgEstimate)} mg`
-                      : undefined,
-                textShiftY: -6,
-                textShiftX: i === arr.length - 1 ? -30 : -16,
-              }))}
-              color={colors.primary}
-              thickness={3}
-              height={110}
-              maxValue={118}
-              initialSpacing={4}
-              endSpacing={48}
-              dataPointsColor={colors.primary}
-              dataPointsRadius={3.5}
-              textColor={colors.text}
-              textFontSize={11}
-              hideAxesAndRules
-              hideYAxisText
-              adjustToWidth
-curved
-disableScroll
-/>)}</FitChart>
-            <AppText variant="caption" muted>
-              {strings.progress.pkLastDose}: {fmtMg(pk.latestDoseMg)} mg ·{' '}
-              {strings.progress.pkIn7Days}: ≈ {fmtMg(pk.endMgEstimate)} mg
-            </AppText>
-            <AppText variant="caption" muted>
-              {pk.medKey} · {strings.progress.pkRelative} · {strings.progress.pkProjection}
-            </AppText>
-          </>
-        ) : doses.length > 0 ? (
-          <AppText variant="caption" muted>
-            {strings.progress.pkUnknownMed}
-          </AppText>
-        ) : (
-          <AppText muted>{strings.progress.empty}</AppText>
-        )}
-        <DisclaimerBanner />
-        <AppText variant="caption" muted>
-          {strings.progress.pkDisclaimer}
-        </AppText>
-      </Card>
 
       <BodyDataSection />
 

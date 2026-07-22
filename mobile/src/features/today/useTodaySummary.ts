@@ -14,6 +14,7 @@ import { firstWeight, listWeights } from '@/db/weightRepo';
 import { todayIntakes, type TodayIntake } from '@/features/meds/medsRepo';
 import { buildInsightInput } from '@/features/insights/data';
 import { buildInsights, type Insight } from '@/features/insights/insights';
+import { estimateCalorieGoal } from '@/features/profile/calorieGoal';
 import { getEffectiveWaterGoal } from '@/features/water/waterGoal';
 import { getCloudAccount } from '@/services/cloudAccount';
 import { getHealthProvider } from '@/services/health/HealthProvider';
@@ -38,6 +39,7 @@ export interface TodaySummary {
   macros: DayMacros;
   kcal: number;
   calorieGoalKcal: number | null;
+  calorieGoalEffectiveKcal: number | null;
   lastWeightKg: number | null;
   weightSeries: WeightLog[];
   goalWeightKg: number | null;
@@ -74,6 +76,7 @@ export function useTodaySummary(): TodaySummary {
   const [lastWaterAt, setLastWaterAt] = useState<string | null>(null);
   const [macros, setMacros] = useState<DayMacros>(EMPTY_MACROS);
   const [calorieGoalKcal, setCalorieGoalKcal] = useState<number | null>(null);
+  const [calorieGoalEffectiveKcal, setCalorieGoalEffectiveKcal] = useState<number | null>(null);
   const [lastWeightKg, setLastWeightKg] = useState<number | null>(null);
   const [weightSeries, setWeightSeries] = useState<WeightLog[]>([]);
   const [goalWeightKg, setGoalWeightKg] = useState<number | null>(null);
@@ -135,6 +138,20 @@ export function useTodaySummary(): TodaySummary {
     if (profile) {
       setCalorieGoalKcal(profile.calorieGoalKcal ?? null);
       setGoalWeightKg(profile.goalWeightKg ?? null);
+      const age = profile.birthDate
+        ? Math.floor((now.getTime() - new Date(profile.birthDate).getTime()) / (365.25 * 86400000))
+        : 30;
+      setCalorieGoalEffectiveKcal(
+        profile.calorieGoalKcal ??
+          (profile.goalWeightKg && profile.heightCm
+            ? estimateCalorieGoal(
+                profile.sex ?? 'nao_informar',
+                profile.goalWeightKg,
+                profile.heightCm,
+                age,
+              )
+            : null),
+      );
     }
     const firstName = (full: string | null | undefined) =>
       full?.trim().split(/\s+/)[0] ?? null;
@@ -207,6 +224,7 @@ export function useTodaySummary(): TodaySummary {
     macros,
     kcal: macros.kcal,
     calorieGoalKcal,
+    calorieGoalEffectiveKcal,
     lastWeightKg,
     weightSeries,
     goalWeightKg,

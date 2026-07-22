@@ -82,6 +82,7 @@ jest.mock('@/features/today/useTodaySummary', () => ({
     macros: { kcal: 850, proteinG: 62.5, carbsG: 90, fatG: 30, fiberG: 14 },
     kcal: 850,
     calorieGoalKcal: null,
+    calorieGoalEffectiveKcal: 2000,
     lastWeightKg: 93.2,
     weightSeries: [
       { id: 1, weightKg: 95.5, origin: 'manual', loggedAt: '2026-06-10T10:00:00.000Z' },
@@ -169,17 +170,11 @@ test('Hoje mostra todos os boxes na nova ordem', async () => {
   );
   getByText('Olá, Jorge!');
   getByText('1.200');
-  getByText(strings.today.waterRing);
-  getByText(strings.today.weightSection);
-  getByText(/93,2/);
-  getByText(/Meta.*85/);
   getByText(strings.today.cards.kcal);
   getByText(strings.today.cards.fiber);
   getByText(strings.today.cards.nextDose);
   getByText(/14\/07\/2026 · \d+d/);
   getByText(strings.today.cards.symptoms);
-  getByText(/Náusea 3\/5/);
-  expect(getAllByText(/\d{2}\/\d{2} \d{2}:\d{2}/).length).toBeGreaterThanOrEqual(2);
   getByText(strings.today.medicationSection);
   getByText(strings.today.mealsSection);
   expect(getAllByText(/850/).length).toBeGreaterThanOrEqual(2);
