@@ -5,6 +5,7 @@ import type { AppDb } from '@/db/client';
 import { addMetric, importedMetricKeys } from '@/db/metricsRepo';
 import { getSetting, setSetting } from '@/db/settingsRepo';
 import { addWeight, weightsSince } from '@/db/weightRepo';
+import { upsertWorkout, type WorkoutSource } from '@/db/workoutRepo';
 import { getEntitlement, isPremium } from '@/features/premium/entitlement';
 import { isLocked } from '@/features/premium/gates';
 import {
@@ -63,6 +64,34 @@ export async function importMetrics(
   return count;
 }
 
+export async function importWorkouts(
+  db: AppDb,
+  provider: HealthProvider,
+  sinceDays = 30,
+): Promise<number> {
+  const since = new Date();
+  since.setDate(since.getDate() - sinceDays);
+  const samples = await provider.readWorkouts(since);
+  if (samples.length === 0) return 0;
+  const source: WorkoutSource = Platform.OS === 'ios' ? 'healthkit' : 'healthconnect';
+  let count = 0;
+  for (const s of samples) {
+    await upsertWorkout(db, {
+      source,
+      externalId: s.externalId,
+      type: s.type,
+      startAt: s.startAt,
+      endAt: s.endAt,
+      durationSec: s.durationSec,
+      distanceM: s.distanceM,
+      calories: s.calories,
+      route: s.route,
+    });
+    count++;
+  }
+  return count;
+}
+
 const SYNC_THROTTLE_MS = 60 * 60 * 1000;
 
 export async function autoSyncIfDue(db: AppDb, provider?: HealthProvider): Promise<boolean> {
@@ -74,6 +103,7 @@ export async function autoSyncIfDue(db: AppDb, provider?: HealthProvider): Promi
   const p = provider ?? getHealthProvider();
   await importWeights(db, p);
   await importMetrics(db, p);
+  await importWorkouts(db, p).catch(() => 0);
   await detectSleepSchedule(db, p).catch(() => undefined);
   await setSetting(db, 'lastHealthSyncAt', new Date().toISOString());
   return true;

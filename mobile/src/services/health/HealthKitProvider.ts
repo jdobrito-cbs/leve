@@ -1,7 +1,17 @@
 import { Platform } from 'react-native';
 import { localDayKey } from '@/core/datetime';
 import type { MetricSample, MetricType } from '@/core/metrics';
-import { aggregateSleepNights, type HealthProvider, type SleepNight, type StepsSample, type WeightSample } from './HealthProvider';
+import { aggregateSleepNights, type HealthProvider, type SleepNight, type StepsSample, type WeightSample, type WorkoutSample } from './HealthProvider';
+
+interface WorkoutRow {
+  uuid?: string;
+  workoutActivityType?: number;
+  startDate?: string | Date;
+  endDate?: string | Date;
+  duration?: number;
+  totalDistance?: { quantity?: number } | number | null;
+  totalEnergyBurned?: { quantity?: number } | number | null;
+}
 
 interface QuantitySample {
   quantity?: number | null;
@@ -32,6 +42,12 @@ interface HealthKitModule {
     identifier: string,
     options: HKQueryOptions,
   ): Promise<CategorySample[] | { samples?: CategorySample[] }>;
+  queryWorkoutSamples?(options: {
+    filter?: { date?: { startDate?: Date; endDate?: Date } };
+    limit: number;
+    distanceUnit?: string;
+    energyUnit?: string;
+  }): Promise<WorkoutRow[] | { samples?: WorkoutRow[] }>;
 }
 
 function rowsOf(result: QuantitySample[] | { samples?: QuantitySample[] }): QuantitySample[] {
@@ -41,6 +57,7 @@ function rowsOf(result: QuantitySample[] | { samples?: QuantitySample[] }): Quan
 const BODY_MASS = 'HKQuantityTypeIdentifierBodyMass';
 const STEP_COUNT = 'HKQuantityTypeIdentifierStepCount';
 const SLEEP = 'HKCategoryTypeIdentifierSleepAnalysis';
+const WORKOUT_TYPE = 'HKWorkoutTypeIdentifier';
 
 const HK_METRICS: { id: string; type: MetricType; unit?: string }[] = [
   { id: 'HKQuantityTypeIdentifierWaistCircumference', type: 'waist_cm', unit: 'cm' },
@@ -79,7 +96,7 @@ export class HealthKitProvider implements HealthProvider {
     if (!this.mod) return false;
     try {
       return await this.mod.requestAuthorization({
-        toRead: [BODY_MASS, STEP_COUNT, SLEEP, ...HK_METRICS.map((m) => m.id)],
+        toRead: [BODY_MASS, STEP_COUNT, SLEEP, WORKOUT_TYPE, ...HK_METRICS.map((m) => m.id)],
         toShare: [],
       });
     } catch (e) {
@@ -144,6 +161,53 @@ export class HealthKitProvider implements HealthProvider {
       return samples.reduce((sum, s) => sum + (s.quantity ?? 0), 0);
     } catch {
       return null;
+    }
+  }
+
+  async readWorkouts(since: Date): Promise<WorkoutSample[]> {
+    if (!this.mod?.queryWorkoutSamples) return [];
+    try {
+      const res = await this.mod.queryWorkoutSamples({
+        filter: { date: { startDate: since, endDate: new Date() } },
+        limit: 200,
+        distanceUnit: 'm',
+        energyUnit: 'kcal',
+      });
+      const rows = Array.isArray(res) ? res : (res?.samples ?? []);
+      const num = (v: unknown): number | null =>
+        typeof v === 'number' && Number.isFinite(v) ? v : null;
+      const qty = (v: unknown): number | null =>
+        typeof v === 'number' ? num(v) : num((v as { quantity?: unknown } | undefined)?.quantity);
+      const typeOf = (n: unknown): 'run' | 'walk' | 'other' =>
+        n === 37 ? 'run' : n === 52 ? 'walk' : 'other';
+      const out: WorkoutSample[] = [];
+      for (const w of rows) {
+        const start = w.startDate ? new Date(w.startDate) : null;
+        if (!start || !Number.isFinite(start.getTime())) continue;
+        const end = w.endDate ? new Date(w.endDate) : null;
+        const dist = qty(w.totalDistance);
+        const cal = qty(w.totalEnergyBurned);
+        const dur = num(w.duration);
+        out.push({
+          externalId: w.uuid ?? null,
+          type: typeOf(w.workoutActivityType),
+          startAt: start.toISOString(),
+          endAt: end ? end.toISOString() : null,
+          durationSec:
+            dur != null
+              ? Math.round(dur)
+              : end
+                ? Math.round((end.getTime() - start.getTime()) / 1000)
+                : null,
+          distanceM: dist != null && dist > 0 ? Math.round(dist) : null,
+          calories: cal != null && cal > 0 ? Math.round(cal) : null,
+          route: null,
+        });
+      }
+      return out;
+    } catch (e) {
+      console.warn('[leve] HealthKit leitura de treinos falhou:', e);
+      return [];
     }
   }
 

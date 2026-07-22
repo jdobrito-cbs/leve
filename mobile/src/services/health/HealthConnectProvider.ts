@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import { localDayKey } from '@/core/datetime';
 import type { MetricSample, MetricType } from '@/core/metrics';
-import { aggregateSleepNights, type HealthProvider, type SleepNight, type StepsSample, type WeightSample } from './HealthProvider';
+import { aggregateSleepNights, type HealthProvider, type SleepNight, type StepsSample, type WeightSample, type WorkoutSample } from './HealthProvider';
 
 interface WeightRecord {
   weight?: { inKilograms?: number | null } | null;
@@ -38,6 +38,7 @@ const METRIC_RECORD_TYPES = [
   'LeanBodyMass',
   'ActiveCaloriesBurned',
   'ExerciseSession',
+  'Distance',
 ];
 
 function getModule(): HealthConnectModule | null {
@@ -248,5 +249,77 @@ export class HealthConnectProvider implements HealthProvider {
       }
     }
     return samples;
+  }
+
+  async readWorkouts(since: Date): Promise<WorkoutSample[]> {
+    if (!this.mod) return [];
+    const range = {
+      timeRangeFilter: {
+        operator: 'between' as const,
+        startTime: since.toISOString(),
+        endTime: new Date().toISOString(),
+      },
+    };
+    const read = async (recordType: string): Promise<Record<string, unknown>[]> => {
+      try {
+        const { records } = await this.mod!.readRecords(recordType, range);
+        return records as Record<string, unknown>[];
+      } catch {
+        return [];
+      }
+    };
+    const num = (v: unknown): number | null =>
+      typeof v === 'number' && Number.isFinite(v) ? v : null;
+    const [sessions, distances, calories] = await Promise.all([
+      read('ExerciseSession'),
+      read('Distance'),
+      read('ActiveCaloriesBurned'),
+    ]);
+    const sumInWindow = (
+      recs: Record<string, unknown>[],
+      s: number,
+      e: number,
+      get: (r: Record<string, unknown>) => number | null,
+    ): number =>
+      recs.reduce((acc, r) => {
+        const t = new Date((r.startTime ?? r.time) as string).getTime();
+        return Number.isFinite(t) && t >= s && t <= e ? acc + (get(r) ?? 0) : acc;
+      }, 0);
+    const typeOf = (n: unknown): 'run' | 'walk' | 'other' =>
+      n === 56 || n === 57 ? 'run' : n === 79 ? 'walk' : 'other';
+    const out: WorkoutSample[] = [];
+    for (const r of sessions) {
+      const start = r.startTime ? new Date(r.startTime as string) : null;
+      if (!start || !Number.isFinite(start.getTime())) continue;
+      const end = r.endTime ? new Date(r.endTime as string) : null;
+      const s = start.getTime();
+      const e = end ? end.getTime() : Date.now();
+      const distM = sumInWindow(distances, s, e, (x) =>
+        num((x.distance as { inMeters?: unknown } | undefined)?.inMeters),
+      );
+      const cal = sumInWindow(calories, s, e, (x) =>
+        num((x.energy as { inKilocalories?: unknown } | undefined)?.inKilocalories),
+      );
+      const routeRaw =
+        (r.exerciseRoute as { route?: unknown[] } | undefined)?.route ??
+        (r.route as unknown[] | undefined) ??
+        null;
+      const route = Array.isArray(routeRaw)
+        ? (routeRaw as Record<string, unknown>[])
+            .map((p) => ({ lat: num(p.latitude) ?? Number.NaN, lng: num(p.longitude) ?? Number.NaN }))
+            .filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng))
+        : null;
+      out.push({
+        externalId: (r.metadata as { id?: string } | undefined)?.id ?? null,
+        type: typeOf(r.exerciseType),
+        startAt: start.toISOString(),
+        endAt: end ? end.toISOString() : null,
+        durationSec: end ? Math.round((e - s) / 1000) : null,
+        distanceM: distM > 0 ? Math.round(distM) : null,
+        calories: cal > 0 ? Math.round(cal) : null,
+        route: route && route.length > 0 ? route : null,
+      });
+    }
+    return out;
   }
 }

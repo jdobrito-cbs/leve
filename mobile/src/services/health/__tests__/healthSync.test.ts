@@ -25,6 +25,7 @@ function fakeProvider(): HealthProvider {
   return {
     isAvailable: async () => true,
     requestPermissions: async () => true,
+    readWorkouts: async () => [],
     readWeight: async () => [
       { kg: 95.5, takenAt: new Date('2026-06-01T10:00:00.000Z'), source: 'healthconnect' },
       { kg: 93.2, takenAt: new Date('2026-07-01T10:00:00.000Z'), source: 'healthconnect' },

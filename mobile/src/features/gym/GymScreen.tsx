@@ -127,6 +127,11 @@ export function GymScreen() {
   return (
     <Screen>
       <AppText variant="display">{strings.gym.title}</AppText>
+      <ListRow
+        title={strings.workouts.title}
+        right="›"
+        onPress={() => router.push('/treinos' as never)}
+      />
       <Card style={{ gap: spacing.md }}>
         <AppText variant="caption" muted>
           {strings.gym.exerciseLabel} — {strings.gym.strengthGroup}

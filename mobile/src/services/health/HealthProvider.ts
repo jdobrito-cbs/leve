@@ -17,6 +17,17 @@ export interface SleepNight {
   end: Date;
 }
 
+export interface WorkoutSample {
+  externalId: string | null;
+  type: 'run' | 'walk' | 'other';
+  startAt: string;
+  endAt: string | null;
+  durationSec: number | null;
+  distanceM: number | null;
+  calories: number | null;
+  route: { lat: number; lng: number; t?: number }[] | null;
+}
+
 export function aggregateSleepNights(spans: SleepNight[]): SleepNight[] {
   const nights = new Map<string, { start: Date; end: Date; totalMs: number }>();
   for (const { start, end } of spans) {
@@ -42,6 +53,7 @@ export interface HealthProvider {
   readMetrics(since: Date): Promise<MetricSample[]>;
   readSleepNights(since: Date): Promise<SleepNight[]>;
   readStepsWindow(start: Date, end: Date): Promise<number | null>;
+  readWorkouts(since: Date): Promise<WorkoutSample[]>;
 }
 
 export class UnavailableHealthProvider implements HealthProvider {
@@ -65,6 +77,9 @@ export class UnavailableHealthProvider implements HealthProvider {
   }
   async readStepsWindow(): Promise<number | null> {
     return null;
+  }
+  async readWorkouts(): Promise<WorkoutSample[]> {
+    return [];
   }
 }
 

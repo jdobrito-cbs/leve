@@ -27,6 +27,7 @@ function provider(steps: number | null): HealthProvider {
     readMetrics: async () => [],
     readSleepNights: async () => [],
     readStepsWindow: async () => steps,
+    readWorkouts: async () => [],
   };
 }
 
