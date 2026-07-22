@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { Coffee, CupSoda, GlassWater, Milk } from 'lucide-react-native';
+import { CupSoda, FlaskRound, GlassWater, Milk } from 'lucide-react-native';
 import { parseDecimalBR } from '@/core/text';
 import { AppText, Button, Card, IconChip, NumberField, Screen } from '@/design/components';
 import { fonts, spacing } from '@/design/tokens';
@@ -16,8 +16,8 @@ import { displayToMl, formatVolume, volumeUnit } from '@/core/units';
 const QUICK = [
   { amount: 100, Icon: CupSoda },
   { amount: 200, Icon: GlassWater },
-  { amount: 500, Icon: Milk },
-  { amount: 1000, Icon: Coffee },
+  { amount: 500, Icon: FlaskRound },
+  { amount: 1000, Icon: Milk },
 ];
 
 export function WaterScreen() {

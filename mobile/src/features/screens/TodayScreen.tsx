@@ -242,7 +242,6 @@ export function TodayScreen() {
         </View>
 
         <View style={{ padding: spacing.md, gap: spacing.md }}>
-          {/* Linha 1 — água | calorias + fibras */}
           <View style={{ flexDirection: 'row', gap: spacing.md }}>
             <Animated.View entering={FadeInDown.duration(420)} style={{ flex: 1 }}>
               <Pressable
@@ -251,7 +250,13 @@ export function TodayScreen() {
                 onPress={() => router.push('/log/agua' as never)}
               >
                 <Card
-                  style={{ gap: spacing.sm, overflow: 'hidden', alignItems: 'center', flex: 1 }}
+                  style={{
+                    gap: spacing.sm,
+                    overflow: 'hidden',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flex: 1,
+                  }}
                 >
                   <OverflowFill progress={progress} />
                   <View
@@ -285,21 +290,47 @@ export function TodayScreen() {
                 Anim={UtensilsCrossIcon}
                 label={strings.today.cards.kcal}
                 value={`${fmt(summary.macros.kcal)} kcal`}
-                route="/log/refeicao"
               />
               <MiniStat
                 index={1}
                 Anim={WheatIcon}
                 label={strings.today.cards.fiber}
                 value={`${fmt(summary.macros.fiberG, 1)} g`}
-                route="/log/refeicao"
               />
             </View>
           </View>
 
-          {/* Linha 2 — balanço calórico | atividades */}
+          <Box index={2} route="/log/refeicao">
+            <TitleRow Anim={UtensilsCrossIcon} title={strings.today.mealsSection} />
+            <AppText style={{ fontFamily: fonts.bold, fontSize: 26, color: colors.text }}>
+              {fmt(summary.macros.kcal)}{' '}
+              <AppText variant="caption" muted>
+                {strings.today.totalKcal}
+                {goalKcal ? ` · ${strings.today.goalLabel}: ${fmt(goalKcal)}` : ''}
+              </AppText>
+            </AppText>
+            <View style={{ gap: spacing.sm, marginTop: spacing.xs }}>
+              {nutrientBar(
+                strings.today.nutrition.protein,
+                summary.macros.proteinG,
+                goals?.proteinG ?? null,
+              )}
+              {nutrientBar(
+                strings.today.nutrition.carbs,
+                summary.macros.carbsG,
+                goals?.carbsG ?? null,
+              )}
+              {nutrientBar(strings.today.nutrition.fat, summary.macros.fatG, goals?.fatG ?? null)}
+              {nutrientBar(
+                strings.today.nutrition.fiber,
+                summary.macros.fiberG,
+                goals?.fiberG ?? null,
+              )}
+            </View>
+          </Box>
+
           <View style={{ flexDirection: 'row', gap: spacing.md }}>
-            <Box index={2} flex>
+            <Box index={3} flex>
               <TitleRow Anim={DrugstoreScaleIcon} title={strings.today.balanceSection} />
               {(() => {
                 const kcalIn = Math.round(summary.macros.kcal);
@@ -362,7 +393,6 @@ export function TodayScreen() {
             </Box>
           </View>
 
-          {/* Linha 3 — saúde */}
           <Box index={3} route="/progresso">
             <TitleRow Anim={NotesWritingIcon} title={strings.today.healthSection} />
             {summary.healthLatest.sleepHours !== null ||
@@ -413,37 +443,6 @@ export function TodayScreen() {
             )}
           </Box>
 
-          {/* Linha 4 — refeição diária (barras) */}
-          <Box index={4} route="/log/refeicao">
-            <TitleRow Anim={UtensilsCrossIcon} title={strings.today.mealsSection} />
-            <AppText style={{ fontFamily: fonts.bold, fontSize: 26, color: colors.text }}>
-              {fmt(summary.macros.kcal)}{' '}
-              <AppText variant="caption" muted>
-                {strings.today.totalKcal}
-                {goalKcal ? ` · ${strings.today.goalLabel}: ${fmt(goalKcal)}` : ''}
-              </AppText>
-            </AppText>
-            <View style={{ gap: spacing.sm, marginTop: spacing.xs }}>
-              {nutrientBar(
-                strings.today.nutrition.protein,
-                summary.macros.proteinG,
-                goals?.proteinG ?? null,
-              )}
-              {nutrientBar(
-                strings.today.nutrition.carbs,
-                summary.macros.carbsG,
-                goals?.carbsG ?? null,
-              )}
-              {nutrientBar(strings.today.nutrition.fat, summary.macros.fatG, goals?.fatG ?? null)}
-              {nutrientBar(
-                strings.today.nutrition.fiber,
-                summary.macros.fiberG,
-                goals?.fiberG ?? null,
-              )}
-            </View>
-          </Box>
-
-          {/* Linha 5 — nível estimado da medicação */}
           <Box index={5} route="/medicacao">
             <TitleRow Anim={SyringeInjectIcon} title={strings.today.medicationSection} />
             {pk ? (
@@ -502,7 +501,6 @@ export function TodayScreen() {
             </AppText>
           </Box>
 
-          {/* Linha 6 — próxima dose | sintomas */}
           <View style={{ flexDirection: 'row', gap: spacing.md }}>
             <MiniStat
               index={6}
@@ -524,7 +522,6 @@ export function TodayScreen() {
             />
           </View>
 
-          {/* Linha 7 — lembretes de medicação */}
           <Box index={7} route="/remedios">
             <TitleRow Anim={PillRollIcon} title={strings.today.medRemindersSection} />
             {summary.intakes.length > 0 ? (
@@ -558,7 +555,6 @@ export function TodayScreen() {
             )}
           </Box>
 
-          {/* Linha 8 — observações */}
           {summary.insights.length > 0 ? (
             <Box index={8}>
               <AppText variant="title">{strings.insights.section}</AppText>

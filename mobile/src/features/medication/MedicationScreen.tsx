@@ -1,16 +1,17 @@
 import { numberLocale } from '@/i18n/engine';
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import type { DoseLog } from '@/core/types';
 import { formatDateBR } from '@/core/datetime';
 import { AppText, Button, Card, FitChart, IconChip, Screen } from '@/design/components';
-import { SyringeInjectIcon } from '@/design/logIcons';
+import { NotesWritingIcon, SyringeInjectIcon } from '@/design/logIcons';
 import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
 import { latestDose, listDoses } from '@/db/doseRepo';
+import { symptomsForDay } from '@/db/symptomRepo';
 import { estimateRelativeCurve } from '@/features/pk/pharmacokinetics';
 import { strings } from '@/i18n/pt-BR';
 
@@ -21,6 +22,7 @@ export function MedicationScreen() {
   const { colors } = useTheme();
   const [doses, setDoses] = useState<DoseLog[]>([]);
   const [last, setLast] = useState<DoseLog | null>(null);
+  const [symptomsToday, setSymptomsToday] = useState(0);
   const [nowTs, setNowTs] = useState(0);
 
   useEffect(() => {
@@ -30,6 +32,9 @@ export function MedicationScreen() {
     latestDose(db)
       .then(setLast)
       .catch(() => setLast(null));
+    symptomsForDay(db, new Date())
+      .then((s) => setSymptomsToday(s.length))
+      .catch(() => setSymptomsToday(0));
     setNowTs(Date.now());
   }, []);
 
@@ -136,16 +141,43 @@ export function MedicationScreen() {
               {last.medication} · {fmt(last.doseMg, 1)} mg · {formatDateBR(new Date(last.loggedAt))}
             </AppText>
           </View>
-          {last.injectionSite ? (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-              <IconChip size={32}>
-                <SyringeInjectIcon size={16} />
-              </IconChip>
-              <AppText variant="caption">{last.injectionSite}</AppText>
-            </View>
-          ) : null}
         </Card>
       ) : null}
+
+      <View style={{ flexDirection: 'row', gap: spacing.md }}>
+        <Pressable
+          accessibilityRole="button"
+          style={{ flex: 1 }}
+          onPress={() => router.push('/log/dose' as never)}
+        >
+          <Card style={{ gap: spacing.xs, flex: 1 }}>
+            <IconChip size={32}>
+              <SyringeInjectIcon size={16} />
+            </IconChip>
+            <AppText variant="caption" muted>
+              {strings.dose.siteLabel}
+            </AppText>
+            <AppText style={{ fontFamily: fonts.semibold }}>{last?.injectionSite ?? '—'}</AppText>
+          </Card>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          style={{ flex: 1 }}
+          onPress={() => router.push('/log/sintoma' as never)}
+        >
+          <Card style={{ gap: spacing.xs, flex: 1 }}>
+            <IconChip size={32}>
+              <NotesWritingIcon size={16} />
+            </IconChip>
+            <AppText variant="caption" muted>
+              {strings.today.cards.symptoms}
+            </AppText>
+            <AppText style={{ fontFamily: fonts.semibold }}>
+              {symptomsToday > 0 ? String(symptomsToday) : strings.today.none}
+            </AppText>
+          </Card>
+        </Pressable>
+      </View>
 
       <Button label={strings.dose.title} onPress={() => router.push('/log/dose' as never)} />
       <Button
