@@ -35,6 +35,7 @@ export function WorkoutsScreen() {
               w.durationSec,
             )}`}
             right={formatDateTimeShort(w.startAt)}
+            onPress={() => router.push(`/treino/${w.id}` as never)}
             onDelete={async () => {
               await deleteWorkout(db, w.id);
               await load();

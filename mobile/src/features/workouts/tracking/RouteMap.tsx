@@ -18,23 +18,27 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 var line = L.polyline([], { color: '#2563EB', weight: 5, lineJoin: 'round' }).addTo(map);
 var dot = null;
 var first = true;
-function update(pts) {
+function update(pts, fit) {
   if (!pts || !pts.length) return;
   var latlngs = pts.map(function (p) { return [p.lat, p.lng]; });
   line.setLatLngs(latlngs);
   var last = latlngs[latlngs.length - 1];
   if (dot) { dot.setLatLng(last); }
   else { dot = L.circleMarker(last, { radius: 7, color: '#fff', weight: 3, fillColor: '#2563EB', fillOpacity: 1 }).addTo(map); }
-  if (first) { map.setView(last, 16); first = false; } else { map.panTo(last); }
+  if (fit && latlngs.length > 1) { map.fitBounds(line.getBounds(), { padding: [24, 24] }); }
+  else if (first) { map.setView(last, 16); first = false; }
+  else { map.panTo(last); }
 }
 </script></body></html>`;
 
 export function RouteMap({
   points,
   style,
+  fit,
 }: {
   points: RoutePoint[];
   style?: StyleProp<ViewStyle>;
+  fit?: boolean;
 }) {
   const ref = useRef<WebView>(null);
   const loaded = useRef(false);
@@ -42,10 +46,11 @@ export function RouteMap({
     () => JSON.stringify(points.map((p) => ({ lat: p.lat, lng: p.lng }))),
     [points],
   );
+  const call = `update(${payload}, ${fit ? 'true' : 'false'}); true;`;
 
   useEffect(() => {
-    if (loaded.current) ref.current?.injectJavaScript(`update(${payload}); true;`);
-  }, [payload]);
+    if (loaded.current) ref.current?.injectJavaScript(call);
+  }, [call]);
 
   return (
     <WebView
@@ -56,7 +61,7 @@ export function RouteMap({
       scrollEnabled={false}
       onLoadEnd={() => {
         loaded.current = true;
-        ref.current?.injectJavaScript(`update(${payload}); true;`);
+        ref.current?.injectJavaScript(call);
       }}
     />
   );
