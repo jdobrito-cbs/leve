@@ -76,6 +76,12 @@ export const strings: Strings = {
     duration: 'समय',
     pace: 'गति',
     empty: 'अभी कोई वर्कआउट नहीं। Apple Health या Health Connect से सिंक करें।',
+    record: 'दौड़ रिकॉर्ड करें',
+    start: 'शुरू',
+    pause: 'रोकें',
+    resume: 'जारी रखें',
+    finish: 'रोकें और सहेजें',
+    permissionDenied: 'स्थान अनुमति अस्वीकृत। सेटिंग में सक्षम करें।',
   },
   today: {
     greeting: 'नमस्ते!',

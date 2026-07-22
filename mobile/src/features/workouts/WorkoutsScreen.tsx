@@ -22,6 +22,7 @@ export function WorkoutsScreen() {
   return (
     <Screen>
       <AppText variant="display">{strings.workouts.title}</AppText>
+      <Button label={strings.workouts.record} onPress={() => router.push('/gravar-corrida' as never)} />
       {items.length === 0 ? (
         <EmptyState title={strings.workouts.empty} hint="" Icon={Footprints} />
       ) : (

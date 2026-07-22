@@ -76,6 +76,12 @@ export const strings: Strings = {
     duration: '時間',
     pace: 'ペース',
     empty: 'まだワークアウトがありません。Apple ヘルスまたは Health Connect と同期してください。',
+    record: 'ランを記録',
+    start: '開始',
+    pause: '一時停止',
+    resume: '再開',
+    finish: '停止して保存',
+    permissionDenied: '位置情報の許可がありません。設定で有効にしてください。',
   },
   today: {
     greeting: 'こんにちは！',

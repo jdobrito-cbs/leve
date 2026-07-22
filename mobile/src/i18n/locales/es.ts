@@ -76,6 +76,12 @@ export const strings: Strings = {
     duration: 'Tiempo',
     pace: 'Ritmo',
     empty: 'Aún no hay entrenamientos. Sincroniza con Apple Salud o Health Connect.',
+    record: 'Grabar carrera',
+    start: 'Iniciar',
+    pause: 'Pausar',
+    resume: 'Reanudar',
+    finish: 'Detener y guardar',
+    permissionDenied: 'Permiso de ubicación denegado. Actívalo en ajustes.',
   },
   today: {
     greeting: '¡Hola!',

@@ -75,6 +75,12 @@ export const strings: Strings = {
     duration: 'الوقت',
     pace: 'الإيقاع',
     empty: 'لا توجد تمارين بعد. زامِن مع Apple Health أو Health Connect.',
+    record: 'تسجيل الجري',
+    start: 'ابدأ',
+    pause: 'إيقاف مؤقت',
+    resume: 'استئناف',
+    finish: 'إيقاف وحفظ',
+    permissionDenied: 'تم رفض إذن الموقع. فعّله من الإعدادات.',
   },
   today: {
     greeting: 'مرحبًا!',

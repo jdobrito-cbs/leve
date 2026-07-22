@@ -76,6 +76,12 @@ export const strings: Strings = {
     duration: 'זמן',
     pace: 'קצב',
     empty: 'אין עדיין אימונים. סנכרן עם Apple Health או Health Connect.',
+    record: 'הקלטת ריצה',
+    start: 'התחלה',
+    pause: 'השהיה',
+    resume: 'המשך',
+    finish: 'עצור ושמור',
+    permissionDenied: 'הרשאת מיקום נדחתה. הפעל בהגדרות.',
   },
   today: {
     greeting: 'שלום!',

@@ -86,7 +86,13 @@
           "iosUrlScheme": "com.googleusercontent.apps.60542120655-ds77mlrhf3vpbrk2i0bf2efdm9ftpnte"
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "O Leve usa sua localização para registrar corridas e caminhadas com GPS enquanto você grava."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

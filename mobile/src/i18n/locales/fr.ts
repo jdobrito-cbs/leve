@@ -76,6 +76,12 @@ export const strings: Strings = {
     duration: 'Temps',
     pace: 'Allure',
     empty: 'Aucune séance pour l’instant. Synchronisez avec Apple Santé ou Health Connect.',
+    record: 'Enregistrer la course',
+    start: 'Démarrer',
+    pause: 'Pause',
+    resume: 'Reprendre',
+    finish: 'Arrêter et enregistrer',
+    permissionDenied: 'Autorisation de localisation refusée. Activez-la dans les réglages.',
   },
   today: {
     greeting: 'Bonjour !',

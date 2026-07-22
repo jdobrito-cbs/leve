@@ -76,6 +76,12 @@ export const strings: Strings = {
     duration: 'Time',
     pace: 'Pace',
     empty: 'No workouts yet. Sync with Apple Health or Health Connect.',
+    record: 'Record run',
+    start: 'Start',
+    pause: 'Pause',
+    resume: 'Resume',
+    finish: 'Stop & save',
+    permissionDenied: 'Location permission denied. Enable it in settings.',
   },
   today: {
     greeting: 'Hello!',

@@ -76,6 +76,12 @@ export const strings: Strings = {
     duration: '时间',
     pace: '配速',
     empty: '还没有运动记录。请与 Apple 健康或 Health Connect 同步。',
+    record: '记录跑步',
+    start: '开始',
+    pause: '暂停',
+    resume: '继续',
+    finish: '停止并保存',
+    permissionDenied: '位置权限被拒绝。请在设置中开启。',
   },
   today: {
     greeting: '您好！',

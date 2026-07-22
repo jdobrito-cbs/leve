@@ -76,6 +76,12 @@ const ptBR = {
     duration: 'Tempo',
     pace: 'Ritmo',
     empty: 'Nenhum treino ainda. Sincronize com o Apple Saúde ou Health Connect.',
+    record: 'Gravar corrida',
+    start: 'Iniciar',
+    pause: 'Pausar',
+    resume: 'Retomar',
+    finish: 'Parar e salvar',
+    permissionDenied: 'Permissão de localização negada. Ative nos ajustes.',
   },
   today: {
     greeting: 'Olá!',
