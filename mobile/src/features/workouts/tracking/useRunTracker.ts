@@ -1,7 +1,8 @@
 import * as Location from 'expo-location';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RoutePoint } from '@/db/workoutRepo';
-import { stepDistanceM } from './geo';
+import { getRunState, resetRun, subscribeRun } from './runStore';
+import { RUN_TASK } from './runTrackingTask';
 
 export type RunStatus = 'idle' | 'recording' | 'paused';
 
@@ -15,21 +16,18 @@ export interface RunResult {
 
 export function useRunTracker() {
   const [status, setStatus] = useState<RunStatus>('idle');
-  const [points, setPoints] = useState<RoutePoint[]>([]);
-  const [distanceM, setDistanceM] = useState(0);
+  const [snap, setSnap] = useState(() => getRunState());
   const [elapsedSec, setElapsedSec] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
-  const sub = useRef<Location.LocationSubscription | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const startedAtRef = useRef<number | null>(null);
   const baseElapsedRef = useRef(0);
   const segStartRef = useRef(0);
-  const lastPointRef = useRef<RoutePoint | null>(null);
 
-  const stopWatch = useCallback(() => {
-    sub.current?.remove();
-    sub.current = null;
+  useEffect(() => subscribeRun(() => setSnap(getRunState())), []);
+
+  const stopTimer = useCallback(() => {
     if (timer.current) {
       clearInterval(timer.current);
       timer.current = null;
@@ -42,76 +40,97 @@ export function useRunTracker() {
     }, 1000);
   }, []);
 
-  const startWatch = useCallback(async () => {
-    sub.current = await Location.watchPositionAsync(
-      { accuracy: Location.Accuracy.BestForNavigation, distanceInterval: 3, timeInterval: 1000 },
-      (loc) => {
-        const t = startedAtRef.current != null ? Date.now() - startedAtRef.current : 0;
-        const p: RoutePoint = { lat: loc.coords.latitude, lng: loc.coords.longitude, t };
-        const last = lastPointRef.current;
-        if (last) {
-          const add = stepDistanceM(last, p);
-          if (add <= 0) return;
-          lastPointRef.current = p;
-          setPoints((prev) => [...prev, p]);
-          setDistanceM((d) => d + add);
-          return;
-        }
-        lastPointRef.current = p;
-        setPoints((prev) => [...prev, p]);
+  const startUpdates = useCallback(async () => {
+    await Location.startLocationUpdatesAsync(RUN_TASK, {
+      accuracy: Location.Accuracy.BestForNavigation,
+      distanceInterval: 3,
+      timeInterval: 1000,
+      pausesUpdatesAutomatically: false,
+      showsBackgroundLocationIndicator: true,
+      foregroundService: {
+        notificationTitle: 'Leve',
+        notificationBody: 'Gravando corrida…',
       },
-    );
+    });
+  }, []);
+
+  const stopUpdates = useCallback(async () => {
+    try {
+      if (await Location.hasStartedLocationUpdatesAsync(RUN_TASK)) {
+        await Location.stopLocationUpdatesAsync(RUN_TASK);
+      }
+    } catch {
+      setError(null);
+    }
   }, []);
 
   const start = useCallback(async () => {
     setError(null);
-    const { status: perm } = await Location.requestForegroundPermissionsAsync();
-    if (perm !== 'granted') {
+    const fg = await Location.requestForegroundPermissionsAsync();
+    if (fg.status !== 'granted') {
       setError('permission');
       return;
     }
-    startedAtRef.current = Date.now();
+    await Location.requestBackgroundPermissionsAsync().catch(() => undefined);
+    const now = Date.now();
+    startedAtRef.current = now;
     baseElapsedRef.current = 0;
-    segStartRef.current = Date.now();
-    lastPointRef.current = null;
-    setPoints([]);
-    setDistanceM(0);
+    segStartRef.current = now;
     setElapsedSec(0);
+    resetRun(now);
     setStatus('recording');
     startTimer();
-    await startWatch();
-  }, [startTimer, startWatch]);
+    await startUpdates();
+  }, [startTimer, startUpdates]);
 
-  const pause = useCallback(() => {
+  const pause = useCallback(async () => {
     baseElapsedRef.current += Math.round((Date.now() - segStartRef.current) / 1000);
-    stopWatch();
+    stopTimer();
+    await stopUpdates();
     setStatus('paused');
-  }, [stopWatch]);
+  }, [stopTimer, stopUpdates]);
 
   const resume = useCallback(async () => {
     segStartRef.current = Date.now();
     setStatus('recording');
     startTimer();
-    await startWatch();
-  }, [startTimer, startWatch]);
+    await startUpdates();
+  }, [startTimer, startUpdates]);
 
-  const stop = useCallback((): RunResult => {
+  const stop = useCallback(async (): Promise<RunResult> => {
     if (status === 'recording') {
       baseElapsedRef.current += Math.round((Date.now() - segStartRef.current) / 1000);
     }
-    stopWatch();
-    const result: RunResult = {
+    stopTimer();
+    await stopUpdates();
+    const s = getRunState();
+    setStatus('idle');
+    return {
       startAt: new Date(startedAtRef.current ?? Date.now()).toISOString(),
       endAt: new Date().toISOString(),
       durationSec: baseElapsedRef.current,
-      distanceM: Math.round(distanceM),
-      route: points,
+      distanceM: Math.round(s.distanceM),
+      route: s.points,
     };
-    setStatus('idle');
-    return result;
-  }, [status, stopWatch, distanceM, points]);
+  }, [status, stopTimer, stopUpdates]);
 
-  useEffect(() => () => stopWatch(), [stopWatch]);
+  useEffect(
+    () => () => {
+      stopTimer();
+      stopUpdates();
+    },
+    [stopTimer, stopUpdates],
+  );
 
-  return { status, points, distanceM, elapsedSec, error, start, pause, resume, stop };
+  return {
+    status,
+    points: snap.points,
+    distanceM: snap.distanceM,
+    elapsedSec,
+    error,
+    start,
+    pause,
+    resume,
+    stop,
+  };
 }

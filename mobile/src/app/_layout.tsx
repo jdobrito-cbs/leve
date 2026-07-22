@@ -26,6 +26,7 @@ import { setMascotEvent } from '@/features/today/mascotSignal';
 import { autoSyncIfDue } from '@/services/health/healthSync';
 import { checkMovementIfDue } from '@/services/activity/movementCheck';
 import { registerHealthBackgroundTask } from '@/services/activity/backgroundTasks';
+import '@/features/workouts/tracking/runTrackingTask';
 import { attachReminderMascotListeners } from '@/services/reminders/reminders';
 import { strings } from '@/i18n/pt-BR';
 import {

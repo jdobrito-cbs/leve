@@ -90,7 +90,11 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "O Leve usa sua localização para registrar corridas e caminhadas com GPS enquanto você grava."
+          "locationWhenInUsePermission": "O Leve usa sua localização para registrar corridas e caminhadas com GPS enquanto você grava.",
+          "locationAlwaysAndWhenInUsePermission": "O Leve continua registrando sua corrida com GPS mesmo com a tela bloqueada, até você parar a gravação.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
         }
       ]
     ],

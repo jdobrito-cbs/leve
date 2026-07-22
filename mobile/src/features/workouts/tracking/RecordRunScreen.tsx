@@ -40,7 +40,7 @@ export function RecordRunScreen() {
   ];
 
   async function finish() {
-    const r = tracker.stop();
+    const r = await tracker.stop();
     if (r.durationSec > 0 || r.route.length > 0) {
       await upsertWorkout(db, {
         source: 'gps',
