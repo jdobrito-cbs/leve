@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useEffect, useState } from 'react';
-import { I18nManager, Linking, Platform, View } from 'react-native';
+import { Linking, Platform, View } from 'react-native';
 
 import { ageFromIsoDate, brDateToIso } from '@/core/datetime';
 import { db } from '@/db/client';
@@ -32,8 +32,6 @@ import { useProfileForm } from '@/features/profile/useProfileForm';
 import { strings } from '@/i18n/pt-BR';
 
 import {
-  getActiveLanguage,
-  isRtlLanguage,
   LANGUAGES,
   resolveAutoLanguage,
   resolveAutoMeasurement,
@@ -164,7 +162,6 @@ export function ProfileScreen() {
   const [langSel, setLangSel] = useState<'auto' | LanguageCode>('auto');
   const [unitSel, setUnitSel] = useState<'auto' | UnitSystem>('auto');
   const [langOpen, setLangOpen] = useState(false);
-  const rtlPending = I18nManager.isRTL !== isRtlLanguage(getActiveLanguage());
 
   useEffect(() => {
     getSetting<'auto' | LanguageCode>(db, 'language')
@@ -498,11 +495,6 @@ export function ProfileScreen() {
               />
             ))}
           </>
-        ) : null}
-        {rtlPending ? (
-          <AppText variant="caption" muted>
-            {strings.language.restartHint}
-          </AppText>
         ) : null}
         <AppText variant="caption" muted>
           {strings.language.unitsLabel}

@@ -146,7 +146,7 @@ function DragTabButton({
         if (success && onPress) runOnJS(onPress)();
       });
     const pan = Gesture.Pan()
-      .minDistance(6)
+      .minDistance(24)
       .onStart((e) => {
         dragging.value = 1;
         dragX.value = e.absoluteX;

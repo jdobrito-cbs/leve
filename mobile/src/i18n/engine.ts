@@ -132,12 +132,11 @@ export function isRtlLanguage(code: LanguageCode = activeCode): boolean {
   return code === 'ar' || code === 'he';
 }
 
-function applyRtl(code: LanguageCode): void {
+function applyRtl(_code: LanguageCode): void {
   try {
     const { I18nManager } = require('react-native') as typeof import('react-native');
-    I18nManager.allowRTL(true);
-    const wantRtl = isRtlLanguage(code);
-    if (I18nManager.isRTL !== wantRtl) I18nManager.forceRTL(wantRtl);
+    I18nManager.allowRTL(false);
+    if (I18nManager.isRTL) I18nManager.forceRTL(false);
   } catch {
   }
 }
