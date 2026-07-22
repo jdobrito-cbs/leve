@@ -67,6 +67,16 @@ export const strings: Strings = {
     setsShort: 'x',
     minShort: 'min',
   },
+  workouts: {
+    title: 'אימונים',
+    run: 'ריצה',
+    walk: 'הליכה',
+    other: 'פעילות',
+    distance: 'מרחק',
+    duration: 'זמן',
+    pace: 'קצב',
+    empty: 'אין עדיין אימונים. סנכרן עם Apple Health או Health Connect.',
+  },
   today: {
     greeting: 'שלום!',
     greetingWithName: 'שלום, {name}!',

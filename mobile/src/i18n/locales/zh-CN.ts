@@ -67,6 +67,16 @@ export const strings: Strings = {
     setsShort: 'x',
     minShort: '分钟',
   },
+  workouts: {
+    title: '运动',
+    run: '跑步',
+    walk: '步行',
+    other: '活动',
+    distance: '距离',
+    duration: '时间',
+    pace: '配速',
+    empty: '还没有运动记录。请与 Apple 健康或 Health Connect 同步。',
+  },
   today: {
     greeting: '您好！',
     greetingWithName: '您好，{name}！',

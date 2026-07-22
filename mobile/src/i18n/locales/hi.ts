@@ -67,6 +67,16 @@ export const strings: Strings = {
     setsShort: 'x',
     minShort: 'min',
   },
+  workouts: {
+    title: 'वर्कआउट',
+    run: 'दौड़',
+    walk: 'पैदल चाल',
+    other: 'गतिविधि',
+    distance: 'दूरी',
+    duration: 'समय',
+    pace: 'गति',
+    empty: 'अभी कोई वर्कआउट नहीं। Apple Health या Health Connect से सिंक करें।',
+  },
   today: {
     greeting: 'नमस्ते!',
     greetingWithName: 'नमस्ते, {name}!',

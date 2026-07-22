@@ -67,6 +67,16 @@ export const strings: Strings = {
     setsShort: 'x',
     minShort: 'min',
   },
+  workouts: {
+    title: 'Workouts',
+    run: 'Run',
+    walk: 'Walk',
+    other: 'Activity',
+    distance: 'Distance',
+    duration: 'Time',
+    pace: 'Pace',
+    empty: 'No workouts yet. Sync with Apple Health or Health Connect.',
+  },
   today: {
     greeting: 'Hello!',
     greetingWithName: 'Hello, {name}!',

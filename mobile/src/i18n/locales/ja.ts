@@ -67,6 +67,16 @@ export const strings: Strings = {
     setsShort: 'x',
     minShort: '分',
   },
+  workouts: {
+    title: 'ワークアウト',
+    run: 'ランニング',
+    walk: 'ウォーキング',
+    other: 'アクティビティ',
+    distance: '距離',
+    duration: '時間',
+    pace: 'ペース',
+    empty: 'まだワークアウトがありません。Apple ヘルスまたは Health Connect と同期してください。',
+  },
   today: {
     greeting: 'こんにちは！',
     greetingWithName: 'こんにちは、{name}さん！',

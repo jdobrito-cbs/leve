@@ -148,3 +148,17 @@ export const medIntakes = sqliteTable('med_intakes', {
   scheduledFor: text('scheduled_for').notNull(),
   takenAt: text('taken_at'),
 });
+
+export const workouts = sqliteTable('workouts', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  source: text('source').notNull(),
+  externalId: text('external_id'),
+  type: text('type').notNull().default('other'),
+  startAt: text('start_at').notNull(),
+  endAt: text('end_at'),
+  durationSec: integer('duration_sec'),
+  distanceM: real('distance_m'),
+  calories: real('calories'),
+  routeJson: text('route_json'),
+  createdAt: text('created_at').notNull(),
+});

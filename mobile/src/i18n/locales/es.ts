@@ -67,6 +67,16 @@ export const strings: Strings = {
     setsShort: 'x',
     minShort: 'min',
   },
+  workouts: {
+    title: 'Entrenamientos',
+    run: 'Carrera',
+    walk: 'Caminata',
+    other: 'Actividad',
+    distance: 'Distancia',
+    duration: 'Tiempo',
+    pace: 'Ritmo',
+    empty: 'Aún no hay entrenamientos. Sincroniza con Apple Salud o Health Connect.',
+  },
   today: {
     greeting: '¡Hola!',
     greetingWithName: '¡Hola, {name}!',

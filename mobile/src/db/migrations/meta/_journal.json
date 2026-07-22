@@ -64,6 +64,13 @@
       "when": 1784429027047,
       "tag": "0008_food_units",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1784600000000,
+      "tag": "0009_workouts",
+      "breakpoints": true
     }
   ]
 }
