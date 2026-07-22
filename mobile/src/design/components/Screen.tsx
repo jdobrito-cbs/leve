@@ -1,10 +1,13 @@
-import { PropsWithChildren } from 'react';
-import { ScrollView } from 'react-native';
+import { PropsWithChildren, ReactElement } from 'react';
+import { RefreshControlProps, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { spacing } from '../tokens';
 import { useTheme } from '../useTheme';
 
-export function Screen({ children }: PropsWithChildren) {
+export function Screen({
+  children,
+  refreshControl,
+}: PropsWithChildren<{ refreshControl?: ReactElement<RefreshControlProps> }>) {
   const { colors } = useTheme();
   return (
     <SafeAreaView
@@ -16,6 +19,7 @@ export function Screen({ children }: PropsWithChildren) {
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         automaticallyAdjustKeyboardInsets
+        refreshControl={refreshControl}
       >
         {children}
       </ScrollView>

@@ -45,7 +45,7 @@ function rowToWorkout(r: typeof workouts.$inferSelect): Workout {
   };
 }
 
-export async function upsertWorkout(db: AppDb, input: WorkoutInput): Promise<void> {
+export async function upsertWorkout(db: AppDb, input: WorkoutInput): Promise<boolean> {
   const base = {
     source: input.source,
     externalId: input.externalId,
@@ -65,10 +65,11 @@ export async function upsertWorkout(db: AppDb, input: WorkoutInput): Promise<voi
       .limit(1);
     if (existing.length > 0) {
       await db.update(workouts).set(base).where(eq(workouts.id, existing[0].id));
-      return;
+      return false;
     }
   }
   await db.insert(workouts).values({ ...base, createdAt: new Date().toISOString() });
+  return true;
 }
 
 export async function listWorkouts(db: AppDb, limit = 50): Promise<Workout[]> {

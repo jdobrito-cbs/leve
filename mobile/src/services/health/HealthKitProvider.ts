@@ -3,6 +3,12 @@ import { localDayKey } from '@/core/datetime';
 import type { MetricSample, MetricType } from '@/core/metrics';
 import { aggregateSleepNights, type HealthProvider, type SleepNight, type StepsSample, type WeightSample, type WorkoutSample } from './HealthProvider';
 
+interface WorkoutRouteLoc {
+  latitude?: number | null;
+  longitude?: number | null;
+  date?: string | number | Date | null;
+}
+
 interface WorkoutRow {
   uuid?: string;
   workoutActivityType?: number;
@@ -11,6 +17,7 @@ interface WorkoutRow {
   duration?: number;
   totalDistance?: { quantity?: number } | number | null;
   totalEnergyBurned?: { quantity?: number } | number | null;
+  getWorkoutRoutes?(): Promise<readonly { locations?: readonly WorkoutRouteLoc[] }[] | undefined>;
 }
 
 interface QuantitySample {
@@ -185,12 +192,17 @@ export class HealthKitProvider implements HealthProvider {
         const start = w.startDate ? new Date(w.startDate) : null;
         if (!start || !Number.isFinite(start.getTime())) continue;
         const end = w.endDate ? new Date(w.endDate) : null;
+        const type = typeOf(w.workoutActivityType);
         const dist = qty(w.totalDistance);
         const cal = qty(w.totalEnergyBurned);
         const dur = num(w.duration);
+        const route =
+          (type === 'run' || type === 'walk') && dist != null && dist > 0
+            ? await this.readRoute(w, start.getTime())
+            : null;
         out.push({
           externalId: w.uuid ?? null,
-          type: typeOf(w.workoutActivityType),
+          type,
           startAt: start.toISOString(),
           endAt: end ? end.toISOString() : null,
           durationSec:
@@ -201,13 +213,38 @@ export class HealthKitProvider implements HealthProvider {
                 : null,
           distanceM: dist != null && dist > 0 ? Math.round(dist) : null,
           calories: cal != null && cal > 0 ? Math.round(cal) : null,
-          route: null,
+          route,
         });
       }
       return out;
     } catch (e) {
       console.warn('[leve] HealthKit leitura de treinos falhou:', e);
       return [];
+    }
+  }
+
+  private async readRoute(
+    w: WorkoutRow,
+    startMs: number,
+  ): Promise<{ lat: number; lng: number; t?: number }[] | null> {
+    if (typeof w.getWorkoutRoutes !== 'function') return null;
+    try {
+      const routes = (await w.getWorkoutRoutes()) ?? [];
+      const pts: { lat: number; lng: number; t?: number }[] = [];
+      for (const r of routes) {
+        for (const loc of r?.locations ?? []) {
+          const lat = typeof loc.latitude === 'number' ? loc.latitude : Number.NaN;
+          const lng = typeof loc.longitude === 'number' ? loc.longitude : Number.NaN;
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+          const at = loc.date != null ? new Date(loc.date).getTime() : Number.NaN;
+          if (Number.isFinite(at)) pts.push({ lat, lng, t: Math.max(0, at - startMs) });
+          else pts.push({ lat, lng });
+        }
+      }
+      pts.sort((a, b) => (a.t ?? 0) - (b.t ?? 0));
+      return pts.length > 0 ? pts : null;
+    } catch {
+      return null;
     }
   }
 
