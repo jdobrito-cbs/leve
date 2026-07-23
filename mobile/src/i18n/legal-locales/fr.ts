@@ -62,7 +62,7 @@ export const legal: LegalCatalog = {
         heading: '2. Le service',
         paragraphs: [
           'Leve est un journal personnel de bien-être destiné aux personnes qui suivent des traitements par médicaments GLP-1 : enregistrement de l\'eau, des repas, du poids, des mesures, des doses, des symptômes, du cycle, du sommeil, des exercices et des rendez-vous médicaux, avec graphiques, rappels et rapports informatifs.',
-          'Leve fonctionne en priorité sur votre appareil : vos enregistrements sont stockés localement. Les fonctionnalités optionnelles (compte, sauvegarde chiffrée, analyse de photo par intelligence artificielle) utilisent des services distants comme décrit dans la Politique de confidentialité.',
+          'Leve fonctionne en priorité sur votre appareil : vos enregistrements sont stockés localement. Les fonctionnalités optionnelles (connexion avec Apple ou Google et analyse de photo par intelligence artificielle) utilisent des services distants comme décrit dans la Politique de confidentialité.',
           'Leve enregistre et organise des informations ; il ne fournit pas de services médicaux, nutritionnels ou pharmaceutiques.',
         ],
       },
@@ -75,7 +75,7 @@ export const legal: LegalCatalog = {
       {
         heading: '4. Compte, clés d\'accès et sécurité',
         paragraphs: [
-          'L\'utilisation de Leve n\'exige pas de compte. Vous pouvez, si vous le souhaitez, connecter un compte (Apple ou Google) pour renseigner vos données et activer les fonctionnalités de sauvegarde.',
+          'L\'utilisation de Leve n\'exige pas de compte. Vous pouvez, si vous le souhaitez, connecter un compte (Apple ou Google) uniquement pour renseigner votre nom et votre e-mail dans le profil.',
           'Les clés de déblocage de partenaires sont personnelles et incessibles, peuvent être révoquées en cas d\'usage abusif et n\'ouvrent droit à aucun remboursement ni indemnisation.',
           'Vous êtes responsable de la sécurité de votre appareil et de vos identifiants.',
         ],
@@ -169,8 +169,7 @@ export const legal: LegalCatalog = {
       {
         heading: '4. Compte et données collectées (optionnels)',
         paragraphs: [
-          'Lorsque vous connectez un compte Apple ou Google, nous recevons uniquement l\'identifiant du compte et, si vous l\'autorisez, votre nom et votre e-mail — utilisés pour renseigner votre profil et identifier votre sauvegarde. Nous ne recevons pas votre mot de passe.',
-          'Si vous créez un compte de sauvegarde, vos enregistrements sont envoyés chiffrés de bout en bout : la clé de chiffrement reste sur votre appareil et nous n\'avons aucun moyen technique de lire le contenu de la sauvegarde.',
+          'Lorsque vous connectez un compte Apple ou Google, nous recevons uniquement l\'identifiant du compte et, si vous l\'autorisez, votre nom et votre e-mail, utilisés pour renseigner votre profil. Nous ne recevons pas votre mot de passe.',
         ],
       },
       {
@@ -196,14 +195,14 @@ export const legal: LegalCatalog = {
       {
         heading: '8. Partage avec des sous-traitants',
         paragraphs: [
-          'Pour fournir les fonctionnalités optionnelles, nous faisons appel à des sous-traitants qui traitent les données en notre nom et sous contrat : hébergement du serveur de Leve (compte, sauvegarde chiffrée, validation des clés) et fournisseur d\'IA (analyse de photo). Les boutiques d\'applications traitent les abonnements de manière indépendante, conformément à leurs propres politiques.',
+          'Pour fournir les fonctionnalités optionnelles, nous faisons appel à des sous-traitants qui traitent les données en notre nom et sous contrat : hébergement du serveur de Leve (validation des clés de partenaire) et fournisseur d\'IA (analyse de photo). Les boutiques d\'applications traitent les abonnements de manière indépendante, conformément à leurs propres politiques.',
         ],
       },
       {
         heading: '9. Conservation et suppression',
         paragraphs: [
           'Les données locales restent sur votre appareil jusqu\'à ce que vous les supprimiez — le bouton « Supprimer mes données » efface tous les enregistrements de l\'application. Désinstaller l\'application supprime également les données locales.',
-          'La sauvegarde chiffrée et les données du compte sont conservées jusqu\'à ce que vous supprimiez le compte dans l\'application, ce qui retire la sauvegarde de nos serveurs.',
+          'Nous ne conservons pas vos enregistrements sur nos serveurs ; ces données ne nous sont pas envoyées.',
         ],
       },
       {
@@ -216,7 +215,7 @@ export const legal: LegalCatalog = {
       {
         heading: '11. Sécurité',
         paragraphs: [
-          'Nous adoptons des mesures techniques proportionnées : stockage local sur l\'appareil, chiffrement de bout en bout de la sauvegarde, communication par des canaux sécurisés, clés de services conservées uniquement sur le serveur et stockage des clés de partenaire uniquement sous forme de hash.',
+          'Nous adoptons des mesures techniques proportionnées : stockage local sur l\'appareil, communication par des canaux sécurisés, clés de services conservées uniquement sur le serveur et stockage des clés de partenaire uniquement sous forme de hash.',
         ],
       },
       {

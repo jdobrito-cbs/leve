@@ -285,7 +285,7 @@ export const LANDING_PAGE_HTML = `<!DOCTYPE html>
     <svg class="shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
     <div>
       <h2>Privacidade em primeiro lugar</h2>
-      <p>Seus registros ficam no seu aparelho. As integrações de saúde só funcionam com a sua permissão, as fotos de refeição não são armazenadas e nada é usado para publicidade. O backup é opcional e criptografado de ponta a ponta com uma chave derivada da sua senha, então o servidor guarda apenas um arquivo que não consegue abrir.</p>
+      <p>Seus registros ficam no seu aparelho. As integrações de saúde só funcionam com a sua permissão, as fotos de refeição não são armazenadas e nada é usado para publicidade. Não enviamos seus registros para nossos servidores.</p>
     </div>
   </div>
 </div></section>
@@ -332,7 +332,7 @@ export const LANDING_PAGE_HTML = `<!DOCTYPE html>
   </div>
   <div class="faq reveal">
     <details><summary>O Leve substitui meu médico? <span class="plus">+</span></summary><p>Não. O Leve registra e organiza suas informações. Ele não fornece diagnóstico nem orientação sobre dose. Decisões sobre medicamentos, ajustes e tratamento são sempre do seu médico.</p></details>
-    <details><summary>Meus dados ficam seguros? <span class="plus">+</span></summary><p>Sim. Seus registros ficam no seu aparelho. O backup é opcional e criptografado de ponta a ponta, então nem nós conseguimos ler. Nada é usado para publicidade nem compartilhado com terceiros.</p></details>
+    <details><summary>Meus dados ficam seguros? <span class="plus">+</span></summary><p>Sim. Seus registros ficam no seu aparelho e não são enviados aos nossos servidores. Nada é usado para publicidade nem compartilhado com terceiros.</p></details>
     <details><summary>Funciona sem internet? <span class="plus">+</span></summary><p>Sim. O registro do dia a dia funciona offline. A análise de foto e a importação da saúde conectada usam conexão quando você as utiliza.</p></details>
     <details><summary>Preciso de uma balança especial? <span class="plus">+</span></summary><p>Não. Você pode registrar tudo manualmente. Se tiver uma balança que envia os dados ao Apple Saúde ou ao Health Connect, o Leve importa a composição corporal automaticamente.</p></details>
     <details><summary>Como cancelo a assinatura? <span class="plus">+</span></summary><p>Pelas configurações da sua conta na App Store ou no Google Play, quando quiser. A assinatura renova automaticamente até você cancelar.</p></details>

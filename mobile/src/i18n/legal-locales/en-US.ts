@@ -62,7 +62,7 @@ export const legal: LegalCatalog = {
         heading: '2. The service',
         paragraphs: [
           'Leve is a personal wellness diary designed for people following treatment with GLP-1 medications: logging of water, meals, weight, measurements, doses, symptoms, cycle, sleep, exercise, and appointments, with charts, reminders, and informational reports.',
-          'Leve works primarily on your device: your entries are stored locally. Optional features (account, encrypted backup, photo analysis by artificial intelligence) use remote services as described in the Privacy Policy.',
+          'Leve works primarily on your device: your entries are stored locally. Optional features (sign-in with Apple or Google and photo analysis by artificial intelligence) use remote services as described in the Privacy Policy.',
           'Leve records and organizes information; it does not provide medical, nutritional, or pharmaceutical services.',
         ],
       },
@@ -75,7 +75,7 @@ export const legal: LegalCatalog = {
       {
         heading: '4. Account, access keys, and security',
         paragraphs: [
-          'Using Leve does not require an account. You may optionally connect an account (Apple or Google) to fill in your details and enable backup features.',
+          'Using Leve does not require an account. You may optionally connect an account (Apple or Google) only to fill in your name and email in your profile.',
           'Partner unlock keys are personal and non-transferable, may be revoked in the event of misuse, and do not create any right to a refund or compensation.',
           'You are responsible for keeping your device and your credentials secure.',
         ],
@@ -169,8 +169,7 @@ export const legal: LegalCatalog = {
       {
         heading: '4. Account and data collected (optional)',
         paragraphs: [
-          'When you connect an Apple or Google account, we receive only the account identifier and, when you authorize it, your name and email — used to fill in your profile and identify your backup. We do not receive your password.',
-          'If you create a backup account, your entries are sent encrypted end to end: the encryption key stays on your device, and we have no technical means of reading the contents of the backup.',
+          'When you connect an Apple or Google account, we receive only the account identifier and, when you authorize it, your name and email, used to fill in your profile. We do not receive your password.',
         ],
       },
       {
@@ -196,14 +195,14 @@ export const legal: LegalCatalog = {
       {
         heading: '8. Sharing with processors',
         paragraphs: [
-          'To provide the optional features, we use processors that handle data on our behalf and under contract: hosting of the Leve server (account, encrypted backup, key validation) and the AI provider (photo analysis). The app stores process subscriptions independently, under their own policies.',
+          'To provide the optional features, we use processors that handle data on our behalf and under contract: hosting of the Leve server (partner key validation) and the AI provider (photo analysis). The app stores process subscriptions independently, under their own policies.',
         ],
       },
       {
         heading: '9. Retention and deletion',
         paragraphs: [
           'Local data remains on your device until you delete it — the "Delete my data" button erases all of the app\'s entries. Uninstalling the app also removes the local data.',
-          'The encrypted backup and the account data are kept until you delete your account in the app, which removes the backup from our servers.',
+          'We do not keep your entries on our servers: the app does not send that data to us.',
         ],
       },
       {
@@ -216,7 +215,7 @@ export const legal: LegalCatalog = {
       {
         heading: '11. Security',
         paragraphs: [
-          'We adopt proportionate technical measures: local storage on the device, end-to-end encryption for the backup, communication over secure channels, service keys kept only on the server, and partner keys stored only as hashes.',
+          'We adopt proportionate technical measures: local storage on the device, communication over secure channels, service keys kept only on the server, and partner keys stored only as hashes.',
         ],
       },
       {

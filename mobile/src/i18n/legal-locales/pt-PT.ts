@@ -62,7 +62,7 @@ export const legal: LegalCatalog = {
         heading: '2. O serviço',
         paragraphs: [
           'O Leve é um diário pessoal de bem-estar dirigido a quem acompanha tratamentos com medicamentos GLP-1: registo de água, refeições, peso, medidas, doses, sintomas, ciclo, sono, exercícios e consultas, com gráficos, lembretes e relatórios informativos.',
-          'O Leve funciona prioritariamente no seu dispositivo: os seus registos ficam armazenados localmente. As funcionalidades opcionais (conta, cópia de segurança encriptada, análise de fotografia por inteligência artificial) usam serviços remotos conforme descrito na Política de Privacidade.',
+          'O Leve funciona prioritariamente no seu dispositivo: os seus registos ficam armazenados localmente. As funcionalidades opcionais (início de sessão com Apple ou Google e análise de fotografia por inteligência artificial) usam serviços remotos conforme descrito na Política de Privacidade.',
           'O Leve regista e organiza informações; não presta serviços médicos, nutricionais ou farmacêuticos.',
         ],
       },
@@ -75,7 +75,7 @@ export const legal: LegalCatalog = {
       {
         heading: '4. Conta, chaves de acesso e segurança',
         paragraphs: [
-          'A utilização do Leve não exige conta. Pode, opcionalmente, ligar uma conta (Apple ou Google) para preencher os seus dados e ativar funcionalidades de cópia de segurança.',
+          'A utilização do Leve não exige conta. Pode, opcionalmente, ligar uma conta (Apple ou Google) apenas para preencher o seu nome e e-mail no perfil.',
           'As chaves de desbloqueio de parceiros são pessoais e intransmissíveis, podem ser revogadas em caso de utilização indevida e não conferem direito a reembolso ou indemnização.',
           'É responsável por manter a segurança do seu dispositivo e das suas credenciais.',
         ],
@@ -169,8 +169,7 @@ export const legal: LegalCatalog = {
       {
         heading: '4. Conta e dados recolhidos (opcionais)',
         paragraphs: [
-          'Ao ligar uma conta Apple ou Google, recebemos apenas o identificador da conta e, quando autoriza, o nome e o e-mail — usados para preencher o seu perfil e identificar a sua cópia de segurança. Não recebemos a sua palavra-passe.',
-          'Se criar uma conta de cópia de segurança, os seus registos são enviados encriptados de ponta a ponta: a chave de encriptação fica no seu dispositivo e não temos meios técnicos de ler o conteúdo da cópia de segurança.',
+          'Ao ligar uma conta Apple ou Google, recebemos apenas o identificador da conta e, quando autoriza, o nome e o e-mail, usados para preencher o seu perfil. Não recebemos a sua palavra-passe.',
         ],
       },
       {
@@ -196,14 +195,14 @@ export const legal: LegalCatalog = {
       {
         heading: '8. Partilha com operadores',
         paragraphs: [
-          'Para prestar as funcionalidades opcionais, usamos operadores (subcontratantes) que tratam dados em nosso nome e sob contrato: alojamento do servidor do Leve (conta, cópia de segurança encriptada, validação de chaves) e fornecedor de IA (análise de fotografia). As lojas de aplicações processam as subscrições de forma independente, de acordo com as suas próprias políticas.',
+          'Para prestar as funcionalidades opcionais, usamos operadores (subcontratantes) que tratam dados em nosso nome e sob contrato: alojamento do servidor do Leve (validação de chaves de parceiro) e fornecedor de IA (análise de fotografia). As lojas de aplicações processam as subscrições de forma independente, de acordo com as suas próprias políticas.',
         ],
       },
       {
         heading: '9. Conservação e eliminação',
         paragraphs: [
           'Os dados locais permanecem no seu dispositivo até os eliminar — o botão “Eliminar os meus dados” apaga todos os registos da aplicação. Desinstalar a aplicação também remove os dados locais.',
-          'A cópia de segurança encriptada e os dados da conta são mantidos até eliminar a conta na aplicação, o que remove a cópia de segurança dos nossos servidores.',
+          'Não guardamos os seus registos nos nossos servidores: a aplicação não nos envia esses dados.',
         ],
       },
       {
@@ -216,7 +215,7 @@ export const legal: LegalCatalog = {
       {
         heading: '11. Segurança',
         paragraphs: [
-          'Adotamos medidas técnicas proporcionais: armazenamento local no dispositivo, encriptação de ponta a ponta na cópia de segurança, comunicação por canais seguros, chaves de serviços mantidas apenas no servidor e armazenamento das chaves de parceiro apenas como hash.',
+          'Adotamos medidas técnicas proporcionais: armazenamento local no dispositivo, comunicação por canais seguros, chaves de serviços mantidas apenas no servidor e armazenamento das chaves de parceiro apenas como hash.',
         ],
       },
       {

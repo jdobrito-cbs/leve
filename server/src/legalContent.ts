@@ -61,7 +61,7 @@ export const termsOfUse: LegalDoc = {
       "heading": "2. O serviço",
       "paragraphs": [
         "O Leve é um diário pessoal de bem-estar voltado a quem acompanha tratamentos com medicamentos GLP-1: registro de água, refeições, peso, medidas, doses, sintomas, ciclo, sono, exercícios e consultas, com gráficos, lembretes e relatórios informativos.",
-        "O Leve funciona prioritariamente no seu aparelho: os seus registros ficam armazenados localmente. Recursos opcionais (conta, backup cifrado, análise de foto por inteligência artificial) usam serviços remotos conforme descrito na Política de Privacidade.",
+        "O Leve funciona prioritariamente no seu aparelho: os seus registros ficam armazenados localmente. Recursos opcionais (login com Apple ou Google e análise de foto por inteligência artificial) usam serviços remotos conforme descrito na Política de Privacidade.",
         "O Leve registra e organiza informações; não presta serviços médicos, nutricionais ou farmacêuticos."
       ]
     },
@@ -74,7 +74,7 @@ export const termsOfUse: LegalDoc = {
     {
       "heading": "4. Conta, chaves de acesso e segurança",
       "paragraphs": [
-        "O uso do Leve não exige conta. Você pode, opcionalmente, conectar uma conta (Apple ou Google) para preencher seus dados e habilitar recursos de backup.",
+        "O uso do Leve não exige conta. Você pode, opcionalmente, entrar com Apple ou Google apenas para preencher seu nome e e-mail no perfil.",
         "Chaves de desbloqueio de parceiros são pessoais e intransferíveis, podem ser revogadas em caso de uso indevido e não geram direito a reembolso ou indenização.",
         "Você é responsável por manter a segurança do seu aparelho e das suas credenciais."
       ]
@@ -171,8 +171,7 @@ export const privacyPolicy: LegalDoc = {
     {
       "heading": "4. Conta e dados coletados (opcionais)",
       "paragraphs": [
-        "Ao conectar uma conta Apple ou Google, recebemos apenas o identificador da conta e, quando você autoriza, nome e e-mail, usados para preencher seu perfil e identificar seu backup. Não recebemos sua senha.",
-        "Se você criar uma conta de backup, seus registros são enviados cifrados de ponta a ponta: a chave de cifragem fica no seu aparelho e não temos meios técnicos de ler o conteúdo do backup."
+        "Ao conectar uma conta Apple ou Google, recebemos apenas o identificador da conta e, quando você autoriza, nome e e-mail, usados para preencher seu perfil. Não recebemos sua senha.",
       ]
     },
     {
@@ -198,27 +197,27 @@ export const privacyPolicy: LegalDoc = {
     {
       "heading": "8. Compartilhamento com operadores",
       "paragraphs": [
-        "Para prestar os recursos opcionais, usamos operadores que tratam dados em nosso nome e sob contrato: hospedagem do servidor do Leve (conta, backup cifrado, validação de chaves) e provedor de IA (análise de foto). As lojas de aplicativos processam as assinaturas de forma independente, conforme suas próprias políticas."
+        "Para prestar os recursos opcionais, usamos operadores que tratam dados em nosso nome e sob contrato: hospedagem do servidor do Leve (validação de chaves de parceiro) e provedor de IA (análise de foto). As lojas de aplicativos processam as assinaturas de forma independente, conforme suas próprias políticas."
       ]
     },
     {
       "heading": "9. Retenção e exclusão",
       "paragraphs": [
         "Dados locais permanecem no seu aparelho até você os excluir. O botão \"Excluir meus dados\" apaga todos os registros do aplicativo. Desinstalar o aplicativo também remove os dados locais.",
-        "O backup cifrado e os dados da conta são mantidos até você excluir a conta no aplicativo, o que remove o backup dos nossos servidores."
+        "Não guardamos seus registros nos nossos servidores: o aplicativo não envia esses dados para nós."
       ]
     },
     {
       "heading": "10. Seus direitos (LGPD e leis equivalentes)",
       "paragraphs": [
-        "Você pode exercer, diretamente pelo aplicativo: acesso e portabilidade (\"Exportar meus dados\" gera um arquivo completo em formato aberto), correção (editando os registros) e eliminação (\"Excluir meus dados\" e exclusão da conta).",
+        "Você pode exercer, diretamente pelo aplicativo: acesso e portabilidade (\"Exportar meus dados\" gera um arquivo completo em formato aberto), correção (editando os registros) e eliminação (\"Excluir meus dados\").",
         "Também pode revogar consentimentos (desativando integrações e recursos) e solicitar informações adicionais pelo e-mail jdobrito@gmail.com. Titulares no Brasil podem ainda peticionar à Autoridade Nacional de Proteção de Dados (ANPD). Usuários em outras jurisdições (como a União Europeia) têm direitos equivalentes garantidos pelas leis locais, incluindo acesso, retificação, apagamento e portabilidade."
       ]
     },
     {
       "heading": "11. Segurança",
       "paragraphs": [
-        "Adotamos medidas técnicas proporcionais: armazenamento local no aparelho, cifragem de ponta a ponta no backup, comunicação por canais seguros, chaves de serviços mantidas apenas no servidor e armazenamento de chaves de parceiro apenas como hash."
+        "Adotamos medidas técnicas proporcionais: armazenamento local no aparelho, comunicação por canais seguros, chaves de serviços mantidas apenas no servidor e armazenamento de chaves de parceiro apenas como hash."
       ]
     },
     {

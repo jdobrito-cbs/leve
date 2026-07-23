@@ -62,7 +62,7 @@ export const legal: LegalCatalog = {
         heading: '2. Der Dienst',
         paragraphs: [
           'Leve ist ein persönliches Wohlbefindens-Tagebuch für Menschen, die eine Behandlung mit GLP-1-Medikamenten begleiten: Erfassung von Wasser, Mahlzeiten, Gewicht, Körpermaßen, Dosen, Symptomen, Zyklus, Schlaf, Training und Arztterminen, mit Diagrammen, Erinnerungen und informativen Berichten.',
-          'Leve funktioniert vorrangig auf Ihrem Gerät: Ihre Einträge werden lokal gespeichert. Optionale Funktionen (Konto, verschlüsseltes Backup, Fotoanalyse durch künstliche Intelligenz) nutzen entfernte Dienste, wie in der Datenschutzerklärung beschrieben.',
+          'Leve funktioniert vorrangig auf Ihrem Gerät: Ihre Einträge werden lokal gespeichert. Optionale Funktionen (Anmeldung mit Apple oder Google und Fotoanalyse durch künstliche Intelligenz) nutzen entfernte Dienste, wie in der Datenschutzerklärung beschrieben.',
           'Leve erfasst und organisiert Informationen; es erbringt keine medizinischen, ernährungsbezogenen oder pharmazeutischen Dienstleistungen.',
         ],
       },
@@ -75,7 +75,7 @@ export const legal: LegalCatalog = {
       {
         heading: '4. Konto, Zugangsschlüssel und Sicherheit',
         paragraphs: [
-          'Die Nutzung von Leve erfordert kein Konto. Sie können optional ein Konto (Apple oder Google) verbinden, um Ihre Daten auszufüllen und Backup-Funktionen zu aktivieren.',
+          'Die Nutzung von Leve erfordert kein Konto. Sie können optional ein Konto (Apple oder Google) verbinden, nur um Ihren Namen und Ihre E-Mail-Adresse im Profil auszufüllen.',
           'Partner-Freischaltschlüssel sind persönlich und nicht übertragbar, können bei missbräuchlicher Nutzung widerrufen werden und begründen keinen Anspruch auf Erstattung oder Entschädigung.',
           'Sie sind dafür verantwortlich, die Sicherheit Ihres Geräts und Ihrer Zugangsdaten zu gewährleisten.',
         ],
@@ -169,8 +169,7 @@ export const legal: LegalCatalog = {
       {
         heading: '4. Konto und erhobene Daten (optional)',
         paragraphs: [
-          'Wenn Sie ein Apple- oder Google-Konto verbinden, erhalten wir nur die Kontokennung und, sofern Sie es erlauben, Name und E-Mail-Adresse — verwendet, um Ihr Profil auszufüllen und Ihr Backup zuzuordnen. Ihr Passwort erhalten wir nicht.',
-          'Wenn Sie ein Backup-Konto erstellen, werden Ihre Einträge Ende-zu-Ende-verschlüsselt übertragen: Der Verschlüsselungsschlüssel bleibt auf Ihrem Gerät, und wir haben keine technische Möglichkeit, den Inhalt des Backups zu lesen.',
+          'Wenn Sie ein Apple- oder Google-Konto verbinden, erhalten wir nur die Kontokennung und, sofern Sie es erlauben, Name und E-Mail-Adresse, verwendet, um Ihr Profil auszufüllen. Ihr Passwort erhalten wir nicht.',
         ],
       },
       {
@@ -196,14 +195,14 @@ export const legal: LegalCatalog = {
       {
         heading: '8. Weitergabe an Auftragsverarbeiter',
         paragraphs: [
-          'Zur Bereitstellung der optionalen Funktionen nutzen wir Auftragsverarbeiter, die Daten in unserem Auftrag und auf Vertragsbasis verarbeiten: das Hosting des Leve-Servers (Konto, verschlüsseltes Backup, Schlüsselprüfung) und den KI-Anbieter (Fotoanalyse). Die App-Stores verarbeiten die Abonnements eigenständig nach ihren eigenen Richtlinien.',
+          'Zur Bereitstellung der optionalen Funktionen nutzen wir Auftragsverarbeiter, die Daten in unserem Auftrag und auf Vertragsbasis verarbeiten: das Hosting des Leve-Servers (Prüfung der Partnerschlüssel) und den KI-Anbieter (Fotoanalyse). Die App-Stores verarbeiten die Abonnements eigenständig nach ihren eigenen Richtlinien.',
         ],
       },
       {
         heading: '9. Aufbewahrung und Löschung',
         paragraphs: [
           'Lokale Daten verbleiben auf Ihrem Gerät, bis Sie sie löschen — die Schaltfläche „Meine Daten löschen“ entfernt alle Einträge der App. Auch das Deinstallieren der App entfernt die lokalen Daten.',
-          'Das verschlüsselte Backup und die Kontodaten werden aufbewahrt, bis Sie das Konto in der App löschen; damit wird das Backup von unseren Servern entfernt.',
+          'Wir speichern Ihre Einträge nicht auf unseren Servern: Die App sendet uns diese Daten nicht.',
         ],
       },
       {
@@ -216,7 +215,7 @@ export const legal: LegalCatalog = {
       {
         heading: '11. Sicherheit',
         paragraphs: [
-          'Wir treffen verhältnismäßige technische Maßnahmen: lokale Speicherung auf dem Gerät, Ende-zu-Ende-Verschlüsselung des Backups, Kommunikation über sichere Kanäle, Dienstschlüssel, die nur auf dem Server aufbewahrt werden, und Speicherung von Partnerschlüsseln ausschließlich als Hash.',
+          'Wir treffen verhältnismäßige technische Maßnahmen: lokale Speicherung auf dem Gerät, Kommunikation über sichere Kanäle, Dienstschlüssel, die nur auf dem Server aufbewahrt werden, und Speicherung von Partnerschlüsseln ausschließlich als Hash.',
         ],
       },
       {

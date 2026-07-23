@@ -62,7 +62,7 @@ export const legal: LegalCatalog = {
         heading: '2. El servicio',
         paragraphs: [
           'Leve es un diario personal de bienestar dirigido a quienes siguen tratamientos con medicamentos GLP-1: registro de agua, comidas, peso, medidas, dosis, síntomas, ciclo, sueño, ejercicios y consultas, con gráficos, recordatorios e informes informativos.',
-          'Leve funciona prioritariamente en tu dispositivo: tus registros se almacenan localmente. Las funciones opcionales (cuenta, copia de seguridad cifrada, análisis de foto mediante inteligencia artificial) usan servicios remotos según se describe en la Política de Privacidad.',
+          'Leve funciona prioritariamente en tu dispositivo: tus registros se almacenan localmente. Las funciones opcionales (inicio de sesión con Apple o Google y análisis de foto mediante inteligencia artificial) usan servicios remotos según se describe en la Política de Privacidad.',
           'Leve registra y organiza información; no presta servicios médicos, nutricionales ni farmacéuticos.',
         ],
       },
@@ -75,7 +75,7 @@ export const legal: LegalCatalog = {
       {
         heading: '4. Cuenta, claves de acceso y seguridad',
         paragraphs: [
-          'El uso de Leve no exige una cuenta. Puedes, opcionalmente, conectar una cuenta (Apple o Google) para completar tus datos y habilitar las funciones de copia de seguridad.',
+          'El uso de Leve no exige una cuenta. Puedes, opcionalmente, conectar una cuenta (Apple o Google) solo para completar tu nombre y correo en el perfil.',
           'Las claves de desbloqueo de socios son personales e intransferibles, pueden ser revocadas en caso de uso indebido y no generan derecho a reembolso ni a indemnización.',
           'Eres responsable de mantener la seguridad de tu dispositivo y de tus credenciales.',
         ],
@@ -169,8 +169,7 @@ export const legal: LegalCatalog = {
       {
         heading: '4. Cuenta y datos recopilados (opcionales)',
         paragraphs: [
-          'Al conectar una cuenta de Apple o Google, recibimos solo el identificador de la cuenta y, cuando lo autorizas, el nombre y el correo electrónico — usados para completar tu perfil e identificar tu copia de seguridad. No recibimos tu contraseña.',
-          'Si creas una cuenta de copia de seguridad, tus registros se envían cifrados de extremo a extremo: la clave de cifrado se queda en tu dispositivo y no tenemos medios técnicos para leer el contenido de la copia de seguridad.',
+          'Al conectar una cuenta de Apple o Google, recibimos solo el identificador de la cuenta y, cuando lo autorizas, el nombre y el correo electrónico, usados para completar tu perfil. No recibimos tu contraseña.',
         ],
       },
       {
@@ -196,14 +195,14 @@ export const legal: LegalCatalog = {
       {
         heading: '8. Compartición con encargados del tratamiento',
         paragraphs: [
-          'Para prestar las funciones opcionales, usamos encargados que tratan datos en nuestro nombre y bajo contrato: el alojamiento del servidor de Leve (cuenta, copia de seguridad cifrada, validación de claves) y el proveedor de IA (análisis de foto). Las tiendas de aplicaciones procesan las suscripciones de forma independiente, conforme a sus propias políticas.',
+          'Para prestar las funciones opcionales, usamos encargados que tratan datos en nuestro nombre y bajo contrato: el alojamiento del servidor de Leve (validación de claves de socio) y el proveedor de IA (análisis de foto). Las tiendas de aplicaciones procesan las suscripciones de forma independiente, conforme a sus propias políticas.',
         ],
       },
       {
         heading: '9. Retención y eliminación',
         paragraphs: [
           'Los datos locales permanecen en tu dispositivo hasta que los elimines — el botón "Eliminar mis datos" borra todos los registros de la aplicación. Desinstalar la aplicación también elimina los datos locales.',
-          'La copia de seguridad cifrada y los datos de la cuenta se conservan hasta que elimines la cuenta en la aplicación, lo que elimina la copia de seguridad de nuestros servidores.',
+          'No guardamos tus registros en nuestros servidores: la aplicación no nos envía esos datos.',
         ],
       },
       {
@@ -216,7 +215,7 @@ export const legal: LegalCatalog = {
       {
         heading: '11. Seguridad',
         paragraphs: [
-          'Adoptamos medidas técnicas proporcionales: almacenamiento local en el dispositivo, cifrado de extremo a extremo en la copia de seguridad, comunicación por canales seguros, claves de servicios mantenidas solo en el servidor y almacenamiento de las claves de socio únicamente como hash.',
+          'Adoptamos medidas técnicas proporcionales: almacenamiento local en el dispositivo, comunicación por canales seguros, claves de servicios mantenidas solo en el servidor y almacenamiento de las claves de socio únicamente como hash.',
         ],
       },
       {
