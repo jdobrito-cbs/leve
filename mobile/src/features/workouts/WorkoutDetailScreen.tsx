@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Modal, View } from 'react-native';
+import { ActivityIndicator, Modal, View } from 'react-native';
 import * as Sharing from 'expo-sharing';
 import { captureRef } from 'react-native-view-shot';
 import { formatDateTimeShort } from '@/core/datetime';
@@ -10,6 +10,7 @@ import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
 import { getWorkout, type Workout } from '@/db/workoutRepo';
 import { ShareCard } from './ShareCard';
+import { buildRouteMapImage } from './staticMap';
 import {
   caloriesLabel,
   distanceLabel,
@@ -39,6 +40,8 @@ export function WorkoutDetailScreen() {
   const [w, setW] = useState<Workout | null>(null);
   const [sharing, setSharing] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [mapUri, setMapUri] = useState<string | null>(null);
+  const [mapLoading, setMapLoading] = useState(false);
   const cardRef = useRef<View>(null);
 
   useEffect(() => {
@@ -49,6 +52,17 @@ export function WorkoutDetailScreen() {
         .catch(() => setW(null));
     }
   }, [id]);
+
+  async function openShare(workout: Workout) {
+    setMapUri(null);
+    setSharing(true);
+    if (workout.route && workout.route.length > 1) {
+      setMapLoading(true);
+      const uri = await buildRouteMapImage(workout.route, 680, 380).catch(() => null);
+      setMapUri(uri);
+      setMapLoading(false);
+    }
+  }
 
   async function doShare() {
     setBusy(true);
@@ -90,7 +104,7 @@ export function WorkoutDetailScreen() {
             <Stat label={strings.workouts.heartRate} value={heartRateLabel(w.avgHr)} />
             <Stat label={strings.workouts.calories} value={caloriesLabel(w.calories)} />
           </Card>
-          <Button label={strings.workouts.share} onPress={() => setSharing(true)} />
+          <Button label={strings.workouts.share} onPress={() => openShare(w)} />
 
           <Modal
             visible={sharing}
@@ -109,14 +123,21 @@ export function WorkoutDetailScreen() {
                 gap: spacing.lg,
               }}
             >
-              <ShareCard ref={cardRef} workout={w} />
-              <View style={{ width: '100%', maxWidth: 340, gap: spacing.sm }}>
-                <Button label={strings.workouts.share} onPress={doShare} disabled={busy} />
-                <Button
-                  label={strings.common.close}
-                  variant="secondary"
-                  onPress={() => setSharing(false)}
-                />
+              <ShareCard ref={cardRef} workout={w} mapUri={mapUri} />
+              <View style={{ width: '100%', maxWidth: 340, gap: spacing.sm, alignItems: 'center' }}>
+                {mapLoading ? <ActivityIndicator color="#fff" /> : null}
+                <View style={{ width: '100%', gap: spacing.sm }}>
+                  <Button
+                    label={strings.workouts.share}
+                    onPress={doShare}
+                    disabled={busy || mapLoading}
+                  />
+                  <Button
+                    label={strings.common.close}
+                    variant="secondary"
+                    onPress={() => setSharing(false)}
+                  />
+                </View>
               </View>
             </View>
           </Modal>

@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import { View } from 'react-native';
+import { Image, View } from 'react-native';
 import Svg, { Polyline, Rect } from 'react-native-svg';
 import { formatDateTimeShort } from '@/core/datetime';
 import { AppText } from '@/design/components';
@@ -56,11 +56,12 @@ function Metric({ label, value }: { label: string; value: string }) {
   );
 }
 
-export const ShareCard = forwardRef<View, { workout: Workout }>(function ShareCard({ workout: w }, ref) {
-  const { colors } = useTheme();
-  const line = w.route ? polylinePoints(w.route) : null;
+export const ShareCard = forwardRef<View, { workout: Workout; mapUri?: string | null }>(
+  function ShareCardImpl({ workout: w, mapUri }, ref) {
+    const { colors } = useTheme();
+    const line = w.route ? polylinePoints(w.route) : null;
 
-  return (
+    return (
     <View
       ref={ref}
       collapsable={false}
@@ -90,19 +91,27 @@ export const ShareCard = forwardRef<View, { workout: Workout }>(function ShareCa
       </View>
 
       <View style={{ height: MAP_H, backgroundColor: colors.primarySoft }}>
-        <Svg width={CARD_W} height={MAP_H}>
-          <Rect x={0} y={0} width={CARD_W} height={MAP_H} fill={colors.primarySoft} />
-          {line ? (
-            <Polyline
-              points={line}
-              fill="none"
-              stroke={colors.primary}
-              strokeWidth={4}
-              strokeLinejoin="round"
-              strokeLinecap="round"
-            />
-          ) : null}
-        </Svg>
+        {mapUri ? (
+          <Image
+            source={{ uri: mapUri }}
+            style={{ width: CARD_W, height: MAP_H }}
+            resizeMode="cover"
+          />
+        ) : (
+          <Svg width={CARD_W} height={MAP_H}>
+            <Rect x={0} y={0} width={CARD_W} height={MAP_H} fill={colors.primarySoft} />
+            {line ? (
+              <Polyline
+                points={line}
+                fill="none"
+                stroke={colors.primary}
+                strokeWidth={4}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+              />
+            ) : null}
+          </Svg>
+        )}
       </View>
 
       <View style={{ padding: spacing.md }}>
