@@ -3,6 +3,8 @@ import { isUsableAccuracy, stepDistanceM } from './geo';
 
 type Listener = () => void;
 
+const STALE_BEFORE_START_MS = 3000;
+
 let points: RoutePoint[] = [];
 let distanceM = 0;
 let startedAt = 0;
@@ -27,6 +29,7 @@ export function addRunPoint(
 ): void {
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
   if (!isUsableAccuracy(accuracyM)) return;
+  if (startedAt > 0 && atMs < startedAt - STALE_BEFORE_START_MS) return;
   const t = Math.max(0, atMs - startedAt);
   const p: RoutePoint = { lat, lng, t };
   const last = points[points.length - 1];
