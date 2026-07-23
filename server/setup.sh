@@ -61,6 +61,11 @@ echo "== Dependencias =="
 npm ci --include=dev --no-audit --no-fund
 
 echo "== Build =="
+# A atualizacao do painel sobrepoe os arquivos sem apagar os removidos; limpamos
+# saidas antigas e testes remanescentes para nao quebrar o build (ex.: um *.test.ts
+# antigo que aponta para codigo ja removido).
+rm -rf dist
+rm -f src/*.test.ts
 npx prisma generate
 npm run build
 

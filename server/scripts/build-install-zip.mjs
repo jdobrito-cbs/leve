@@ -9,9 +9,23 @@ const out = join(root, 'deploy', 'leve-server.zip');
 rmSync(join(root, 'deploy'), { recursive: true, force: true });
 mkdirSync(stage, { recursive: true });
 
-const items = ['app.md', 'setup.sh', 'package.json', 'package-lock.json', 'tsconfig.json', 'prisma', 'src'];
+const items = [
+  'app.md',
+  'setup.sh',
+  'package.json',
+  'package-lock.json',
+  'tsconfig.json',
+  'tsconfig.build.json',
+  'prisma',
+  'src',
+];
 for (const item of items) {
   cpSync(join(root, item), join(stage, item), { recursive: true });
+}
+
+const stageSrc = join(stage, 'src');
+for (const f of readdirSync(stageSrc)) {
+  if (f.endsWith('.test.ts')) rmSync(join(stageSrc, f));
 }
 
 for (const name of ['setup.sh', 'app.md']) {
