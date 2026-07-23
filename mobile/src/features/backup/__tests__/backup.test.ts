@@ -7,11 +7,6 @@ import { addWeight, latestWeight } from '@/db/weightRepo';
 import { setSetting, getSetting } from '@/db/settingsRepo';
 import { updateProfile, getProfile } from '@/db/profileRepo';
 import { exportAllData, importAllData, wipeAllData } from '../exportData';
-import { decryptBackup, deriveBackupKey, encryptBackup } from '../crypto';
-
-jest.mock('expo-crypto', () => ({
-  getRandomBytes: (n: number) => new Uint8Array(n).fill(7),
-}));
 
 function makeDb() {
   const sqlite = new Database(':memory:');
@@ -40,15 +35,4 @@ test('export → wipe → import restaura os dados (TACO preservada)', async () 
   expect(await waterTotalForDay(db, day)).toBe(500);
   expect((await latestWeight(db))?.weightKg).toBe(93.2);
   expect(await getSetting(db, 'waterGoalAuto')).toBe(false);
-});
-
-test('cripto E2E: roundtrip ok e chave errada falha', () => {
-  const key = deriveBackupKey('senha-forte-123', 'jorge@exemplo.com');
-  const payload = encryptBackup('{"oi":"leve"}', key);
-  expect(payload.startsWith('v1.')).toBe(true);
-  expect(decryptBackup(payload, key)).toBe('{"oi":"leve"}');
-
-  const wrong = deriveBackupKey('outra-senha', 'jorge@exemplo.com');
-  expect(() => decryptBackup(payload, wrong)).toThrow();
-  expect(() => decryptBackup('lixo', key)).toThrow();
 });

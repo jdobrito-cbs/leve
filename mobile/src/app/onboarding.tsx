@@ -270,11 +270,15 @@ function AccountStep({ onDone }: { onDone: () => void }) {
           {message}
         </AppText>
       ) : null}
-      <Pressable accessibilityRole="button" onPress={finish}>
-        <AppText variant="caption" muted style={{ textAlign: 'center' }}>
-          {strings.cloudAccount.skip}
-        </AppText>
-      </Pressable>
+      <Button
+        label={strings.cloudAccount.skip}
+        variant="secondary"
+        onPress={finish}
+        disabled={busy}
+      />
+      <AppText variant="caption" muted style={{ textAlign: 'center' }}>
+        {strings.cloudAccount.skipHint}
+      </AppText>
     </Card>
   );
 }

@@ -76,11 +76,6 @@ export function AccountPrivacyScreen() {
             {strings.profile.deleteDataConfirm}
           </AppText>
         ) : null}
-        <Button
-          label={strings.accountPrivacy.backup}
-          variant="secondary"
-          onPress={() => router.push('/conta' as never)}
-        />
       </Card>
 
       <Button label={strings.common.close} variant="secondary" onPress={() => router.back()} />

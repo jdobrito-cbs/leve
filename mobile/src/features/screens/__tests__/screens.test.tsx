@@ -236,7 +236,6 @@ test('Conta e privacidade: exportar e excluir funcionam', async () => {
     require('@/features/account/AccountPrivacyScreen') as typeof import('@/features/account/AccountPrivacyScreen');
   const { getByText } = await render(<AccountPrivacyScreen />);
   getByText(strings.accountPrivacy.accountSection);
-  getByText(strings.accountPrivacy.backup);
 
   await fireEvent.press(getByText(strings.profile.exportData));
   expect(mockExportAll).toHaveBeenCalled();
