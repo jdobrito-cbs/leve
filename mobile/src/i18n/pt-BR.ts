@@ -78,6 +78,7 @@ const ptBR = {
     speed: 'Velocidade',
     heartRate: 'Pulsação',
     calories: 'Calorias',
+    share: 'Compartilhar',
     empty: 'Nenhum treino ainda. Sincronize com o Apple Saúde ou Health Connect.',
     record: 'Gravar corrida',
     start: 'Iniciar',

@@ -78,6 +78,7 @@ export const strings: Strings = {
     speed: 'מהירות',
     heartRate: 'דופק',
     calories: 'קלוריות',
+    share: 'שיתוף',
     empty: 'אין עדיין אימונים. סנכרן עם Apple Health או Health Connect.',
     record: 'הקלטת ריצה',
     start: 'התחלה',

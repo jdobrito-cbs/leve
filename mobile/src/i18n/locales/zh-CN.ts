@@ -78,6 +78,7 @@ export const strings: Strings = {
     speed: '速度',
     heartRate: '心率',
     calories: '卡路里',
+    share: '分享',
     empty: '还没有运动记录。请与 Apple 健康或 Health Connect 同步。',
     record: '记录跑步',
     start: '开始',

@@ -77,6 +77,7 @@ export const strings: Strings = {
     speed: 'السرعة',
     heartRate: 'معدل ضربات القلب',
     calories: 'السعرات',
+    share: 'مشاركة',
     empty: 'لا توجد تمارين بعد. زامِن مع Apple Health أو Health Connect.',
     record: 'تسجيل الجري',
     start: 'ابدأ',

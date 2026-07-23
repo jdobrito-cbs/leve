@@ -78,6 +78,7 @@ export const strings: Strings = {
     speed: 'Velocidad',
     heartRate: 'Pulso',
     calories: 'Calorías',
+    share: 'Compartir',
     empty: 'Aún no hay entrenamientos. Sincroniza con Apple Salud o Health Connect.',
     record: 'Grabar carrera',
     start: 'Iniciar',
