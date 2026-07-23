@@ -90,6 +90,8 @@ export const strings: Strings = {
     neverSynced: 'अभी तक सिंक नहीं हुआ',
     syncedCount: 'नए वर्कआउट: {count}',
     syncedNone: 'कोई नया वर्कआउट नहीं',
+    starting: 'शुरू हो रहा है…',
+    startFailed: 'GPS शुरू नहीं हो सका। फिर से प्रयास करें।',
   },
   today: {
     greeting: 'नमस्ते!',
@@ -518,6 +520,8 @@ export const strings: Strings = {
     importNow: 'सिंक करें',
     manageAccess: 'सेटिंग्स में एक्सेस प्रबंधित करें',
     importedSuffix: 'डेटा आयात हुए',
+    syncedTitle: 'डेटा सिंक हो गया',
+    syncedCount: '{count} डेटा सिंक हुए',
     unavailable:
       'इस डिवाइस पर उपलब्ध नहीं — डेवलपमेंट ऐप (dev build) और Health Connect/Apple Health चाहिए।',
     connectDenied:

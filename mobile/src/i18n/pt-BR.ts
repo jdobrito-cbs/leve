@@ -90,6 +90,8 @@ const ptBR = {
     neverSynced: 'Ainda não sincronizado',
     syncedCount: 'Novos treinos: {count}',
     syncedNone: 'Nenhum treino novo',
+    starting: 'Iniciando…',
+    startFailed: 'Não foi possível iniciar o GPS. Tente novamente.',
   },
   today: {
     greeting: 'Olá!',
@@ -518,6 +520,8 @@ const ptBR = {
     importNow: 'Sincronizar',
     manageAccess: 'Gerenciar acesso nos ajustes',
     importedSuffix: 'dados importados',
+    syncedTitle: 'Dados sincronizados',
+    syncedCount: '{count} dados sincronizados',
     unavailable:
       'Indisponível neste aparelho — requer o app de desenvolvimento (dev build) e o Health Connect/Apple Saúde.',
     connectDenied:

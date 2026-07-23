@@ -17,7 +17,6 @@ import {
   SegmentedChips,
 } from '@/design/components';
 import { spacing } from '@/design/tokens';
-import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
 import {
   Appointment,
@@ -28,6 +27,7 @@ import {
 import { getSetting } from '@/db/settingsRepo';
 import { isLocked } from '@/features/premium/gates';
 import { usePremium } from '@/features/premium/usePremium';
+import { showMessage } from '@/design/messageSignal';
 import { strings } from '@/i18n/pt-BR';
 import {
   ReminderSettings,
@@ -48,14 +48,12 @@ async function rescheduleReminders() {
 }
 
 export function AppointmentsScreen() {
-  const { colors } = useTheme();
   const { premium } = usePremium();
   const [list, setList] = useState<Appointment[]>([]);
   const [place, setPlace] = useState('');
   const [specialty, setSpecialty] = useState<SpecialtyKey | null>(null);
   const [otherSpecialty, setOtherSpecialty] = useState('');
   const [doctor, setDoctor] = useState('');
-  const [saved, setSaved] = useState(false);
   const [dateStr, setDateStr] = useState(formatDateBR(new Date()));
   const [timeStr, setTimeStr] = useState(formatTimeHM(new Date()));
   const at = parseDateTimeBR(dateStr, timeStr);
@@ -121,7 +119,7 @@ export function AppointmentsScreen() {
     setSpecialty(null);
     setOtherSpecialty('');
     setDoctor('');
-    setSaved(true);
+    showMessage(strings.appointments.savedLabel);
     await load();
   }
 
@@ -148,7 +146,6 @@ export function AppointmentsScreen() {
           label={strings.appointments.placeLabel}
           value={place}
           onChangeText={(v) => {
-            setSaved(false);
             setPlace(v);
           }}
           placeholder={strings.appointments.placeLabel}
@@ -160,7 +157,6 @@ export function AppointmentsScreen() {
           options={specialtyOptions()}
           value={specialty}
           onChange={(v) => {
-            setSaved(false);
             setSpecialty(v);
           }}
         />
@@ -169,7 +165,6 @@ export function AppointmentsScreen() {
             label={strings.appointments.otherSpecialtyLabel}
             value={otherSpecialty}
             onChangeText={(v) => {
-              setSaved(false);
               setOtherSpecialty(v);
             }}
           />
@@ -178,7 +173,6 @@ export function AppointmentsScreen() {
           label={strings.appointments.doctorLabel}
           value={doctor}
           onChangeText={(v) => {
-            setSaved(false);
             setDoctor(v);
           }}
         />
@@ -189,11 +183,6 @@ export function AppointmentsScreen() {
           onChangeTime={setTimeStr}
         />
         <Button label={strings.appointments.save} onPress={save} disabled={!valid} />
-        {saved ? (
-          <AppText variant="caption" style={{ color: colors.success }}>
-            {strings.appointments.savedLabel}
-          </AppText>
-        ) : null}
         <AppText variant="caption" muted>
           {strings.appointments.remindersNote}
         </AppText>

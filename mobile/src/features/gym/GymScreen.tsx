@@ -20,13 +20,13 @@ import {
   SegmentedChips,
 } from '@/design/components';
 import { spacing } from '@/design/tokens';
-import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
 import { GymLog, addGymLog, deleteGymLog, gymKcalForDay, listGymLogs } from '@/db/gymRepo';
 import { latestWeight } from '@/db/weightRepo';
 import { GYM_EXERCISES, GymExerciseKey, estimateKcal } from '@/features/gym/exercises';
 import { isLocked } from '@/features/premium/gates';
 import { usePremium } from '@/features/premium/usePremium';
+import { showMessage } from '@/design/messageSignal';
 import { strings } from '@/i18n/pt-BR';
 import { displayToKg, formatWeight, kgToDisplay, weightUnit } from '@/core/units';
 
@@ -47,7 +47,6 @@ function detailLabel(log: GymLog): string {
 }
 
 export function GymScreen() {
-  const { colors } = useTheme();
   const { premium } = usePremium();
   const [exercise, setExercise] = useState<GymExerciseKey>('supino');
   const [weightStr, setWeightStr] = useState('');
@@ -57,7 +56,6 @@ export function GymScreen() {
   const [bodyKg, setBodyKg] = useState(70);
   const [list, setList] = useState<GymLog[]>([]);
   const [todayKcal, setTodayKcal] = useState(0);
-  const [saved, setSaved] = useState(false);
   const [dateStr, setDateStr] = useState(formatDateBR(new Date()));
   const [timeStr, setTimeStr] = useState(formatTimeHM(new Date()));
   const at = parseDateTimeBR(dateStr, timeStr);
@@ -103,7 +101,7 @@ export function GymScreen() {
       kcal,
       at,
     });
-    setSaved(true);
+    showMessage(strings.gym.savedLabel);
     await load();
   }
 
@@ -139,7 +137,6 @@ export function GymScreen() {
           options={strengthOptions()}
           value={exercise}
           onChange={(v) => {
-            setSaved(false);
             setExercise(v);
           }}
         />
@@ -150,7 +147,6 @@ export function GymScreen() {
           options={cardioOptions()}
           value={exercise}
           onChange={(v) => {
-            setSaved(false);
             setExercise(v);
           }}
         />
@@ -163,7 +159,6 @@ export function GymScreen() {
               label={strings.gym.weightLabel}
               value={weightStr}
               onChangeText={(v) => {
-                setSaved(false);
                 setWeightStr(v);
               }}
               suffix={weightUnit()}
@@ -179,7 +174,6 @@ export function GymScreen() {
               label={strings.gym.setsLabel}
               value={setsStr}
               onChangeText={(v) => {
-                setSaved(false);
                 setSetsStr(v);
               }}
               placeholder="3"
@@ -188,7 +182,6 @@ export function GymScreen() {
               label={strings.gym.repsLabel}
               value={repsStr}
               onChangeText={(v) => {
-                setSaved(false);
                 setRepsStr(v);
               }}
               placeholder="12"
@@ -199,7 +192,6 @@ export function GymScreen() {
             label={strings.gym.minutesLabel}
             value={minutesStr}
             onChangeText={(v) => {
-              setSaved(false);
               setMinutesStr(v);
             }}
             placeholder="30"
@@ -220,11 +212,6 @@ export function GymScreen() {
           {strings.gym.estimateNote}
         </AppText>
         <Button label={strings.gym.save} onPress={save} disabled={kcal === null || !at} />
-        {saved ? (
-          <AppText variant="caption" style={{ color: colors.success }}>
-            {strings.gym.savedLabel}
-          </AppText>
-        ) : null}
       </Card>
 
       {todayKcal > 0 ? (

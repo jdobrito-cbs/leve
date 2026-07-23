@@ -90,6 +90,8 @@ export const strings: Strings = {
     neverSynced: 'まだ同期していません',
     syncedCount: '新しいワークアウト: {count}',
     syncedNone: '新しいワークアウトはありません',
+    starting: '開始中…',
+    startFailed: 'GPSを開始できませんでした。もう一度お試しください。',
   },
   today: {
     greeting: 'こんにちは！',
@@ -518,6 +520,8 @@ export const strings: Strings = {
     importNow: '同期',
     manageAccess: '設定でアクセスを管理',
     importedSuffix: '件のデータを取り込みました',
+    syncedTitle: 'データを同期しました',
+    syncedCount: '{count} 件のデータを同期しました',
     unavailable:
       'この端末では利用できません — 開発ビルド（dev build）のアプリと Health Connect / Appleヘルスケアが必要です。',
     connectDenied:

@@ -1,4 +1,6 @@
 import { useFocusEffect } from 'expo-router';
+import { showMessage } from '@/design/messageSignal';
+import { strings } from '@/i18n/pt-BR';
 import { useCallback, useState } from 'react';
 import { brDateToIso, isoDateToBR } from '@/core/datetime';
 import { parseDecimalBR } from '@/core/text';
@@ -74,7 +76,6 @@ const EMPTY_FORM: ProfileForm = {
 export function useProfileForm() {
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState<ProfileForm>(EMPTY_FORM);
-  const [saved, setSaved] = useState(false);
   const [permissionError, setPermissionError] = useState(false);
   const [autoGoalMl, setAutoGoalMl] = useState<number | null>(null);
   const [detectedBedtime, setDetectedBedtime] = useState<string | null>(null);
@@ -128,7 +129,6 @@ export function useProfileForm() {
   );
 
   function setField<K extends keyof ProfileForm>(key: K, value: ProfileForm[K]) {
-    setSaved(false);
     setForm((f) => ({ ...f, [key]: value }));
   }
 
@@ -236,7 +236,7 @@ export function useProfileForm() {
         times: parseTimes(m.times),
       })),
     );
-    setSaved(true);
+    showMessage(strings.profile.saved);
   }, [form, detectedBedtime, detectedWake]);
 
   return {
@@ -244,7 +244,6 @@ export function useProfileForm() {
     form,
     setField,
     save,
-    saved,
     permissionError,
     autoGoalMl,
     detectedBedtime,

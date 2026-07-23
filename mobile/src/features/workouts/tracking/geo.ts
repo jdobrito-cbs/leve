@@ -15,11 +15,20 @@ export function haversineM(
   return 2 * EARTH_M * Math.asin(Math.min(1, Math.sqrt(h)));
 }
 
+export const MAX_ACCURACY_M = 25;
+export const MIN_STEP_M = 2;
+export const MAX_SPEED_MPS = 12;
+
+export function isUsableAccuracy(accuracyM?: number | null): boolean {
+  if (accuracyM == null || !Number.isFinite(accuracyM)) return true;
+  return accuracyM > 0 && accuracyM <= MAX_ACCURACY_M;
+}
+
 export function stepDistanceM(prev: RoutePoint, next: RoutePoint): number {
   const d = haversineM(prev, next);
   const dt = prev.t != null && next.t != null ? (next.t - prev.t) / 1000 : 1;
-  if (d < 2) return 0;
-  if (dt > 0 && d / dt > 12) return 0;
+  if (d < MIN_STEP_M) return 0;
+  if (dt > 0 && d / dt > MAX_SPEED_MPS) return 0;
   return d;
 }
 

@@ -22,7 +22,6 @@ import {
   SegmentedChips,
 } from '@/design/components';
 import { spacing } from '@/design/tokens';
-import { useTheme } from '@/design/useTheme';
 
 import { db } from '@/db/client';
 import { addDose, deleteDose, lastInjectionSite, listDoses } from '@/db/doseRepo';
@@ -30,6 +29,7 @@ import { getProfile } from '@/db/profileRepo';
 import { getSetting } from '@/db/settingsRepo';
 import { BodyMapPicker } from '@/features/dose/BodyMapPicker';
 import { InjectionSite, suggestNextSite } from '@/features/dose/rotation';
+import { showMessage } from '@/design/messageSignal';
 import { strings } from '@/i18n/pt-BR';
 import { scheduleDoseReminder } from '@/services/reminders/reminders';
 
@@ -46,7 +46,6 @@ const routeOptions = () => (Object.keys(strings.dose.routes) as DoseRoute[]).map
 }));
 
 export function DoseScreen() {
-  const { colors } = useTheme();
   const [medication, setMedication] = useState<MedKey | null>(null);
   const [customMed, setCustomMed] = useState('');
   const [doseStr, setDoseStr] = useState('');
@@ -54,7 +53,6 @@ export function DoseScreen() {
   const [lastSite, setLastSite] = useState<InjectionSite | null>(null);
   const [site, setSite] = useState<InjectionSite | null>(null);
   const [list, setList] = useState<DoseLog[]>([]);
-  const [saved, setSaved] = useState(false);
   const [dateStr, setDateStr] = useState(formatDateBR(new Date()));
   const [timeStr, setTimeStr] = useState(formatTimeHM(new Date()));
 
@@ -107,7 +105,7 @@ export function DoseScreen() {
       if (reminders?.doseEnabled) await scheduleDoseReminder(nextDoseAt);
     }
     setDoseStr('');
-    setSaved(true);
+    showMessage(strings.dose.savedLabel);
     await load();
   }
 
@@ -141,7 +139,6 @@ export function DoseScreen() {
           label={strings.dose.doseLabel}
           value={doseStr}
           onChangeText={(v) => {
-            setSaved(false);
             setDoseStr(v);
           }}
           suffix="mg"
@@ -178,11 +175,6 @@ export function DoseScreen() {
         />
       </Card>
       <Button label={strings.dose.save} onPress={save} disabled={!valid} />
-      {saved ? (
-        <AppText variant="caption" style={{ color: colors.success, textAlign: 'center' }}>
-          {strings.dose.savedLabel}
-        </AppText>
-      ) : null}
       {list.length > 0 ? (
         <Card>
           <AppText variant="title">{strings.common.historyTitle}</AppText>

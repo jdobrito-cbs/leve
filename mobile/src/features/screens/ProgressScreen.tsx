@@ -3,6 +3,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { BarChart, LineChart } from 'react-native-gifted-charts';
 import { METRIC_DEFS, MetricType , MANUAL_BODY_METRICS } from '@/core/metrics';
+import type { Workout } from '@/db/workoutRepo';
+import { distanceLabel, durationLabel, workoutTypeLabel } from '@/features/workouts/format';
+import { formatDateTimeShort } from '@/core/datetime';
 import {
   AppText,
   Card,
@@ -159,7 +162,13 @@ function vitalZonesFor(type: MetricType, sex: Sex): GaugeZone[] | null {
   }
 }
 
-function BodyHealthSection({ metrics }: { metrics: MetricRow[] }) {
+function BodyHealthSection({
+  metrics,
+  workouts = [],
+}: {
+  metrics: MetricRow[];
+  workouts?: Workout[];
+}) {
   const [sex, setSex] = useState<Sex>('masculino');
 
   useEffect(() => {
@@ -172,7 +181,7 @@ function BodyHealthSection({ metrics }: { metrics: MetricRow[] }) {
     .map((m) => ({ metric: m, zones: vitalZonesFor(m.type, sex) }))
     .filter((r) => r.zones !== null || !MANUAL_BODY_METRICS.includes(r.metric.type));
 
-  if (rows.length === 0) {
+  if (rows.length === 0 && workouts.length === 0) {
     return (
       <Card style={{ gap: spacing.md }}>
         <AppText variant="title">{strings.progress.bodySection}</AppText>
@@ -221,13 +230,35 @@ function BodyHealthSection({ metrics }: { metrics: MetricRow[] }) {
           </View>
         );
       })}
+      {workouts.length > 0 ? (
+        <View style={{ gap: spacing.sm }}>
+          <AppText variant="caption" muted>
+            {strings.workouts.title}
+          </AppText>
+          {workouts.map((w) => (
+            <View
+              key={w.id}
+              style={{ flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm }}
+            >
+              <AppText style={{ flex: 1 }}>{workoutTypeLabel(w.type)}</AppText>
+              <AppText variant="caption" muted>
+                {formatDateTimeShort(w.startAt)}
+              </AppText>
+              <AppText style={{ fontFamily: fonts.semibold }}>
+                {w.distanceM ? `${distanceLabel(w.distanceM)} · ` : ''}
+                {durationLabel(w.durationSec)}
+              </AppText>
+            </View>
+          ))}
+        </View>
+      ) : null}
     </Card>
   );
 }
 
 export function ProgressScreen() {
   const { colors } = useTheme();
-  const { weights, water7, kcal7, doses, metrics } = useProgressData();
+  const { weights, water7, kcal7, doses, metrics, workouts } = useProgressData();
   const [range, setRange] = useState<RangeKey>('30');
 
   const weightData = useMemo(() => {
@@ -266,7 +297,7 @@ export function ProgressScreen() {
 
       <BodyDataSection />
 
-      <BodyHealthSection metrics={metrics} />
+      <BodyHealthSection metrics={metrics} workouts={workouts} />
 
       <Card style={{ gap: spacing.md }}>
         <View

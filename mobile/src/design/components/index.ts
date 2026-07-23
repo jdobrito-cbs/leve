@@ -4,6 +4,7 @@ export { Card } from './Card';
 export { Screen } from './Screen';
 export { Input } from './Input';
 export { EmptyState } from './EmptyState';
+export { MessageModal } from './MessageModal';
 export { IconChip } from './IconChip';
 export { ProgressRing } from './ProgressRing';
 export { WaterRing } from './WaterRing';

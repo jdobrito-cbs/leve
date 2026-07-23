@@ -107,14 +107,20 @@ export function RecordRunScreen() {
         />
       </Card>
 
-      {tracker.error === 'permission' ? (
+      {tracker.error ? (
         <AppText variant="caption" style={{ color: colors.danger }}>
-          {strings.workouts.permissionDenied}
+          {tracker.error === 'permission'
+            ? strings.workouts.permissionDenied
+            : strings.workouts.startFailed}
         </AppText>
       ) : null}
 
       {!active ? (
-        <Button label={strings.workouts.start} onPress={tracker.start} />
+        <Button
+          label={tracker.starting ? strings.workouts.starting : strings.workouts.start}
+          disabled={tracker.starting}
+          onPress={tracker.start}
+        />
       ) : (
         <View style={{ gap: spacing.sm }}>
           {recording ? (

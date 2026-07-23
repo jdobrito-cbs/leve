@@ -4,6 +4,15 @@ import { db } from '@/db/client';
 import { getSetting, setSetting } from '@/db/settingsRepo';
 import { getHealthProvider } from '@/services/health/HealthProvider';
 import { importMetrics, importWeights, importWorkouts } from '@/services/health/healthSync';
+import { showMessage } from '@/design/messageSignal';
+import { strings } from '@/i18n/pt-BR';
+
+function notifySynced(count: number): void {
+  showMessage(
+    strings.health.syncedTitle,
+    strings.health.syncedCount.replace('{count}', String(count)),
+  );
+}
 
 interface HealthSettings {
   connected: boolean;
@@ -51,6 +60,7 @@ export function useHealthConnection() {
       await provider.requestPermissions();
       const count = (await importWeights(db, provider)) + (await importMetrics(db, provider));
       setLastImported(count);
+      notifySynced(count);
       return count;
     } finally {
       setImporting(false);
@@ -61,7 +71,9 @@ export function useHealthConnection() {
     setImporting(true);
     try {
       await provider.requestPermissions();
-      return await importWorkouts(db, provider);
+      const count = await importWorkouts(db, provider);
+      notifySynced(count);
+      return count;
     } finally {
       setImporting(false);
     }

@@ -90,6 +90,8 @@ export const strings: Strings = {
     neverSynced: 'Ainda não sincronizado',
     syncedCount: 'Novos treinos: {count}',
     syncedNone: 'Nenhum treino novo',
+    starting: 'A iniciar…',
+    startFailed: 'Não foi possível iniciar o GPS. Tente novamente.',
   },
   today: {
     greeting: 'Olá!',
@@ -518,6 +520,8 @@ export const strings: Strings = {
     importNow: 'Sincronizar',
     manageAccess: 'Gerir acesso nas definições',
     importedSuffix: 'dados importados',
+    syncedTitle: 'Dados sincronizados',
+    syncedCount: '{count} dados sincronizados',
     unavailable:
       'Indisponível neste dispositivo — requer a aplicação de desenvolvimento (dev build) e o Health Connect/Saúde da Apple.',
     connectDenied:

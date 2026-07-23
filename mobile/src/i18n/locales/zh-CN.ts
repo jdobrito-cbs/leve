@@ -90,6 +90,8 @@ export const strings: Strings = {
     neverSynced: '尚未同步',
     syncedCount: '新增运动：{count}',
     syncedNone: '没有新的运动',
+    starting: '正在启动…',
+    startFailed: '无法启动 GPS，请重试。',
   },
   today: {
     greeting: '您好！',
@@ -518,6 +520,8 @@ export const strings: Strings = {
     importNow: '同步',
     manageAccess: '在设置中管理访问',
     importedSuffix: '条数据已导入',
+    syncedTitle: '数据已同步',
+    syncedCount: '已同步 {count} 条数据',
     unavailable:
       '此设备上不可用——需要开发构建版应用（dev build）以及 Health Connect/Apple 健康。',
     connectDenied:

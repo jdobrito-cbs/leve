@@ -16,7 +16,7 @@ import {
 } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { AppText, Button, Screen } from '@/design/components';
+import { AppText, Button, MessageModal, Screen } from '@/design/components';
 import { db, initDb, isDbLockedError } from '@/db/client';
 import { getSetting } from '@/db/settingsRepo';
 import { seedFoodItemsIfEmpty } from '@/db/seed/tacoSeed';
@@ -158,6 +158,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <RootErrorBoundary>
         <Stack key={`${lang}-${units}`} screenOptions={{ headerShown: false }} />
+        <MessageModal />
       </RootErrorBoundary>
     </GestureHandlerRootView>
   );

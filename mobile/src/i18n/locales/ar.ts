@@ -89,6 +89,8 @@ export const strings: Strings = {
     neverSynced: 'لم تتم المزامنة بعد',
     syncedCount: 'تمارين جديدة: {count}',
     syncedNone: 'لا توجد تمارين جديدة',
+    starting: 'جارٍ البدء…',
+    startFailed: 'تعذّر تشغيل GPS. حاول مرة أخرى.',
   },
   today: {
     greeting: 'مرحبًا!',
@@ -519,6 +521,8 @@ export const strings: Strings = {
     importNow: 'مزامنة',
     manageAccess: 'إدارة الوصول في الإعدادات',
     importedSuffix: 'سجلًا مستوردًا',
+    syncedTitle: 'تمت مزامنة البيانات',
+    syncedCount: 'تمت مزامنة {count} من البيانات',
     unavailable:
       'غير متاح على هذا الجهاز — يتطلب نسخة التطوير (dev build) وHealth Connect/صحة Apple.',
     connectDenied:

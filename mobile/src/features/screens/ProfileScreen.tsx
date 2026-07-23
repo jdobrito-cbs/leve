@@ -107,11 +107,6 @@ function HealthSection() {
             onPress={health.importNow}
             disabled={health.importing}
           />
-          {health.lastImported !== null ? (
-            <AppText variant="caption" muted>
-              {health.lastImported} {strings.health.importedSuffix}
-            </AppText>
-          ) : null}
           <Button
             label={strings.health.disconnect}
             variant="secondary"
@@ -150,7 +145,6 @@ export function ProfileScreen() {
     form,
     setField,
     save,
-    saved,
     permissionError,
     autoGoalMl,
     detectedBedtime,
@@ -531,11 +525,6 @@ export function ProfileScreen() {
       </Card>
 
       <Button label={strings.profile.save} onPress={save} />
-      {saved ? (
-        <AppText variant="caption" style={{ color: colors.success, textAlign: 'center' }}>
-          {strings.profile.saved}
-        </AppText>
-      ) : null}
 
       <HealthSection />
 

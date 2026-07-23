@@ -17,7 +17,6 @@ export function WorkoutsScreen() {
   const { colors } = useTheme();
   const [items, setItems] = useState<Workout[]>([]);
   const [lastSync, setLastSync] = useState<string | null>(null);
-  const [note, setNote] = useState<string | null>(null);
   const health = useHealthConnection();
 
   const load = useCallback(async () => {
@@ -30,11 +29,8 @@ export function WorkoutsScreen() {
   }, [load]);
 
   const sync = useCallback(async () => {
-    const n = await health.syncWorkouts();
+    await health.syncWorkouts();
     await setSetting(db, 'lastHealthSyncAt', new Date().toISOString());
-    setNote(
-      n > 0 ? strings.workouts.syncedCount.replace('{count}', String(n)) : strings.workouts.syncedNone,
-    );
     await load();
   }, [health, load]);
 
@@ -78,11 +74,6 @@ export function WorkoutsScreen() {
                   ? strings.workouts.lastSync.replace('{time}', formatDateTimeShort(lastSync))
                   : strings.workouts.neverSynced}
               </AppText>
-              {note ? (
-                <AppText variant="caption" style={{ color: colors.primary }}>
-                  {note}
-                </AppText>
-              ) : null}
             </>
           ) : (
             <>

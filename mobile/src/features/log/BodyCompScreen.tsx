@@ -19,7 +19,6 @@ import {
   Screen,
 } from '@/design/components';
 import { spacing } from '@/design/tokens';
-import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
 import {
   MetricRow,
@@ -28,6 +27,7 @@ import {
   latestMetrics,
   listManualMetrics,
 } from '@/db/metricsRepo';
+import { showMessage } from '@/design/messageSignal';
 import { strings } from '@/i18n/pt-BR';
 import {
   cmToDisplay,
@@ -57,10 +57,8 @@ function toShown(unit: string, v: number): number {
 }
 
 export function BodyCompScreen() {
-  const { colors } = useTheme();
   const [values, setValues] = useState<Partial<Record<MetricType, string>>>({});
   const [placeholders, setPlaceholders] = useState<Partial<Record<MetricType, string>>>({});
-  const [saved, setSaved] = useState(false);
   const [dateStr, setDateStr] = useState(formatDateBR(new Date()));
   const [timeStr, setTimeStr] = useState(formatTimeHM(new Date()));
   const [list, setList] = useState<MetricRow[]>([]);
@@ -96,7 +94,7 @@ export function BodyCompScreen() {
       await addMetric(db, type, toCanonical(METRIC_DEFS[type].unit, typed), at);
     }
     setValues({});
-    setSaved(true);
+    showMessage(strings.bodyComp.saved);
     await load();
   }
 
@@ -113,7 +111,6 @@ export function BodyCompScreen() {
             label={strings.metrics[type]}
             value={values[type] ?? ''}
             onChangeText={(v) => {
-              setSaved(false);
               setValues((prev) => ({ ...prev, [type]: v }));
             }}
             suffix={displayUnitOf(METRIC_DEFS[type].unit)}
@@ -131,11 +128,6 @@ export function BodyCompScreen() {
           onPress={save}
           disabled={filled.length === 0 || !at}
         />
-        {saved ? (
-          <AppText variant="caption" style={{ color: colors.success }}>
-            {strings.bodyComp.saved}
-          </AppText>
-        ) : null}
       </Card>
       {list.length > 0 ? (
         <Card>

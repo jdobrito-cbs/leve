@@ -38,6 +38,7 @@ const mockData = {
     { id: 1, type: 'body_fat_pct', value: 31.4, unit: '%', origin: 'healthconnect', loggedAt: '2026-07-01T08:00:00.000Z' },
     { id: 2, type: 'heart_rate_resting', value: 62, unit: 'bpm', origin: 'healthconnect', loggedAt: '2026-07-01T08:00:00.000Z' },
   ],
+  workouts: [],
   refresh: jest.fn(),
 };
 jest.mock('@/db/client', () => ({ db: {} }));

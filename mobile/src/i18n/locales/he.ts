@@ -90,6 +90,8 @@ export const strings: Strings = {
     neverSynced: 'עדיין לא סונכרן',
     syncedCount: 'אימונים חדשים: {count}',
     syncedNone: 'אין אימונים חדשים',
+    starting: 'מתחיל…',
+    startFailed: 'לא ניתן להפעיל GPS. נסה שוב.',
   },
   today: {
     greeting: 'שלום!',
@@ -518,6 +520,8 @@ export const strings: Strings = {
     importNow: 'סנכרון',
     manageAccess: 'ניהול הגישה בהגדרות',
     importedSuffix: 'נתונים יובאו',
+    syncedTitle: 'הנתונים סונכרנו',
+    syncedCount: '{count} נתונים סונכרנו',
     unavailable:
       'לא זמין במכשיר זה — נדרשת גרסת הפיתוח של האפליקציה (dev build) יחד עם Health Connect או בריאות Apple.',
     connectDenied:

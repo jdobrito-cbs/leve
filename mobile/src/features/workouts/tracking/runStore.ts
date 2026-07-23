@@ -1,5 +1,5 @@
 import type { RoutePoint } from '@/db/workoutRepo';
-import { stepDistanceM } from './geo';
+import { isUsableAccuracy, stepDistanceM } from './geo';
 
 type Listener = () => void;
 
@@ -19,7 +19,14 @@ export function resetRun(startTs: number): void {
   emit();
 }
 
-export function addRunPoint(lat: number, lng: number, atMs: number): void {
+export function addRunPoint(
+  lat: number,
+  lng: number,
+  atMs: number,
+  accuracyM?: number | null,
+): void {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+  if (!isUsableAccuracy(accuracyM)) return;
   const t = Math.max(0, atMs - startedAt);
   const p: RoutePoint = { lat, lng, t };
   const last = points[points.length - 1];

@@ -25,7 +25,7 @@ if (tm) {
       if (error || !data) return;
       const locations = (data as { locations?: LocationObject[] }).locations ?? [];
       for (const l of locations) {
-        addRunPoint(l.coords.latitude, l.coords.longitude, l.timestamp);
+        addRunPoint(l.coords.latitude, l.coords.longitude, l.timestamp, l.coords.accuracy);
       }
     });
   } catch {

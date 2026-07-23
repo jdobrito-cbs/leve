@@ -13,18 +13,16 @@ import {
   Screen,
 } from '@/design/components';
 import { spacing } from '@/design/tokens';
-import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
 import { addWeight, deleteWeight, listWeights } from '@/db/weightRepo';
 import { setMascotEvent } from '@/features/today/mascotSignal';
+import { showMessage } from '@/design/messageSignal';
 import { strings } from '@/i18n/pt-BR';
 import { displayToKg, formatWeight, kgToDisplay, weightUnit } from '@/core/units';
 
 export function WeightScreen() {
-  const { colors } = useTheme();
   const [list, setList] = useState<WeightLog[]>([]);
   const [value, setValue] = useState('');
-  const [saved, setSaved] = useState(false);
   const [dateStr, setDateStr] = useState(formatDateBR(new Date()));
   const [timeStr, setTimeStr] = useState(formatTimeHM(new Date()));
 
@@ -47,7 +45,7 @@ export function WeightScreen() {
     await addWeight(db, kg, at);
     if (diff !== null && diff < 0) setMascotEvent('slimmer');
     setValue('');
-    setSaved(true);
+    showMessage(strings.weight.savedLabel);
     await load();
   }
 
@@ -75,7 +73,6 @@ export function WeightScreen() {
           label={strings.weight.inputLabel}
           value={value}
           onChangeText={(v) => {
-            setSaved(false);
             setValue(v);
           }}
           suffix={weightUnit()}
@@ -98,11 +95,6 @@ export function WeightScreen() {
           </AppText>
         ) : null}
         <Button label={strings.weight.save} onPress={save} disabled={kg === null || kg <= 0 || !at} />
-        {saved ? (
-          <AppText variant="caption" style={{ color: colors.success }}>
-            {strings.weight.savedLabel}
-          </AppText>
-        ) : null}
       </Card>
       {list.length > 0 ? (
         <Card>
