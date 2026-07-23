@@ -86,7 +86,6 @@ describe('POST /scan-food', () => {
     const app = await buildServer({ callHub: async () => '{"foods":[]}' });
     expect((await app.inject({ method: 'GET', url: '/health' })).json()).toEqual({
       ok: true,
-      accounts: false,
     });
   });
 

@@ -3,15 +3,7 @@ import Fastify, { type FastifyReply, type FastifyRequest } from 'fastify';
 import rateLimit from '@fastify/rate-limit';
 import helmet from '@fastify/helmet';
 import { z } from 'zod';
-import {
-  REFRESH_TTL_MS,
-  hashPassword,
-  hashRefreshToken,
-  newRefreshToken,
-  signAccessToken,
-  verifyAccessToken,
-  verifyPassword,
-} from './auth.js';
+import { hashPassword, verifyPassword } from './auth.js';
 
 function safeEqual(a: string, b: string): boolean {
   const ba = Buffer.from(a);
@@ -20,6 +12,7 @@ function safeEqual(a: string, b: string): boolean {
 }
 
 const DUMMY_PASSWORD_HASH = hashPassword('leve-dummy-password-for-timing');
+
 import { ADMIN_PAGE_HTML } from './adminPage.js';
 import { LANDING_PAGE_HTML } from './landingPage.js';
 import { APPLE_ICON_PNG, FAVICON_PNG } from './siteAssets.js';
@@ -65,7 +58,7 @@ import {
   verifyTotp,
   type AdminScope,
 } from './adminAuth.js';
-import type { AdminRecord, AdminStore, PartnerKeyStore, Store } from './store.js';
+import type { AdminRecord, AdminStore, PartnerKeyStore } from './store.js';
 
 export interface HubConfig {
   baseUrl: string;
@@ -148,27 +141,12 @@ export function makeDescribeHubCaller(config: HubConfig): CallDescribeHub {
   return (text) => chatCompletion(config, buildDescribeBody(text, config.model), 25_000);
 }
 
-const registerSchema = z.object({
-  email: z.string().email().toLowerCase(),
-  password: z.string().min(8).max(200),
-  consents: z.object({ terms: z.literal(true), backup: z.boolean().default(false) }),
-});
-const loginSchema = z.object({
-  email: z.string().email().toLowerCase(),
-  password: z.string().min(1),
-});
-const refreshSchema = z.object({ refreshToken: z.string().min(32) });
-const consentSchema = z.object({ kind: z.enum(['backup']), granted: z.boolean() });
-const backupSchema = z.object({ blob: z.string().min(1).max(24 * 1024 * 1024) });
-const deleteSchema = z.object({ password: z.string().min(1) });
 
 export interface ServerOptions {
   callHub: CallHub;
   callFoodHub?: CallFoodHub;
   callDescribeHub?: CallDescribeHub;
   appToken?: string;
-  store?: Store;
-  jwtSecret?: string;
   partnerStore?: PartnerKeyStore;
   adminStore?: AdminStore;
   adminToken?: string;
@@ -215,7 +193,6 @@ export async function buildServer(options: ServerOptions) {
     logger: false,
     trustProxy: options.trustProxy ?? false,
   });
-  const { store, jwtSecret } = options;
 
   app.setErrorHandler((err: Error & { statusCode?: number }, _req, reply) => {
     const status = err.statusCode ?? 500;
@@ -249,7 +226,7 @@ export async function buildServer(options: ServerOptions) {
   });
   await app.register(rateLimit, { max: 120, timeWindow: '1 minute' });
 
-  app.get('/health', async () => ({ ok: true, accounts: Boolean(store) }));
+  app.get('/health', async () => ({ ok: true }));
 
   const pngRoute = (bytes: Buffer) => async (_req: FastifyRequest, reply: FastifyReply) =>
     reply.type('image/png').header('cache-control', 'public, max-age=86400').send(bytes);
@@ -267,130 +244,6 @@ export async function buildServer(options: ServerOptions) {
   app.get('/termos', htmlPage(TERMS_PAGE_HTML));
   app.get('/aviso-medico', htmlPage(MEDICAL_PAGE_HTML));
 
-  if (store && jwtSecret) {
-    const issueTokens = async (userId: string) => {
-      const refreshToken = newRefreshToken();
-      await store.saveRefreshToken(
-        userId,
-        hashRefreshToken(refreshToken),
-        new Date(Date.now() + REFRESH_TTL_MS),
-      );
-      return { accessToken: signAccessToken(userId, jwtSecret), refreshToken };
-    };
-
-    const requireUser = async (req: FastifyRequest, reply: FastifyReply) => {
-      const header = req.headers.authorization ?? '';
-      const token = header.startsWith('Bearer ') ? header.slice(7) : '';
-      const userId = token ? verifyAccessToken(token, jwtSecret) : null;
-      if (!userId) {
-        reply.code(401).send({ error: 'não autenticado' });
-        return null;
-      }
-      return userId;
-    };
-
-    app.post(
-      '/auth/register',
-      { config: { rateLimit: { max: 5, timeWindow: '1 minute' } } },
-      async (req, reply) => {
-        const parsed = registerSchema.safeParse(req.body);
-        if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
-        const { email, password, consents } = parsed.data;
-        if (await store.findUserByEmail(email)) {
-          return reply.code(409).send({ error: 'e-mail já cadastrado' });
-        }
-        const user = await store.createUser(email, hashPassword(password));
-        await store.setConsent(user.id, 'terms', true);
-        await store.setConsent(user.id, 'backup', consents.backup);
-        return issueTokens(user.id);
-      },
-    );
-
-    app.post(
-      '/auth/login',
-      { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } },
-      async (req, reply) => {
-        const parsed = loginSchema.safeParse(req.body);
-        if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
-        const user = await store.findUserByEmail(parsed.data.email);
-        const ok = verifyPassword(parsed.data.password, user?.passwordHash ?? DUMMY_PASSWORD_HASH);
-        if (!user || !ok) {
-          return reply.code(401).send({ error: 'e-mail ou senha incorretos' });
-        }
-        return issueTokens(user.id);
-      },
-    );
-
-    app.post('/auth/refresh', async (req, reply) => {
-      const parsed = refreshSchema.safeParse(req.body);
-      if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
-      const tokenHash = hashRefreshToken(parsed.data.refreshToken);
-      const record = await store.findRefreshToken(tokenHash);
-      if (!record || record.revokedAt || record.expiresAt.getTime() < Date.now()) {
-        return reply.code(401).send({ error: 'sessão expirada' });
-      }
-      await store.revokeRefreshToken(tokenHash);
-      return issueTokens(record.userId);
-    });
-
-    app.post('/auth/logout', async (req, reply) => {
-      const parsed = refreshSchema.safeParse(req.body);
-      if (parsed.success) await store.revokeRefreshToken(hashRefreshToken(parsed.data.refreshToken));
-      return reply.code(204).send();
-    });
-
-    app.get('/me', async (req, reply) => {
-      const userId = await requireUser(req, reply);
-      if (!userId) return;
-      const user = await store.findUserById(userId);
-      if (!user) return reply.code(401).send({ error: 'não autenticado' });
-      const backup = await store.getBackup(userId);
-      return {
-        email: user.email,
-        consents: await store.listConsents(userId),
-        backup: backup ? { size: backup.size, updatedAt: backup.updatedAt } : null,
-      };
-    });
-
-    app.post('/consents', async (req, reply) => {
-      const userId = await requireUser(req, reply);
-      if (!userId) return;
-      const parsed = consentSchema.safeParse(req.body);
-      if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
-      await store.setConsent(userId, parsed.data.kind, parsed.data.granted);
-      return { ok: true };
-    });
-
-    app.put('/backup', { bodyLimit: 25 * 1024 * 1024 }, async (req, reply) => {
-      const userId = await requireUser(req, reply);
-      if (!userId) return;
-      const parsed = backupSchema.safeParse(req.body);
-      if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
-      await store.putBackup(userId, parsed.data.blob);
-      return { ok: true };
-    });
-
-    app.get('/backup', async (req, reply) => {
-      const userId = await requireUser(req, reply);
-      if (!userId) return;
-      const backup = await store.getBackup(userId);
-      if (!backup) return reply.code(404).send({ error: 'sem backup' });
-      return backup;
-    });
-
-    app.delete('/account', async (req, reply) => {
-      const userId = await requireUser(req, reply);
-      if (!userId) return;
-      const parsed = deleteSchema.safeParse(req.body);
-      if (!parsed.success) return reply.code(400).send({ error: 'dados inválidos' });
-      const user = await store.findUserById(userId);
-      if (!user || !verifyPassword(parsed.data.password, user.passwordHash)) {
-        return reply.code(401).send({ error: 'senha incorreta' });
-      }
-      await store.deleteUser(userId);
-      return reply.code(204).send();
-    });
-  }
 
   const { partnerStore, adminStore, adminToken } = options;
 

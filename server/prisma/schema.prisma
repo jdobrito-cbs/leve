@@ -7,46 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  passwordHash  String
-  provider      String         @default("email")
-  providerId    String?
-  createdAt     DateTime       @default(now())
-  refreshTokens RefreshToken[]
-  consents      Consent[]
-  backup        Backup?
-}
-
-model RefreshToken {
-  id        String    @id @default(uuid())
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tokenHash String    @unique
-  expiresAt DateTime
-  revokedAt DateTime?
-}
-
-model Consent {
-  id        String    @id @default(uuid())
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  kind      String
-  grantedAt DateTime  @default(now())
-  revokedAt DateTime?
-
-  @@unique([userId, kind])
-}
-
-model Backup {
-  userId    String   @id
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  blob      String
-  size      Int
-  updatedAt DateTime @updatedAt
-}
-
 model PartnerKey {
   id            String    @id @default(uuid())
   keyHash       String    @unique

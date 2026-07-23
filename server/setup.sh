@@ -26,7 +26,6 @@ GENERATED=0
 if [ ! -f .env ]; then
   echo "== Primeira instalacao: gerando .env com segredos novos =="
   ADMIN_TOKEN="$(node -p 'require("crypto").randomBytes(24).toString("hex")')"
-  JWT_SECRET="$(node -p 'require("crypto").randomBytes(32).toString("hex")')"
   cat > .env <<EOF
 # Gerado pelo setup.sh na instalacao — segredos unicos deste servidor.
 # IA de comida (scan por foto e busca nutricional): cole a sua chave do
@@ -38,8 +37,6 @@ HUB_API_KEY=
 HUB_MODEL=google/gemma-4-26b-a4b-it:free
 # Codigo do painel: pedido no cadastro do master e chave-mestra de recuperacao.
 ADMIN_TOKEN=${ADMIN_TOKEN}
-# Segredo das sessoes das contas do app (backup).
-JWT_SECRET=${JWT_SECRET}
 EOF
   chmod 600 .env
   GENERATED=1

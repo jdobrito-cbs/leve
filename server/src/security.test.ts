@@ -14,16 +14,12 @@ describe('endurecimento de segurança', () => {
   });
 
   test('corpo acima do limite global é recusado (413) fora do scan', async () => {
-    const app = await buildServer({
-      callHub: hub,
-      store: new MemoryStore(),
-      jwtSecret: 'x'.repeat(40),
-    });
+    const app = await buildServer({ callHub: hub, partnerStore: new MemoryStore() });
     const big = 'a'.repeat(200 * 1024);
     const res = await app.inject({
       method: 'POST',
-      url: '/auth/login',
-      payload: { email: 'a@b.com', password: big },
+      url: '/partner-keys/validate',
+      payload: { key: big },
     });
     expect(res.statusCode).toBe(413);
   });
@@ -31,14 +27,14 @@ describe('endurecimento de segurança', () => {
   test('força-bruta de login é barrada por rate limit (429)', async () => {
     const app = await buildServer({
       callHub: hub,
-      store: new MemoryStore(),
-      jwtSecret: 'x'.repeat(40),
+      adminStore: new MemoryStore(),
+      adminToken: 'token-de-admin-bem-longo-1234',
     });
     let sawTooMany = false;
     for (let i = 0; i < 14; i++) {
       const res = await app.inject({
         method: 'POST',
-        url: '/auth/login',
+        url: '/admin/login',
         payload: { email: 'ninguem@b.com', password: 'senhaerrada' },
       });
       if (res.statusCode === 429) {

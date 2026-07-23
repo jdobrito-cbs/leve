@@ -9,7 +9,6 @@ const {
   APP_TOKEN,
   PORT,
   DATABASE_URL,
-  JWT_SECRET,
   ADMIN_TOKEN,
   DATA_DIR,
   TRUST_PROXY,
@@ -22,32 +21,26 @@ if (!hubConfigured) {
   );
 }
 
-if (JWT_SECRET && JWT_SECRET.length < 32) {
-  console.error('JWT_SECRET muito curto: use pelo menos 32 caracteres aleatórios.');
-  process.exit(1);
-}
 if (ADMIN_TOKEN && ADMIN_TOKEN.length < 16) {
   console.error('ADMIN_TOKEN muito curto: use pelo menos 16 caracteres aleatórios.');
   process.exit(1);
 }
 
 async function main() {
-  let store;
   let partnerStore;
   let adminStore;
-  if (DATABASE_URL && JWT_SECRET) {
+  if (DATABASE_URL) {
     const { PrismaClient } = await import('@prisma/client');
     const { PrismaStore } = await import('./prismaStore.js');
     const prismaStore = new PrismaStore(new PrismaClient());
-    store = prismaStore;
     partnerStore = prismaStore;
     adminStore = prismaStore;
-    console.log('contas/backup: ATIVOS (PostgreSQL)');
+    console.log('armazenamento: PostgreSQL (chaves de parceiro e admin)');
   } else {
     const dir = DATA_DIR ?? './data';
     partnerStore = new FilePartnerKeyStore(`${dir}/partner-keys.json`);
     adminStore = new FileAdminStore(`${dir}/admins.json`);
-    console.warn('contas/backup: desativados (defina DATABASE_URL e JWT_SECRET para ativar)');
+    console.log('armazenamento: arquivos locais (defina DATABASE_URL para usar PostgreSQL)');
   }
 
   if (ADMIN_TOKEN) console.log('painel do dono: ATIVO em /painel (login + 2FA)');
@@ -65,8 +58,6 @@ async function main() {
     callFoodHub: hub ? makeFoodHubCaller(hub) : undefined,
     callDescribeHub: hub ? makeDescribeHubCaller(hub) : undefined,
     appToken: APP_TOKEN || undefined,
-    store,
-    jwtSecret: JWT_SECRET || undefined,
     partnerStore,
     adminStore,
     adminToken: ADMIN_TOKEN || undefined,
