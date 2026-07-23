@@ -206,7 +206,7 @@ export const LANDING_PAGE_HTML = `<!DOCTYPE html>
   <div>
     <div class="eyebrow">Diário de saúde · GLP-1</div>
     <h1>Organize seu tratamento GLP-1 no dia a dia.</h1>
-    <p class="sub">Registre água, refeições, peso, sintomas e as doses do seu tratamento num lugar só. Os gráficos mostram sua evolução ao longo do tempo e os dados ficam guardados no seu aparelho.</p>
+    <p class="sub">Registre água, refeições, peso, sintomas e as doses do seu tratamento em um lugar só. Os gráficos mostram sua evolução ao longo do tempo e os dados ficam guardados no seu aparelho.</p>
     <div class="actions">
       <a class="btn" href="#planos">Ver planos</a>
       <a class="btn ghost" href="#como">Como funciona</a>
@@ -254,7 +254,7 @@ export const LANDING_PAGE_HTML = `<!DOCTYPE html>
 <section class="pad" id="recursos"><div class="wrap">
   <div class="sec-head reveal">
     <div class="eyebrow">O que o Leve faz</div>
-    <h2 class="sec-h">Tudo do seu tratamento, num lugar só</h2>
+    <h2 class="sec-h">Tudo do seu tratamento, em um lugar só</h2>
     <p class="sec-lead">Uma ferramenta de registro e organização para o dia a dia. Não promete resultado nem opina sobre a sua dose.</p>
   </div>
   <div class="grid">
