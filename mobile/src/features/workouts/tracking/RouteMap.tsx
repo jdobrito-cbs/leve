@@ -27,11 +27,13 @@ export function RouteMap({
   style,
   fit,
   center,
+  bearing,
 }: {
   points: RoutePoint[];
   style?: StyleProp<ViewStyle>;
   fit?: boolean;
   center?: { lat: number; lng: number } | null;
+  bearing?: number;
 }) {
   const coords = useMemo<[number, number][]>(
     () =>
@@ -79,7 +81,7 @@ export function RouteMap({
       {bounds ? (
         <Camera bounds={bounds} />
       ) : here ? (
-        <Camera center={here} zoom={16} />
+        <Camera center={here} zoom={16} bearing={bearing ?? 0} />
       ) : (
         <Camera center={[0, 20]} zoom={1} />
       )}

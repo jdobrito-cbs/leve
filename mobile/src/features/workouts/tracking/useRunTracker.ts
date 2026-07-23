@@ -170,6 +170,7 @@ export function useRunTracker() {
     starting,
     points: snap.points,
     distanceM: snap.distanceM,
+    heading: snap.heading,
     elapsedSec,
     error,
     start,

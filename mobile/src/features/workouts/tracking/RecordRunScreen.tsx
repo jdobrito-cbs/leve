@@ -104,7 +104,12 @@ export function RecordRunScreen() {
       ) : null}
 
       <Card style={{ padding: 0, overflow: 'hidden', height: 280 }}>
-        <RouteMap points={tracker.points} center={center} style={{ flex: 1 }} />
+        <RouteMap
+          points={tracker.points}
+          center={center}
+          bearing={tracker.heading}
+          style={{ flex: 1 }}
+        />
       </Card>
 
       <Card style={{ gap: spacing.md }}>
