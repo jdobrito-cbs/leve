@@ -2,11 +2,11 @@ export const LANDING_PAGE_HTML = `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"/>
-<title>Leve — Seu diário de saúde</title>
+<title>Leve · Diário de saúde no tratamento GLP-1</title>
 <link rel="icon" type="image/png" href="/favicon.png"/>
 <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<meta name="description" content="O Leve organiza seu dia a dia de saúde no tratamento GLP-1: água, refeições com a tabela TACO, peso, doses e saúde do relógio — em 12 idiomas, com tudo no seu aparelho."/>
+<meta name="description" content="O Leve organiza seu dia a dia de saúde no tratamento GLP-1: água, refeições com a tabela TACO, peso, doses e treinos do relógio. Em 12 idiomas, com tudo guardado no seu aparelho."/>
 <style>
   :root{
     --bg:#090E17; --bg2:#0C1320; --surface:#131C2B; --surface2:#182338;
@@ -205,8 +205,8 @@ export const LANDING_PAGE_HTML = `<!DOCTYPE html>
 <header class="hero" id="top"><div class="wrap">
   <div>
     <div class="eyebrow">Diário de saúde · GLP-1</div>
-    <h1>Seu diário de saúde, leve como deve ser.</h1>
-    <p class="sub">Registre água, refeições, peso, sintomas e as doses do seu tratamento num lugar só — com gráficos claros, lembretes inteligentes e tudo guardado no seu aparelho.</p>
+    <h1>Organize seu tratamento GLP-1 no dia a dia.</h1>
+    <p class="sub">Registre água, refeições, peso, sintomas e as doses do seu tratamento num lugar só. Os gráficos mostram sua evolução ao longo do tempo e os dados ficam guardados no seu aparelho.</p>
     <div class="actions">
       <a class="btn" href="#planos">Ver planos</a>
       <a class="btn ghost" href="#como">Como funciona</a>
@@ -255,27 +255,28 @@ export const LANDING_PAGE_HTML = `<!DOCTYPE html>
   <div class="sec-head reveal">
     <div class="eyebrow">O que o Leve faz</div>
     <h2 class="sec-h">Tudo do seu tratamento, num lugar só</h2>
-    <p class="sec-lead">Ferramenta de registro e organização para o dia a dia — simples de usar, honesta com os números.</p>
+    <p class="sec-lead">Uma ferramenta de registro e organização para o dia a dia. Não promete resultado nem opina sobre a sua dose.</p>
   </div>
   <div class="grid">
-    <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7c3.2 3.7 6.3 7.1 6.3 10.6A6.3 6.3 0 0 1 5.7 13.3C5.7 9.8 8.8 6.4 12 2.7z"/></svg></div><h3>Água com física real</h3><p>Meta diária ajustada ao seu peso, botões rápidos e um anel d'água que se move com o celular. Lembretes na hora que você escolher.</p></div>
-    <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2v7a2.5 2.5 0 0 0 5 0V2M7.5 11.5V22M17 2c-1.7 0-3 2-3 4.5s1.3 3.5 3 3.5V2zM17 10v12"/></svg></div><h3>Refeições do Brasil</h3><p>Busca na tabela TACO e em bases oficiais, doces e bebidas locais, porções em g ou ml — ou identifique o prato por uma foto.</p></div>
-    <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 20.4 3.6 13.5a4.9 4.9 0 0 1 6.9-6.9l6.9 6.9a4.9 4.9 0 0 1-6.9 6.9zM7 10l7 7"/></svg></div><h3>Doses GLP-1</h3><p>Registro das aplicações com rodízio do local sugerido, próxima dose calculada e nível estimado da medicação — apoio de memória.</p></div>
-    <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M12 4a2 2 0 0 0-2 2h4a2 2 0 0 0-2-2zM8.5 15l3.5-5 3.5 5"/></svg></div><h3>Peso e corpo</h3><p>Progresso de peso e composição corporal da sua balança via Apple Saúde ou Health Connect, com relatório em PDF.</p></div>
-    <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg></div><h3>Lembretes que aprendem</h3><p>Hora de dormir e "bom dia com um copo d'água" a partir do seu sono, e um aviso para levantar quando você fica muito tempo parado.</p></div>
-    <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg></div><h3>12 idiomas, duas medidas</h3><p>Português, inglês, espanhol e mais — com sistema métrico ou imperial automático pela região do aparelho.</p></div>
+    <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7c3.2 3.7 6.3 7.1 6.3 10.6A6.3 6.3 0 0 1 5.7 13.3C5.7 9.8 8.8 6.4 12 2.7z"/></svg></div><h3>Água</h3><p>Meta diária calculada a partir do seu peso, botões de 100, 200, 500 e 1000 ml para registrar num toque, total do dia e lembretes nos horários que você escolher.</p></div>
+    <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2v7a2.5 2.5 0 0 0 5 0V2M7.5 11.5V22M17 2c-1.7 0-3 2-3 4.5s1.3 3.5 3 3.5V2zM17 10v12"/></svg></div><h3>Refeições do Brasil</h3><p>Busca na tabela TACO e em bases oficiais do IBGE, com doces, salgadinhos e bebidas regionais. Porções em gramas ou mililitros, com calorias, proteína, carboidrato, gordura e fibras. No Premium você também descreve o prato por texto ou identifica por foto.</p></div>
+    <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 20.4 3.6 13.5a4.9 4.9 0 0 1 6.9-6.9l6.9 6.9a4.9 4.9 0 0 1-6.9 6.9zM7 10l7 7"/></svg></div><h3>Doses GLP-1</h3><p>Registro das aplicações com rodízio do local sugerido, cálculo da próxima dose e gráfico do nível estimado da medicação. Serve como apoio de memória, não como orientação de dose.</p></div>
+    <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M12 4a2 2 0 0 0-2 2h4a2 2 0 0 0-2-2zM8.5 15l3.5-5 3.5 5"/></svg></div><h3>Peso e corpo</h3><p>Progresso de peso e composição corporal enviados pela sua balança via Apple Saúde ou Health Connect, com relatório em PDF para levar à consulta.</p></div>
+    <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><h3>Corrida e caminhada</h3><p>Grave a corrida ou a caminhada pelo GPS do celular e veja distância, tempo, ritmo e o trajeto no mapa. Os treinos gravados no seu relógio entram pelo Apple Saúde ou pelo Health Connect.</p></div>
+    <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg></div><h3>Lembretes</h3><p>Horário de dormir e o copo d'água da manhã sugeridos a partir do sono que o app lê da sua saúde conectada. Também avisa para levantar depois de muito tempo parado e lembra os remédios de apoio.</p></div>
+    <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg></div><h3>12 idiomas, duas medidas</h3><p>Português, inglês, espanhol, francês, alemão, japonês e outros. O sistema métrico ou imperial acompanha a região do aparelho.</p></div>
   </div>
 </div></section>
 
 <section class="pad" id="como" style="background:var(--bg2)"><div class="wrap">
   <div class="sec-head reveal">
     <div class="eyebrow">Como funciona</div>
-    <h2 class="sec-h">Três passos, todo dia mais leve</h2>
+    <h2 class="sec-h">Registrar, conectar e acompanhar</h2>
   </div>
   <div class="steps">
-    <div class="step reveal"><div class="n">1</div><h3>Registre</h3><p>Água, refeições, peso, doses e sintomas em poucos toques — ou por foto do prato. Funciona offline.</p></div>
-    <div class="step reveal"><div class="n">2</div><h3>Conecte a saúde</h3><p>Ligue ao Apple Saúde ou Health Connect e receba sono, batimentos, passos e a composição da sua balança automaticamente.</p></div>
-    <div class="step reveal"><div class="n">3</div><h3>Acompanhe</h3><p>Gráficos claros, observações informativas e um relatório em PDF para levar às suas consultas.</p></div>
+    <div class="step reveal"><div class="n">1</div><h3>Registre</h3><p>Água, refeições, peso, doses e sintomas em poucos toques. O registro do dia a dia funciona sem internet.</p></div>
+    <div class="step reveal"><div class="n">2</div><h3>Conecte a saúde</h3><p>Ligue ao Apple Saúde ou ao Health Connect para receber sono, batimentos, passos, treinos e a composição da sua balança automaticamente.</p></div>
+    <div class="step reveal"><div class="n">3</div><h3>Acompanhe</h3><p>Gráficos de peso, água, calorias e nível da medicação, com um relatório em PDF para levar às suas consultas.</p></div>
   </div>
 </div></section>
 
@@ -284,7 +285,7 @@ export const LANDING_PAGE_HTML = `<!DOCTYPE html>
     <svg class="shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
     <div>
       <h2>Privacidade em primeiro lugar</h2>
-      <p>Seus registros ficam no seu aparelho. As integrações de saúde só funcionam com a sua permissão, as fotos de refeição não são armazenadas e nada é usado para publicidade. O backup é opcional e criptografado de ponta a ponta — nem nosso servidor consegue ler.</p>
+      <p>Seus registros ficam no seu aparelho. As integrações de saúde só funcionam com a sua permissão, as fotos de refeição não são armazenadas e nada é usado para publicidade. O backup é opcional e criptografado de ponta a ponta com uma chave derivada da sua senha, então o servidor guarda apenas um arquivo que não consegue abrir.</p>
     </div>
   </div>
 </div></section>
@@ -330,7 +331,7 @@ export const LANDING_PAGE_HTML = `<!DOCTYPE html>
     <h2 class="sec-h">Ainda em dúvida?</h2>
   </div>
   <div class="faq reveal">
-    <details><summary>O Leve substitui meu médico? <span class="plus">+</span></summary><p>Não. O Leve registra e organiza suas informações — não fornece diagnóstico nem orientação sobre dose. Decisões sobre medicamentos, ajustes e tratamento são sempre do seu médico.</p></details>
+    <details><summary>O Leve substitui meu médico? <span class="plus">+</span></summary><p>Não. O Leve registra e organiza suas informações. Ele não fornece diagnóstico nem orientação sobre dose. Decisões sobre medicamentos, ajustes e tratamento são sempre do seu médico.</p></details>
     <details><summary>Meus dados ficam seguros? <span class="plus">+</span></summary><p>Sim. Seus registros ficam no seu aparelho. O backup é opcional e criptografado de ponta a ponta, então nem nós conseguimos ler. Nada é usado para publicidade nem compartilhado com terceiros.</p></details>
     <details><summary>Funciona sem internet? <span class="plus">+</span></summary><p>Sim. O registro do dia a dia funciona offline. A análise de foto e a importação da saúde conectada usam conexão quando você as utiliza.</p></details>
     <details><summary>Preciso de uma balança especial? <span class="plus">+</span></summary><p>Não. Você pode registrar tudo manualmente. Se tiver uma balança que envia os dados ao Apple Saúde ou ao Health Connect, o Leve importa a composição corporal automaticamente.</p></details>
@@ -340,8 +341,8 @@ export const LANDING_PAGE_HTML = `<!DOCTYPE html>
 
 <section class="pad" id="baixar"><div class="wrap reveal">
   <div class="band">
-    <h2>Comece a deixar seus dias mais leves</h2>
-    <p>Um diário de saúde honesto, privado por padrão e feito para o seu tratamento.</p>
+    <h2>Comece a registrar seu tratamento</h2>
+    <p>Um diário para acompanhar o tratamento, com os seus dados guardados no aparelho.</p>
     <span class="soon"><span class="g"></span> Em breve na App Store e no Google Play</span>
   </div>
 </div></section>
@@ -388,7 +389,7 @@ export const LANDING_PAGE_HTML = `<!DOCTYPE html>
       tm.setAttribute('aria-pressed',m);ta.setAttribute('aria-pressed',!m);
       document.getElementById('pv').textContent=m?'R$ 11,90':'R$ 106,90';
       document.getElementById('pp').textContent=m?' /mês':' /ano';
-      document.getElementById('per').textContent=m?'Renova todo mês, cancele quando quiser.':'Equivale a R$ 8,91/mês — cerca de 3 meses grátis.';
+      document.getElementById('per').textContent=m?'Renova todo mês, cancele quando quiser.':'Equivale a R$ 8,91/mês, cerca de 3 meses grátis.';
     }
     tm.addEventListener('click',function(){setPlan(true)});
     ta.addEventListener('click',function(){setPlan(false)});
