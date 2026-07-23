@@ -258,7 +258,7 @@ export const LANDING_PAGE_HTML = `<!DOCTYPE html>
     <p class="sec-lead">Uma ferramenta de registro e organização para o dia a dia. Não promete resultado nem opina sobre a sua dose.</p>
   </div>
   <div class="grid">
-    <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7c3.2 3.7 6.3 7.1 6.3 10.6A6.3 6.3 0 0 1 5.7 13.3C5.7 9.8 8.8 6.4 12 2.7z"/></svg></div><h3>Água</h3><p>Meta diária calculada a partir do seu peso, botões de 100, 200, 500 e 1000 ml para registrar num toque, total do dia e lembretes nos horários que você escolher.</p></div>
+    <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7c3.2 3.7 6.3 7.1 6.3 10.6A6.3 6.3 0 0 1 5.7 13.3C5.7 9.8 8.8 6.4 12 2.7z"/></svg></div><h3>Água</h3><p>Meta diária ajustada ao seu peso e botões rápidos. Lembretes para tomar água na hora que você escolher.</p></div>
     <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2v7a2.5 2.5 0 0 0 5 0V2M7.5 11.5V22M17 2c-1.7 0-3 2-3 4.5s1.3 3.5 3 3.5V2zM17 10v12"/></svg></div><h3>Refeições do Brasil</h3><p>Busca na tabela TACO e em bases oficiais do IBGE, com doces, salgadinhos e bebidas regionais. Porções em gramas ou mililitros, com calorias, proteína, carboidrato, gordura e fibras. No Premium você também descreve o prato por texto ou identifica por foto.</p></div>
     <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 20.4 3.6 13.5a4.9 4.9 0 0 1 6.9-6.9l6.9 6.9a4.9 4.9 0 0 1-6.9 6.9zM7 10l7 7"/></svg></div><h3>Doses GLP-1</h3><p>Registro das aplicações com rodízio do local sugerido, cálculo da próxima dose e gráfico do nível estimado da medicação. Serve como apoio de memória, não como orientação de dose.</p></div>
     <div class="card reveal"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M12 4a2 2 0 0 0-2 2h4a2 2 0 0 0-2-2zM8.5 15l3.5-5 3.5 5"/></svg></div><h3>Peso e corpo</h3><p>Progresso de peso e composição corporal enviados pela sua balança via Apple Saúde ou Health Connect, com relatório em PDF para levar à consulta.</p></div>
@@ -362,7 +362,7 @@ export const LANDING_PAGE_HTML = `<!DOCTYPE html>
     <a href="/aviso-medico">Aviso médico</a>
     <a href="mailto:jdobrito@gmail.com">Contato</a>
   </div>
-  <div>© 2026 Jorge Brito e Jorge Manoel Reis Brito · levemobile.com.br</div>
+  <div>© 2026 Jorge Brito, Jorge Manoel Brito e Alairton Silva · levemobile.com.br</div>
   <p class="disc">O Leve é uma ferramenta de registro e organização e não substitui consulta, diagnóstico ou tratamento por profissionais de saúde. Valores nutricionais e de composição corporal são estimativas informativas. Em emergência, procure atendimento imediatamente (no Brasil, SAMU 192).</p>
 </div></footer>
 

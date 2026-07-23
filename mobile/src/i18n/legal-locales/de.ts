@@ -55,7 +55,7 @@ export const legal: LegalCatalog = {
       {
         heading: '1. Zustimmung',
         paragraphs: [
-          'Diese Nutzungsbedingungen regeln die Nutzung der App Leve („Leve“ oder „App“), bereitgestellt von Jorge Brito und Jorge Manoel Reis Brito („wir“). Mit der Nutzung von Leve erklären Sie, dass Sie diese Bedingungen sowie die Datenschutzerklärung und den Medizinischen und ernährungsbezogenen Hinweis, die durch Verweis Bestandteil dieser Bedingungen sind, gelesen und verstanden haben und ihnen zustimmen. Wenn Sie nicht zustimmen, nutzen Sie die App nicht.',
+          'Diese Nutzungsbedingungen regeln die Nutzung der App Leve („Leve“ oder „App“), bereitgestellt von Jorge Brito, Jorge Manoel Brito und Alairton Silva („wir“). Mit der Nutzung von Leve erklären Sie, dass Sie diese Bedingungen sowie die Datenschutzerklärung und den Medizinischen und ernährungsbezogenen Hinweis, die durch Verweis Bestandteil dieser Bedingungen sind, gelesen und verstanden haben und ihnen zustimmen. Wenn Sie nicht zustimmen, nutzen Sie die App nicht.',
         ],
       },
       {
@@ -150,7 +150,7 @@ export const legal: LegalCatalog = {
       {
         heading: '1. Wer wir sind',
         paragraphs: [
-          'Leve wird von Jorge Brito und Jorge Manoel Reis Brito bereitgestellt, den Verantwortlichen für die von der App verarbeiteten personenbezogenen Daten im Sinne des brasilianischen Datenschutzgesetzes (Lei Geral de Proteção de Dados, Gesetz Nr. 13.709/2018 — LGPD). Kontakt des Verantwortlichen und des Datenschutzbeauftragten: jdobrito@gmail.com.',
+          'Leve wird von Jorge Brito, Jorge Manoel Brito und Alairton Silva bereitgestellt, den Verantwortlichen für die von der App verarbeiteten personenbezogenen Daten im Sinne des brasilianischen Datenschutzgesetzes (Lei Geral de Proteção de Dados, Gesetz Nr. 13.709/2018 — LGPD). Kontakt des Verantwortlichen und des Datenschutzbeauftragten: jdobrito@gmail.com.',
         ],
       },
       {

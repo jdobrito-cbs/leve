@@ -55,7 +55,7 @@ export const legal: LegalCatalog = {
       {
         heading: '1. Acceptance',
         paragraphs: [
-          'These Terms of Use govern the use of the Leve application ("Leve" or "the app"), made available by Jorge Brito and Jorge Manoel Reis Brito ("we" or "us"). By using Leve, you declare that you have read, understood, and agree to these terms and to the Privacy Policy and the Medical and Nutritional Notice, which are incorporated into these terms by reference. If you do not agree, do not use the app.',
+          'These Terms of Use govern the use of the Leve application ("Leve" or "the app"), made available by Jorge Brito, Jorge Manoel Brito and Alairton Silva ("we" or "us"). By using Leve, you declare that you have read, understood, and agree to these terms and to the Privacy Policy and the Medical and Nutritional Notice, which are incorporated into these terms by reference. If you do not agree, do not use the app.',
         ],
       },
       {
@@ -150,7 +150,7 @@ export const legal: LegalCatalog = {
       {
         heading: '1. Who we are',
         paragraphs: [
-          'Leve is made available by Jorge Brito and Jorge Manoel Reis Brito, the controllers of the personal data processed by the app, under the Lei Geral de Proteção de Dados — the Brazilian General Data Protection Law (Law No. 13,709/2018 — LGPD). Contact for the controllers and the data protection officer: jdobrito@gmail.com.',
+          'Leve is made available by Jorge Brito, Jorge Manoel Brito and Alairton Silva, the controllers of the personal data processed by the app, under the Lei Geral de Proteção de Dados — the Brazilian General Data Protection Law (Law No. 13,709/2018 — LGPD). Contact for the controllers and the data protection officer: jdobrito@gmail.com.',
         ],
       },
       {

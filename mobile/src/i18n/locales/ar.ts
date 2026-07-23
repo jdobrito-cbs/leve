@@ -402,7 +402,7 @@ export const strings: Strings = {
     privacyPolicy: 'سياسة الخصوصية',
     terms: 'شروط الاستخدام',
     medicalNotice: 'تنبيه طبي وغذائي',
-    copyright: '© 2026 Jorge Brito وJorge Manoel Reis Brito',
+    copyright: '© 2026 Jorge Brito, Jorge Manoel Brito وAlairton Silva',
   },
   accountPrivacy: {
     title: 'الحساب والخصوصية',

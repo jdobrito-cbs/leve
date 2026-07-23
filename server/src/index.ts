@@ -18,7 +18,7 @@ const {
 const hubConfigured = Boolean(HUB_BASE_URL && HUB_API_KEY && HUB_MODEL);
 if (!hubConfigured) {
   console.warn(
-    'IA de comida: DESATIVADA — defina HUB_BASE_URL, HUB_API_KEY e HUB_MODEL no .env (ver .env.example).',
+    'IA de comida: DESATIVADA. Defina HUB_BASE_URL, HUB_API_KEY e HUB_MODEL no .env (ver .env.example).',
   );
 }
 

@@ -55,7 +55,7 @@ export const legal: LegalCatalog = {
       {
         heading: '1. Acceptation',
         paragraphs: [
-          'Les présentes Conditions d\'utilisation régissent l\'utilisation de l\'application Leve (« Leve » ou « application »), mise à disposition par Jorge Brito et Jorge Manoel Reis Brito (« nous »). En utilisant Leve, vous déclarez avoir lu, compris et accepté ces conditions ainsi que la Politique de confidentialité et l\'Avis médical et nutritionnel, qui en font partie intégrante par référence. Si vous n\'êtes pas d\'accord, n\'utilisez pas l\'application.',
+          'Les présentes Conditions d\'utilisation régissent l\'utilisation de l\'application Leve (« Leve » ou « application »), mise à disposition par Jorge Brito, Jorge Manoel Brito et Alairton Silva (« nous »). En utilisant Leve, vous déclarez avoir lu, compris et accepté ces conditions ainsi que la Politique de confidentialité et l\'Avis médical et nutritionnel, qui en font partie intégrante par référence. Si vous n\'êtes pas d\'accord, n\'utilisez pas l\'application.',
         ],
       },
       {
@@ -150,7 +150,7 @@ export const legal: LegalCatalog = {
       {
         heading: '1. Qui sommes-nous',
         paragraphs: [
-          'Leve est mis à disposition par Jorge Brito et Jorge Manoel Reis Brito, responsables du traitement des données personnelles traitées par l\'application, au sens de la loi générale brésilienne sur la protection des données (loi nº 13.709/2018 — LGPD). Contact du responsable du traitement et du délégué à la protection des données : jdobrito@gmail.com.',
+          'Leve est mis à disposition par Jorge Brito, Jorge Manoel Brito et Alairton Silva, responsables du traitement des données personnelles traitées par l\'application, au sens de la loi générale brésilienne sur la protection des données (loi nº 13.709/2018 — LGPD). Contact du responsable du traitement et du délégué à la protection des données : jdobrito@gmail.com.',
         ],
       },
       {

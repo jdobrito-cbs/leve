@@ -62,7 +62,7 @@ export const termsOfUse: LegalDoc = {
     {
       heading: '1. Aceitação',
       paragraphs: [
-        'Estes Termos de Uso regulam a utilização do aplicativo Leve ("Leve" ou "aplicativo"), disponibilizado por Jorge Brito e Jorge Manoel Reis Brito ("nós"). Ao usar o Leve, você declara que leu, entendeu e concorda com estes termos e com a Política de Privacidade e o Aviso Médico e Nutricional, que os integram por referência. Se não concordar, não utilize o aplicativo.',
+        'Estes Termos de Uso regulam a utilização do aplicativo Leve ("Leve" ou "aplicativo"), disponibilizado por Jorge Brito, Jorge Manoel Brito e Alairton Silva ("nós"). Ao usar o Leve, você declara que leu, entendeu e concorda com estes termos e com a Política de Privacidade e o Aviso Médico e Nutricional, que os integram por referência. Se não concordar, não utilize o aplicativo.',
       ],
     },
     {
@@ -158,7 +158,7 @@ export const privacyPolicy: LegalDoc = {
     {
       heading: '1. Quem somos',
       paragraphs: [
-        'O Leve é disponibilizado por Jorge Brito e Jorge Manoel Reis Brito, controladores dos dados pessoais tratados pelo aplicativo, nos termos da Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD). Contato do controlador e do encarregado: jdobrito@gmail.com.',
+        'O Leve é disponibilizado por Jorge Brito, Jorge Manoel Brito e Alairton Silva, controladores dos dados pessoais tratados pelo aplicativo, nos termos da Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD). Contato do controlador e do encarregado: jdobrito@gmail.com.',
       ],
     },
     {

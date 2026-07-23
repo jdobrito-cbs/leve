@@ -17,9 +17,9 @@ export const medicalNotice: LegalDoc = {
     {
       "heading": "Estimativas nutricionais e de algoritmos",
       "paragraphs": [
-        "Dados nutricionais, metas de calorias, macronutrientes (carboidratos, proteínas, gorduras, fibras), metas de água, IMC, composição corporal e faixas de referência exibidos pelo Leve são estimativas baseadas em algoritmos, calculadas a partir de bases nutricionais públicas (como a Tabela Brasileira de Composição de Alimentos — TACO), fórmulas científicas publicadas (como Mifflin-St Jeor) e faixas de referência padrão de bioimpedância.",
+        "Dados nutricionais, metas de calorias, macronutrientes (carboidratos, proteínas, gorduras, fibras), metas de água, IMC, composição corporal e faixas de referência exibidos pelo Leve são estimativas baseadas em algoritmos, calculadas a partir de bases nutricionais públicas (como a Tabela Brasileira de Composição de Alimentos, a TACO), fórmulas científicas publicadas (como Mifflin-St Jeor) e faixas de referência padrão de bioimpedância.",
         "Esses valores são aproximações e podem não refletir o conteúdo nutricional exato nem as necessidades metabólicas individuais. Os valores reais variam conforme o preparo dos alimentos, o tamanho das porções, a fisiologia individual e outros fatores.",
-        "A análise de fotos de refeições, quando disponível, usa inteligência artificial e está sujeita a erros de identificação e de estimativa de porções — confira sempre os itens antes de salvar."
+        "A análise de fotos de refeições, quando disponível, usa inteligência artificial e está sujeita a erros de identificação e de estimativa de porções. Confira sempre os itens antes de salvar."
       ]
     },
     {
@@ -54,7 +54,7 @@ export const termsOfUse: LegalDoc = {
     {
       "heading": "1. Aceitação",
       "paragraphs": [
-        "Estes Termos de Uso regulam a utilização do aplicativo Leve (\"Leve\" ou \"aplicativo\"), disponibilizado por Jorge Brito e Jorge Manoel Reis Brito (\"nós\"). Ao usar o Leve, você declara que leu, entendeu e concorda com estes termos e com a Política de Privacidade e o Aviso Médico e Nutricional, que os integram por referência. Se não concordar, não utilize o aplicativo."
+        "Estes Termos de Uso regulam a utilização do aplicativo Leve (\"Leve\" ou \"aplicativo\"), disponibilizado por Jorge Brito, Jorge Manoel Brito e Alairton Silva (\"nós\"). Ao usar o Leve, você declara que leu, entendeu e concorda com estes termos e com a Política de Privacidade e o Aviso Médico e Nutricional, que os integram por referência. Se não concordar, não utilize o aplicativo."
       ]
     },
     {
@@ -152,26 +152,26 @@ export const privacyPolicy: LegalDoc = {
     {
       "heading": "1. Quem somos",
       "paragraphs": [
-        "O Leve é disponibilizado por Jorge Brito e Jorge Manoel Reis Brito, controladores dos dados pessoais tratados pelo aplicativo, nos termos da Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD). Contato do controlador e do encarregado: jdobrito@gmail.com."
+        "O Leve é disponibilizado por Jorge Brito, Jorge Manoel Brito e Alairton Silva, controladores dos dados pessoais tratados pelo aplicativo, nos termos da Lei Geral de Proteção de Dados (Lei nº 13.709/2018, a LGPD). Contato do controlador e do encarregado: jdobrito@gmail.com."
       ]
     },
     {
       "heading": "2. O princípio do Leve: seus dados ficam no seu aparelho",
       "paragraphs": [
-        "Os registros que você faz no Leve — água, refeições, peso, medidas corporais, doses, sintomas, ciclo menstrual, sono, exercícios, consultas e observações — são armazenados localmente, no seu aparelho. Por padrão, nada disso é enviado aos nossos servidores.",
+        "Os registros que você faz no Leve (água, refeições, peso, medidas corporais, doses, sintomas, ciclo menstrual, sono, exercícios, consultas e observações) são armazenados localmente, no seu aparelho. Por padrão, nada disso é enviado aos nossos servidores.",
         "Dados sensíveis de saúde são tratados com base no seu consentimento (art. 11, II, \"a\", da LGPD), manifestado ao usar cada recurso."
       ]
     },
     {
       "heading": "3. Integrações de saúde (opcionais)",
       "paragraphs": [
-        "Se você autorizar, o Leve lê dados do Apple Saúde (iOS) ou do Health Connect (Android) — como peso, composição corporal, passos, sono e batimentos — exclusivamente para exibir seu progresso no aplicativo. A permissão é controlada pelo sistema operacional e pode ser revogada a qualquer momento nos ajustes do aparelho. Esses dados também ficam apenas no seu aparelho."
+        "Se você autorizar, o Leve lê dados do Apple Saúde (iOS) ou do Health Connect (Android), como peso, composição corporal, passos, sono e batimentos, exclusivamente para exibir seu progresso no aplicativo. A permissão é controlada pelo sistema operacional e pode ser revogada a qualquer momento nos ajustes do aparelho. Esses dados também ficam apenas no seu aparelho."
       ]
     },
     {
       "heading": "4. Conta e dados coletados (opcionais)",
       "paragraphs": [
-        "Ao conectar uma conta Apple ou Google, recebemos apenas o identificador da conta e, quando você autoriza, nome e e-mail — usados para preencher seu perfil e identificar seu backup. Não recebemos sua senha.",
+        "Ao conectar uma conta Apple ou Google, recebemos apenas o identificador da conta e, quando você autoriza, nome e e-mail, usados para preencher seu perfil e identificar seu backup. Não recebemos sua senha.",
         "Se você criar uma conta de backup, seus registros são enviados cifrados de ponta a ponta: a chave de cifragem fica no seu aparelho e não temos meios técnicos de ler o conteúdo do backup."
       ]
     },
@@ -185,7 +185,7 @@ export const privacyPolicy: LegalDoc = {
     {
       "heading": "6. Assinaturas e chaves de parceiro",
       "paragraphs": [
-        "A assinatura Leve Premium é processada pela App Store ou pelo Google Play — não recebemos dados do seu cartão. Recebemos da loja apenas a confirmação do estado da assinatura.",
+        "A assinatura Leve Premium é processada pela App Store ou pelo Google Play. Não recebemos dados do seu cartão. Recebemos da loja apenas a confirmação do estado da assinatura.",
         "Chaves de parceiro são validadas no nosso servidor, que armazena apenas um resumo criptográfico (hash) da chave, o nome do parceiro e o estado (ativa/revogada)."
       ]
     },
@@ -204,7 +204,7 @@ export const privacyPolicy: LegalDoc = {
     {
       "heading": "9. Retenção e exclusão",
       "paragraphs": [
-        "Dados locais permanecem no seu aparelho até você os excluir — o botão \"Excluir meus dados\" apaga todos os registros do aplicativo. Desinstalar o aplicativo também remove os dados locais.",
+        "Dados locais permanecem no seu aparelho até você os excluir. O botão \"Excluir meus dados\" apaga todos os registros do aplicativo. Desinstalar o aplicativo também remove os dados locais.",
         "O backup cifrado e os dados da conta são mantidos até você excluir a conta no aplicativo, o que remove o backup dos nossos servidores."
       ]
     },

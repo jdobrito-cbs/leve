@@ -401,7 +401,7 @@ export const strings: Strings = {
     privacyPolicy: 'מדיניות פרטיות',
     terms: 'תנאי שימוש',
     medicalNotice: 'הבהרה רפואית ותזונתית',
-    copyright: '© 2026 Jorge Brito ו-Jorge Manoel Reis Brito',
+    copyright: '© 2026 Jorge Brito, Jorge Manoel Brito ו-Alairton Silva',
   },
   accountPrivacy: {
     title: 'חשבון ופרטיות',

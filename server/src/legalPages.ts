@@ -62,7 +62,7 @@ function renderLegalDoc(doc: LegalDoc): string {
     <div class="upd">${esc(doc.updated)}</div>
     ${sections}
     <footer>
-      <div>© 2026 Jorge Brito e Jorge Manoel Reis Brito · Leve</div>
+      <div>© 2026 Jorge Brito, Jorge Manoel Brito e Alairton Silva · Leve</div>
       <div><a href="/privacidade">Política de privacidade</a> · <a href="/termos">Termos de uso</a> · <a href="/aviso-medico">Aviso médico</a></div>
       <div><a href="mailto:jdobrito@gmail.com">jdobrito@gmail.com</a></div>
     </footer>

@@ -401,7 +401,7 @@ export const strings: Strings = {
     privacyPolicy: 'गोपनीयता नीति',
     terms: 'उपयोग की शर्तें',
     medicalNotice: 'चिकित्सा और पोषण संबंधी सूचना',
-    copyright: '© 2026 Jorge Brito और Jorge Manoel Reis Brito',
+    copyright: '© 2026 Jorge Brito, Jorge Manoel Brito और Alairton Silva',
   },
   accountPrivacy: {
     title: 'खाता और गोपनीयता',

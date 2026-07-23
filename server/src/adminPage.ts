@@ -179,7 +179,7 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
       <div class="card">
         <ol class="steps">
           <li>Abra seu app autenticador (Google Authenticator, Authy, etc.).</li>
-          <li>Escaneie o QR code abaixo — ou adicione manualmente com a chave.</li>
+          <li>Escaneie o QR code abaixo ou adicione manualmente com a chave.</li>
           <li>Digite o código de 6 dígitos que aparecer para confirmar.</li>
         </ol>
         <div class="qrbox"><img id="en-qr" alt="QR code para o app autenticador" width="200" height="200"/></div>
@@ -200,7 +200,7 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
       <p class="lead">Use um destes se perder o app autenticador. Cada código funciona uma vez. Eles não serão mostrados de novo.</p>
       <div class="card">
         <div class="codes mono" id="bk-codes"></div>
-        <button class="btn block" id="bk-go">Guardei em local seguro — continuar</button>
+        <button class="btn block" id="bk-go">Guardei em local seguro, continuar</button>
       </div>
     </div>
 
@@ -230,7 +230,7 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
         <div class="row">
           <div style="flex:2">
             <label for="k-label">Nome do parceiro</label>
-            <input id="k-label" placeholder="ex.: Dra. Ana — nutricionista"/>
+            <input id="k-label" placeholder="ex.: Dra. Ana, nutricionista"/>
           </div>
           <div>
             <label for="k-validity">Validade</label>
@@ -265,7 +265,7 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
           <button class="btn" id="ia-scan">Analisar foto</button>
         </div>
         <div id="ia-scan-out" class="muted" style="margin-top:10px;min-height:1px"></div>
-        <div class="faint" style="margin-top:8px">Usa a mesma IA do app — bom para conferir sem depender de uma nova versão.</div>
+        <div class="faint" style="margin-top:8px">Usa a mesma IA do app. Serve para conferir sem depender de uma nova versão.</div>
       </div>
 
       <div class="card">
@@ -438,8 +438,8 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
       var expired=!k.revokedAt&&k.expiresAt&&new Date(k.expiresAt).getTime()<Date.now();
       var sit=k.revokedAt?'<span class="badge off">revogada</span>'
         :(expired?'<span class="badge off">expirada</span>':'<span class="badge on">ativa</span>');
-      var val=k.expiresAt?new Date(k.expiresAt).toLocaleDateString('pt-BR'):'—';
-      var dev=k.revokedAt?'—':(k.bound?'<span class="badge bound">vinculada</span>':'<span class="badge free">livre</span>');
+      var val=k.expiresAt?new Date(k.expiresAt).toLocaleDateString('pt-BR'):'-';
+      var dev=k.revokedAt?'-':(k.bound?'<span class="badge bound">vinculada</span>':'<span class="badge free">livre</span>');
       var act='';
       if(!k.revokedAt){
         if(k.canReveal)act+='<button class="btn ghost mini" data-act="reveal" data-id="'+esc(k.id)+'">Ver</button>';
@@ -483,7 +483,7 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
     api('/partner-keys','POST',{label:label,validity:$('k-validity').value}).then(function(r){
       if(!r.ok){$('k-err').textContent=(r.json&&r.json.error)||'não foi possível gerar';return;}
       var validade=r.json.expiresAt?('válida até '+new Date(r.json.expiresAt).toLocaleDateString('pt-BR')):'sem validade';
-      $('k-new').innerHTML='<div class="newkey">'+esc(r.json.key)+'</div><div class="hintnote">Chave de '+esc(r.json.label)+' ('+esc(validade)+') — use o botão Ver para reexibir depois.</div>';
+      $('k-new').innerHTML='<div class="newkey">'+esc(r.json.key)+'</div><div class="hintnote">Chave de '+esc(r.json.label)+' ('+esc(validade)+'). Use o botão Ver para reexibir depois.</div>';
       $('k-label').value='';loadKeys();
     });
   });
@@ -540,7 +540,7 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
           if(a.role!=='master')act+='<button class="btn danger" data-act="del" data-id="'+esc(a.id)+'" data-name="'+esc(a.email)+'">Excluir</button>';
         }
         return '<tr><td>'+esc(a.email)+(a.isSelf?' <span class="faint">(você)</span>':'')+'</td><td>'+role+'</td><td>'+tfa+
-          '</td><td class="mono">'+esc(fmt(a.createdAt))+'</td><td><div class="actions">'+(act||'<span class="faint">—</span>')+'</div></td></tr>';
+          '</td><td class="mono">'+esc(fmt(a.createdAt))+'</td><td><div class="actions">'+(act||'<span class="faint">-</span>')+'</div></td></tr>';
       }).join('');
       $('a-rows').innerHTML=rows||'<tr><td colspan="5" class="empty">Nenhum administrador.</td></tr>';
     });
@@ -564,7 +564,7 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
       if(np.length<8){alert('a senha precisa de pelo menos 8 caracteres');return;}
       api('/admin/'+id+'/password','POST',{newPassword:np}).then(function(r){
         if(!r.ok)alert((r.json&&r.json.error)||'não foi possível redefinir');
-        else alert('senha redefinida — envie a nova senha para '+name);
+        else alert('senha redefinida, envie a nova senha para '+name);
         loadAdmins();
       });
     }else if(act==='r2fa'){
@@ -612,7 +612,7 @@ export const ADMIN_PAGE_HTML = `<!DOCTYPE html>
         var foods=(r.json&&r.json.foods)||[];
         if(!foods.length){$('ia-scan-out').textContent='Nenhum alimento identificado na foto.';return;}
         $('ia-scan-out').innerHTML=foods.map(function(fd){
-          return '• '+esc(fd.name)+' — '+(fd.portionGrams!=null?esc(fd.portionGrams)+' g':'porção estimada')+' ('+Math.round((fd.confidence||0)*100)+'%)';
+          return '• '+esc(fd.name)+': '+(fd.portionGrams!=null?esc(fd.portionGrams)+' g':'porção estimada')+' ('+Math.round((fd.confidence||0)*100)+'%)';
         }).join('<br>');
       });
     }

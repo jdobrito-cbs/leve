@@ -54,7 +54,7 @@ export const legal: LegalCatalog = {
       {
         heading: '1. 接受条款',
         paragraphs: [
-          '本使用条款规范 Leve 应用（“Leve”或“本应用”）的使用，该应用由 Jorge Brito 和 Jorge Manoel Reis Brito（“我们”）提供。使用 Leve，即表示您声明已阅读、理解并同意本条款，以及通过引用构成本条款组成部分的《隐私政策》和《医疗与营养声明》。如不同意，请勿使用本应用。',
+          '本使用条款规范 Leve 应用（“Leve”或“本应用”）的使用，该应用由 Jorge Brito, Jorge Manoel Brito 和 Alairton Silva（“我们”）提供。使用 Leve，即表示您声明已阅读、理解并同意本条款，以及通过引用构成本条款组成部分的《隐私政策》和《医疗与营养声明》。如不同意，请勿使用本应用。',
         ],
       },
       {
@@ -149,7 +149,7 @@ export const legal: LegalCatalog = {
       {
         heading: '1. 我们是谁',
         paragraphs: [
-          'Leve 由 Jorge Brito 和 Jorge Manoel Reis Brito 提供，二人依照巴西《通用数据保护法》（第 13.709/2018 号法律——LGPD）担任本应用所处理个人数据的控制者。控制者及数据保护负责人的联系方式：jdobrito@gmail.com。',
+          'Leve 由 Jorge Brito, Jorge Manoel Brito 和 Alairton Silva 提供，二人依照巴西《通用数据保护法》（第 13.709/2018 号法律——LGPD）担任本应用所处理个人数据的控制者。控制者及数据保护负责人的联系方式：jdobrito@gmail.com。',
         ],
       },
       {

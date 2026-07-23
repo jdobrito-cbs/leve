@@ -54,7 +54,7 @@ export const legal: LegalCatalog = {
       {
         heading: '1. 同意',
         paragraphs: [
-          '本利用規約は、Jorge Brito および Jorge Manoel Reis Brito（以下「当方」）が提供するアプリ Leve（以下「Leve」または「本アプリ」）の利用について定めるものです。Leve を利用することにより、お客様は、本規約、ならびに参照により本規約に組み込まれるプライバシーポリシーおよび医療・栄養に関する注意事項を読み、理解し、同意したことを表明するものとします。同意されない場合は、本アプリを利用しないでください。',
+          '本利用規約は、Jorge Brito, Jorge Manoel Brito および Alairton Silva（以下「当方」）が提供するアプリ Leve（以下「Leve」または「本アプリ」）の利用について定めるものです。Leve を利用することにより、お客様は、本規約、ならびに参照により本規約に組み込まれるプライバシーポリシーおよび医療・栄養に関する注意事項を読み、理解し、同意したことを表明するものとします。同意されない場合は、本アプリを利用しないでください。',
         ],
       },
       {
@@ -149,7 +149,7 @@ export const legal: LegalCatalog = {
       {
         heading: '1. 事業者について',
         paragraphs: [
-          'Leve は Jorge Brito および Jorge Manoel Reis Brito が提供しており、両名は、ブラジル一般データ保護法（法律第 13.709/2018 号 — LGPD）に基づき、本アプリで取り扱われる個人データの管理者です。管理者およびデータ保護責任者の連絡先：jdobrito@gmail.com。',
+          'Leve は Jorge Brito, Jorge Manoel Brito および Alairton Silva が提供しており、両名は、ブラジル一般データ保護法（法律第 13.709/2018 号 — LGPD）に基づき、本アプリで取り扱われる個人データの管理者です。管理者およびデータ保護責任者の連絡先：jdobrito@gmail.com。',
         ],
       },
       {

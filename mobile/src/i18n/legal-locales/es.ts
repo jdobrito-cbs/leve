@@ -55,7 +55,7 @@ export const legal: LegalCatalog = {
       {
         heading: '1. Aceptación',
         paragraphs: [
-          'Estos Términos de Uso regulan la utilización de la aplicación Leve ("Leve" o "aplicación"), puesta a disposición por Jorge Brito y Jorge Manoel Reis Brito ("nosotros"). Al usar Leve, declaras que has leído, entendido y aceptado estos términos, así como la Política de Privacidad y el Aviso Médico y Nutricional, que forman parte de ellos por referencia. Si no estás de acuerdo, no utilices la aplicación.',
+          'Estos Términos de Uso regulan la utilización de la aplicación Leve ("Leve" o "aplicación"), puesta a disposición por Jorge Brito, Jorge Manoel Brito y Alairton Silva ("nosotros"). Al usar Leve, declaras que has leído, entendido y aceptado estos términos, así como la Política de Privacidad y el Aviso Médico y Nutricional, que forman parte de ellos por referencia. Si no estás de acuerdo, no utilices la aplicación.',
         ],
       },
       {
@@ -150,7 +150,7 @@ export const legal: LegalCatalog = {
       {
         heading: '1. Quiénes somos',
         paragraphs: [
-          'Leve es puesto a disposición por Jorge Brito y Jorge Manoel Reis Brito, responsables del tratamiento de los datos personales tratados por la aplicación, en los términos de la Ley General de Protección de Datos de Brasil (Ley n.º 13.709/2018 — LGPD). Contacto del responsable y del encargado de protección de datos: jdobrito@gmail.com.',
+          'Leve es puesto a disposición por Jorge Brito, Jorge Manoel Brito y Alairton Silva, responsables del tratamiento de los datos personales tratados por la aplicación, en los términos de la Ley General de Protección de Datos de Brasil (Ley n.º 13.709/2018 — LGPD). Contacto del responsable y del encargado de protección de datos: jdobrito@gmail.com.',
         ],
       },
       {

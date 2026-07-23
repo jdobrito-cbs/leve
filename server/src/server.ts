@@ -119,16 +119,16 @@ function aiFailReason(msg: string): string {
     const detail = (up[2] || '').replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120);
     if (status === '429') return 'limite de uso da IA (aguarde um pouco)';
     if (status === '401' || status === '403') return 'chave da IA inválida';
-    if (status === '400') return 'a IA recusou a imagem' + (detail ? ' — ' + detail : '');
-    if (status === '404') return 'modelo/endereço não encontrado' + (detail ? ' — ' + detail : '');
-    return `IA indisponível (${status})` + (detail ? ' — ' + detail : '');
+    if (status === '400') return 'a IA recusou a imagem' + (detail ? ': ' + detail : '');
+    if (status === '404') return 'modelo/endereço não encontrado' + (detail ? ': ' + detail : '');
+    return `IA indisponível (${status})` + (detail ? ': ' + detail : '');
   }
   if (/timed?\s*out|abort/i.test(msg)) return 'a IA demorou demais (tempo esgotado)';
   if (/fetch failed|ENOTFOUND|ECONNREFUSED|EAI_AGAIN|network|socket|certificate|TLS/i.test(msg))
     return 'o servidor não conseguiu se conectar à IA';
   if (/sem conteúdo/i.test(msg)) return 'a IA respondeu vazio';
   if (/JSON|sem JSON|Unexpected token/i.test(msg)) return 'a IA respondeu fora do formato';
-  return 'IA — ' + msg.replace(/[\r\n]+/g, ' ').slice(0, 100);
+  return 'IA: ' + msg.replace(/[\r\n]+/g, ' ').slice(0, 100);
 }
 
 export function makeHubCaller(config: HubConfig): CallHub {
