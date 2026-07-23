@@ -1,43 +1,26 @@
-import { useEffect, useMemo, useRef } from 'react';
-import { WebView } from 'react-native-webview';
+import { useMemo } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
+import { Camera, GeoJSONSource, Layer, Map as MapView } from '@maplibre/maplibre-react-native';
 import type { RoutePoint } from '@/db/workoutRepo';
 
-const HTML = `<!DOCTYPE html><html><head>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<style>html,body,#map{height:100%;margin:0;background:#e8eef6}</style>
-</head><body><div id="map"></div>
-<script>
-var map = L.map('map', { zoomControl: false, attributionControl: true }).setView([20, 0], 2);
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  attribution: '&copy; OpenStreetMap'
-}).addTo(map);
-var line = L.polyline([], { color: '#2563EB', weight: 5, lineJoin: 'round' }).addTo(map);
-var dot = null;
-var here = null;
-var first = true;
-function setHere(lat, lng) {
-  var ll = [lat, lng];
-  if (here) { here.setLatLng(ll); }
-  else { here = L.circleMarker(ll, { radius: 7, color: '#fff', weight: 3, fillColor: '#2563EB', fillOpacity: 1 }).addTo(map); }
-  if (first) { map.setView(ll, 16); first = false; }
+const STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
+const LINE = '#2563EB';
+
+function paddedBounds(coords: [number, number][]): [number, number, number, number] {
+  let west = Infinity;
+  let south = Infinity;
+  let east = -Infinity;
+  let north = -Infinity;
+  for (const [lng, lat] of coords) {
+    if (lng < west) west = lng;
+    if (lng > east) east = lng;
+    if (lat < south) south = lat;
+    if (lat > north) north = lat;
+  }
+  const padLng = Math.max((east - west) * 0.15, 0.0008);
+  const padLat = Math.max((north - south) * 0.15, 0.0008);
+  return [west - padLng, south - padLat, east + padLng, north + padLat];
 }
-function update(pts, fit) {
-  if (!pts || !pts.length) return;
-  if (here) { map.removeLayer(here); here = null; }
-  var latlngs = pts.map(function (p) { return [p.lat, p.lng]; });
-  line.setLatLngs(latlngs);
-  var last = latlngs[latlngs.length - 1];
-  if (dot) { dot.setLatLng(last); }
-  else { dot = L.circleMarker(last, { radius: 7, color: '#fff', weight: 3, fillColor: '#2563EB', fillOpacity: 1 }).addTo(map); }
-  if (fit && latlngs.length > 1) { map.fitBounds(line.getBounds(), { padding: [24, 24] }); }
-  else if (first) { map.setView(last, 16); first = false; }
-  else { map.panTo(last); }
-}
-</script></body></html>`;
 
 export function RouteMap({
   points,
@@ -50,38 +33,82 @@ export function RouteMap({
   fit?: boolean;
   center?: { lat: number; lng: number } | null;
 }) {
-  const ref = useRef<WebView>(null);
-  const loaded = useRef(false);
-  const payload = useMemo(
-    () => JSON.stringify(points.map((p) => ({ lat: p.lat, lng: p.lng }))),
+  const coords = useMemo<[number, number][]>(
+    () =>
+      points
+        .filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng))
+        .map((p) => [p.lng, p.lat]),
     [points],
   );
-  const call = `update(${payload}, ${fit ? 'true' : 'false'}); true;`;
-  const centerCall =
-    center && Number.isFinite(center.lat) && Number.isFinite(center.lng)
-      ? `setHere(${center.lat}, ${center.lng}); true;`
-      : '';
 
-  useEffect(() => {
-    if (loaded.current) ref.current?.injectJavaScript(call);
-  }, [call]);
+  const last = coords.length > 0 ? coords[coords.length - 1] : null;
+  const here = useMemo<[number, number] | null>(
+    () =>
+      last ??
+      (center && Number.isFinite(center.lat) && Number.isFinite(center.lng)
+        ? [center.lng, center.lat]
+        : null),
+    [last, center],
+  );
 
-  useEffect(() => {
-    if (loaded.current && centerCall) ref.current?.injectJavaScript(centerCall);
-  }, [centerCall]);
+  const lineData = useMemo(
+    () => ({
+      type: 'Feature' as const,
+      geometry: { type: 'LineString' as const, coordinates: coords },
+      properties: {},
+    }),
+    [coords],
+  );
+
+  const dotData = useMemo(
+    () =>
+      here
+        ? {
+            type: 'Feature' as const,
+            geometry: { type: 'Point' as const, coordinates: here },
+            properties: {},
+          }
+        : null,
+    [here],
+  );
+
+  const bounds = fit && coords.length > 1 ? paddedBounds(coords) : null;
 
   return (
-    <WebView
-      ref={ref}
-      originWhitelist={['*']}
-      source={{ html: HTML }}
-      style={style}
-      scrollEnabled={false}
-      onLoadEnd={() => {
-        loaded.current = true;
-        if (centerCall) ref.current?.injectJavaScript(centerCall);
-        ref.current?.injectJavaScript(call);
-      }}
-    />
+    <MapView mapStyle={STYLE_URL} style={style} compass={false}>
+      {bounds ? (
+        <Camera bounds={bounds} />
+      ) : here ? (
+        <Camera center={here} zoom={16} />
+      ) : (
+        <Camera center={[0, 20]} zoom={1} />
+      )}
+
+      {coords.length > 1 ? (
+        <GeoJSONSource id="route" data={lineData}>
+          <Layer
+            id="route-line"
+            type="line"
+            layout={{ 'line-join': 'round', 'line-cap': 'round' }}
+            paint={{ 'line-color': LINE, 'line-width': 5 }}
+          />
+        </GeoJSONSource>
+      ) : null}
+
+      {dotData ? (
+        <GeoJSONSource id="here" data={dotData}>
+          <Layer
+            id="here-dot"
+            type="circle"
+            paint={{
+              'circle-radius': 7,
+              'circle-color': LINE,
+              'circle-stroke-color': '#ffffff',
+              'circle-stroke-width': 3,
+            }}
+          />
+        </GeoJSONSource>
+      ) : null}
+    </MapView>
   );
 }
