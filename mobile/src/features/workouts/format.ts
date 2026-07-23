@@ -34,6 +34,25 @@ export function paceLabel(distanceM: number | null, durationSec: number | null):
   return `${m}:${String(s).padStart(2, '0')} /${unit}`;
 }
 
+export function speedLabel(distanceM: number | null, durationSec: number | null): string {
+  if (!distanceM || distanceM <= 0 || !durationSec || durationSec <= 0) return '—';
+  const kmh = distanceM / 1000 / (durationSec / 3600);
+  const imperial = getUnitSystem() === 'imperial';
+  const v = imperial ? kmh / KM_PER_MI : kmh;
+  const unit = imperial ? 'mph' : 'km/h';
+  return `${v.toLocaleString(numberLocale(), { maximumFractionDigits: 1 })} ${unit}`;
+}
+
+export function heartRateLabel(bpm: number | null): string {
+  if (bpm == null || !(bpm > 0)) return '—';
+  return `${Math.round(bpm)} bpm`;
+}
+
+export function caloriesLabel(kcal: number | null): string {
+  if (kcal == null || !(kcal > 0)) return '—';
+  return `${Math.round(kcal).toLocaleString(numberLocale())} kcal`;
+}
+
 export function workoutTypeLabel(type: string): string {
   return type === 'run'
     ? strings.workouts.run

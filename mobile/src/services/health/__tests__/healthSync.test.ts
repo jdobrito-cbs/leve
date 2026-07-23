@@ -37,6 +37,7 @@ function fakeProvider(): HealthProvider {
     ],
     readSleepNights: async () => [],
     readStepsWindow: async () => null,
+    readHeartRateWindow: async () => null,
   };
 }
 

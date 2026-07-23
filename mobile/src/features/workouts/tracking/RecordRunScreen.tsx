@@ -7,8 +7,11 @@ import { AppText, Button, Card, Screen, SegmentedChips } from '@/design/componen
 import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
+import { latestWeight } from '@/db/weightRepo';
 import { upsertWorkout, type WorkoutType } from '@/db/workoutRepo';
-import { distanceLabel, durationLabel, paceLabel } from '../format';
+import { getHealthProvider } from '@/services/health/HealthProvider';
+import { estimateWorkoutKcal } from '../calories';
+import { distanceLabel, durationLabel, heartRateLabel, speedLabel } from '../format';
 import { RouteMap } from './RouteMap';
 import { useRunTracker } from './useRunTracker';
 import { strings } from '@/i18n/pt-BR';
@@ -72,6 +75,11 @@ export function RecordRunScreen() {
   async function finish() {
     const r = await tracker.stop();
     if (r.durationSec > 0 || r.route.length > 0) {
+      const weight = await latestWeight(db).catch(() => null);
+      const calories = estimateWorkoutKcal(type, weight?.weightKg ?? null, r.durationSec);
+      const avgHr = await getHealthProvider()
+        .readHeartRateWindow(new Date(r.startAt), new Date(r.endAt))
+        .catch(() => null);
       await upsertWorkout(db, {
         source: 'gps',
         externalId: null,
@@ -80,7 +88,8 @@ export function RecordRunScreen() {
         endAt: r.endAt,
         durationSec: r.durationSec,
         distanceM: r.distanceM > 0 ? r.distanceM : null,
-        calories: null,
+        calories,
+        avgHr,
         route: r.route.length > 0 ? r.route : null,
       });
     }
@@ -98,13 +107,18 @@ export function RecordRunScreen() {
         <RouteMap points={tracker.points} center={center} style={{ flex: 1 }} />
       </Card>
 
-      <Card style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-        <Stat label={strings.workouts.duration} value={durationLabel(tracker.elapsedSec)} />
-        <Stat label={strings.workouts.distance} value={distanceLabel(tracker.distanceM)} />
-        <Stat
-          label={strings.workouts.pace}
-          value={paceLabel(tracker.distanceM, tracker.elapsedSec)}
-        />
+      <Card style={{ gap: spacing.md }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+          <Stat label={strings.workouts.distance} value={distanceLabel(tracker.distanceM)} />
+          <Stat label={strings.workouts.duration} value={durationLabel(tracker.elapsedSec)} />
+        </View>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+          <Stat
+            label={strings.workouts.speed}
+            value={speedLabel(tracker.distanceM, tracker.elapsedSec)}
+          />
+          <Stat label={strings.workouts.heartRate} value={heartRateLabel(null)} />
+        </View>
       </Card>
 
       {tracker.error ? (

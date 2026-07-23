@@ -171,6 +171,26 @@ export class HealthKitProvider implements HealthProvider {
     }
   }
 
+  async readHeartRateWindow(start: Date, end: Date): Promise<number | null> {
+    if (!this.mod) return null;
+    try {
+      const samples = rowsOf(
+        await this.mod.queryQuantitySamples('HKQuantityTypeIdentifierHeartRate', {
+          filter: { date: { startDate: start, endDate: end } },
+          limit: 0,
+          unit: 'count/min',
+        }),
+      );
+      const vals = samples
+        .map((s) => s.quantity ?? Number.NaN)
+        .filter((v) => Number.isFinite(v) && v > 0);
+      if (vals.length === 0) return null;
+      return vals.reduce((a, b) => a + b, 0) / vals.length;
+    } catch {
+      return null;
+    }
+  }
+
   async readWorkouts(since: Date): Promise<WorkoutSample[]> {
     if (!this.mod?.queryWorkoutSamples) return [];
     try {

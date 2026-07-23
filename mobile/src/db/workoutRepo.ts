@@ -1,6 +1,7 @@
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, gte, lt, sum } from 'drizzle-orm';
 import type { AppDb } from './client';
 import { workouts } from './schema';
+import { dayRangeUtc } from '@/core/datetime';
 
 export type WorkoutType = 'run' | 'walk' | 'other';
 export type WorkoutSource = 'healthkit' | 'healthconnect' | 'gps';
@@ -20,6 +21,7 @@ export interface WorkoutInput {
   durationSec: number | null;
   distanceM: number | null;
   calories: number | null;
+  avgHr: number | null;
   route: RoutePoint[] | null;
 }
 
@@ -40,6 +42,7 @@ function rowToWorkout(r: typeof workouts.$inferSelect): Workout {
     durationSec: r.durationSec,
     distanceM: r.distanceM,
     calories: r.calories,
+    avgHr: r.avgHr,
     route: r.routeJson ? (JSON.parse(r.routeJson) as RoutePoint[]) : null,
     createdAt: r.createdAt,
   };
@@ -55,6 +58,7 @@ export async function upsertWorkout(db: AppDb, input: WorkoutInput): Promise<boo
     durationSec: input.durationSec,
     distanceM: input.distanceM,
     calories: input.calories,
+    avgHr: input.avgHr,
     routeJson: input.route ? JSON.stringify(input.route) : null,
   };
   if (input.externalId) {
@@ -89,4 +93,13 @@ export async function deleteWorkout(db: AppDb, id: number): Promise<void> {
 export function paceSecPerKm(distanceM: number | null, durationSec: number | null): number | null {
   if (!distanceM || distanceM <= 0 || !durationSec || durationSec <= 0) return null;
   return durationSec / (distanceM / 1000);
+}
+
+export async function workoutKcalForDay(db: AppDb, day: Date): Promise<number> {
+  const { startIso, endIso } = dayRangeUtc(day);
+  const rows = await db
+    .select({ total: sum(workouts.calories) })
+    .from(workouts)
+    .where(and(gte(workouts.startAt, startIso), lt(workouts.startAt, endIso)));
+  return Math.round(Number(rows[0]?.total ?? 0));
 }

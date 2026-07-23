@@ -136,6 +136,33 @@ export class HealthConnectProvider implements HealthProvider {
     }
   }
 
+  async readHeartRateWindow(start: Date, end: Date): Promise<number | null> {
+    if (!this.mod) return null;
+    try {
+      const { records } = await this.mod.readRecords('HeartRate', {
+        timeRangeFilter: {
+          operator: 'between',
+          startTime: start.toISOString(),
+          endTime: end.toISOString(),
+        },
+      });
+      let sum = 0;
+      let n = 0;
+      for (const r of records as { samples?: { beatsPerMinute?: number }[] }[]) {
+        for (const s of r.samples ?? []) {
+          const bpm = s.beatsPerMinute;
+          if (typeof bpm === 'number' && bpm > 0) {
+            sum += bpm;
+            n += 1;
+          }
+        }
+      }
+      return n > 0 ? sum / n : null;
+    } catch {
+      return null;
+    }
+  }
+
   async readSleepNights(since: Date): Promise<SleepNight[]> {
     if (!this.mod) return [];
     try {

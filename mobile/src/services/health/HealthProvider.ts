@@ -53,6 +53,7 @@ export interface HealthProvider {
   readMetrics(since: Date): Promise<MetricSample[]>;
   readSleepNights(since: Date): Promise<SleepNight[]>;
   readStepsWindow(start: Date, end: Date): Promise<number | null>;
+  readHeartRateWindow(start: Date, end: Date): Promise<number | null>;
   readWorkouts(since: Date): Promise<WorkoutSample[]>;
 }
 
@@ -76,6 +77,9 @@ export class UnavailableHealthProvider implements HealthProvider {
     return [];
   }
   async readStepsWindow(): Promise<number | null> {
+    return null;
+  }
+  async readHeartRateWindow(): Promise<number | null> {
     return null;
   }
   async readWorkouts(): Promise<WorkoutSample[]> {

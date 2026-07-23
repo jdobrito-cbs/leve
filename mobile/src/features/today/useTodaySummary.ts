@@ -4,6 +4,7 @@ import type { DoseLog, SymptomLog, WeightLog } from '@/core/types';
 import { db } from '@/db/client';
 import { latestDose, listDoses } from '@/db/doseRepo';
 import { gymKcalForDay } from '@/db/gymRepo';
+import { workoutKcalForDay } from '@/db/workoutRepo';
 import { DayMacros, macrosForDay } from '@/db/foodLogRepo';
 import { latestMetric, metricSeries } from '@/db/metricsRepo';
 import { getProfile } from '@/db/profileRepo';
@@ -175,7 +176,10 @@ export function useTodaySummary(): TodaySummary {
     try {
       const burned = await metricSeries(db, 'active_calories', startOfDay);
       const gymKcal = await gymKcalForDay(db, now).catch(() => 0);
-      setActiveCalories(Math.round(burned.reduce((a, m) => a + m.value, 0) + gymKcal));
+      const workoutKcal = await workoutKcalForDay(db, now).catch(() => 0);
+      setActiveCalories(
+        Math.round(burned.reduce((a, m) => a + m.value, 0) + gymKcal + workoutKcal),
+      );
       const [sleep, sleepEff, breathing, hr, spo2, resp] = await Promise.all([
         latestMetric(db, 'sleep_hours'),
         latestMetric(db, 'sleep_efficiency_pct'),

@@ -1,0 +1,1 @@
+ALTER TABLE `workouts` ADD `avg_hr` real;

@@ -76,6 +76,9 @@ export async function importWorkouts(
   const source: WorkoutSource = Platform.OS === 'ios' ? 'healthkit' : 'healthconnect';
   let count = 0;
   for (const s of samples) {
+    const avgHr = await provider
+      .readHeartRateWindow(new Date(s.startAt), s.endAt ? new Date(s.endAt) : new Date(s.startAt))
+      .catch(() => null);
     const inserted = await upsertWorkout(db, {
       source,
       externalId: s.externalId,
@@ -85,6 +88,7 @@ export async function importWorkouts(
       durationSec: s.durationSec,
       distanceM: s.distanceM,
       calories: s.calories,
+      avgHr,
       route: s.route,
     });
     if (inserted) count++;

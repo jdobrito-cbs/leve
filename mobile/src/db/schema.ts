@@ -159,6 +159,7 @@ export const workouts = sqliteTable('workouts', {
   durationSec: integer('duration_sec'),
   distanceM: real('distance_m'),
   calories: real('calories'),
+  avgHr: real('avg_hr'),
   routeJson: text('route_json'),
   createdAt: text('created_at').notNull(),
 });

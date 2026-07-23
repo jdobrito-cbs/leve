@@ -20,6 +20,7 @@ const RUN = {
   durationSec: 1800,
   distanceM: 5000,
   calories: 300,
+  avgHr: null,
   route: [{ lat: 1, lng: 2 }],
 };
 
@@ -36,6 +37,7 @@ test('upsert deduplica pelo idExterno e atualiza; guarda/lê a rota', async () =
     durationSec: 600,
     distanceM: 800,
     calories: 50,
+    avgHr: null,
     route: null,
   });
   const list = await listWorkouts(db);
@@ -56,6 +58,7 @@ test('dois GPS sem idExterno são distintos; delete remove', async () => {
     durationSec: 1200,
     distanceM: 3000,
     calories: 200,
+    avgHr: null,
     route: null,
   };
   await upsertWorkout(db, base);
