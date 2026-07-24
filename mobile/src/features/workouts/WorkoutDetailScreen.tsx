@@ -42,7 +42,19 @@ export function WorkoutDetailScreen() {
   const [sharing, setSharing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [mapReady, setMapReady] = useState(false);
   const cardRef = useRef<View>(null);
+  const mapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function armMap() {
+    setMapReady(false);
+    if (mapTimer.current) clearTimeout(mapTimer.current);
+    mapTimer.current = setTimeout(() => setMapReady(true), 8000);
+  }
+  function mapDone() {
+    if (mapTimer.current) clearTimeout(mapTimer.current);
+    setMapReady(true);
+  }
 
   useEffect(() => {
     const n = Number(id);
@@ -72,16 +84,27 @@ export function WorkoutDetailScreen() {
     };
   }, [w]);
 
+  useEffect(
+    () => () => {
+      if (mapTimer.current) clearTimeout(mapTimer.current);
+    },
+    [],
+  );
+
   async function pickPhoto() {
     try {
       const res = await ImagePicker.launchImageLibraryAsync({ quality: 0.9, mediaTypes: 'images' });
-      if (!res.canceled && res.assets?.[0]) setPhotoUri(res.assets[0].uri);
+      if (!res.canceled && res.assets?.[0]) {
+        armMap();
+        setPhotoUri(res.assets[0].uri);
+      }
     } catch {
       setPhotoUri(null);
     }
   }
 
   function openShare() {
+    armMap();
     setPhotoUri(null);
     setSharing(true);
   }
@@ -145,15 +168,26 @@ export function WorkoutDetailScreen() {
                 gap: spacing.lg,
               }}
             >
-              <ShareCard ref={cardRef} workout={w} photoUri={photoUri} />
+              <ShareCard ref={cardRef} workout={w} photoUri={photoUri} onMapReady={mapDone} />
               <View style={{ width: '100%', maxWidth: 340, gap: spacing.sm }}>
                 <Button
                   label={photoUri ? strings.workouts.removePhoto : strings.workouts.addPhoto}
                   variant="secondary"
-                  onPress={photoUri ? () => setPhotoUri(null) : pickPhoto}
+                  onPress={
+                    photoUri
+                      ? () => {
+                          armMap();
+                          setPhotoUri(null);
+                        }
+                      : pickPhoto
+                  }
                   disabled={busy}
                 />
-                <Button label={strings.workouts.share} onPress={doShare} disabled={busy} />
+                <Button
+                  label={strings.workouts.share}
+                  onPress={doShare}
+                  disabled={busy || !mapReady}
+                />
                 <Button
                   label={strings.common.close}
                   variant="secondary"
