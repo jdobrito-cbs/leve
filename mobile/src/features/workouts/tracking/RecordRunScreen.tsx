@@ -76,7 +76,7 @@ export function RecordRunScreen() {
     const r = await tracker.stop();
     if (r.durationSec > 0 || r.route.length > 0) {
       const weight = await latestWeight(db).catch(() => null);
-      const calories = estimateWorkoutKcal(type, weight?.weightKg ?? null, r.durationSec);
+      const calories = estimateWorkoutKcal(type, weight?.weightKg ?? 70, r.durationSec);
       const avgHr = await getHealthProvider()
         .readHeartRateWindow(new Date(r.startAt), new Date(r.endAt))
         .catch(() => null);

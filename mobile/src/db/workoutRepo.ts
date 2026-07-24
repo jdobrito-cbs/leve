@@ -94,6 +94,10 @@ export async function setWorkoutHr(db: AppDb, id: number, avgHr: number): Promis
   await db.update(workouts).set({ avgHr }).where(eq(workouts.id, id));
 }
 
+export async function setWorkoutCalories(db: AppDb, id: number, calories: number): Promise<void> {
+  await db.update(workouts).set({ calories }).where(eq(workouts.id, id));
+}
+
 export function paceSecPerKm(distanceM: number | null, durationSec: number | null): number | null {
   if (!distanceM || distanceM <= 0 || !durationSec || durationSec <= 0) return null;
   return durationSec / (distanceM / 1000);

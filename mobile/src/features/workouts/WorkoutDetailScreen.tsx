@@ -9,8 +9,10 @@ import { AppText, Button, Card, Screen } from '@/design/components';
 import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
-import { getWorkout, setWorkoutHr, type Workout } from '@/db/workoutRepo';
+import { getWorkout, setWorkoutCalories, setWorkoutHr, type Workout } from '@/db/workoutRepo';
+import { latestWeight } from '@/db/weightRepo';
 import { getHealthProvider } from '@/services/health/HealthProvider';
+import { estimateWorkoutKcal } from './calories';
 import { ShareCard } from './ShareCard';
 import {
   caloriesLabel,
@@ -77,6 +79,22 @@ export function WorkoutDetailScreen() {
         const rounded = Math.round(hr);
         setW((prev) => (prev ? { ...prev, avgHr: rounded } : prev));
         setWorkoutHr(db, w.id, rounded).catch(() => undefined);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [w]);
+
+  useEffect(() => {
+    if (!w || w.calories != null || !w.durationSec) return;
+    let active = true;
+    (async () => {
+      const weight = (await latestWeight(db).catch(() => null))?.weightKg ?? 70;
+      const kcal = estimateWorkoutKcal(w.type, weight, w.durationSec);
+      if (active && kcal != null && kcal > 0) {
+        setW((prev) => (prev ? { ...prev, calories: kcal } : prev));
+        setWorkoutCalories(db, w.id, kcal).catch(() => undefined);
       }
     })();
     return () => {
@@ -172,7 +190,6 @@ export function WorkoutDetailScreen() {
               <View style={{ width: '100%', maxWidth: 340, gap: spacing.sm }}>
                 <Button
                   label={photoUri ? strings.workouts.removePhoto : strings.workouts.addPhoto}
-                  variant="secondary"
                   onPress={
                     photoUri
                       ? () => {
@@ -188,11 +205,7 @@ export function WorkoutDetailScreen() {
                   onPress={doShare}
                   disabled={busy || !mapReady}
                 />
-                <Button
-                  label={strings.common.close}
-                  variant="secondary"
-                  onPress={() => setSharing(false)}
-                />
+                <Button label={strings.common.close} onPress={() => setSharing(false)} />
               </View>
             </View>
           </Modal>
