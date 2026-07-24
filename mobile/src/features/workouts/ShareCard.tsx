@@ -82,9 +82,15 @@ export const ShareCard = forwardRef<View, { workout: Workout; mapUri?: string | 
           justifyContent: 'space-between',
         }}
       >
-        <AppText style={{ color: colors.onPrimary, fontFamily: fonts.bold, fontSize: 24 }}>
-          Leve
-        </AppText>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+          <Image
+            source={require('../../../assets/images/icon.png')}
+            style={{ width: 32, height: 32, borderRadius: 9 }}
+          />
+          <AppText style={{ color: colors.onPrimary, fontFamily: fonts.bold, fontSize: 24 }}>
+            Leve
+          </AppText>
+        </View>
         <AppText style={{ color: colors.onPrimary, fontFamily: fonts.semibold, fontSize: 15 }}>
           {workoutTypeLabel(w.type)}
         </AppText>
@@ -125,6 +131,12 @@ export const ShareCard = forwardRef<View, { workout: Workout; mapUri?: string | 
         <AppText variant="caption" muted style={{ marginTop: spacing.sm }}>
           {formatDateTimeShort(w.startAt)}
           {w.endAt ? ` – ${formatDateTimeShort(w.endAt)}` : ''}
+        </AppText>
+        <AppText
+          variant="caption"
+          style={{ marginTop: 4, color: colors.primary, fontFamily: fonts.semibold }}
+        >
+          levemobile.com.br
         </AppText>
       </View>
     </View>
