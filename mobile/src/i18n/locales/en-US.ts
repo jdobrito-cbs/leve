@@ -79,6 +79,8 @@ export const strings: Strings = {
     heartRate: 'Heart rate',
     calories: 'Calories',
     share: 'Share',
+    addPhoto: 'Add photo',
+    removePhoto: 'Remove photo',
     empty: 'No workouts yet. Sync with Apple Health or Health Connect.',
     record: 'Record run',
     start: 'Start',

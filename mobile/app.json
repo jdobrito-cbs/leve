@@ -63,7 +63,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "O Leve usa suas fotos apenas quando você escolhe uma imagem para identificar alimentos.",
+          "photosPermission": "O Leve usa suas fotos quando você escolhe uma imagem para identificar alimentos ou ilustrar o compartilhamento de um treino.",
           "cameraPermission": "O Leve usa a câmera apenas quando você fotografa uma refeição para identificar alimentos."
         }
       ],

@@ -78,6 +78,8 @@ export const strings: Strings = {
     heartRate: 'معدل ضربات القلب',
     calories: 'السعرات',
     share: 'مشاركة',
+    addPhoto: 'إضافة صورة',
+    removePhoto: 'إزالة الصورة',
     empty: 'لا توجد تمارين بعد. زامِن مع Apple Health أو Health Connect.',
     record: 'تسجيل الجري',
     start: 'ابدأ',

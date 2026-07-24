@@ -79,6 +79,8 @@ export const strings: Strings = {
     heartRate: '心拍数',
     calories: 'カロリー',
     share: '共有',
+    addPhoto: '写真を追加',
+    removePhoto: '写真を削除',
     empty: 'まだワークアウトがありません。Apple ヘルスまたは Health Connect と同期してください。',
     record: 'ランを記録',
     start: '開始',

@@ -2,6 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Modal, View } from 'react-native';
 import * as Sharing from 'expo-sharing';
+import * as ImagePicker from 'expo-image-picker';
 import { captureRef } from 'react-native-view-shot';
 import { formatDateTimeShort } from '@/core/datetime';
 import { AppText, Button, Card, Screen } from '@/design/components';
@@ -42,6 +43,7 @@ export function WorkoutDetailScreen() {
   const [busy, setBusy] = useState(false);
   const [mapUri, setMapUri] = useState<string | null>(null);
   const [mapLoading, setMapLoading] = useState(false);
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
   const cardRef = useRef<View>(null);
 
   useEffect(() => {
@@ -53,8 +55,18 @@ export function WorkoutDetailScreen() {
     }
   }, [id]);
 
+  async function pickPhoto() {
+    try {
+      const res = await ImagePicker.launchImageLibraryAsync({ quality: 0.9, mediaTypes: 'images' });
+      if (!res.canceled && res.assets?.[0]) setPhotoUri(res.assets[0].uri);
+    } catch {
+      setPhotoUri(null);
+    }
+  }
+
   async function openShare(workout: Workout) {
     setMapUri(null);
+    setPhotoUri(null);
     setSharing(true);
     if (workout.route && workout.route.length > 1) {
       setMapLoading(true);
@@ -123,10 +135,16 @@ export function WorkoutDetailScreen() {
                 gap: spacing.lg,
               }}
             >
-              <ShareCard ref={cardRef} workout={w} mapUri={mapUri} />
+              <ShareCard ref={cardRef} workout={w} mapUri={mapUri} photoUri={photoUri} />
               <View style={{ width: '100%', maxWidth: 340, gap: spacing.sm, alignItems: 'center' }}>
                 {mapLoading ? <ActivityIndicator color="#fff" /> : null}
                 <View style={{ width: '100%', gap: spacing.sm }}>
+                  <Button
+                    label={photoUri ? strings.workouts.removePhoto : strings.workouts.addPhoto}
+                    variant="secondary"
+                    onPress={photoUri ? () => setPhotoUri(null) : pickPhoto}
+                    disabled={busy}
+                  />
                   <Button
                     label={strings.workouts.share}
                     onPress={doShare}

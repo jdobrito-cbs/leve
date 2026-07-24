@@ -79,6 +79,8 @@ export const strings: Strings = {
     heartRate: 'Pulso',
     calories: 'Calorías',
     share: 'Compartir',
+    addPhoto: 'Añadir foto',
+    removePhoto: 'Quitar foto',
     empty: 'Aún no hay entrenamientos. Sincroniza con Apple Salud o Health Connect.',
     record: 'Grabar carrera',
     start: 'Iniciar',

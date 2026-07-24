@@ -79,6 +79,8 @@ export const strings: Strings = {
     heartRate: 'हृदय गति',
     calories: 'कैलोरी',
     share: 'साझा करें',
+    addPhoto: 'फ़ोटो जोड़ें',
+    removePhoto: 'फ़ोटो हटाएँ',
     empty: 'अभी कोई वर्कआउट नहीं। Apple Health या Health Connect से सिंक करें।',
     record: 'दौड़ रिकॉर्ड करें',
     start: 'शुरू',
