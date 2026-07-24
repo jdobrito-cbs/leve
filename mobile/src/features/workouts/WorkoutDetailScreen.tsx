@@ -1,9 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
-import { Modal, View } from 'react-native';
-import * as Sharing from 'expo-sharing';
-import * as ImagePicker from 'expo-image-picker';
-import { captureRef } from 'react-native-view-shot';
+import { useEffect, useState } from 'react';
+import { View } from 'react-native';
 import { formatDateTimeShort } from '@/core/datetime';
 import { AppText, Button, Card, Screen } from '@/design/components';
 import { fonts, spacing } from '@/design/tokens';
@@ -13,7 +10,6 @@ import { getWorkout, setWorkoutCalories, setWorkoutHr, type Workout } from '@/db
 import { latestWeight } from '@/db/weightRepo';
 import { getHealthProvider } from '@/services/health/HealthProvider';
 import { estimateWorkoutKcal } from './calories';
-import { ShareCard } from './ShareCard';
 import {
   caloriesLabel,
   distanceLabel,
@@ -41,22 +37,6 @@ function Stat({ label, value }: { label: string; value: string }) {
 export function WorkoutDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [w, setW] = useState<Workout | null>(null);
-  const [sharing, setSharing] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [photoUri, setPhotoUri] = useState<string | null>(null);
-  const [mapReady, setMapReady] = useState(false);
-  const cardRef = useRef<View>(null);
-  const mapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  function armMap() {
-    setMapReady(false);
-    if (mapTimer.current) clearTimeout(mapTimer.current);
-    mapTimer.current = setTimeout(() => setMapReady(true), 8000);
-  }
-  function mapDone() {
-    if (mapTimer.current) clearTimeout(mapTimer.current);
-    setMapReady(true);
-  }
 
   useEffect(() => {
     const n = Number(id);
@@ -102,49 +82,6 @@ export function WorkoutDetailScreen() {
     };
   }, [w]);
 
-  useEffect(
-    () => () => {
-      if (mapTimer.current) clearTimeout(mapTimer.current);
-    },
-    [],
-  );
-
-  async function pickPhoto() {
-    try {
-      const res = await ImagePicker.launchImageLibraryAsync({ quality: 0.9, mediaTypes: 'images' });
-      if (!res.canceled && res.assets?.[0]) {
-        armMap();
-        setPhotoUri(res.assets[0].uri);
-      }
-    } catch {
-      setPhotoUri(null);
-    }
-  }
-
-  function openShare() {
-    armMap();
-    setPhotoUri(null);
-    setSharing(true);
-  }
-
-  async function doShare() {
-    setBusy(true);
-    try {
-      const uri = await captureRef(cardRef, { format: 'png', quality: 1 });
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(uri, {
-          mimeType: 'image/png',
-          dialogTitle: strings.workouts.share,
-        });
-      }
-    } catch {
-      setBusy(false);
-    } finally {
-      setBusy(false);
-      setSharing(false);
-    }
-  }
-
   return (
     <Screen>
       <AppText variant="display">{w ? workoutTypeLabel(w.type) : strings.workouts.title}</AppText>
@@ -167,48 +104,10 @@ export function WorkoutDetailScreen() {
             <Stat label={strings.workouts.heartRate} value={heartRateLabel(w.avgHr)} />
             <Stat label={strings.workouts.calories} value={caloriesLabel(w.calories)} />
           </Card>
-          <Button label={strings.workouts.share} onPress={openShare} />
-
-          <Modal
-            visible={sharing}
-            transparent
-            animationType="fade"
-            statusBarTranslucent
-            onRequestClose={() => setSharing(false)}
-          >
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: 'rgba(0,0,0,0.55)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: spacing.lg,
-                gap: spacing.lg,
-              }}
-            >
-              <ShareCard ref={cardRef} workout={w} photoUri={photoUri} onMapReady={mapDone} />
-              <View style={{ width: '100%', maxWidth: 340, gap: spacing.sm }}>
-                <Button
-                  label={photoUri ? strings.workouts.removePhoto : strings.workouts.addPhoto}
-                  onPress={
-                    photoUri
-                      ? () => {
-                          armMap();
-                          setPhotoUri(null);
-                        }
-                      : pickPhoto
-                  }
-                  disabled={busy}
-                />
-                <Button
-                  label={strings.workouts.share}
-                  onPress={doShare}
-                  disabled={busy || !mapReady}
-                />
-                <Button label={strings.common.close} onPress={() => setSharing(false)} />
-              </View>
-            </View>
-          </Modal>
+          <Button
+            label={strings.workouts.share}
+            onPress={() => router.push(`/compartilhar/${w.id}` as never)}
+          />
         </>
       ) : null}
       <Button label={strings.common.close} variant="secondary" onPress={() => router.back()} />
