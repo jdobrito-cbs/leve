@@ -9,7 +9,8 @@ import { AppText, Button, Card, Screen } from '@/design/components';
 import { fonts, spacing } from '@/design/tokens';
 import { useTheme } from '@/design/useTheme';
 import { db } from '@/db/client';
-import { getWorkout, type Workout } from '@/db/workoutRepo';
+import { getWorkout, setWorkoutHr, type Workout } from '@/db/workoutRepo';
+import { getHealthProvider } from '@/services/health/HealthProvider';
 import { ShareCard } from './ShareCard';
 import { buildRouteMapImage } from './staticMap';
 import {
@@ -54,6 +55,25 @@ export function WorkoutDetailScreen() {
         .catch(() => setW(null));
     }
   }, [id]);
+
+  useEffect(() => {
+    if (!w || w.avgHr != null) return;
+    let active = true;
+    (async () => {
+      const end = w.endAt ? new Date(w.endAt) : new Date();
+      const hr = await getHealthProvider()
+        .readHeartRateWindow(new Date(w.startAt), end)
+        .catch(() => null);
+      if (active && hr != null && hr > 0) {
+        const rounded = Math.round(hr);
+        setW((prev) => (prev ? { ...prev, avgHr: rounded } : prev));
+        setWorkoutHr(db, w.id, rounded).catch(() => undefined);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [w]);
 
   async function pickPhoto() {
     try {

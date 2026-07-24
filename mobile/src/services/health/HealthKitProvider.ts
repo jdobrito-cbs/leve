@@ -178,7 +178,6 @@ export class HealthKitProvider implements HealthProvider {
         await this.mod.queryQuantitySamples('HKQuantityTypeIdentifierHeartRate', {
           filter: { date: { startDate: start, endDate: end } },
           limit: 0,
-          unit: 'count/min',
         }),
       );
       const vals = samples
